@@ -1,0 +1,13 @@
+﻿namespace Hurudza.Data.Models.Base
+{
+    public class BaseEntity
+    {
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public required string CreatorId { get; set; }
+        public DateTime ModifiedDate { get; set; } = DateTime.Now;
+        public string? ModifiedBy { get; set; }
+        public bool IsArchived { get; set; } = false;
+        public bool IsDeleted { get; set; } = false;
+        public bool IsActive { get; set; } = true;
+    }
+}

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Hurudza.Data.Data</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.8" />
+      <PackageReference Include="Serilog" Version="3.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Common\Hurudza.Common.Services\Hurudza.Common.Services.csproj" />
+      <ProjectReference Include="..\Hurudza.Data.Models\Hurudza.Data.Models.csproj" />
+    </ItemGroup>
+
+</Project>

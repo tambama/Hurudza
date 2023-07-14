@@ -1,0 +1,12 @@
+﻿using Hurudza.Data.Models.Base;
+
+namespace Hurudza.Data.Models.Models;
+
+public class UserProfile: BaseEntity
+{
+    public required string Id { get; set; }
+    public required string UserId { get; set; }
+    public required string Role { get; set; }
+
+    public virtual ApplicationUser User { get; set; }
+}
