@@ -4,6 +4,9 @@ public class Ward
 {
     public int Id { get; set; }
     public required string Name { get; set; }
-    public required District District { get; set; }
     public int DistrictId { get; set; }
+    public int ProvinceId { get; set; }
+    
+    public required District District { get; set; }
+    public required Province Province { get; set; }
 }

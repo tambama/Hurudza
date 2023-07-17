@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using Hurudza.Data.Data.Context;
+using Hurudza.Data.Context.Context;
 using Hurudza.Data.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Serilog;

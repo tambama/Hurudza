@@ -7,11 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Hurudza.Data.Context\Hurudza.Data.Context.csproj" />
+      <PackageReference Include="Serilog" Version="3.0.1" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Serilog" Version="3.0.1" />
+      <ProjectReference Include="..\Hurudza.Data.Context\Hurudza.Data.Context.csproj" />
+      <ProjectReference Include="..\Hurudza.Data.Models\Hurudza.Data.Models.csproj" />
     </ItemGroup>
 
 </Project>

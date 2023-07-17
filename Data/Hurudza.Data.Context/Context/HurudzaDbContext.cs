@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Serilog;
 
-namespace Hurudza.Data.Data.Context;
+namespace Hurudza.Data.Context.Context;
 
 public class HurudzaDbContext :
     IdentityDbContext<
@@ -27,28 +27,28 @@ public class HurudzaDbContext :
     public HurudzaDbContext(DbContextOptions<HurudzaDbContext> options,
         ICurrentUserService currentUserService,
         IDateTimeService dateTimeService,
-        ILoggerFactory loggerFactory, DbSet<IdentityClaim> claims, DbSet<Province> provinces, DbSet<District> adminDistricts, DbSet<Ward> wards)
+        ILoggerFactory loggerFactory)
         : base(options)
     {
         _currentUserService = currentUserService;
         _dateTimeService = dateTimeService;
         _loggerFactory = loggerFactory;
-        Claims = claims;
-        Provinces = provinces;
-        AdminDistricts = adminDistricts;
-        Wards = wards;
     }
 
-    public HurudzaDbContext()
-    {
-    }
-
+    // User Management
     public DbSet<IdentityClaim> Claims { get; set; }
 
-    //Administrative Structure
+    // Administrative Structure
     public DbSet<Province> Provinces { get; set; }
     public DbSet<District> AdminDistricts { get; set; }
     public DbSet<Ward> Wards { get; set; }
+    
+    // System
+    public DbSet<Farm> Farms { get; set; }
+    public DbSet<UserProfile> UserProfiles { get; set; }
+    
+    // Notifications
+    public DbSet<SendGridTemplate>? SendGridTemplates { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {

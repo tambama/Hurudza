@@ -1,7 +1,6 @@
-﻿namespace Hurudza.Data.Data.Context
+﻿namespace Hurudza.Data.Context.Context;
+
+public interface IApplicationDbContext
 {
-    public interface IApplicationDbContext
-    {
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
-    }
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

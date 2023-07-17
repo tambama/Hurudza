@@ -1,4 +1,4 @@
-﻿using Hurudza.Data.Data.Context;
+﻿using Hurudza.Data.Context.Context;
 using Hurudza.Data.Models.Models;
 using Hurudza.Data.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;

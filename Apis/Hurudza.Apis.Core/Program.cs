@@ -7,7 +7,8 @@ using Hurudza.Common.Emails.Services;
 using Hurudza.Common.Services.Interfaces;
 using Hurudza.Common.Services.Services;
 using Hurudza.Common.Sms.Services;
-using Hurudza.Data.Data.Context;
+using Hurudza.Data.Context.Context;
+using Hurudza.Data.Context.Seed;
 using Hurudza.Data.Models.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -35,7 +36,7 @@ try
 
     builder.Services.AddControllers();
     
-    var assembly = Assembly.Load("Hurudza.Services.Base");
+    var assembly = Assembly.Load("Hurudza.Apis.Base");
     builder.Services.AddAutoMapper(assembly);
     builder.Services.AddHttpContextAccessor();
 
@@ -171,4 +172,7 @@ static void InitializeDatabase(WebApplication app, HurudzaDbContext dbContext)
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
     dbContext.Database.Migrate();
+    SeedRoleData.SeedRoles(dbContext, roleManager);
+    SeedSendGridData.SeedSendGridTemplates(dbContext);
+    SeedUserData.SeedUsers(dbContext, roleManager, userManager);
 }

@@ -3,7 +3,8 @@
 public class UserViewModel
 {
     public required string Id { get; set; }
-    public required string Fullname { get; set; }
+    public required string Firstname { get; set; }
+    public required string Surname { get; set; }
     public required string UserName { get; set; }
     public required string PhoneNumber { get; set; }
     public string? ProfileId { get; set; }
