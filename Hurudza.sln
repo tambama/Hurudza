@@ -26,7 +26,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hurudza.Apis.Core", "Apis\H
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hurudza.Data.Context", "Data\Hurudza.Data.Context\Hurudza.Data.Context.csproj", "{75F58789-230F-42EA-80B8-598C69D8DFA7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hurudza.UI.Web", "UI\Hurudza.UI.Web\Hurudza.UI.Web.csproj", "{E8ED0907-3E4E-4134-B774-DC02AC96F065}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hurudza.UI.Sample", "UI\Hurudza.UI.Sample\Hurudza.UI.Sample.csproj", "{E8ED0907-3E4E-4134-B774-DC02AC96F065}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
