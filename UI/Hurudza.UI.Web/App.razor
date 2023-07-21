@@ -1,0 +1,54 @@
+﻿@using Hurudza.UI.Web.Cookie.Providers
+@using Hurudza.UI.Web.Models
+
+@inject IApiCall _apiCall
+@inject ILocalStorageService _localStorageService;
+@inject AuthenticationStateProvider _authStateProvider
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly" OnNavigateAsync="@OnNavigateAsync">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                <NotAuthorized>
+                    @if (context.User.Identity?.IsAuthenticated != true)
+                    {
+                        <RedirectToLogin/>
+                    }
+                    else
+                    {
+                        <p role="alert">You are not authorized to access this resource.</p>
+                    }
+                </NotAuthorized>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
+        </Found>
+        <NotFound>
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <p role="alert">Sorry, there's nothing at this address.</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>
+
+@code{
+    private async Task OnNavigateAsync(NavigationContext args)
+    {
+        var auth =  await _localStorageService.GetItemAsync<string>("userId");
+        var user = (await(_authStateProvider as CustomAuthStateProvider)
+            .GetAuthenticationStateAsync()).User;
+        
+        if(user.Identity != null && !string.IsNullOrEmpty(auth) && !user.Identity.IsAuthenticated )
+        {
+            var response = await _apiCall.Get<ApiResponse<UserViewModel>>(await _apiCall.GetHttpClient(), "authentication/getuserprofile/", auth);
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                (_authStateProvider as CustomAuthStateProvider)?.SetAuthInfo(response.Result);
+            }
+            else
+            {
+                await _localStorageService.RemoveItemAsync("userId");
+            }
+        }
+    }
+}

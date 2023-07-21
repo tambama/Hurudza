@@ -1,0 +1,27 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Hurudza.UI.Web.Cookie.Providers
+@inject NavigationManager _navigationManager
+@inject AuthenticationStateProvider _authStateProvider
+@inject ILocalStorageService _localStorageService;
+
+<AuthorizeView>
+    <Authorized>
+        Hello, @context.User.Identity?.Name!
+        <button class="nav-link btn btn-link" @onclick="Logout">Log out</button>
+    </Authorized>
+    <NotAuthorized>
+        <a href="authentication/login">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code{
+
+    private async Task Logout()
+    {
+        (_authStateProvider as CustomAuthStateProvider)?.ClearAuthInfo();
+        await _localStorageService.RemoveItemAsync("userId");
+        _navigationManager.NavigateTo("authentication/login", true);
+    }
+
+}

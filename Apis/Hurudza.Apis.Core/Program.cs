@@ -96,6 +96,19 @@ try
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
         });
     
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("HurudzaCors",
+            config =>
+            {
+                config
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .SetIsOriginAllowed(x => true)
+                    .AllowCredentials();
+            });
+    });
+    
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddSwaggerGen(c =>
     {
@@ -148,6 +161,7 @@ try
 
     app.UseHttpsRedirection();
 
+    app.UseCors("HurudzaCors");
     app.UseAuthentication();
     app.UseAuthorization();
 

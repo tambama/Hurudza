@@ -1,0 +1,47 @@
+@page "/authentication/login"
+@using Hurudza.UI.Web.Cookie.Providers
+
+@inject IApiCall _apiCall;
+@inject AuthenticationStateProvider _authStateProvider
+@inject NavigationManager _navigationManager
+@inject ILocalStorageService _localStorageService;
+
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <legend>User Login</legend>
+        <_ValidationSummary Errors="Errors"/>
+        <div class="mb-3">
+            <label for="txtEmail" class="form-label">Email</label>
+            <input @bind="_loginViewModel.Username" type="text" class="form-control" id="txtEmail"/>
+        </div>
+
+        <div class="mb-3">
+            <label for="txtPassword" class="form-label">Password</label>
+            <input @bind="_loginViewModel.Password" type="password" class="form-control" id="txtPassword"/>
+        </div>
+        <button type="button" @onclick="UserLogin" class="btn btn-primary">Login</button>
+    </div>
+</div>
+
+@code {
+    private readonly LoginViewModel _loginViewModel = new LoginViewModel();
+    private List<string> Errors { get; set; } = new List<string>();
+
+    private async Task UserLogin()
+    {
+        var response =
+            await _apiCall.Add<UserViewModel, LoginViewModel>(await _apiCall.GetHttpClient(), "authentication/login",
+                _loginViewModel);
+
+        if (response.Status == (int) HttpStatusCode.OK)
+        {
+            await _localStorageService.SetItemAsStringAsync("userId", response.Result.Id);
+            (_authStateProvider as CustomAuthStateProvider)?.SetAuthInfo(response.Result);
+            _navigationManager.NavigateTo("/", true);
+        }
+        else
+        {
+            Errors.Add(response.Title);
+        }
+    }
+}
