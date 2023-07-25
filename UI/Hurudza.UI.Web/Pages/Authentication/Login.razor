@@ -1,0 +1,62 @@
+@page "/authentication/login"
+@using Hurudza.UI.Web.Cookie.Providers
+
+@inject IApiCall _apiCall;
+@inject AuthenticationStateProvider _authStateProvider
+@inject NavigationManager _navigationManager
+@inject ILocalStorageService _localStorageService;
+
+<div class="card card-plain">
+    <div class="card-header pb-0 text-start">
+        <h4 class="font-weight-bolder">Sign In</h4>
+        <p class="mb-0">Enter your email and password to sign in</p>
+    </div>
+    <div class="card-body">
+        <_ValidationSummary Errors="Errors"/>
+        <form role="form">
+            <div class="mb-3">
+                <input @bind="_loginViewModel.Username" type="email" class="form-control form-control-lg" placeholder="Email" aria-label="Email">
+            </div>
+            <div class="mb-3">
+                <input @bind="_loginViewModel.Password" type="email" class="form-control form-control-lg" placeholder="Password" aria-label="Password">
+            </div>
+            <div class="form-check form-switch">
+                <input @bind="_loginViewModel.RememberMe" class="form-check-input" type="checkbox" id="rememberMe">
+                <label class="form-check-label" for="rememberMe">Remember me</label>
+            </div>
+            <div class="text-center">
+                <button type="button" @onclick="UserLogin" class="btn btn-lg bg-gradient-success btn-lg w-100 mt-4 mb-0">Sign in</button>
+            </div>
+        </form>
+    </div>
+    <div class="card-footer text-center pt-0 px-lg-2 px-1">
+        <p class="mb-4 text-sm mx-auto">
+            Don't have an account?
+            <a href="javascript:;" class="text-primary text-gradient font-weight-bold">Sign up</a>
+        </p>
+    </div>
+</div>
+
+@code {
+    private readonly LoginViewModel _loginViewModel = new LoginViewModel();
+    private List<string> Errors { get; set; } = new List<string>();
+
+    private async Task UserLogin()
+    {
+        var response =
+            await _apiCall.Add<UserViewModel, LoginViewModel>(await _apiCall.GetHttpClient(), "authentication/login",
+                _loginViewModel);
+
+        if (response.Status == (int)HttpStatusCode.OK)
+        {
+            await _localStorageService.SetItemAsStringAsync("userId", response.Result.Id);
+            (_authStateProvider as CustomAuthStateProvider)?.SetAuthInfo(response.Result);
+            _navigationManager.NavigateTo("/", true);
+        }
+        else
+        {
+            Errors.Add(response.Title);
+        }
+    }
+
+}
