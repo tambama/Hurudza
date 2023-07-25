@@ -53,6 +53,7 @@ const Routes = {
     AddFieldScreen:'AddFieldScreen',
     MapFieldScreen:'MapFieldScreen',
 
+    InventoryStack:'InventoryStack',
     Inventory:'Inventory',
     AddInventory:'AddInventory',
 

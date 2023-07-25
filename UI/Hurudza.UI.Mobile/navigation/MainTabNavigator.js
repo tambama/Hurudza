@@ -28,6 +28,7 @@ import FarmDetailsScreen from '../screens/farms/FarmDetailsScreen';
 import AddFieldScreen from '../screens/farms/AddFieldScreen';
 import MapFieldScreen from '../screens/farms/MapFieldScreen';
 import CustomDrawer from '../components/CustomDrawer';
+import InventoryScreen from '../screens/fields/InventoryScreen';
 
 
 const Home = createStackNavigator();
@@ -66,12 +67,8 @@ function FarmsStack(){
 const Inventory = createStackNavigator();
 function InventoryStack(){
   return (
-    <Inventory.Navigator initialRouteName={Routes.FarmDetails}>
-      <Inventory.Screen name={Routes.Farms} component={FarmsScreen} options={{headerShown: false}}/>
-      <Inventory.Screen name={Routes.AddFarmScreen} component={AddFarmScreen} options={{headerShown: false}} />
-      <Inventory.Screen name={Routes.FarmDetails} component={FarmDetailsScreen} options={{headerShown: false}} />
-      <Inventory.Screen name={Routes.AddFieldScreen} component={AddFieldScreen} options={{headerShown: false}} />
-      <Inventory.Screen name={Routes.MapFieldScreen} component={MapFieldScreen} options={{headerShown: false}} />
+    <Inventory.Navigator initialRouteName={Routes.Inventory}>
+      <Inventory.Screen name={Routes.Inventory} component={InventoryScreen} options={{headerShown: false}}/>
     </Inventory.Navigator>
   )
 }
@@ -140,7 +137,7 @@ const Tab = createBottomTabNavigator();
 }*/}
 export function MainTabNavigator(){
   return (
-    <Drawer.Navigator initialRouteName={Routes.Farms} drawerContent={props =><CustomDrawer {...props}/>} screenOptions={{drawerType:'front', drawerStyle:{backgroundColor:'transparent'}, drawerActiveBackgroundColor:'rgba(82,115,87,0.3)', drawerActiveTintColor:'#52734D', drawerInactiveTintColor:'rgba(0,0,0,0.8)'}}>
+    <Drawer.Navigator initialRouteName={Routes.InventoryStack} drawerContent={props =><CustomDrawer {...props}/>} screenOptions={{drawerType:'back', drawerStyle:{backgroundColor:'transparent'}, drawerActiveBackgroundColor:'rgba(82,115,87,0.3)', drawerActiveTintColor:'#52734D', drawerInactiveTintColor:'rgba(0,0,0,0.8)'}}>
     <Drawer.Screen name={Routes.HomeStack} component={HomeStack} options={({navigation}) => ({
        headerShown:false,
       drawerLabel:'Home',
@@ -166,7 +163,7 @@ export function MainTabNavigator(){
               color={focused ? '#52734D' : 'grey'}
             />
           )})} />
-    <Drawer.Screen name={Routes.Inventory} component={FarmsStack} options={({navigation}) => ({
+    <Drawer.Screen name={Routes.InventoryStack} component={InventoryStack} options={({navigation}) => ({
       headerShown:false,
       drawerLabel:'Inventory',
       drawerLabelStyle:{fontFamily:'montserrat-bold', fontSize:20},

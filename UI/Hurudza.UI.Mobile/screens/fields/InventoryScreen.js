@@ -14,7 +14,8 @@ import {
   TextInput,
   ScrollView,    
   Modal,
-  Pressable
+  Pressable,
+  Alert
 } from 'react-native';
 import { connect, useSelector } from 'react-redux';
 import { Ionicons, SimpleLineIcons, FontAwesome, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons'
@@ -32,6 +33,8 @@ import ActionSheet from "react-native-actions-sheet";
 import MapView, { Callout, Marker, Polygon } from 'react-native-maps';
 import * as Location from 'expo-location';
 
+import { Table, Row, Rows, TableWrapper, Col, Cols, Cell } from 'react-native-reanimated-table';
+
 
 import colors from '../../constants/Colors';
 import DropdownAlert from 'react-native-dropdownalert';
@@ -41,10 +44,10 @@ import { useDispatch } from 'react-redux';
 import { connectAlert } from '../../components/Alert';
 import { getNetwork } from '../../helpers/mobile-numbers';
 import { onlyUnique } from '../../helpers/helper-methods';
-import { Divider, Skeleton, SearchBar, Button } from '@rneui/themed';
+import { Divider, Skeleton, SearchBar, Button, CheckBox } from '@rneui/themed';
 import { useDrawerStatus } from '@react-navigation/drawer';
 
-function FarmDetailsScreen({navigation, route}, props) {
+function InventoryScreen({navigation, route}, props) {
     const drawerStatus = useDrawerStatus();
   const dispatch = useDispatch();
   const { type, message } = useSelector(state => state.alert);
@@ -57,6 +60,25 @@ const height = windowWidth*0.7
   const [nestedScrollEnabled, setNestedScrollEnabled] = useState(false);
   const [farmAvailable, setFarmAvailable]= useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+
+  const [tableHead, setTableHead] = useState([['Inventory item', 'Condition', 'Quantity']]);
+  const [tableData, setTableData] = useState([
+    ['Hoe', 'Good', '10'],
+    ['Rake', 'Good', '10'],
+    ['Shovel', 'Good', '10'],
+    ['Hoe', 'Bad', '3'],
+    ['Rake', 'Bad', '1'],
+    ['Shovel', 'Bad', '2'],
+    ['Tractor', 'Good', '4'],
+    ['Tipper', 'Bad', '1'],
+    ['Axe', 'Good', '4'],
+    ['Hoe', 'Good', '10'],
+    ['Seeder v654.65', 'Good', '1'],
+    ['Rain Gauge v643.53', 'Good', '10'],
+    ['Harvester v654.65', 'Good', '1'],
+    ['Perfo', 'Good', '10'],
+
+  ])
 
   const dropDownAlertRef = useRef(null);
 
@@ -72,6 +94,39 @@ const height = windowWidth*0.7
       dispatch(alertActions.clear());
     }
   }, [type, message]);
+  _alertIndex=(index)=> {
+    Alert.alert(`This is row ${index + 1}`);
+  }
+  const [checkedAll, setCheckedAll] = useState(false);
+  const element = (Celldata, index) => (
+    <View style={{flexDirection:'row', alignItems:'center'}}>
+        <CheckBox
+           checked={checkedAll}
+           iconType="material-community"
+           checkedIcon="checkbox-marked"
+           uncheckedIcon="checkbox-blank-outline"
+           checkedColor="#52734D"
+           size={30}
+         />
+         <Text style={{...styles.TableText, marginLeft:5, fontFamily:'montserrat-bold', color:'rgba(0,0,0,0.8)'}}>{Celldata}</Text>
+    </View>
+
+  );
+  const titleElement = (Celldata, index) => (
+    <View style={{flexDirection:'row', alignItems:'center'}}>
+        <CheckBox
+           checked={checkedAll}
+           onPress={()=>setCheckedAll(!checkedAll)}
+           iconType="material-community"
+           checkedIcon="checkbox-marked"
+           uncheckedIcon="checkbox-blank-outline"
+           checkedColor="#52734D"
+           size={30}
+         />
+         <Text style={{...styles.Tabletitle,marginLeft:5, }}>{Celldata}</Text>
+    </View>
+
+  );
 
   return (
     <View style={styles.container}>
@@ -85,10 +140,10 @@ const height = windowWidth*0.7
             </View>
         </View>
         <View style={styles.contentContainer}>
-        <Text style={styles.headerTitle}>Nyazura Adventist High School</Text>
+        <Text style={styles.headerTitle}>Farm Inventory</Text>
         <View style={{...styles.historyTitleContainer, backgroundColor:'transparent'}}>
                   <View>
-                    <Text style={styles.historyTitle}>Farm Description</Text>
+                    <Text style={styles.historyTitle}>Summary</Text>
                     <View style={{
                       width: 20,
                       height: 3,
@@ -104,142 +159,90 @@ const height = windowWidth*0.7
             <View style={{alignItems:'center', width:'100%'}}>
                 
             <View style={{flexDirection:'row', justifyContent:'space-around', marginBottom:30}}>
-                <View style={{width:'70%', backgroundColor:'transparent', flexDirection:'row', justifyContent:'space-between', paddingHorizontal:20, borderRightWidth:0.5, alignItems:'center'}}>
+                <View style={{width:'100%', backgroundColor:'transparent', flexDirection:'row', justifyContent:'space-between', paddingHorizontal:20, alignItems:'center'}}>
                     <View style={{}}>
-                    <Text style={{fontSize:15, fontFamily:'montserrat-medium'}}>Very arable land with a dynamic structure, placed in a hilly area with the right soil type around for the available farms and people can till the land kusvikira vaneta, uye vasingachade kuita izvozvo.</Text>
+                    <Text style={{fontSize:15, fontFamily:'montserrat-medium'}}>Total items registered : {tableData.length}</Text>
+                    <Text style={{fontSize:15, fontFamily:'montserrat-medium'}}>Last inventory Update : {moment().calendar()}</Text>
                     </View>
-
-                </View>
-                <View style={{width:'30%', backgroundColor:'transparent', flexDirection:'row', justifyContent:'space-between', paddingHorizontal:25}}>
-                    <View style={{}}>
-                    <Text style={{fontSize:40, fontFamily:'montserrat-medium'}}>30,54</Text>
-                    <Text style={{fontSize:19, fontFamily:'montserrat-regular'}}><Text style={{color:'#52734D'}}>hacteres</Text></Text>
-
-                    </View>
-
-
                 </View>
             </View>
             </View>
-            <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-            <View style={{...styles.history, width:'55%'}}>
+
+            <View style={{...styles.history, width:'100%', flex:1}}>
                 <View style={styles.historyTitleContainer}>
-                  <View>
-                    <Text style={styles.historyTitle}>Fields</Text>
-                    <View style={{
-                      width: 20,
-                      height: 3,
-                      backgroundColor: '#52734D',
-                      marginHorizontal: 4,
-                      marginTop: 3
-                    }}></View>
-                  </View>
-                  <TouchableOpacity onPress={() => goToTransactions()}>
-                    <Text style={styles.historyTitleRight}>View All</Text>
-                  </TouchableOpacity>
+                <SearchBar
+                platform={ Platform.OS === 'ios' ? 'android' : 'android' }
+                placeholder='Search by name, condition, etc.'
+                inputStyle={{fontFamily:'montserrat-medium'}}
+                onSubmitEditing={() => {}}
+                spellCheck={false}
+                autoCorrect={false}
+                returnKeyType='search'
+                containerStyle={ Platform.OS === 'ios' ? {
+                  height: 50,
+                  borderRadius: 15,
+                } : {
+                  width: '100%',
+                }}
+                inputContainerStyle={ 
+                  Platform.OS === 'ios' ? {
+                  backgroundColor: colors.white,
+                  borderRadius:15
+                } : null } />
                 </View>
-                <View style={{alignItems:'center', justifyContent:'center', height:windowWidth*0.5, marginTop:30}}><Text style={{fontFamily:'montserrat-medium', fontSize:16, marginTop:-100, textAlign:'center', marginHorizontal:30}}>No fields</Text></View>
+                <View style={{marginBottom:120, flex:1}}>
+                        <Divider />
+                        <Table borderStyle={{borderColor: 'transparent'}}>
+                            <>
+                            {
+                                    tableHead.map((rowData, index) => (
+                                    <>
+                                    <TableWrapper key={index} style={styles.row}>
+                                {
+                                    rowData.map((cellData, cellIndex) => (
+                                    <Cell key={cellIndex} flex={cellIndex === 0 ?3:1} data={cellIndex === 0 ? titleElement(cellData, index) : cellData} textStyle={styles.Tabletitle}/>
+                                    ))
+                                }
+                                    </TableWrapper>
+                                    <Divider />
+                                    </>
+
+                 
+                                ))
+                                }
+
+
+                 
+
+                            <Divider />
+                            </>
+                            <ScrollView style={{}}>
+
+                            {
+                                    tableData.map((rowData, index) => (
+                                    <>
+                                    <TableWrapper key={index} style={styles.row}>
+                                {
+                                    rowData.map((cellData, cellIndex) => (
+                                    <Cell key={cellIndex} flex={cellIndex === 0 ?3:1} data={cellIndex === 0 ? element(cellData, index) : cellData} textStyle={styles.TableText}/>
+                                    ))
+                                }
+                                    </TableWrapper>
+                                    <Divider />
+                                    </>
+
+                 
+                                ))
+                                }
+                             </ScrollView>
+                        </Table>
+                </View>
+
                 <TouchableOpacity style={{position:'absolute', bottom:0, height:50, backgroundColor:'#52734D', width:'100%', alignItems:'center', justifyContent:'center', flexDirection:'row'}} onPress={()=>{navigation.navigate(Routes.AddFieldScreen)}}>
                     <Icon name='plus' type='feather' color={'#ffffff'}/>
-                    <Text style={{fontFamily:'montserrat-semi', color:'#ffffff'}}> Add field</Text>
+                    <Text style={{fontFamily:'montserrat-semi', color:'#ffffff'}}> Add item</Text>
                 </TouchableOpacity>
               </View>
-              <View style={{width:'40%', backgroundColor:'#f1f2f2'}}>
-                <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-                <View style={{width:'45%', height:150, backgroundColor:'#52734D', alignItems:'center', justifyContent:'space-between', borderRadius:10, paddingVertical:20}}>
-                    <Text style={{fontSize:50, color:'white'}}>35</Text>
-                    <Text style={{fontSize:16, color:'white'}}>Projects</Text>
-                </View>
-                <View style={{width:'45%', height:150, backgroundColor:'#91C788', alignItems:'center', justifyContent:'space-between', borderRadius:10, paddingVertical:20}}>
-                    <Text style={{fontSize:50, color:'white'}}>3</Text>
-                    <Text style={{fontSize:16, color:'white', textAlign:'center'}}> completed</Text>
-                </View>
-                </View>
-                <View style={{height:20, backgroundColor:'transparent'}}/>
-                <View style={{...styles.history, flex:1, width:'100%', backgroundColor:'#DDFFBC'}}>
-                <View style={{...styles.historyTitleContainer, backgroundColor:'#DDFFBC'}}>
-                  <View>
-                    <Text style={styles.historyTitle}>This quarter</Text>
-                    <View style={{
-                      width: 20,
-                      height: 3,
-                      backgroundColor: '#52734D',
-                      marginHorizontal: 4,
-                      marginTop: 3
-                    }}></View>
-                  </View>
-                    <Text style={styles.historyTitleRight}></Text>
-
-                </View>
-                <View style={{marginTop:15, paddingHorizontal:15, justifyContent:'space-between', flex:1, paddingBottom:15, backgroundColor:'#DDFFBC'}}>
-                    <View/>
-                    <Text style={{fontSize:30, fontFamily:'montserrat-medium', width:200}}>Made 3 requests for farming inputs</Text>
-                    <View style={{flexDirection:'row', alignItems:'center'}}>
-                    <CircularProgress
-                    value={33.33}
-                    activeStrokeWidth={8}
-                    progressValueColor={'transparent'}
-                    radius={15}
-                    activeStrokeColor={'green'}
-                    />
-<Text style={{fontFamily:'montserrat-regular', fontSize:15}}>   1/3 Completed</Text>
-                    </View>
-
-                </View>
-
-              </View>
-
-              </View>
-            </View>
-            <View style={{flexDirection:'row', justifyContent:'space-between', marginTop:30}}>
-            <View style={styles.history}>
-                <View style={styles.historyTitleContainer}>
-                  <View>
-                    <Text style={styles.historyTitle}>Inventory</Text>
-                    <View style={{
-                      width: 20,
-                      height: 3,
-                      backgroundColor: '#52734D',
-                      marginHorizontal: 4,
-                      marginTop: 3
-                    }}></View>
-                  </View>
-                  <TouchableOpacity onPress={() => goToTransactions()}>
-                    <Text style={styles.historyTitleRight}>View All</Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={{alignItems:'center', justifyContent:'center', height:250, marginTop:30}}><Text style={{fontFamily:'montserrat-medium', fontSize:16, marginTop:-100, textAlign:'center', marginHorizontal:30}}>No inventory registered</Text></View>
-                <TouchableOpacity style={{position:'absolute', bottom:0, height:50, backgroundColor:'#52734D', width:'100%', alignItems:'center', justifyContent:'center', flexDirection:'row'}}>
-                    <Icon name='plus' type='feather' color={'#ffffff'}/>
-                    <Text style={{fontFamily:'montserrat-semi', color:'#ffffff'}}> Add inventory</Text>
-                </TouchableOpacity>
-              </View>
-              
-              <View style={styles.history}>
-                <View style={styles.historyTitleContainer}>
-                  <View>
-                    <Text style={styles.historyTitle}>Farm managers</Text>
-                    <View style={{
-                      width: 20,
-                      height: 3,
-                      backgroundColor: '#52734D',
-                      marginHorizontal: 4,
-                      marginTop: 3
-                    }}></View>
-                  </View>
-                  <TouchableOpacity onPress={() => goToTransactions()}>
-                    <Text style={styles.historyTitleRight}>View All</Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={{alignItems:'center', justifyContent:'center', height:250, marginTop:30}}><Text style={{fontFamily:'montserrat-medium', fontSize:16, marginTop:-100, textAlign:'center', marginHorizontal:30}}>No farm managers registered</Text></View>
-                <TouchableOpacity style={{position:'absolute', bottom:0, height:50, backgroundColor:'#52734D', width:'100%', alignItems:'center', justifyContent:'center', flexDirection:'row'}}>
-                    <Icon name='plus' type='feather' color={'#ffffff'}/>
-                    <Text style={{fontFamily:'montserrat-semi', color:'#ffffff'}}> Add manager</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            
         </View>
         <DropdownAlert inactiveStatusBarStyle='dark-content' inactiveStatusBarBackgroundColor={Platform.OS === 'ios' ? colors.white : colors.lightGray1} ref={dropDownAlertRef} />
       </View>
@@ -247,6 +250,12 @@ const height = windowWidth*0.7
 }
 
 const styles = StyleSheet.create({
+    head: { height: 60, paddingLeft:15},
+    TableText: { margin: 6, fontSize:16, fontFamily:'montserrat-semi', color:'rgba(0,0,0,0.8)' },
+    Tabletitle: { margin: 6, fontSize:20, fontFamily:'montserrat-semi', color:'rgba(0,0,0,0.8)' },
+    row: { flexDirection: 'row', height: 60, paddingLeft:15},
+    btn: { width: 58, height: 18, backgroundColor: '#78B7BB',  borderRadius: 2 },
+    btnText: { textAlign: 'center', color: '#fff' },
   container: {
     flex: 1,
     backgroundColor: colors.lightGray1,
@@ -407,8 +416,6 @@ const styles = StyleSheet.create({
     justifyContent:'space-between',
     paddingHorizontal: 15,
     backgroundColor: 'white',
-    paddingTop: 5,
-    marginTop: 5,
   },
   historyTitle:{
     fontSize:18,
@@ -567,4 +574,4 @@ const pickerSelectStyles = StyleSheet.create({
   },
 });
 
-export default connectAlert(FarmDetailsScreen);
+export default connectAlert(InventoryScreen);
