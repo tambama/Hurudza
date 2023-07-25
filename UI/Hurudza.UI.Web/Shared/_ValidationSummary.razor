@@ -1,9 +1,9 @@
 @if (!string.IsNullOrEmpty(SuccessMessage))
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <span class="message">@SuccessMessage</span>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">×</span>
+        <span class="alert-text text-white">@SuccessMessage</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
         </button>
     </div>
 }
@@ -11,9 +11,9 @@
 @foreach (var error in Errors)
 {
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <span class="message">@error</span>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">×</span>
+        <span class="alert-text text-white">@error</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
         </button>
     </div>
 }
@@ -22,7 +22,7 @@
 {
     [Parameter]
     public string? SuccessMessage { get; set; }
-    
+
     [Parameter]
     public List<string> Errors { get; set; } = new List<string>();
 }

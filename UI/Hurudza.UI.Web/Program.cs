@@ -7,6 +7,7 @@ using Hurudza.UI.Web.Api.Interfaces;
 using Hurudza.UI.Web.Cookie.Handlers;
 using Hurudza.UI.Web.Cookie.Providers;
 using Microsoft.AspNetCore.Components.Authorization;
+using Syncfusion.Blazor;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -18,7 +19,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>
 builder.Services.AddScoped<CookieHandler>();
 
 builder.Services.AddHttpClient("Api.Core", options => {
-        options.BaseAddress = new Uri("http://localhost:5249/api/");
+        options.BaseAddress = new Uri("https://localhost:7148/api/");
     })
     .AddHttpMessageHandler<CookieHandler>();
 
@@ -28,4 +29,5 @@ builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped<IApiCall, ApiCall>();
 
+builder.Services.AddSyncfusionBlazor();
 await builder.Build().RunAsync();

@@ -1,4 +1,6 @@
-﻿using System.Net.Mime;
+﻿using System.Net;
+using System.Net.Mime;
+using System.Security.Claims;
 using AutoMapper.QueryableExtensions;
 using Hurudza.Apis.Base.Models;
 using Hurudza.Common.Emails.Helpers;
@@ -12,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using ApiResponse = Hurudza.Apis.Base.Models.ApiResponse;
 using IConfigurationProvider = AutoMapper.IConfigurationProvider;
 
 namespace Hurudza.Apis.Core.Controllers
@@ -26,6 +29,7 @@ namespace Hurudza.Apis.Core.Controllers
     {
         private readonly HurudzaDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IConfigurationProvider _configuration;
         private readonly ISmsService _smsService;
         private readonly ISendGridEmailService _sendGridEmailService;
@@ -59,6 +63,39 @@ namespace Hurudza.Apis.Core.Controllers
                 .ConfigureAwait(false);
             
             return Ok(roles);
+        }
+
+        [HttpPost(Name = nameof(CreateRole))]
+        public async Task<IActionResult> CreateRole([FromBody] RoleViewModel vm)
+        {
+            if (await _roleManager.RoleExistsAsync(vm.Name))
+                return Ok(new ApiResponse((int)HttpStatusCode.BadRequest, "Role already exists"));
+
+            var newRole = await _roleManager.CreateAsync(new ApplicationRole
+            {
+                Name = vm.Name,
+                Description = vm.Description
+            }).ConfigureAwait(false);
+
+            if (!newRole.Succeeded)
+                return Ok(new ApiResponse((int)HttpStatusCode.BadRequest, "Failed to add Role"));
+
+            var role = await _roleManager.FindByNameAsync(vm.Name).ConfigureAwait(false);
+
+            if (role is null)
+                return Ok(new ApiResponse((int)HttpStatusCode.BadRequest, "Failed to add Role"));
+
+            if (vm.Permissions != null)
+                foreach (var permission in vm.Permissions)
+                {
+                    await _roleManager.AddClaimAsync(role, new Claim(permission.ClaimType, permission.ClaimValue))
+                        .ConfigureAwait(false);
+                }
+
+            var result = await _context.Roles.ProjectTo<RoleViewModel>(_configuration)
+                .FirstOrDefaultAsync(r => r.Id == role.Id).ConfigureAwait(false);
+            
+            return Ok(new ApiOkResponse(result));
         }
 
         [HttpPost(Name = nameof(FilterRoles))]

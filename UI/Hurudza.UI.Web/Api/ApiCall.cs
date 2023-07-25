@@ -1,7 +1,9 @@
 using System.Net.Http.Json;
+using Blazored.LocalStorage;
 using Hurudza.Common.Utils.Extensions;
 using Hurudza.UI.Web.Api.Interfaces;
 using Hurudza.UI.Web.Models;
+using IdentityModel.Client;
 
 namespace Hurudza.UI.Web.Api;
 
@@ -9,15 +11,22 @@ public class ApiCall : IApiCall
 {
     private const string ApiVersion = "1.0";
     private readonly IHttpClientFactory _httpClientFactory;
-    
-    public ApiCall(IHttpClientFactory httpClientFactory)
+    private readonly ILocalStorageService _localStorageService;
+
+    public ApiCall(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService)
     {
         _httpClientFactory = httpClientFactory;
+        _localStorageService = localStorageService;
     }
     
     public async Task<HttpClient> GetHttpClient()
     {
+        var token = await _localStorageService.GetItemAsync<string>("token");
         var client = _httpClientFactory.CreateClient("Api.Core");
+        if (!string.IsNullOrEmpty(token))
+        {
+            client.SetBearerToken(token);
+        }
 
         return await Task.FromResult(client);
     }
