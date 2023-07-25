@@ -4,6 +4,7 @@
 @inject IApiCall _apiCall
 @inject ILocalStorageService _localStorageService;
 @inject AuthenticationStateProvider _authStateProvider
+@inject NavigationManager _navigationManager
 
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly" OnNavigateAsync="@OnNavigateAsync">

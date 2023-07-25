@@ -102,10 +102,10 @@ try
             config =>
             {
                 config
+                    .AllowAnyOrigin()
                     .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .SetIsOriginAllowed(x => true)
-                    .AllowCredentials();
+                    .SetIsOriginAllowed(x => true);
             });
     });
     
@@ -114,6 +114,29 @@ try
     {
         c.AddServer(new OpenApiServer { Url = builder.Configuration["ApiSettings:CoreUrl"] });
         c.OperationFilter<SwaggerDefaultValues>();
+        c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            In = ParameterLocation.Header,
+            Description = "Please enter token",
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            BearerFormat = "JWT",
+            Scheme = "bearer"
+        });
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                Array.Empty<string>()
+            }
+        });
     });
     builder.Services.AddApiVersioning();
     builder.Services.AddVersionedApiExplorer(options =>
@@ -145,6 +168,8 @@ try
     
     InitializeDatabase(app, context);
     
+    app.UseCors("HurudzaCors");
+    
     if (app.Environment.IsDevelopment())
     {
         app.UseDeveloperExceptionPage();
@@ -161,7 +186,6 @@ try
 
     app.UseHttpsRedirection();
 
-    app.UseCors("HurudzaCors");
     app.UseAuthentication();
     app.UseAuthorization();
 

@@ -9,6 +9,7 @@ using Hurudza.Data.Context.Context;
 using Hurudza.Data.Context.Data;
 using Hurudza.Data.Models.Models;
 using Hurudza.Data.Models.ViewModels.UserManagement;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,7 @@ using automapper = AutoMapper;
 
 namespace Hurudza.Apis.Core.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]/[action]"), Authorize]
     [ApiController]
     [ApiVersion("1.0")]
     [Produces(MediaTypeNames.Application.Json)]
@@ -44,7 +45,7 @@ namespace Hurudza.Apis.Core.Controllers
             _configurationProvider = configurationProvider;
         }
 
-        [HttpPost(Name = nameof(Login))]
+        [HttpPost(Name = nameof(Login)), AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
             var user = await _userManager.FindByNameAsync(model.Username);
@@ -240,7 +241,7 @@ namespace Hurudza.Apis.Core.Controllers
             return Ok(new ApiOkResponse(login));
         }
 
-        [HttpPost(Name = nameof(Register))]
+        [HttpPost(Name = nameof(Register)), AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterUserViewModel model)
         {
             var userExists = await _userManager.FindByNameAsync(model.UserName);
