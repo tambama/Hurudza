@@ -29,6 +29,7 @@ import AddFieldScreen from '../screens/farms/AddFieldScreen';
 import MapFieldScreen from '../screens/farms/MapFieldScreen';
 import CustomDrawer from '../components/CustomDrawer';
 import InventoryScreen from '../screens/fields/InventoryScreen';
+import AddInventoryScreen from '../screens/fields/AddInventoryScreen';
 
 
 const Home = createStackNavigator();
@@ -69,6 +70,7 @@ function InventoryStack(){
   return (
     <Inventory.Navigator initialRouteName={Routes.Inventory}>
       <Inventory.Screen name={Routes.Inventory} component={InventoryScreen} options={{headerShown: false}}/>
+      <Inventory.Screen name={Routes.AddInventory} component={AddInventoryScreen} options={{headerShown: false}}/>
     </Inventory.Navigator>
   )
 }
