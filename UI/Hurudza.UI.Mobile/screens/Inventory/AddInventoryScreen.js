@@ -213,6 +213,7 @@ const height = windowWidth*0.7
               containerStyle={styles.textInputContainer}
               keyboardType='default'
               returnKeyType={'done'}
+              type='number'
               cursorColor={'#52734D'}
               onChangeText={(value) => setItemCount(value)}
               onSubmitEditing={(value) => setItemCount(value)}
