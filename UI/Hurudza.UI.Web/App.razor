@@ -1,10 +1,9 @@
 ﻿@using Hurudza.UI.Web.Cookie.Providers
 @using Hurudza.UI.Web.Models
 
-@inject IApiCall _apiCall
-@inject ILocalStorageService _localStorageService;
-@inject AuthenticationStateProvider _authStateProvider
-@inject NavigationManager _navigationManager
+@inject IApiCall ApiCall
+@inject ILocalStorageService LocalStorageService;
+@inject AuthenticationStateProvider AuthStateProvider
 
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly" OnNavigateAsync="@OnNavigateAsync">
@@ -35,20 +34,20 @@
 @code{
     private async Task OnNavigateAsync(NavigationContext args)
     {
-        var auth =  await _localStorageService.GetItemAsync<string>("userId");
-        var user = (await(_authStateProvider as CustomAuthStateProvider)
+        var auth =  await LocalStorageService.GetItemAsync<string>("token");
+        var user = (await(AuthStateProvider as CustomAuthStateProvider)
             .GetAuthenticationStateAsync()).User;
         
         if(user.Identity != null && !string.IsNullOrEmpty(auth) && !user.Identity.IsAuthenticated )
         {
-            var response = await _apiCall.Get<ApiResponse<UserViewModel>>(await _apiCall.GetHttpClient(), "authentication/getuserprofile/", auth);
-            if (response.Status == (int)HttpStatusCode.OK)
+            var response = await ApiCall.Get<ApiResponse<UserViewModel>>(await ApiCall.GetHttpClient(), "authentication/getloggedinprofile/");
+            if (response != null && response.Status == (int)HttpStatusCode.OK)
             {
-                (_authStateProvider as CustomAuthStateProvider)?.SetAuthInfo(response.Result);
+                (AuthStateProvider as CustomAuthStateProvider)?.SetAuthInfo(response.Result);
             }
             else
             {
-                await _localStorageService.RemoveItemAsync("userId");
+                await LocalStorageService.RemoveItemAsync("token");
             }
         }
     }

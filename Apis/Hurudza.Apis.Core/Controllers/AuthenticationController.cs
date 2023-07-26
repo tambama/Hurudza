@@ -186,6 +186,73 @@ namespace Hurudza.Apis.Core.Controllers
 
         }
         
+        [HttpGet(Name = nameof(GetLoggedInProfile))]
+        public async Task<IActionResult> GetLoggedInProfile()
+        {
+            var user = await _userManager.FindByIdAsync(User.FindFirstValue(ClaimTypes.PrimarySid) ?? string.Empty);
+            
+            if (user == null)
+                return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized,
+                    "User was not found"));
+
+            if(!user.IsActive)
+                return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized,
+                    "User is not active. Contact admin to activate account"));
+
+            var profiles = await _context.UserProfiles
+                .Where(p => p.UserId == user.Id)
+                .ProjectTo<UserProfileViewModel>(_configurationProvider)
+                .ToListAsync();
+
+            if (profiles.Count > 0)
+                profiles[0].LoggedIn = true;
+            else
+            {
+                var userRole = (await _userManager.GetRolesAsync(user)).First();
+                profiles.Add(new UserProfileViewModel { Farm = "System", Fullname = "Administrator", Role = userRole, LoggedIn = true });
+            }
+
+            var authClaims = new List<Claim>
+            {
+                new(ClaimTypes.PrimarySid, user.Id),
+                new(ClaimTypes.Name, user.UserName),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            };
+
+            var loggedIn = profiles.First(p => p.LoggedIn);
+            authClaims.Add(new Claim(ClaimTypes.Role, loggedIn.Role));
+
+            var role = await _roleManager.FindByNameAsync(loggedIn.Role);
+            var roleClaims = await _roleManager.GetClaimsAsync(role);
+
+            authClaims.AddRange(roleClaims.ToList());
+            
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JWT:ValidIssuer"],
+                audience: _configuration["JWT:ValidAudience"],
+                expires: DateTime.Now.AddHours(3),
+                claims: authClaims,
+                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+            );
+
+            var login = new UserViewModel
+            {
+                Id = user.Id,
+                Firstname = user.Firstname,
+                Surname = user.Surname,
+                UserName = user.UserName,
+                PhoneNumber = user.PhoneNumber,
+                Email = user.Email,
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                Profiles = profiles
+            };
+
+            return Ok(new ApiOkResponse(login));
+
+        }
+        
         [HttpPost(Name = nameof(SwitchProfile))]
         public async Task<IActionResult> SwitchProfile([FromBody] UserProfileViewModel model)
         {

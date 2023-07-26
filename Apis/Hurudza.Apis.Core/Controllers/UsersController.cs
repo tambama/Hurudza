@@ -20,8 +20,6 @@ using Microsoft.Extensions.Options;
 using ApiResponse = Hurudza.Data.Models.Models.ApiResponse;
 using IConfigurationProvider = AutoMapper.IConfigurationProvider;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace Hurudza.Apis.Core.Controllers
 {
     [Route("api/[controller]/[action]")]
@@ -62,7 +60,9 @@ namespace Hurudza.Apis.Core.Controllers
         [HttpGet("", Name = nameof(GetUsers))]
         public async Task<IActionResult> GetUsers()
         {
-            var users = await _context.Users.Where(u => u.IsActive).ProjectTo<UserViewModel>(_configuration)
+            var users = await _context.Users
+                .Where(u => u.IsActive)
+                .ProjectTo<UserViewModel>(_configuration)
                 .ToListAsync();
 
             return Ok(users);
@@ -72,7 +72,8 @@ namespace Hurudza.Apis.Core.Controllers
         [HttpGet("{id}", Name = nameof(GetUser))]
         public async Task<IActionResult> GetUser(string id)
         {
-            var user = await _context.Users.ProjectTo<UserViewModel>(_configuration)
+            var user = await _context.Users
+                .ProjectTo<UserViewModel>(_configuration)
                 .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null) return NotFound();
@@ -83,7 +84,8 @@ namespace Hurudza.Apis.Core.Controllers
         [HttpGet("{username}", Name = nameof(GetUserByUsername))]
         public async Task<IActionResult> GetUserByUsername(string username)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == username.Trim().ToLower())
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserName.ToLower() == username.Trim().ToLower())
                 .ConfigureAwait(false);
 
             if (user == null) return NotFound();

@@ -131,6 +131,12 @@ public class HurudzaDbContext :
                 .IsRequired();
         });
 
+        builder.Entity<IdentityClaim>(b =>
+        {
+            b.Property(p => p.Id)
+                .ValueGeneratedOnAdd();
+        });
+
         builder.Entity<Province>(b =>
         {
             b.Property(d => d.Id)

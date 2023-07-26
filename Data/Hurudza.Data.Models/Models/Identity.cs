@@ -76,6 +76,5 @@ namespace Hurudza.Data.Models.Models
         public int Id { get; set; }
         public string ClaimType { get; set; }
         public string ClaimValue { get; set; }
-        public int UserTypeId { get; set; }
     }
 }

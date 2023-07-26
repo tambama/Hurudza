@@ -102,10 +102,11 @@ try
             config =>
             {
                 config
-                    .AllowAnyOrigin()
+                    .WithOrigins("http://localhost:5113", "https://localhost:7148")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .SetIsOriginAllowed(x => true);
+                    .SetIsOriginAllowed(x => true)
+                    .AllowCredentials();
             });
     });
     
@@ -210,6 +211,7 @@ static void InitializeDatabase(WebApplication app, HurudzaDbContext dbContext)
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
     dbContext.Database.Migrate();
+    SeedClaimsData.SeedClaims(dbContext);
     SeedRoleData.SeedRoles(dbContext, roleManager);
     SeedSendGridData.SeedSendGridTemplates(dbContext);
     SeedUserData.SeedUsers(dbContext, roleManager, userManager);

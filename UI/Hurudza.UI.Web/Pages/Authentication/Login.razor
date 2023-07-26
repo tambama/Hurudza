@@ -1,10 +1,10 @@
 @page "/authentication/login"
 @using Hurudza.UI.Web.Cookie.Providers
 
-@inject IApiCall _apiCall;
-@inject AuthenticationStateProvider _authStateProvider
-@inject NavigationManager _navigationManager
-@inject ILocalStorageService _localStorageService;
+@inject IApiCall ApiCall;
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorageService;
 
 <div class="card card-plain">
     <div class="card-header pb-0 text-start">
@@ -13,21 +13,23 @@
     </div>
     <div class="card-body">
         <_ValidationSummary Errors="Errors"/>
-        <form role="form">
+        <EditForm role="form" Model="@_loginViewModel" OnValidSubmit="@UserLogin">
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
             <div class="mb-3">
-                <input @bind="_loginViewModel.Username" type="email" class="form-control form-control-lg" placeholder="Email" aria-label="Email">
+                <InputText @bind-Value="_loginViewModel.Username" type="email" class="form-control form-control-lg" placeholder="Email" aria-label="Email" />
             </div>
             <div class="mb-3">
-                <input @bind="_loginViewModel.Password" type="email" class="form-control form-control-lg" placeholder="Password" aria-label="Password">
+                <InputText @bind-Value="_loginViewModel.Password" type="password" class="form-control form-control-lg" placeholder="Password" aria-label="Password" />
             </div>
             <div class="form-check form-switch">
-                <input @bind="_loginViewModel.RememberMe" class="form-check-input" type="checkbox" id="rememberMe">
+                <InputCheckbox @bind-Value="_loginViewModel.RememberMe" class="form-check-input" type="checkbox" id="rememberMe" />
                 <label class="form-check-label" for="rememberMe">Remember me</label>
             </div>
             <div class="text-center">
-                <button type="button" @onclick="UserLogin" class="btn btn-lg bg-gradient-success btn-lg w-100 mt-4 mb-0">Sign in</button>
+                <button type="submit" class="btn btn-lg bg-gradient-success btn-lg w-100 mt-4 mb-0">Sign in</button>
             </div>
-        </form>
+        </EditForm>
     </div>
     <div class="card-footer text-center pt-0 px-lg-2 px-1">
         <p class="mb-4 text-sm mx-auto">
@@ -44,18 +46,25 @@
     private async Task UserLogin()
     {
         var response =
-            await _apiCall.Add<UserViewModel, LoginViewModel>(await _apiCall.GetHttpClient(), "authentication/login",
+            await ApiCall.Add<UserViewModel, LoginViewModel>(await ApiCall.GetHttpClient(), "authentication/login",
                 _loginViewModel);
 
-        if (response.Status == (int)HttpStatusCode.OK)
+        if (response == null)
         {
-            await _localStorageService.SetItemAsStringAsync("userId", response.Result.Id);
-            (_authStateProvider as CustomAuthStateProvider)?.SetAuthInfo(response.Result);
-            _navigationManager.NavigateTo("/", true);
+            Errors.Add("Login failed. Please contact System Admin");
         }
         else
         {
-            Errors.Add(response.Title);
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                await LocalStorageService.SetItemAsStringAsync("token", response.Result.Token);
+                (AuthStateProvider as CustomAuthStateProvider)?.SetAuthInfo(response.Result);
+                NavigationManager.NavigateTo("/", true);
+            }
+            else
+            {
+                Errors.Add(response.Title);
+            }
         }
     }
 
