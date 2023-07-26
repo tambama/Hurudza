@@ -125,6 +125,7 @@ const height = windowWidth*0.7
         (txObj, resultSet) => {
           if (resultSet.rowsAffected > 0) {
             console.log('Item added successfully');
+            dropDownAlertRef.current.alertWithType('success', 'Success', 'Item added successfully');
             setItemName(undefined);
             setItemModel(undefined);
             setItemCount(undefined);
