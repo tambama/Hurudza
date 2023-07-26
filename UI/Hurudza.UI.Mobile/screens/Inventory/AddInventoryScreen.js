@@ -20,17 +20,19 @@ import { connect, useSelector } from 'react-redux';
 import { Ionicons, SimpleLineIcons, FontAwesome, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons'
 import { getStatusBarHeight, isIphoneX, ifIphoneX } from 'react-native-iphone-x-helper'
 import * as Permissions from 'expo-permissions';
+import * as Location from 'expo-location';
 import Constants from 'expo-constants';
 import { ListItem, Icon, Badge, Input } from 'react-native-elements';
 import moment from 'moment';
+import { LinearGradient } from 'expo-linear-gradient';
 import {Dimensions} from 'react-native';
+import { CustomButton } from '../../components/Buttons'
 
 import { Pagination } from 'react-native-snap-carousel';
 import RNPickerSelect from 'react-native-picker-select';
 import ActionSheet from "react-native-actions-sheet";
 
-import MapView, { Callout, Marker, Polygon } from 'react-native-maps';
-import * as Location from 'expo-location';
+import * as SQLite from 'expo-sqlite';
 
 
 import colors from '../../constants/Colors';
@@ -43,8 +45,11 @@ import { getNetwork } from '../../helpers/mobile-numbers';
 import { onlyUnique } from '../../helpers/helper-methods';
 import { Divider, Skeleton, SearchBar, Button } from '@rneui/themed';
 import { useDrawerStatus } from '@react-navigation/drawer';
+import { value } from 'react-native-extended-stylesheet';
 
-function FarmDetailsScreen({navigation, route}, props) {
+function AddInventoryScreen({navigation, route}, props) {
+  const db = SQLite.openDatabase('HurudzaTest.db');
+
     const drawerStatus = useDrawerStatus();
   const dispatch = useDispatch();
   const { type, message } = useSelector(state => state.alert);
@@ -55,8 +60,13 @@ const height = windowWidth*0.7
 
   const [index, setIndex] = useState(0);
   const [nestedScrollEnabled, setNestedScrollEnabled] = useState(false);
-  const [farmAvailable, setFarmAvailable]= useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [equipment, setEquipment] = useState([]);
+  const [itemName, setItemName] = useState(undefined);
+  const [itemCount, setItemCount] = useState(undefined);
+  const [itemModel, setItemModel] = useState(undefined);
+  const [itemSerial, setItemSerial] = useState(undefined);
+  const [isLoading, setIsLoading] = useState(true);
 
   const dropDownAlertRef = useRef(null);
 
@@ -72,10 +82,81 @@ const height = windowWidth*0.7
       dispatch(alertActions.clear());
     }
   }, [type, message]);
-
+  useEffect(() => {
+    db.transaction(tx => {
+        tx.executeSql(
+          'CREATE TABLE IF NOT EXISTS farm_equipment (' +
+          'id INTEGER PRIMARY KEY AUTOINCREMENT, ' +
+          'item_name TEXT NOT NULL, ' +
+          'model_type TEXT, ' +
+          'item_count INTEGER NOT NULL, ' +
+          'serial_number TEXT NOT NULL)'
+        );
+      });
+      db.transaction(tx => {
+        tx.executeSql('SELECT * FROM farm_equipment', null,
+          (txObj, resultSet) => setEquipment(resultSet.rows._array),
+          (txObj, error) => console.log(error)
+        );
+      });
+    setIsLoading(false);
+  }, []);
+  _handleAddItem =(event)=>{
+    if(itemName === undefined || itemName === null || itemName === ''){
+      dropDownAlertRef.current.alertWithType('error', 'Error', 'Please enter the item name');
+      return;
+    }
+    if(itemCount === undefined || itemCount === null || itemCount === ''){
+      dropDownAlertRef.current.alertWithType('error', 'Error', 'Please enter the item count');
+      return;
+    }
+    if(itemSerial === undefined || itemSerial === null || itemSerial === ''){
+      dropDownAlertRef.current.alertWithType('error', 'Error', 'Please enter the item serial number');
+      return;
+    }
+    if(itemModel === undefined || itemModel === null || itemModel === ''){
+      dropDownAlertRef.current.alertWithType('error', 'Error', 'Please enter the item model');
+      return;
+    }
+    db.transaction(tx => {
+      tx.executeSql(
+        'INSERT INTO farm_equipment (item_name, model_type, item_count, serial_number) VALUES (?, ?, ?, ?)',
+        [itemName, itemModel, itemCount, itemSerial],
+        (txObj, resultSet) => {
+          if (resultSet.rowsAffected > 0) {
+            console.log('Item added successfully');
+            setItemName(undefined);
+            setItemModel(undefined);
+            setItemCount(undefined);
+            setItemSerial(undefined);
+            db.transaction(tx => {
+              tx.executeSql('SELECT * FROM farm_equipment', null,
+                (txObj, resultSet) => setEquipment(resultSet.rows._array),
+                (txObj, error) => console.log(error)
+              );
+            });
+          } else {
+            console.log('Item could not be added');
+          }
+        },
+        (txObj, error) => console.log('Error', error)
+      );
+    });
+  }
+  const showEquipment = () => {
+    return equipment.map((item, index) => {
+      return (
+        <View key={index} style={styles.row}>
+          <Text>{item.item_name} {item.id}yacho</Text>
+          <Button title='Delete' onPress={() =>{}} />
+          <Button title='Update' onPress={() => {}} />
+        </View>
+      );
+    });
+  };
   return (
     <View style={styles.container}>
-      <StatusBar barStyle='dark-content' backgroundColor={Platform.OS === 'ios' ? colors.white : colors.white} />
+      <StatusBar barStyle='dark-content' backgroundColor={Platform.OS === 'ios' ? colors.white : colors.lightGray1} />
         <View style={styles.welcomeContainer}>
             <View style={{flexDirection:'row', alignItems:'center'}}>
                 <TouchableOpacity onPress={() => navigation.openDrawer()}>
@@ -85,81 +166,14 @@ const height = windowWidth*0.7
             </View>
         </View>
         <View style={styles.contentContainer}>
-        <Text style={styles.headerTitle}>Nyazura Adventist High School</Text>
-        <View style={{...styles.historyTitleContainer, backgroundColor:'transparent'}}>
+
+            <Text style={styles.headerTitle}>Enter Equipment/Machinery details</Text>
+            <View style={{backgroundColor:'#ffffff', paddingVertical:20, borderRadius:15, marginTop:30, overflow:'hidden', }}>
+                <View style={{paddingHorizontal:25
+                }}>
+                <View style={{...styles.historyTitleContainer, backgroundColor:''}}>
                   <View>
-                    <Text style={styles.historyTitle}>Farm Description</Text>
-                    <View style={{
-                      width: 20,
-                      height: 3,
-                      backgroundColor: '#52734D',
-                      marginHorizontal: 4,
-                      marginTop: 3
-                    }}></View>
-                  </View>
-                  
-                    <Text style={styles.historyTitleRight}></Text>
-                  
-                </View>
-            <View style={{alignItems:'center', width:'100%'}}>
-                
-            <View style={{flexDirection:'row', justifyContent:'space-around', marginBottom:30}}>
-                <View style={{width:'70%', backgroundColor:'transparent', flexDirection:'row', justifyContent:'space-between', paddingHorizontal:20, borderRightWidth:0.5, alignItems:'center'}}>
-                    <View style={{}}>
-                    <Text style={{fontSize:15, fontFamily:'montserrat-medium'}}>Very arable land with a dynamic structure, placed in a hilly area with the right soil type around for the available farms and people can till the land kusvikira vaneta, uye vasingachade kuita izvozvo.</Text>
-                    </View>
-
-                </View>
-                <View style={{width:'30%', backgroundColor:'transparent', flexDirection:'row', justifyContent:'space-between', paddingHorizontal:25}}>
-                    <View style={{}}>
-                    <Text style={{fontSize:40, fontFamily:'montserrat-medium'}}>30,54</Text>
-                    <Text style={{fontSize:19, fontFamily:'montserrat-regular'}}><Text style={{color:'#52734D'}}>hacteres</Text></Text>
-
-                    </View>
-
-
-                </View>
-            </View>
-            </View>
-            <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-            <View style={{...styles.history, width:'55%',borderColor:colors.inputBorderGray, borderWidth:1}}>
-                <View style={styles.historyTitleContainer}>
-                  <View>
-                    <Text style={styles.historyTitle}>Fields</Text>
-                    <View style={{
-                      width: 20,
-                      height: 3,
-                      backgroundColor: '#52734D',
-                      marginHorizontal: 4,
-                      marginTop: 3
-                    }}></View>
-                  </View>
-                  <TouchableOpacity onPress={() => goToTransactions()}>
-                    <Text style={styles.historyTitleRight}>View All</Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={{alignItems:'center', justifyContent:'center', height:windowWidth*0.5, marginTop:30}}><Text style={{fontFamily:'montserrat-medium', fontSize:16, marginTop:-100, textAlign:'center', marginHorizontal:30}}>No fields</Text></View>
-                <TouchableOpacity style={{position:'absolute', bottom:0, height:50, backgroundColor:'#52734D', width:'100%', alignItems:'center', justifyContent:'center', flexDirection:'row'}} onPress={()=>{navigation.navigate(Routes.AddFieldScreen)}}>
-                    <Icon name='plus' type='feather' color={'#ffffff'}/>
-                    <Text style={{fontFamily:'montserrat-semi', color:'#ffffff'}}> Add field</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={{width:'40%', backgroundColor:'#ffffff'}}>
-                <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-                <View style={{width:'45%', height:150, backgroundColor:'#52734D', alignItems:'center', justifyContent:'space-between', borderRadius:10, paddingVertical:20}}>
-                    <Text style={{fontSize:50, color:'white'}}>35</Text>
-                    <Text style={{fontSize:16, color:'white'}}>Projects</Text>
-                </View>
-                <View style={{width:'45%', height:150, backgroundColor:'#91C788', alignItems:'center', justifyContent:'space-between', borderRadius:10, paddingVertical:20}}>
-                    <Text style={{fontSize:50, color:'white'}}>3</Text>
-                    <Text style={{fontSize:16, color:'white', textAlign:'center'}}> completed</Text>
-                </View>
-                </View>
-                <View style={{height:20, backgroundColor:'transparent'}}/>
-                <View style={{...styles.history, flex:1, width:'100%', backgroundColor:'#DDFFBC'}}>
-                <View style={{...styles.historyTitleContainer, backgroundColor:'#DDFFBC'}}>
-                  <View>
-                    <Text style={styles.historyTitle}>This quarter</Text>
+                    <Text style={styles.historyTitle}>Item</Text>
                     <View style={{
                       width: 20,
                       height: 3,
@@ -169,56 +183,20 @@ const height = windowWidth*0.7
                     }}></View>
                   </View>
                     <Text style={styles.historyTitleRight}></Text>
-
                 </View>
-                <View style={{marginTop:15, paddingHorizontal:15, justifyContent:'space-between', flex:1, paddingBottom:15, backgroundColor:'#DDFFBC'}}>
-                    <View/>
-                    <Text style={{fontSize:30, fontFamily:'montserrat-medium', width:200}}>Made 3 requests for farming inputs</Text>
-                    <View style={{flexDirection:'row', alignItems:'center'}}>
-                    <CircularProgress
-                    value={33.33}
-                    activeStrokeWidth={8}
-                    progressValueColor={'transparent'}
-                    radius={15}
-                    activeStrokeColor={'green'}
-                    />
-<Text style={{fontFamily:'montserrat-regular', fontSize:15}}>   1/3 Completed</Text>
-                    </View>
-
-                </View>
-
-              </View>
-
-              </View>
-            </View>
-            <View style={{flexDirection:'row', justifyContent:'space-between', marginTop:30}}>
-            <View style={{...styles.history,borderColor:colors.inputBorderGray, borderWidth:1}}>
-                <View style={styles.historyTitleContainer}>
-                  <View>
-                    <Text style={styles.historyTitle}>Inventory</Text>
-                    <View style={{
-                      width: 20,
-                      height: 3,
-                      backgroundColor: '#52734D',
-                      marginHorizontal: 4,
-                      marginTop: 3
-                    }}></View>
-                  </View>
-                  <TouchableOpacity onPress={() => goToTransactions()}>
-                    <Text style={styles.historyTitleRight}>View All</Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={{alignItems:'center', justifyContent:'center', height:250, marginTop:30}}><Text style={{fontFamily:'montserrat-medium', fontSize:16, marginTop:-100, textAlign:'center', marginHorizontal:30}}>No inventory registered</Text></View>
-                <TouchableOpacity style={{position:'absolute', bottom:0, height:50, backgroundColor:'#52734D', width:'100%', alignItems:'center', justifyContent:'center', flexDirection:'row'}}>
-                    <Icon name='plus' type='feather' color={'#ffffff'}/>
-                    <Text style={{fontFamily:'montserrat-semi', color:'#ffffff'}}> Add inventory</Text>
-                </TouchableOpacity>
-              </View>
+                <Input
+              style={styles.textInput}
+              inputContainerStyle={styles.inputContainer}
+              containerStyle={styles.textInputContainer}
+              keyboardType='default'
+              returnKeyType={'done'}
+              onChangeText={(value) => setItemName(value)}
+              onSubmitEditing={(value) => setItemName(value)}
               
-              <View style={{...styles.history,borderColor:colors.inputBorderGray, borderWidth:1}}>
-                <View style={styles.historyTitleContainer}>
+            />
+                  <View style={{...styles.historyTitleContainer, backgroundColor:''}}>
                   <View>
-                    <Text style={styles.historyTitle}>Farm managers</Text>
+                    <Text style={styles.historyTitle}>Items count</Text>
                     <View style={{
                       width: 20,
                       height: 3,
@@ -227,17 +205,74 @@ const height = windowWidth*0.7
                       marginTop: 3
                     }}></View>
                   </View>
-                  <TouchableOpacity onPress={() => goToTransactions()} style={{}}>
-                    <Text style={styles.historyTitleRight}>View All</Text>
-                  </TouchableOpacity>
+                    <Text style={styles.historyTitleRight}></Text>
                 </View>
-                <View style={{alignItems:'center', justifyContent:'center', height:250, marginTop:30}}><Text style={{fontFamily:'montserrat-medium', fontSize:16, marginTop:-100, textAlign:'center', marginHorizontal:30}}>No farm managers registered</Text></View>
-                <TouchableOpacity style={{position:'absolute', bottom:0, height:50, backgroundColor:'#52734D', width:'100%', alignItems:'center', justifyContent:'center', flexDirection:'row'}}>
-                    <Icon name='plus' type='feather' color={'#ffffff'}/>
-                    <Text style={{fontFamily:'montserrat-semi', color:'#ffffff'}}> Add manager</Text>
-                </TouchableOpacity>
-              </View>
+                <Input
+              style={styles.textInput}
+              inputContainerStyle={styles.inputContainer}
+              containerStyle={styles.textInputContainer}
+              keyboardType='default'
+              returnKeyType={'done'}
+              cursorColor={'#52734D'}
+              onChangeText={(value) => setItemCount(value)}
+              onSubmitEditing={(value) => setItemCount(value)}
+              
+            />
+                 <View style={{...styles.historyTitleContainer, backgroundColor:''}}>
+                  <View>
+                    <Text style={styles.historyTitle}>Model (If applicable)</Text>
+                    <View style={{
+                      width: 20,
+                      height: 3,
+                      backgroundColor: '#52734D',
+                      marginHorizontal: 4,
+                      marginTop: 3
+                    }}></View>
+                  </View>
+                    <Text style={styles.historyTitleRight}></Text>
+                </View>
+                <Input
+              style={styles.textInput}
+              inputContainerStyle={styles.inputContainer}
+              containerStyle={{...styles.textInputContainer}}
+              keyboardType='default'
+              returnKeyType={'done'}
+              onChangeText={(value) => setItemModel(value)}
+              onSubmitEditing={(value) => setItemModel(value)}
+              cursorColor={'#52734D'}
+            />
+            <View style={{...styles.historyTitleContainer, backgroundColor:''}}>
+                  <View>
+                    <Text style={styles.historyTitle}>Serial number (If applicable)</Text>
+                    <View style={{
+                      width: 20,
+                      height: 3,
+                      backgroundColor: '#52734D',
+                      marginHorizontal: 4,
+                      marginTop: 3
+                    }}></View>
+                  </View>
+                    <Text style={styles.historyTitleRight}></Text>
+                </View>
+                <Input
+              style={styles.textInput}
+              inputContainerStyle={styles.inputContainer}
+              containerStyle={{...styles.textInputContainer, marginBottom:70}}
+              keyboardType='default'
+              returnKeyType={'done'}
+              onChangeText={(value) => setItemSerial(value)}
+              onSubmitEditing={(value) => setItemSerial(value)}
+              cursorColor={'#52734D'}
+
+              
+            />
             </View>
+            <TouchableOpacity style={{position:'absolute', bottom:0, height:60, backgroundColor:'#52734D', width:'100%', alignItems:'center', justifyContent:'center'}} onPress={()=>{_handleAddItem()}}>
+                <Text style={{color:'white', fontFamily:'montserrat-medium', fontSize:22, textAlign:'center'}}>Add item</Text>
+            </TouchableOpacity>
+            </View>
+            {showEquipment()}
+
 
             
         </View>
@@ -247,9 +282,16 @@ const height = windowWidth*0.7
 }
 
 const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    justifyContent: 'space-between',
+    margin: 8
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.lightGray1,
   },
   welcomeContainer: {
     paddingTop: Platform.OS === 'ios' ? Constants.statusBarHeight +20 : 30,
@@ -405,7 +447,6 @@ const styles = StyleSheet.create({
   historyTitleContainer: {
     flexDirection:'row',
     justifyContent:'space-between',
-    paddingHorizontal: 15,
     backgroundColor: 'white',
     paddingTop: 5,
     marginTop: 5,
@@ -489,7 +530,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   textInput: {
-    fontSize: 16
+    fontSize: 16,
+
   },
   pickerContainer: {
     borderWidth: 1,
@@ -517,6 +559,13 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     color: colors.black,
     marginBottom: 5
+  },
+  loginButton: {
+    width: Platform.OS === 'ios' ? 350 : 500
+  },
+  loginButtonText: {
+    fontWeight: '300',
+    fontSize: 14,
   },
 });
 
@@ -567,4 +616,4 @@ const pickerSelectStyles = StyleSheet.create({
   },
 });
 
-export default connectAlert(FarmDetailsScreen);
+export default connectAlert(AddInventoryScreen);
