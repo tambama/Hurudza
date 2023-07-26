@@ -41,7 +41,7 @@
         if(user.Identity != null && !string.IsNullOrEmpty(auth) && !user.Identity.IsAuthenticated )
         {
             var response = await ApiCall.Get<ApiResponse<UserViewModel>>(await ApiCall.GetHttpClient(), "authentication/getloggedinprofile/");
-            if (response.Status == (int)HttpStatusCode.OK)
+            if (response != null && response.Status == (int)HttpStatusCode.OK)
             {
                 (AuthStateProvider as CustomAuthStateProvider)?.SetAuthInfo(response.Result);
             }

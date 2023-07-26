@@ -9,6 +9,8 @@ using Hurudza.UI.Web.Cookie.Providers;
 using Microsoft.AspNetCore.Components.Authorization;
 using Syncfusion.Blazor;
 
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MjYwMjcxN0AzMjMyMmUzMDJlMzBJRFFyZlpJOVBsaVI1QmdwUmNKejBOd20xTXg4a01BRTJha0VLVnNPTWEwPQ==");
+
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");

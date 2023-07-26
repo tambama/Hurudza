@@ -1,2 +1,156 @@
 ﻿@page "/"
 @attribute [Authorize]
+
+@using SelectionMode = Syncfusion.Blazor.Grids.SelectionMode
+@using FilterType = Syncfusion.Blazor.Grids.FilterType
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Orders</h6>
+            </div>
+            <div class="card-body px-2 pt-0 pb-2">
+                <SfGrid
+                    DataSource="@Orders"
+                    @ref="Grid"
+                    AllowPaging="true"
+                    AllowExcelExport="true"
+                    AllowSorting="true"
+                    AllowMultiSorting="true"
+                    EnableStickyHeader="true"
+                    AllowResizing="true"
+                    AllowFiltering="true"
+                    AllowSelection="true"
+                    Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "ExcelExport", "Print", "Search" })"
+                    ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Edit", "Delete", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                    <GridPageSettings PageSize="12"></GridPageSettings>
+                    <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
+                    <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="Order"></GridEvents>
+                    <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog">
+                        <Template>
+                            @{
+                                var Order = (context as Order);
+                                <div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Order ID</label>
+                                            <SfNumericTextBox TValue="int?" FloatLabelType="FloatLabelType.Always" @bind-Value="@(Order.OrderID)" Enabled="@Data"></SfNumericTextBox>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Customer Name</label>
+                                            <SfAutoComplete ID="customerID" FloatLabelType="FloatLabelType.Always" TItem="Order" @bind-Value="@(Order.CustomerID)" TValue="string" DataSource="@GridData">
+                                                <AutoCompleteFieldSettings Value="CustomerID"></AutoCompleteFieldSettings>
+                                            </SfAutoComplete>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Order Date</label>
+                                            <SfDatePicker ID="OrderDate" FloatLabelType="FloatLabelType.Always" @bind-Value="@(Order.OrderDate)"></SfDatePicker>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </Template>
+                    </GridEditSettings>
+                    <GridColumns>
+                        <GridColumn Field=@nameof(Order.OrderID) HeaderText="Order ID" IsPrimaryKey="true" ValidationRules="@(new ValidationRules { Required = true })" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(Order.CustomerID) HeaderText="Customer Name" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(Order.OrderDate) HeaderText=" Order Date" EditType="EditType.DatePickerEdit" Visible="true" Format="d" TextAlign="TextAlign.Center" Width="130" Type="ColumnType.Date"></GridColumn>
+                        <GridColumn Field=@nameof(Order.Freight) HeaderText="Freight" Format="C2" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+                    </GridColumns>
+                </SfGrid>
+                <SfDialog @ref="Dialog" Width="250px" Visible="false" ShowCloseIcon="true" IsModal="true">
+                    <DialogEvents Closed="Closed"></DialogEvents>
+                    <DialogTemplates>
+                        <Header> Delete Record</Header>
+                        <Content> You are about to Delete a Record @SelectedData?</Content>
+                    </DialogTemplates>
+                    <DialogButtons>
+                        <DialogButton OnClick="@OkClick" Content="OK" IsPrimary="true"></DialogButton>
+                        <DialogButton OnClick="@CancelClick" Content="Cancel"></DialogButton>
+                    </DialogButtons>
+                </SfDialog>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code{
+    SfGrid<Order> Grid;
+    SfDialog Dialog;
+    public List<Order> Orders { get; set; }
+    public bool Enabled = true;
+    public bool Data = false;
+    public object SelectedData;
+    public bool flag = true;
+    public void Closed()
+    {
+        flag = true;
+    }
+
+    public List<Order> GridData = new()
+    {
+        new Order { OrderID = 10248, CustomerID = "VINET", Freight = 32.38, OrderDate = DateTime.Now.AddDays(-2) },
+        new Order { OrderID = 10249, CustomerID = "TOMSP", Freight = 11.61, OrderDate = DateTime.Now.AddDays(-5) },
+        new Order { OrderID = 10250, CustomerID = "HANAR", Freight = 65.83, OrderDate = DateTime.Now.AddDays(-12) },
+        new Order { OrderID = 10251, CustomerID = "VICTE", Freight = 41.34, OrderDate = DateTime.Now.AddDays(-18) },
+        new Order { OrderID = 10252, CustomerID = "SUPRD", Freight = 51.3, OrderDate = DateTime.Now.AddDays(-22) },
+        new Order { OrderID = 10253, CustomerID = "HANAR", Freight = 58.17, OrderDate = DateTime.Now.AddDays(-26) },
+    };
+
+    public void ActionBeginHandler(ActionEventArgs<Order> args)
+    {
+        if (args.RequestType == Syncfusion.Blazor.Grids.Action.Add)
+        {
+            Data = true;
+        }
+        
+        if (args.RequestType.ToString() == "FilterChoiceRequest")
+        {
+            args.FilterChoiceCount = 2;    //here you can override the default take count
+        }
+        
+        if (args.RequestType.ToString() == "Delete" && flag)
+        {
+            args.Cancel = true;  //Cancel default delete action.
+            Dialog.Show();
+            flag = false;
+        }
+    }
+    
+    public void RowSelectHandler(RowSelectEventArgs<Order> args)
+    {
+        SelectedData = args.Data.OrderID;
+    }
+    
+    private void OkClick()
+    {
+        Grid.DeleteRecord();   //Delete the record programmatically while clicking OK button.
+        Dialog.Hide();
+    }
+    
+    private void CancelClick()
+    {
+        Dialog.Hide();
+    }
+
+    protected override void OnInitialized()
+    {
+        Orders = Enumerable.Range(1, 75).Select(x => new Order
+        {
+            OrderID = 1000 + x,
+            CustomerID = (new string[] { "ALFKI", "ANANTR", "ANTON", "BLONP", "BOLID" })[new Random().Next(5)],
+            Freight = 2.1 * x,
+            OrderDate = DateTime.Now.AddDays(-x),
+        }).ToList();
+    }
+
+    public class Order
+    {
+        public int? OrderID { get; set; }
+        public string CustomerID { get; set; }
+        public DateTime? OrderDate { get; set; }
+        public double? Freight { get; set; }
+    }
+
+}
