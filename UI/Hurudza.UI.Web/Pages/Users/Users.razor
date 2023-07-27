@@ -1,11 +1,11 @@
 @page "/users"
-@using FilterType = Syncfusion.Blazor.Grids.FilterType
-@using Microsoft.AspNetCore.Http
-@using Hurudza.UI.Web.Cookie.Providers
+@using Action = Syncfusion.Blazor.Grids.Action
+@using Hurudza.Data.Models.Models
+@using System.Security.Claims
 @attribute [Authorize]
 
 @inject IApiCall ApiCall
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="row">
     <div class="col-12">
@@ -31,22 +31,46 @@
                     <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
                     <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="UserViewModel"></GridEvents>
                     <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog">
+                        <HeaderTemplate>
+                            @{
+                                var text = GetHeader((context as UserViewModel));
+                                <span>@text</span>
+                            }
+                        </HeaderTemplate>
+                        <Validator>
+                            <DataAnnotationsValidator></DataAnnotationsValidator>
+                        </Validator>
                         <Template>
                             @{
                                 var User = (context as UserViewModel);
                                 <div>
                                     <div class="form-row">
-                                        <div class="form-group">
-                                            <label>Order ID</label>
-                                            <SfTextBox ID="id" TValue="string" FloatLabelType="FloatLabelType.Always" @bind-Value="@(User.Id]])" Enabled="@Data"></SfTextBox>
-                                        </div>
+                                        <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(User.Id)"></SfTextBox>
                                         <div class="form-group">
                                             <label>Firstname</label>
-                                            <SfTextBox ID="firstname" TValue="string" FloatLabelType="FloatLabelType.Always" @bind-Value="@(User.Firstname)"></SfTextBox>
+                                            <SfTextBox ID="firstname" TValue="string" @bind-Value="@(User.Firstname)" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => User.Firstname" />
                                         </div>
                                         <div class="form-group">
-                                            <label>Order Date</label>
-                                            <SfDatePicker ID="OrderDate" FloatLabelType="FloatLabelType.Always" @bind-Value="@(User.OrderDate)"></SfDatePicker>
+                                            <label>Surname</label>
+                                            <SfTextBox ID="surname" TValue="string" @bind-Value="@(User.Surname)" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => User.Surname" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <SfTextBox ID="email" TValue="string" @bind-Value="@(User.Email)" Placeholder="e.g. your@email.com" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => User.Email" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Phone Number</label>
+                                            <SfTextBox ID="phone" TValue="string" @bind-Value="@(User.PhoneNumber)" Placeholder="e.g. 0771234567" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => User.PhoneNumber" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Role</label>
+                                            <SfDropDownList ID="role" TValue="string" TItem="RoleViewModel" @bind-Value="@(User.Role)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a role" DataSource="@Roles">
+                                                <DropDownListFieldSettings Value="Name" Text="Description"></DropDownListFieldSettings>
+                                            </SfDropDownList>
                                         </div>
                                     </div>
                                 </div>
@@ -54,10 +78,12 @@
                         </Template>
                     </GridEditSettings>
                     <GridColumns>
-                        <GridColumn Field=@nameof(.OrderID) HeaderText="Order ID" IsPrimaryKey="true" ValidationRules="@(new ValidationRules { Required = true })" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                        <GridColumn Field=@nameof(Order.CustomerID) HeaderText="Customer Name" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                        <GridColumn Field=@nameof(Order.OrderDate) HeaderText=" Order Date" EditType="EditType.DatePickerEdit" Visible="true" Format="d" TextAlign="TextAlign.Center" Width="130" Type="ColumnType.Date"></GridColumn>
-                        <GridColumn Field=@nameof(Order.Freight) HeaderText="Freight" Format="C2" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(UserViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                        <GridColumn Field=@nameof(UserViewModel.Surname) HeaderText="Surname" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(UserViewModel.Firstname) HeaderText="Firstname" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(UserViewModel.Email) HeaderText="Email" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(UserViewModel.PhoneNumber) HeaderText="Phone Number" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(UserViewModel.Role) HeaderText="Role" TextAlign="TextAlign.Center" Width="120"></GridColumn>
                     </GridColumns>
                 </SfGrid>
                 <SfDialog @ref="Dialog" Width="250px" Visible="false" ShowCloseIcon="true" IsModal="true">
@@ -79,47 +105,67 @@
 @code{
     SfGrid<UserViewModel> Grid;
     SfDialog Dialog;
-    public List<UserViewModel> SystemUsers { get; set; }
+    public List<UserViewModel> SystemUsers;
+    public List<RoleViewModel> Roles;
     public bool Enabled = true;
     public bool Data = false;
     public UserViewModel SelectedUser;
     public bool flag = true;
+    ClaimsPrincipal user;
+
+    public string GetHeader(UserViewModel Value)
+    {
+        if (string.IsNullOrEmpty(Value.Id))
+        {
+            return "Add New User";
+        }
+        else
+        {
+            return "Edit Details of " + Value.Fullname;
+        }
+    }
+
     public void Closed()
     {
         flag = true;
     }
 
-    public void ActionBeginHandler(ActionEventArgs<UserViewModel> args)
+    public async Task ActionBeginHandler(ActionEventArgs<UserViewModel> args)
     {
-        if (args.RequestType == Syncfusion.Blazor.Grids.Action.Add)
+        if (args.RequestType == Action.Add)
         {
             Data = true;
         }
-        
+
         if (args.RequestType.ToString() == "FilterChoiceRequest")
         {
-            args.FilterChoiceCount = 2;    //here you can override the default take count
+            args.FilterChoiceCount = 2; //here you can override the default take count
         }
-        
-        if (args.RequestType.ToString() == "Delete" && flag)
+
+        if (args.RequestType == Action.Delete && flag)
         {
-            args.Cancel = true;  //Cancel default delete action.
+            args.Cancel = true; //Cancel default delete action.
             Dialog.Show();
             flag = false;
         }
+
+        if (args.RequestType == Action.Save)
+        {
+            await SaveUser(args.Data);
+        }
     }
-    
+
     public void RowSelectHandler(RowSelectEventArgs<UserViewModel> args)
     {
         SelectedUser = args.Data;
     }
-    
+
     private void OkClick()
     {
-        Grid.DeleteRecord();   //Delete the record programmatically while clicking OK button.
+        Grid.DeleteRecord(); //Delete the record programmatically while clicking OK button.
         Dialog.Hide();
     }
-    
+
     private void CancelClick()
     {
         Dialog.Hide();
@@ -127,7 +173,21 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var user = (await (AuthenticationStateProvider as CustomAuthStateProvider)?.GetAuthenticationStateAsync()).User;
-        SystemUsers = (await ApiCall.Get<IEnumerable<UserViewModel>>(await ApiCall.GetHttpClient(), "api/users/getusers/")).ToList();
+        user = (await (AuthStateProvider as CustomAuthStateProvider)?.GetAuthenticationStateAsync()).User;
+
+        SystemUsers = (await ApiCall.Get<IEnumerable<UserViewModel>>(await ApiCall.GetHttpClient(), "users/getusers/")).ToList();
+
+        Roles = (await ApiCall.Get<IEnumerable<RoleViewModel>>(await ApiCall.GetHttpClient(), "roles/getroles")).ToList();
     }
+
+    private async Task SaveUser(UserViewModel user)
+    {
+        var response = await ApiCall.Add<UserViewModel>(await ApiCall.GetHttpClient(), "authentication/register", user);
+
+        if (response.Status == (int)HttpStatusCode.OK)
+        {
+            
+        }
+    }
+
 }

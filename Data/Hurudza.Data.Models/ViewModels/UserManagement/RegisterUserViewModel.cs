@@ -17,7 +17,7 @@ public class RegisterUserViewModel
     [Display(Name = "Mobile Number")]
     [RegularExpression(@"^((00|\+)?(263))?0?7(1|3|7|8)[0-9]{7}$", ErrorMessage = "Enter a Zimbabwean Number")]
     public string PhoneNumber { get; set; }
-    public Role Role { get; set; }
+    public string Role { get; set; }
     [DataType(DataType.EmailAddress)]
     [Display(Name = "Email (optional)")]
     public string Email { get; set; }

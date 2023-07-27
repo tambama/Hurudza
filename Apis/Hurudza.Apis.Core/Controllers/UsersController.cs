@@ -147,13 +147,10 @@ namespace Hurudza.Apis.Core.Controllers
                     .FirstOrDefaultAsync(u => u.Id == user.Id)));
             }
 
-            if (vm.Role == Role.Administrator)
-            {
-                var role = await _userManager.AddToRoleAsync(user, vm.Role.GetDescription());
+            var role = await _userManager.AddToRoleAsync(user, vm.Role);
 
-                if (!role.Succeeded)
-                    throw new CustomException($"Failed to add {user.UserName} to role {vm.Role.GetDescription()}");
-            }
+            if (!role.Succeeded)
+                throw new CustomException($"Failed to add {user.UserName} to role {vm.Role}");
 
             var profile =
                 await _context.UserProfiles.FirstOrDefaultAsync(p =>
@@ -178,7 +175,7 @@ namespace Hurudza.Apis.Core.Controllers
                 {
                     FarmId = vm.FarmId,
                     UserId = user.Id,
-                    Role = vm.Role.GetDescription()
+                    Role = vm.Role
                 };
 
                 await _context.AddAsync(profile);
