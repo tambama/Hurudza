@@ -109,9 +109,9 @@ namespace Hurudza.Apis.Core.Controllers
 
         // POST api/users
         [HttpPost("", Name = nameof(CreateUser))]
-        public async Task<IActionResult> CreateUser([FromBody] RegisterUserViewModel vm)
+        public async Task<IActionResult> CreateUser([FromBody] UserViewModel vm)
         {
-            var user = await _userManager.FindByNameAsync(vm.UserName);
+            var user = await _userManager.FindByNameAsync(vm.Email);
 
             var hasAccount = user != null;
 
@@ -119,7 +119,7 @@ namespace Hurudza.Apis.Core.Controllers
             {
                 user = new ApplicationUser
                 {
-                    UserName = vm.UserName,
+                    UserName = vm.Email,
                     Firstname = vm.Firstname,
                     Surname = vm.Surname,
                     Email = vm.Email,
@@ -314,7 +314,7 @@ namespace Hurudza.Apis.Core.Controllers
 
         // PUT api/Users/5
         [HttpPut("{id}", Name = nameof(UpdateUser))]
-        public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserViewModel vm)
+        public async Task<IActionResult> UpdateUser(string id, [FromBody] UserViewModel vm)
         {
             if (id != vm.Id) return BadRequest();
 
@@ -326,16 +326,24 @@ namespace Hurudza.Apis.Core.Controllers
             user.Email = vm.Email;
             user.Firstname = vm.Firstname;
             user.Surname = vm.Surname;
+            user.UserName = vm.Email;
 
             await _userManager.UpdateAsync(user);
+
+            if (!string.IsNullOrEmpty(vm.Password))
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user).ConfigureAwait(false);
+
+                await _userManager.ResetPasswordAsync(user, token, vm.Password);
+            }
 
             var roles = await _userManager.GetRolesAsync(user);
 
             await _userManager.RemoveFromRolesAsync(user, roles);
 
-            await _userManager.AddToRoleAsync(user, vm.Role.GetDescription());
+            await _userManager.AddToRoleAsync(user, vm.Role);
 
-            return Ok(new ApiOkResponse(user));
+            return Ok(new ApiOkResponse(user, "User updated successfully"));
         }
         
         // PUT api/Users/5
@@ -544,7 +552,7 @@ namespace Hurudza.Apis.Core.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(user);
+            return Ok(new ApiOkResponse(user, $"{user.Fullname} was deleted successfully"));
         }
 
         // DELETE api/users/5

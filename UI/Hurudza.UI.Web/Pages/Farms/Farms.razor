@@ -1,0 +1,350 @@
+@page "/farms"
+@attribute [Authorize]
+
+@using Hurudza.Data.Models.Models
+@using Hurudza.Data.Models.ViewModels.Core
+@using Hurudza.Data.Models.Enums
+@using Region = Hurudza.Data.Models.Enums.Region
+@inject IApiCall ApiCall
+@inject AuthenticationStateProvider AuthStateProvider
+
+<Toast @ref="Alert"/>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Farms</h6>
+            </div>
+            <div class="card-body px-2 pt-0 pb-2">
+                <SfGrid
+                    DataSource="@FarmList"
+                    @ref="Grid"
+                    AllowPaging="true"
+                    AllowExcelExport="true"
+                    AllowSorting="true"
+                    AllowMultiSorting="true"
+                    EnableStickyHeader="true"
+                    AllowResizing="true"
+                    AllowFiltering="true"
+                    AllowSelection="true"
+                    Toolbar="@(new List<string>() { "Add", "ExcelExport", "Print", "Search" })"
+                    ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Edit", "Delete", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                    <GridPageSettings PageSize="12"></GridPageSettings>
+                    <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
+                    <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="FarmViewModel"></GridEvents>
+                    <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog">
+                        <HeaderTemplate>
+                            @{
+                                var text = GetHeader((context as FarmViewModel));
+                                <span>@text</span>
+                            }
+                        </HeaderTemplate>
+                        <Validator>
+                            <DataAnnotationsValidator></DataAnnotationsValidator>
+                        </Validator>
+                        <Template>
+                            @{
+                                var Farm = (context as FarmViewModel);
+                                <div>
+                                    <div class="form-row">
+                                        <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(Farm.Id)"></SfTextBox>
+                                        <div class="form-group">
+                                            <label>Name</label>
+                                            <SfTextBox ID="name" TValue="string" @bind-Value="@(Farm.Name)" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => Farm.Name"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Address</label>
+                                            <SfTextBox ID="surname" TValue="string" @bind-Value="@(Farm.Address)" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => Farm.Address"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <SfTextBox ID="email" TValue="string" @bind-Value="@(Farm.Email)" Placeholder="e.g. your@email.com" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => Farm.Email"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Phone Number</label>
+                                            <SfTextBox ID="phone" TValue="string" @bind-Value="@(Farm.PhoneNumber)" Placeholder="e.g. 0771234567" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => Farm.PhoneNumber"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Size (Hectares)</label>
+                                            <SfNumericTextBox ID="size" TValue="float" @bind-Value="@(Farm.Size)" Decimals=3 Format="n3" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                                            <ValidationMessage For="() => Farm.Size"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Province</label>
+                                            <SfComboBox ID="province" TValue="int?" TItem="Province" @bind-Value="@(Farm.ProvinceId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Province" DataSource="@_provinces">
+                                                <ComboBoxEvents TItem="Province" TValue="int?" ValueChange="@ProvinceChangeHandler"></ComboBoxEvents>
+                                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                                            </SfComboBox>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>District</label>
+                                            <SfComboBox ID="district" TValue="int?" TItem="District" @bind-Value="@(Farm.DistrictId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a District" DataSource="@_districts" Query="@DistrictQuery">
+                                                <ComboBoxEvents TItem="District" TValue="int?" ValueChange="@DistrictChangeHandler"></ComboBoxEvents>
+                                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                                            </SfComboBox>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Local Authority</label>
+                                            <SfComboBox ID="localAuthority" TValue="int?" TItem="LocalAuthority" @bind-Value="@(Farm.LocalAuthorityId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Local Authority" DataSource="@_localAuthorities" Query="@LocalAuthorityQuery">
+                                                <ComboBoxEvents TItem="LocalAuthority" TValue="int?" ValueChange="@LocalAuthorityChangeHandler"></ComboBoxEvents>
+                                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                                            </SfComboBox>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Ward</label>
+                                            <SfComboBox ID="ward" TValue="int?" TItem="Ward" @bind-Value="@(Farm.WardId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Ward" DataSource="@_wards" Query="@WardQuery">
+                                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                                            </SfComboBox>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Region</label>
+                                            <SfDropDownList ID="region" TValue="Region" TItem="RegionModel" @bind-Value="@(Farm.Region)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Region" DataSource="@_regions">
+                                                <DropDownListFieldSettings Value="Region" Text="Name"></DropDownListFieldSettings>
+                                            </SfDropDownList>
+                                        </div>
+                                        <div class="form-group">
+                                            <SfSpinner @ref="SaveSpinner"></SfSpinner>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </Template>
+                    </GridEditSettings>
+                    <GridColumns>
+                        <GridColumn Field=@nameof(FarmViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                        <GridColumn Field=@nameof(FarmViewModel.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                        <GridColumn Field=@nameof(FarmViewModel.Address) HeaderText="Address" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                        <GridColumn Field=@nameof(FarmViewModel.PhoneNumber) HeaderText="Phone Number" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                        <GridColumn Field=@nameof(FarmViewModel.Email) HeaderText="Email" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                        <GridColumn Field=@nameof(FarmViewModel.Size) HeaderText="Size (Ha)" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn HeaderText="Actions" Width="150">
+                            <GridCommandColumns>
+                                <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-edit", CssClass = "e-flat" })"></GridCommandColumn>
+                                <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-delete", CssClass = "e-flat" })"></GridCommandColumn>
+                            </GridCommandColumns>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+                <SfDialog @ref="Dialog" Width="250px" Visible="false" ShowCloseIcon="true" IsModal="true">
+                    <DialogEvents Closed="Closed"></DialogEvents>
+                    <DialogTemplates>
+                        <Header> Delete Record</Header>
+                        <Content>
+                            You are about to Delete a Record @SelectedFarm.Name?
+                            <div class="form-group">
+                                <SfSpinner @ref="DeleteSpinner"></SfSpinner>
+                            </div>
+                        </Content>
+                    </DialogTemplates>
+                    <DialogButtons>
+                        <DialogButton OnClick="@OkClick" Content="OK" IsPrimary="true"></DialogButton>
+                        <DialogButton OnClick="@CancelClick" Content="Cancel"></DialogButton>
+                    </DialogButtons>
+                </SfDialog>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code{
+    SfGrid<FarmViewModel> Grid;
+    SfDialog Dialog;
+    SfSpinner SaveSpinner;
+    SfSpinner DeleteSpinner;
+    Toast Alert;
+    List<FarmViewModel> FarmList;
+    List<Province> _provinces = new List<Province>();
+    List<District> _districts = new List<District>();
+    List<LocalAuthority> _localAuthorities = new List<LocalAuthority>();
+    List<Ward> _wards = new List<Ward>();
+    List<Data.Models.Models.RegionModel> _regions = Enum.GetValues<Region>().Select(x => new Data.Models.Models.RegionModel(x)).ToList();
+    public Query DistrictQuery { get; set; } = null;
+    public Query LocalAuthorityQuery { get; set; } = null;
+    public Query WardQuery { get; set; } = null;
+    bool Enabled = true;
+    bool Data = false;
+    FarmViewModel SelectedFarm;
+    bool flag = true;
+    ClaimsPrincipal Farm;
+    bool ShowSaveSpinner { get; set; } = false;
+
+    private string GetHeader(FarmViewModel Value)
+    {
+        if (string.IsNullOrEmpty(Value.Id))
+        {
+            return "Add New Farm";
+        }
+        else
+        {
+            return "Edit Details of " + Value.Name;
+        }
+    }
+
+    private void Closed()
+    {
+        flag = true;
+    }
+
+    private async Task ActionBeginHandler(ActionEventArgs<FarmViewModel> args)
+    {
+        switch (args.RequestType)
+        {
+            case Action.FilterChoiceRequest:
+                args.FilterChoiceCount = 100;
+                break;
+            case Action.Add:
+                Data = true;
+                break;
+            case Action.Delete when flag:
+                args.Cancel = true;
+                Dialog.Show();
+                flag = false;
+                break;
+            case Action.Save:
+            {
+                if (SaveSpinner.Visible)
+                {
+                    args.Cancel = true;
+                    break;
+                }
+
+                await SaveSpinner.ShowAsync();
+                if (!string.IsNullOrEmpty(args.Data.Id))
+                {
+                    if (!await UpdateFarm(args.Data))
+                    {
+                        args.Cancel = true;
+                    }
+                }
+                else
+                {
+                    if (!await SaveFarm(args.Data))
+                    {
+                        args.Cancel = true;
+                    }
+                }
+
+
+                await SaveSpinner.HideAsync();
+                break;
+            }
+        }
+    }
+
+    private void RowSelectHandler(RowSelectEventArgs<FarmViewModel> args)
+    {
+        SelectedFarm = args.Data;
+    }
+
+    private async Task OkClick()
+    {
+        await DeleteSpinner.ShowAsync();
+        if (await DeleteFarm(SelectedFarm))
+        {
+            await Grid.DeleteRecordAsync();
+            await Dialog.HideAsync();
+        }
+        await DeleteSpinner.HideAsync();
+    }
+
+    private async Task CancelClick()
+    {
+        await Dialog.HideAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        FarmList = (await ApiCall.Get<IEnumerable<FarmViewModel>>(await ApiCall.GetHttpClient(), "Farms/getFarms/")).ToList();
+
+        _provinces = (await ApiCall.Get<IEnumerable<Province>>(await ApiCall.GetHttpClient(), "provinces/getprovinces")).ToList();
+        _districts = (await ApiCall.Get<IEnumerable<District>>(await ApiCall.GetHttpClient(), "districts/getdistricts")).ToList();
+        _localAuthorities = (await ApiCall.Get<IEnumerable<LocalAuthority>>(await ApiCall.GetHttpClient(), "localAuthorities/getLocalAuthorities")).ToList();
+        _wards = (await ApiCall.Get<IEnumerable<Ward>>(await ApiCall.GetHttpClient(), "wards/getWards")).ToList();
+    }
+
+    private async Task<bool> SaveFarm(FarmViewModel model)
+    {
+        var response = await ApiCall.Add(await ApiCall.GetHttpClient(), "farms/createfarm", model);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to save Farm, please try again!", showTitle: true, toastType: ToastType.Danger);
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        }
+
+        return false;
+    }
+
+    private async Task<bool> UpdateFarm(FarmViewModel model)
+    {
+        var response = await ApiCall.Update<FarmViewModel>(await ApiCall.GetHttpClient(), "Farms/updateFarm", model.Id, model);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to update Farm, please try again!", showTitle: true, toastType: ToastType.Danger);
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        }
+
+        return false;
+    }
+
+    private async Task<bool> DeleteFarm(FarmViewModel model)
+    {
+        var response = await ApiCall.Remove<FarmViewModel>(await ApiCall.GetHttpClient(), "Farms/deleteFarm", model.Id);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to delete Farm, please try again!", showTitle: true, toastType: ToastType.Danger);
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        }
+
+        return false;
+    }
+
+    private void ProvinceChangeHandler(ChangeEventArgs<int?, Province> args)
+    {
+        DistrictQuery = new Query().Where(new WhereFilter() { Field = "ProvinceId", Operator = "equal", value = args.Value, IgnoreCase = false, IgnoreAccent = false });
+        WardQuery = new Query().Where(new WhereFilter() { Field = "ProvinceId", Operator = "equal", value = args.Value, IgnoreCase = false, IgnoreAccent = false });
+    }
+
+    private void DistrictChangeHandler(ChangeEventArgs<int?, District> args)
+    {
+        DistrictQuery = new Query().Where(new WhereFilter() { Field = "DistrictId", Operator = "equal", value = args.Value, IgnoreCase = false, IgnoreAccent = false });
+        WardQuery = new Query().Where(new WhereFilter() { Field = "DistrictId", Operator = "equal", value = args.Value, IgnoreCase = false, IgnoreAccent = false });
+    }
+
+    private void LocalAuthorityChangeHandler(ChangeEventArgs<int?, LocalAuthority> args)
+    {
+        LocalAuthorityQuery = new Query().Where(new WhereFilter() { Field = "LocalAuthorityId", Operator = "equal", value = args.Value, IgnoreCase = false, IgnoreAccent = false });
+    }
+
+}

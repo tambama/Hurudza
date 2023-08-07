@@ -309,25 +309,39 @@ namespace Hurudza.Apis.Core.Controllers
         }
 
         [HttpPost(Name = nameof(Register)), AllowAnonymous]
-        public async Task<IActionResult> Register([FromBody] RegisterUserViewModel model)
+        public async Task<IActionResult> Register([FromBody] UserViewModel model)
         {
-            var userExists = await _userManager.FindByNameAsync(model.UserName);
+            var userExists = await _userManager.FindByNameAsync(model.Email);
             if (userExists != null)
                 return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, "User already exists!"));
 
+            var role = await _roleManager.FindByNameAsync(model.Role ?? string.Empty);
+            if (role == null)
+                return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, "Role does not exist!"));
+            
             ApplicationUser user = new ApplicationUser()
             {
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.UserName,
+                UserName = model.Email,
                 Firstname = model.Firstname,
                 Surname = model.Surname
             };
+            
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse((int)HttpStatusCode.InternalServerError, "User creation failed! Please check user details and try again."));
+            
+            var addedRole = await _userManager.AddToRoleAsync(user, role.Name);
+            if (!addedRole.Succeeded)
+            {
+                return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, "Registered user but failed to assign role. Contact Admin"));
+            }
 
-            return Ok(new ApiResponse((int)HttpStatusCode.OK, "User created successfully!"));
+            var newUser = await _context.Users.ProjectTo<UserViewModel>(_configurationProvider)
+                .FirstOrDefaultAsync(u => u.UserName == user.UserName).ConfigureAwait(false);
+
+            return Ok(new ApiOkResponse(newUser, "User created successfully!"));
         }
     }
 }

@@ -64,6 +64,9 @@ try
         .AddEntityFrameworkStores<HurudzaDbContext>()
         .AddDefaultTokenProviders();
     
+    builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
+        opt.TokenLifespan = TimeSpan.FromMinutes(5));
+    
     // Adding Authentication  
     builder.Services.AddAuthentication(options =>
         {
@@ -167,7 +170,7 @@ try
     var provider = scope.ServiceProvider.GetRequiredService<IApiVersionDescriptionProvider>();
     var context = scope.ServiceProvider.GetRequiredService<HurudzaDbContext>();
     
-    InitializeDatabase(app, context);
+    await InitializeDatabase(app, context);
     
     app.UseCors("HurudzaCors");
     
@@ -204,15 +207,21 @@ finally
     Log.CloseAndFlush();
 }
 
-static void InitializeDatabase(WebApplication app, HurudzaDbContext dbContext)
+static async Task InitializeDatabase(WebApplication app, HurudzaDbContext dbContext)
 {
     using var serviceScope = app.Services.CreateScope();
     var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
     dbContext.Database.Migrate();
+    
     SeedClaimsData.SeedClaims(dbContext);
     SeedRoleData.SeedRoles(dbContext, roleManager);
     SeedSendGridData.SeedSendGridTemplates(dbContext);
     SeedUserData.SeedUsers(dbContext, roleManager, userManager);
+    await SeedCropsData.SeedCrops(dbContext);
+    if (Convert.ToBoolean(app.Configuration["Seed:AdminStructure"]))
+    {
+        await SeedAdministrativeStructureData.SeedAdministrativeStructure(dbContext);
+    }
 }

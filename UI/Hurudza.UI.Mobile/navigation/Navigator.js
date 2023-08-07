@@ -13,16 +13,11 @@ const Navigator = () => {
     return (
         <>
         <Stack.Navigator>
-            {
-                user ===1 ?
                 <>
                 <Stack.Screen name={Routes.Auth} component={AuthNavigator} options={{headerShown: false}} />
                 </>
-                    :
-                <>
-                <Stack.Screen name={Routes.Main} component={MainTabNavigator} options={{headerShown:false}} />
-                </>
-            }
+            
+            
         </Stack.Navigator>
         </>
     )

@@ -1,10 +1,58 @@
-<SfToast ID="toast_default" @ref="ToastObj" Title="Adaptive Tiles Meeting" Content="@ToastContent" Timeout="5000" Icon="e-meeting">
-    <ToastPosition X="@ToastPosition"></ToastPosition>
+<SfToast 
+    ID="toast_default" 
+    @ref="ToastObj"
+    Content="@ToastContent" 
+    Timeout="5000"
+    ShowCloseButton="true" 
+    ProgressDirection="ProgressDirection.RTL" 
+    NewestOnTop="true" 
+    ShowProgressBar="true">
+    <ToastPosition X="@ToastPositionX" Y="@ToastPositionY"></ToastPosition>
 </SfToast>
+
+<ToastCustom @ref="_toastCustom"/>
 
 @code
 {
     SfToast ToastObj;
-    private string ToastPosition = "Right";
-    private string ToastContent = "Conference Room 01 / Building 135 10:00 AM-10:30 AM";
+    ToastCustom _toastCustom;
+    private string ToastPositionX = "Right";
+    private string ToastPositionY = "Bottom";
+    private string ToastContent;
+
+    public void Show(
+        string content, 
+        bool showTitle = false,
+        string? title = null, 
+        string positionX = "Right", 
+        string positionY = "Bottom", 
+        ToastType toastType = ToastType.Default,
+        bool showProgressBar = false
+    )
+    {
+        if (toastType != ToastType.Default)
+        {
+            _toastCustom.Show(content, showTitle, title, positionX, positionY, toastType, showProgressBar);
+        }
+        else
+        {
+            ToastPositionX = positionX;
+            ToastPositionY = positionY;
+            ToastObj.ShowProgressBar = showProgressBar;
+
+            if (showTitle && string.IsNullOrEmpty(title))
+            {
+                ToastObj.Title = "Alert!";
+            }
+            
+            if (!string.IsNullOrEmpty(title))
+            {
+                ToastObj.Title = title;
+            }
+
+            ToastObj.Content = content;
+            
+            ToastObj.ShowAsync();
+        }
+    }
 }

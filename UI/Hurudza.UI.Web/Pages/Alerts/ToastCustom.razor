@@ -1,0 +1,118 @@
+<SfToast
+    ID="toast_custom"
+    @ref="ToastObj"
+    Content="@ToastContent"
+    Timeout="50000"
+    ShowCloseButton="true"
+    ProgressDirection="ProgressDirection.RTL"
+    ShowProgressBar="false"
+    NewestOnTop="true">
+    <ToastPosition X="@ToastPositionX" Y="@ToastPositionY"></ToastPosition>
+</SfToast>
+
+@code
+{
+    SfToast ToastObj;
+    private string ToastPositionX = "Right";
+    private string ToastPositionY = "Bottom";
+    private string ToastContent;
+    private string ContainerClass = "light";
+    private string TitleClass = "toast-title-dark";
+    private string MessageClass = "toast-message-dark";
+
+    public void Show(
+        string content,
+        bool showTitle = false,
+        string? title = null,
+        string positionX = "Right",
+        string positionY = "Bottom",
+        ToastType toastType = ToastType.Info,
+        bool showProgressBar = false
+        )
+    {
+        ToastPositionX = positionX;
+        ToastPositionY = positionY;
+        ToastObj.ShowProgressBar = showProgressBar;
+        ToastObj.Content = content;
+
+        if (showTitle && string.IsNullOrEmpty(title))
+        {
+            ToastObj.Title = toastType switch
+            {
+                ToastType.Danger => "Error!",
+                ToastType.Warning => "Warning!",
+                ToastType.Success => "Success!",
+                ToastType.Info => "Info!",
+                _ => "Alert!"
+                };
+        }
+
+        if (!string.IsNullOrEmpty(title))
+        {
+            ToastObj.Title = title;
+        }
+
+        ToastObj.CssClass = toastType switch
+        {
+            ToastType.Danger => "danger",
+            ToastType.Warning => "warning",
+            ToastType.Success => "success",
+            ToastType.Info => "info",
+            ToastType.Dark => "dark",
+            ToastType.Light => "light",
+            ToastType.White => "white",
+            _ => "white"
+            };
+
+        ToastObj.ShowAsync();
+    }
+}
+
+<style>
+    /* To change color, font family and font size */
+    .e-toast-container .e-toast .e-toast-message .e-toast-title {
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    
+    /* To change color, font family and font size */
+    .e-toast-container .e-toast .e-toast-message .e-toast-content {
+        color: white;
+        font-size: 13px;
+        font-weight: normal;
+    }
+    
+    /* To change icon color */
+    .e-toast-container .e-toast .e-toast-icon {
+        color: white;
+    }
+    
+    .primary {
+        background-color: #007bff!important;
+    }
+    .secondary {
+        background-color: #6c757d!important;
+    }
+    .success {
+        background-color: #28a745!important;
+    }
+    .danger {
+        background-color: #dc3545!important;
+    }
+    .warning {
+        background-color: #ffc107!important;
+    }
+    .info {
+        background-color: #17a2b8!important;
+    }
+    .light {
+        background-color: #f8f9fa!important;
+    }
+    .dark {
+        background-color: #343a40!important;
+    }
+    .white {
+        background-color: #fff!important;
+    }
+</style>
