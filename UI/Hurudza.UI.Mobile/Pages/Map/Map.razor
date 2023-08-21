@@ -1,0 +1,24 @@
+@page "/map"
+@using Hurudza.UI.Mobile.Services.Interfaces
+@using Hurudza.UI.Shared.Services.Interfaces
+
+@inject IJSRuntime JS
+@inject ILocationService LocationService
+@inject IMapBoxJsInterop MapBoxJsInterop
+
+<div id="map" style="@PageStyle">Loading...</div>
+
+@code {
+    public string PageStyle => $"width:{DeviceDisplay.Current.MainDisplayInfo.Width / DeviceDisplay.Current.MainDisplayInfo.Density}px;height:{DeviceDisplay.Current.MainDisplayInfo.Height / DeviceDisplay.Current.MainDisplayInfo.Density}px";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var location = await LocationService.GetCurrentLocation();
+            double[] array = new[] { location.Longitude, location.Latitude };
+            await JS.InvokeVoidAsync("loadMap", array);
+        }
+    }
+
+}

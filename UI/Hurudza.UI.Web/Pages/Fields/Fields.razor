@@ -5,6 +5,7 @@
 @using Hurudza.UI.Web.Pages.Farms
 @using Hurudza.Data.Models.ViewModels.Core
 @using Hurudza.Data.Models.Models
+@using Hurudza.UI.Shared.Api.Interfaces
 @inject IApiCall ApiCall
 @inject NavigationManager Navigation
 
@@ -249,7 +250,7 @@
 
     private async Task<bool> SaveField(FieldViewModel model)
     {
-        var response = await ApiCall.Add(await ApiCall.GetHttpClient(), "fields/createfield", model);
+        var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldViewModel>, FieldViewModel>(await ApiCall.GetHttpClient(), "fields/createfield", model);
 
         if (response == null)
         {
@@ -270,7 +271,7 @@
 
     private async Task<bool> UpdateField(FieldViewModel model)
     {
-        var response = await ApiCall.Update<FieldViewModel>(await ApiCall.GetHttpClient(), "Fields/updateField", model.Id, model);
+        var response = await ApiCall.Update<UI.Shared.Models.ApiResponse<FieldViewModel>, FieldViewModel>(await ApiCall.GetHttpClient(), "Fields/updateField", model.Id, model);
 
         if (response == null)
         {
@@ -291,7 +292,7 @@
 
     private async Task<bool> DeleteField(FieldViewModel model)
     {
-        var response = await ApiCall.Remove<FieldViewModel>(await ApiCall.GetHttpClient(), "Fields/deleteField", model.Id);
+        var response = await ApiCall.Remove<UI.Shared.Models.ApiResponse<FieldViewModel>>(await ApiCall.GetHttpClient(), "Fields/deleteField", model.Id);
 
         if (response == null)
         {

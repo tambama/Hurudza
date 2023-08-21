@@ -4,21 +4,21 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="apple-touch-icon" sizes="76x76" href="img/apple-icon.png">
-    <link rel="icon" type="image/png" href="img/favicon.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="_content/Hurudza.UI.Shared/img/apple-icon.png">
+    <link rel="icon" type="image/png" href="_content/Hurudza.UI.Shared/img/favicon.png">
     <title>Hurudza</title>
     <base href="/" />
     <!--     Fonts and icons     -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
     <!-- Nucleo Icons -->
-    <link href="css/nucleo-icons.css" rel="stylesheet" />
-    <link href="css/nucleo-svg.css" rel="stylesheet" />
+    <link href="_content/Hurudza.UI.Shared/css/nucleo-icons.css" rel="stylesheet" />
+    <link href="_content/Hurudza.UI.Shared/css/nucleo-svg.css" rel="stylesheet" />
     <!-- Font Awesome Icons -->
     <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-    <link href="css/nucleo-svg.css" rel="stylesheet" />
+    <link href="_content/Hurudza.UI.Shared/css/nucleo-svg.css" rel="stylesheet" />
     <!-- CSS Files -->
-    <link id="pagestyle" href="css/soft-ui-dashboard.css?v=1.0.8" rel="stylesheet" />
-    <link href="css/app.css" rel="stylesheet" />
+    <link id="pagestyle" href="_content/Hurudza.UI.Shared/css/soft-ui-dashboard.css?v=1.0.8" rel="stylesheet" />
+    <link href="_content/Hurudza.UI.Shared/css/app.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="Hurudza.UI.Web.styles.css" rel="stylesheet" />
     <link href="_content/Syncfusion.Blazor.Themes/bootstrap5.css" rel="stylesheet" />
@@ -44,10 +44,10 @@
 <script src="_framework/blazor.webassembly.js"></script>
 
 <!--   Core JS Files   -->
-<script src="js/core/popper.min.js"></script>
-<script src="js/core/bootstrap.min.js"></script>
-<script src="js/plugins/perfect-scrollbar.min.js"></script>
-<script src="js/plugins/smooth-scrollbar.min.js"></script>
+<script src="_content/Hurudza.UI.Shared/js/core/popper.min.js"></script>
+<script src="_content/Hurudza.UI.Shared/js/core/bootstrap.min.js"></script>
+<script src="_content/Hurudza.UI.Shared/js/plugins/perfect-scrollbar.min.js"></script>
+<script src="_content/Hurudza.UI.Shared/js/plugins/smooth-scrollbar.min.js"></script>
 <script>
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {
@@ -58,18 +58,18 @@
     }
 </script>
 <!-- Github buttons -->
-<script async defer src="https://buttons.github.io/buttons.js"></script>
+<script async defer src="_content/Hurudza.UI.Shared/https://buttons.github.io/buttons.js"></script>
 <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
-<script src="js/soft-ui-dashboard.min.js?v=1.0.7"></script>
+<script src="_content/Hurudza.UI.Shared/js/soft-ui-dashboard.min.js?v=1.0.7"></script>
 <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
 <script>
-    function loadMap(){
+    function loadMap(center){
         mapboxgl.accessToken = 'pk.eyJ1IjoicGVuaWVsdCIsImEiOiJjbGt3Y2gxM3YweWtrM3FwbW9jaWNkMWVyIn0.cDAgTWNXN-TVJROjgoWQiw';
-        console.log('Tirimo muma maps');
+        console.log(center);
         const map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/streets-v12',
-            center: [-74.5, 40],
+            center: center,
             zoom: 9
         });
     }

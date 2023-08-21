@@ -1,6 +1,8 @@
 @page "/field/{id}"
 @attribute [Authorize]
 @using Hurudza.Data.Models.ViewModels.Core
+@using Hurudza.UI.Shared.Api.Interfaces
+@using Hurudza.UI.Shared.Models
 @using Hurudza.UI.Web.Models
 
 @inject IApiCall ApiCall
@@ -41,7 +43,7 @@ else
                             </p>
                             <div class="row mt-0">
                                 <div class="col-lg-6">
-                                    <button class="btn bg-gradient-primary mb-0 mt-lg-auto w-100" type="button" name="button">Update Details</button>
+                                    <button class="btn bg-gradient-primary mb-0 mt-lg-auto w-100" type="button" name="button" @onclick="ShowEditDialog">Update Details</button>
                                 </div>
                             </div>
                         </div>
@@ -124,8 +126,8 @@ else
                                     <GridColumn Field=@nameof(FieldCropViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
                                     <GridColumn Field=@nameof(FieldCropViewModel.Field) HeaderText="Field" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
                                     <GridColumn Field=@nameof(FieldCropViewModel.Crop) HeaderText="Crop" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
-                                    <GridColumn Field=@nameof(FieldCropViewModel.Size) HeaderText="Description" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
-                                    <GridColumn Field=@nameof(FieldCropViewModel.Irrigation) HeaderText="Size (Ha)" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                                    <GridColumn Field=@nameof(FieldCropViewModel.Size) HeaderText="Size (Ha)" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                                    <GridColumn Field=@nameof(FieldCropViewModel.Irrigation) HeaderText="Irrigated" TextAlign="TextAlign.Center" Width="120"></GridColumn>
                                     <GridColumn Field=@nameof(FieldCropViewModel.PlantedDate) HeaderText="Plant Date" TextAlign="TextAlign.Center" Width="120"></GridColumn>
                                     <GridColumn Field=@nameof(FieldCropViewModel.HarvestDate) HeaderText="Harvest Date" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" Width="120">
                                         <Template>
@@ -168,6 +170,11 @@ else
                                     <DialogButton OnClick="@CancelClick" Content="Cancel"></DialogButton>
                                 </DialogButtons>
                             </SfDialog>
+                            <SfDialog @ref="EditFieldDialog" Visible="false" ShowCloseIcon="true" IsModal="true" Width="250px">
+                                <DialogTemplates>
+                                    <Content> This is a Dialog with content </Content>
+                                </DialogTemplates>
+                            </SfDialog>
                         </div>
                     </div>
                 </div>
@@ -183,6 +190,7 @@ else
 
     SfGrid<FieldCropViewModel> Grid;
     SfDialog Dialog;
+    SfDialog EditFieldDialog;
     SfSpinner SaveSpinner;
     SfSpinner DeleteSpinner;
     FieldViewModel _field = null;
@@ -210,6 +218,11 @@ else
     private void Closed()
     {
         flag = true;
+    }
+
+    private async Task ShowEditDialog()
+    {
+        await EditFieldDialog.ShowAsync();
     }
 
     private async Task ActionBeginHandler(ActionEventArgs<FieldCropViewModel> args)
@@ -298,7 +311,8 @@ else
     {
         if (_field != null)
         {
-            await JS.InvokeVoidAsync("loadMap");
+            double[] array = new[] { -17.767358, 31.153375 };
+            await JS.InvokeVoidAsync("loadMap", array);
         }
     }
 }

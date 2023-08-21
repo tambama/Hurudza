@@ -4,6 +4,7 @@
 @using Hurudza.Data.Models.Models
 @using Hurudza.Data.Models.ViewModels.Core
 @using Hurudza.Data.Models.Enums
+@using Hurudza.UI.Shared.Api.Interfaces
 @using Region = Hurudza.Data.Models.Enums.Region
 @inject IApiCall ApiCall
 @inject AuthenticationStateProvider AuthStateProvider
@@ -269,7 +270,7 @@
 
     private async Task<bool> SaveFarm(FarmViewModel model)
     {
-        var response = await ApiCall.Add(await ApiCall.GetHttpClient(), "farms/createfarm", model);
+        var response = await ApiCall.Add< UI.Shared.Models.ApiResponse<FarmViewModel>, FarmViewModel>(await ApiCall.GetHttpClient(), "farms/createfarm", model);
 
         if (response == null)
         {
@@ -290,7 +291,7 @@
 
     private async Task<bool> UpdateFarm(FarmViewModel model)
     {
-        var response = await ApiCall.Update<FarmViewModel>(await ApiCall.GetHttpClient(), "Farms/updateFarm", model.Id, model);
+        var response = await ApiCall.Update<ApiResponse<FarmViewModel>, FarmViewModel>(await ApiCall.GetHttpClient(), "Farms/updateFarm", model.Id, model);
 
         if (response == null)
         {
@@ -311,7 +312,7 @@
 
     private async Task<bool> DeleteFarm(FarmViewModel model)
     {
-        var response = await ApiCall.Remove<FarmViewModel>(await ApiCall.GetHttpClient(), "Farms/deleteFarm", model.Id);
+        var response = await ApiCall.Remove<ApiResponse<FarmViewModel>>(await ApiCall.GetHttpClient(), "Farms/deleteFarm", model.Id);
 
         if (response == null)
         {

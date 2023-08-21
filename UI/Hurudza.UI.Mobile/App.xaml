@@ -1,0 +1,82 @@
+﻿<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:dashboard="clr-namespace:Hurudza.UI.Mobile.Pages.Dashboard"
+             xmlns:farms="clr-namespace:Hurudza.UI.Mobile.Pages.Farms"
+             xmlns:map="clr-namespace:Hurudza.UI.Mobile.Pages.Map"
+             xmlns:settings="clr-namespace:Hurudza.UI.Mobile.Pages.Settings"
+             xmlns:local="clr-namespace:Hurudza.UI.Mobile"
+             xmlns:authentication="clr-namespace:Hurudza.UI.Mobile.Pages.Authentication"
+             x:Class="Hurudza.UI.Mobile.App">
+    <Application.Resources>
+        <ResourceDictionary Source="Resources/Styles/DefaultTheme.xaml"/>
+    </Application.Resources>
+
+    <Application.MainPage>
+        <Shell
+            FlyoutWidth="68" FlyoutBackgroundColor="{StaticResource Background_Mid}"
+            FlyoutBehavior="{OnIdiom Phone=Disabled, Default=Locked}">
+
+            <Shell.FlyoutFooterTemplate>
+                <DataTemplate>
+                    <Grid RowDefinitions="68">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
+                        </Grid.GestureRecognizers>
+                        <Image Source="tab_settings.png"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Center"
+                               WidthRequest="40"
+                               HeightRequest="40"
+                        />
+                    </Grid>
+                </DataTemplate>
+    
+            </Shell.FlyoutFooterTemplate>
+    
+            <!-- Desktop/Tablet-->
+            <FlyoutItem Title="Home" Style="{StaticResource HomeFlyout}">
+                <ShellContent ContentTemplate="{DataTemplate dashboard:HomePage}"/>
+            </FlyoutItem>
+            <FlyoutItem Title="Farms" Style="{StaticResource FarmFlyout}">
+                <ShellContent ContentTemplate="{DataTemplate farms:FarmsPage}"/>
+            </FlyoutItem>
+            <FlyoutItem Title="Map" Style="{StaticResource MapFlyout}">
+                <ShellContent ContentTemplate="{DataTemplate map:MapPage}"/>
+            </FlyoutItem>
+            <FlyoutItem Title="Settings" Route="settings" FlyoutItemIsVisible="False">
+                <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}"/>
+            </FlyoutItem>
+    
+            <!-- Phone -->
+            <TabBar x:Name="PhoneTabs">
+                <Tab Title="Home" Icon="tab_home.png">
+                    <ShellContent ContentTemplate="{DataTemplate dashboard:HomePage}"/>
+                </Tab>
+                <Tab Title="Farms" Icon="tab_tractor.png">
+                    <ShellContent ContentTemplate="{DataTemplate farms:FarmsPage}"/>
+                </Tab>
+                <Tab Title="Map" Icon="tab_map.png">
+                    <ShellContent ContentTemplate="{DataTemplate map:MapPage}"/>
+                </Tab>
+                <Tab Title="Settings" Icon="tab_settings.png">
+                    <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}"/>
+                </Tab>
+            </TabBar>
+    
+            <Shell.ItemTemplate>
+                <DataTemplate>
+                    <Grid WidthRequest="44" HeightRequest="68"
+                          ColumnDefinitions="44" RowDefinitions="68">
+                        <Image Source="{Binding FlyoutIcon}"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Center"
+                               HeightRequest="38"
+                               WidthRequest="38"
+                               />
+                    </Grid>
+                </DataTemplate>
+    
+            </Shell.ItemTemplate>
+        </Shell>
+    </Application.MainPage>
+</Application>

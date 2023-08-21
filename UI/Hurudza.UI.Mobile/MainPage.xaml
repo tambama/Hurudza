@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:Hurudza.UI.Mobile"
+             xmlns:authentication="clr-namespace:Hurudza.UI.Mobile.Pages.Authentication"
+             xmlns:dashboard="clr-namespace:Hurudza.UI.Mobile.Pages.Dashboard"
+             xmlns:farms="clr-namespace:Hurudza.UI.Mobile.Pages.Farms"
+             xmlns:map="clr-namespace:Hurudza.UI.Mobile.Pages.Map"
+             xmlns:settings="clr-namespace:Hurudza.UI.Mobile.Pages.Settings"
+             x:Class="Hurudza.UI.Mobile.MainPage"
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
+
+    <ShellContent>
+        <ContentPage Title="Home">
+            <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
+                <BlazorWebView.RootComponents>
+                    <RootComponent Selector="#app" ComponentType="{x:Type local:Main}" />
+                </BlazorWebView.RootComponents>
+            </BlazorWebView>
+        </ContentPage>
+    </ShellContent>
+    
+    <!-- Phone -->
+    <TabBar x:Name="PhoneTabs">
+        <Tab Title="Home" Icon="tab_home.png">
+            <ShellContent ContentTemplate="{DataTemplate dashboard:HomePage}"/>
+        </Tab>
+        <Tab Title="Farms" Icon="tab_tractor.png">
+            <ShellContent ContentTemplate="{DataTemplate farms:FarmsPage}"/>
+        </Tab>
+        <Tab Title="Map" Icon="tab_map.png">
+            <ShellContent ContentTemplate="{DataTemplate map:MapPage}"/>
+        </Tab>
+        <Tab Title="Settings" Icon="tab_settings.png">
+            <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}"/>
+        </Tab>
+    </TabBar>
+    
+
+</Shell>

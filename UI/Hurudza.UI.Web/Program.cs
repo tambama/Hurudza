@@ -1,4 +1,6 @@
 using Blazored.LocalStorage;
+using Hurudza.UI.Shared.Api;
+using Hurudza.UI.Shared.Api.Interfaces;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Hurudza.UI.Web;

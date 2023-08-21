@@ -2,6 +2,7 @@
 @attribute [Authorize]
 
 @using Hurudza.Data.Models.Models
+@using Hurudza.UI.Shared.Api.Interfaces
 @inject IApiCall ApiCall
 @inject AuthenticationStateProvider AuthStateProvider
 
@@ -225,7 +226,7 @@
 
     private async Task<bool> SaveUser(UserViewModel model)
     {
-        var response = await ApiCall.Add<UserViewModel>(await ApiCall.GetHttpClient(), "authentication/register", model);
+        var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<UserViewModel>, UserViewModel>(await ApiCall.GetHttpClient(), "authentication/register", model);
 
         if (response == null)
         {
@@ -246,7 +247,7 @@
 
     private async Task<bool> UpdateUser(UserViewModel model)
     {
-        var response = await ApiCall.Update<UserViewModel>(await ApiCall.GetHttpClient(), "users/updateuser", model.Id, model);
+        var response = await ApiCall.Update<UI.Shared.Models.ApiResponse<UserViewModel>, UserViewModel>(await ApiCall.GetHttpClient(), "users/updateuser", model.Id, model);
 
         if (response == null)
         {
@@ -267,7 +268,7 @@
 
     private async Task<bool> DeleteUser(UserViewModel model)
     {
-        var response = await ApiCall.Remove<UserViewModel>(await ApiCall.GetHttpClient(), "users/deleteuser", model.Id);
+        var response = await ApiCall.Remove<ApiResponse<UserViewModel>>(await ApiCall.GetHttpClient(), "users/deleteuser", model.Id);
 
         if (response == null)
         {
