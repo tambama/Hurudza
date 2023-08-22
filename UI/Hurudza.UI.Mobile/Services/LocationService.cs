@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Hurudza.UI.Mobile.Services.Interfaces;
 
 namespace Hurudza.UI.Mobile.Services;
@@ -20,7 +21,7 @@ public class LocationService : ILocationService
             Location location = await Geolocation.Default.GetLocationAsync(request, _cancelTokenSource.Token);
 
             if (location != null)
-                Console.WriteLine($"Latitude: {location.Latitude}, Longitude: {location.Longitude}, Altitude: {location.Altitude}");
+                Debug.WriteLine($"Latitude: {location.Latitude}, Longitude: {location.Longitude}, Altitude: {location.Altitude}");
 
             return location;
         }

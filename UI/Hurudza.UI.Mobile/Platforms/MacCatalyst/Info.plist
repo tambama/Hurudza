@@ -27,11 +27,13 @@
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Center Map to your current location</string>
+	<string>Can we use your location when your app is being used?</string>
 	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
 	<dict>
 		<key>TemporaryFullAccuracyUsageDescription</key>
 		<string>Mark Farm Field Boundaries accurately</string>
 	</dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Can we use your location at all times?</string>
 </dict>
 </plist>
