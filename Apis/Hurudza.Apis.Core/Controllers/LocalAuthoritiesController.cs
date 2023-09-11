@@ -2,14 +2,13 @@ using System.Net;
 using System.Net.Mime;
 using Hurudza.Apis.Base.Models;
 using Hurudza.Data.Context.Context;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hurudza.Apis.Core.Controllers;
 
 [Route("api/[controller]/[action]")]
-[Authorize]
+//[Authorize]
 [ApiController]
 [ApiVersion("1.0")]
 [Produces(MediaTypeNames.Application.Json)]
@@ -31,8 +30,8 @@ public class LocalAuthoritiesController : Controller
         return Ok(localAuthorities);
     }
     
-    [HttpGet("{id:int}", Name = nameof(GetLocalAuthoritiesByProvinceId))]
-    public async Task<IActionResult> GetLocalAuthoritiesByProvinceId(int id)
+    [HttpGet("{id}", Name = nameof(GetLocalAuthoritiesByProvinceId))]
+    public async Task<IActionResult> GetLocalAuthoritiesByProvinceId(string id)
     {
         var localAuthorities = await (from l in _context.LocalAuthorities
             join d in _context.Districts on l.DistrictId equals d.Id
@@ -43,16 +42,16 @@ public class LocalAuthoritiesController : Controller
         return Ok(localAuthorities);
     }
     
-    [HttpGet("{id:int}", Name = nameof(GetLocalAuthoritiesByDistrictId))]
-    public async Task<IActionResult> GetLocalAuthoritiesByDistrictId(int id)
+    [HttpGet("{id}", Name = nameof(GetLocalAuthoritiesByDistrictId))]
+    public async Task<IActionResult> GetLocalAuthoritiesByDistrictId(string id)
     {
         var localAuthorities = await _context.LocalAuthorities.Where(d => d.DistrictId == id).ToListAsync().ConfigureAwait(false);
 
         return Ok(localAuthorities);
     }
 
-    [HttpGet("{id:int}", Name = nameof(GetLocalAuthority))]
-    public async Task<IActionResult> GetLocalAuthority(int id)
+    [HttpGet("{id}", Name = nameof(GetLocalAuthority))]
+    public async Task<IActionResult> GetLocalAuthority(string id)
     {
         var localAuthority = await _context.LocalAuthorities.FirstOrDefaultAsync(r => r.Id == id).ConfigureAwait(false);
 

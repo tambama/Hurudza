@@ -2,14 +2,13 @@ using System.Net;
 using System.Net.Mime;
 using Hurudza.Apis.Base.Models;
 using Hurudza.Data.Context.Context;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hurudza.Apis.Core.Controllers;
 
 [Route("api/[controller]/[action]")]
-[Authorize]
+//[Authorize]
 [ApiController]
 [ApiVersion("1.0")]
 [Produces(MediaTypeNames.Application.Json)]
@@ -31,8 +30,8 @@ public class CropsController : Controller
         return Ok(crops);
     }
 
-    [HttpGet("{id:int}", Name = nameof(GetCrop))]
-    public async Task<IActionResult> GetCrop(int id)
+    [HttpGet("{id}", Name = nameof(GetCrop))]
+    public async Task<IActionResult> GetCrop(string id)
     {
         var crop = await _context.Crops.SingleOrDefaultAsync(c => c.Id == id).ConfigureAwait(false);
 

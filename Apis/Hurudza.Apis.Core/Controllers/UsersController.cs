@@ -9,21 +9,20 @@ using Hurudza.Common.Utils.Exceptions;
 using Hurudza.Common.Utils.Extensions;
 using Hurudza.Common.Utils.Helpers;
 using Hurudza.Data.Context.Context;
-using Hurudza.Data.Models.Enums;
 using Hurudza.Data.Models.Models;
-using Hurudza.Data.Models.ViewModels.UserManagement;
+using Hurudza.Data.UI.Models.Models;
+using Hurudza.Data.UI.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using ApiResponse = Hurudza.Data.Models.Models.ApiResponse;
 using IConfigurationProvider = AutoMapper.IConfigurationProvider;
 
 namespace Hurudza.Apis.Core.Controllers
 {
     [Route("api/[controller]/[action]")]
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [ApiVersion("1.0")]
     [Produces(MediaTypeNames.Application.Json)]
@@ -138,7 +137,7 @@ namespace Hurudza.Apis.Core.Controllers
             if (listProfile != null)
             {
                 listProfile.IsActive = true;
-                listProfile.IsDeleted = false;
+                listProfile.Deleted = false;
 
                 _context.Update(listProfile);
                 await _context.SaveChangesAsync();
@@ -161,7 +160,7 @@ namespace Hurudza.Apis.Core.Controllers
                 // user is in company but in different list
                 // move them to this list
                 profile.IsActive = true;
-                profile.IsDeleted = false;
+                profile.Deleted = false;
 
                 _context.Update(profile);
 
@@ -251,7 +250,7 @@ namespace Hurudza.Apis.Core.Controllers
             if (profile != null)
             {
                 profile.IsActive = true;
-                profile.IsDeleted = false;
+                profile.Deleted = false;
 
                 _context.Update(profile);
                 await _context.SaveChangesAsync();
@@ -581,7 +580,7 @@ namespace Hurudza.Apis.Core.Controllers
 
             if (user == null)
             {
-                return Ok(new ApiResponse((int) HttpStatusCode.NotFound, $"User {user.UserName} was not found"));
+                return Ok(new Base.Models.ApiResponse((int) HttpStatusCode.NotFound, $"User {user.UserName} was not found"));
             }
 
             var profile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.Id == vm.ProfileId);
@@ -589,7 +588,7 @@ namespace Hurudza.Apis.Core.Controllers
             if (profile == null) return Ok(new ApiOkResponse(null, "Successfully added new user!"));
             
             profile.IsActive = false;
-            profile.IsDeleted = true;
+            profile.Deleted = true;
 
             _context.Update(profile);
             await _context.SaveChangesAsync();

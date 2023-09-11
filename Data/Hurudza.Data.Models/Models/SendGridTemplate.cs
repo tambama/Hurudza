@@ -1,8 +1,9 @@
-﻿namespace Hurudza.Data.Models.Models;
+﻿using Hurudza.Data.Models.Base;
 
-public class SendGridTemplate
+namespace Hurudza.Data.Models.Models;
+
+public class SendGridTemplate : BaseEntity
 {
-    public int Id { get; set; }
     public string TemplateId { get; set; }
     public SendGridTemplateName Name { get; set; }
 }

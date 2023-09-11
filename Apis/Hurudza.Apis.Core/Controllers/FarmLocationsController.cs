@@ -3,7 +3,6 @@ using System.Net.Mime;
 using Hurudza.Apis.Base.Models;
 using Hurudza.Data.Context.Context;
 using Hurudza.Data.Models.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ApiResponse = Hurudza.Apis.Base.Models.ApiResponse;
@@ -11,7 +10,7 @@ using ApiResponse = Hurudza.Apis.Base.Models.ApiResponse;
 namespace Hurudza.Apis.Core.Controllers;
 
 [Route("api/[controller]/[action]")]
-[Authorize]
+//[Authorize]
 [ApiController]
 [ApiVersion("1.0")]
 [Produces(MediaTypeNames.Application.Json)]

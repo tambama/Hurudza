@@ -1,8 +1,9 @@
-﻿namespace Hurudza.Data.Models.Models;
+﻿using Hurudza.Data.Models.Base;
 
-public class Province
+namespace Hurudza.Data.Models.Models;
+
+public class Province : BaseEntity
 {
-    public int Id { get; set; }
     public required string Name { get; set; }
 
     public virtual ICollection<District>? Districts { get; set; }

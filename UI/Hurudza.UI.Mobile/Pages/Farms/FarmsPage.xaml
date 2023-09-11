@@ -2,8 +2,62 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Hurudza.UI.Mobile.Pages.Farms.FarmsPage">
-    <ContentPage.Content>
-        
-    </ContentPage.Content>
+             x:Class="Hurudza.UI.Mobile.Pages.Farms.FarmsPage"
+             BackgroundColor="White">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <HorizontalStackLayout Grid.Row="0" Padding="20, 10, 0, 5" >
+            <Label Text="Farms" FontSize="Title" FontAttributes="Bold" />
+        </HorizontalStackLayout>
+        <SearchBar Grid.Row="1" Placeholder="Search" Text="{Binding SearchText}"/>
+        <Frame Grid.Row="2" HeightRequest="5"  Padding="1" Margin="0, 10" BackgroundColor="{StaticResource LightGray}">
+            <HorizontalStackLayout Padding="20, 0">
+                <Label Text="All Farms" FontSize="11"/>
+            </HorizontalStackLayout>
+        </Frame>
+        <ListView Grid.Row="3" ItemsSource="{Binding Farms}" HasUnevenRows="True">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <StackLayout Padding="10">
+                            <Label Text="{Binding Name}" FontSize="Large" />
+                            <Label Text="{Binding Size, StringFormat='Size: {0}ha'}" FontSize="Small" />
+                        </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <StackLayout x:Name="fab" Grid.Row="3" IsVisible="True" InputTransparent="False" VerticalOptions="End" HorizontalOptions="End">
+            <StackLayout.Margin>
+                <OnPlatform x:TypeArguments="Thickness">
+                    <On Platform="iOS">0,20,20,50</On>
+                    <On Platform="Android">0,20,15,25</On>
+                </OnPlatform>
+            </StackLayout.Margin>
+            <Frame  BackgroundColor="Transparent" VerticalOptions="Start" HorizontalOptions="End" CornerRadius="20" HasShadow="False" Padding="0" Margin="0" WidthRequest="250">
+                
+                <StackLayout>
+                    <Frame  BackgroundColor="Black" Margin="0" Padding="0" WidthRequest="50" HeightRequest="50" HorizontalOptions="End">
+                        <Frame.CornerRadius>
+                            <OnPlatform x:TypeArguments="x:Single">
+                                <On Platform="iOS" Value="30"></On>
+                                <On Platform="Android" Value="40"></On>
+                            </OnPlatform>
+                        </Frame.CornerRadius>
+                        <Image Source="plus.png" x:Name="menu"  HorizontalOptions="End" HeightRequest="30" WidthRequest=" 30" Margin=" 0,0,10,0">
+                            <Image.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding GoToCreateFarmCommand}" />
+                            </Image.GestureRecognizers>
+                        </Image>
+                    </Frame>
+                </StackLayout>
+            </Frame>
+        </StackLayout>
+    </Grid>
+    
 </ContentPage>

@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
 using Blazored.LocalStorage;
 using Hurudza.Common.Utils.Extensions;
-using Hurudza.Data.Models.Models;
 using Hurudza.UI.Shared.Api.Interfaces;
 using IdentityModel.Client;
 

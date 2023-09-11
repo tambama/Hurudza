@@ -10,6 +10,7 @@ using Hurudza.Common.Sms.Services;
 using Hurudza.Data.Context.Context;
 using Hurudza.Data.Context.Seed;
 using Hurudza.Data.Models.Models;
+using Hurudza.Data.UI.Models.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

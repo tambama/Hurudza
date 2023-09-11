@@ -2,14 +2,13 @@ using System.Net;
 using System.Net.Mime;
 using Hurudza.Apis.Base.Models;
 using Hurudza.Data.Context.Context;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hurudza.Apis.Core.Controllers;
 
 [Route("api/[controller]/[action]")]
-[Authorize]
+//[Authorize]
 [ApiController]
 [ApiVersion("1.0")]
 [Produces(MediaTypeNames.Application.Json)]
@@ -32,7 +31,7 @@ public class DistrictsController : Controller
     }
     
     [HttpGet("{id:int}", Name = nameof(GetDistrictsByProvinceId))]
-    public async Task<IActionResult> GetDistrictsByProvinceId(int id)
+    public async Task<IActionResult> GetDistrictsByProvinceId(string id)
     {
         var districts = await _context.Districts.Where(d => d.ProvinceId == id).ToListAsync().ConfigureAwait(false);
 
@@ -40,7 +39,7 @@ public class DistrictsController : Controller
     }
 
     [HttpGet("{id:int}", Name = nameof(GetDistrict))]
-    public async Task<IActionResult> GetDistrict(int id)
+    public async Task<IActionResult> GetDistrict(string id)
     {
         var district = await _context.Districts.FirstOrDefaultAsync(r => r.Id == id).ConfigureAwait(false);
 

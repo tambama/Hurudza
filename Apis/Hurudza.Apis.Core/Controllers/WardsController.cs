@@ -2,14 +2,13 @@ using System.Net;
 using System.Net.Mime;
 using Hurudza.Apis.Base.Models;
 using Hurudza.Data.Context.Context;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hurudza.Apis.Core.Controllers;
 
 [Route("api/[controller]/[action]")]
-[Authorize]
+//[Authorize]
 [ApiController]
 [ApiVersion("1.0")]
 [Produces(MediaTypeNames.Application.Json)]
@@ -31,32 +30,32 @@ public class WardsController : Controller
         return Ok(wards);
     }
     
-    [HttpGet("{id:int}", Name = nameof(GetWardsByProvinceId))]
-    public async Task<IActionResult> GetWardsByProvinceId(int id)
+    [HttpGet("{id}", Name = nameof(GetWardsByProvinceId))]
+    public async Task<IActionResult> GetWardsByProvinceId(string id)
     {
         var wards = await _context.Wards.Where(d => d.ProvinceId == id).ToListAsync().ConfigureAwait(false);
 
         return Ok(wards);
     }
     
-    [HttpGet("{id:int}", Name = nameof(GetWardsByDistrictId))]
-    public async Task<IActionResult> GetWardsByDistrictId(int id)
+    [HttpGet("{id}", Name = nameof(GetWardsByDistrictId))]
+    public async Task<IActionResult> GetWardsByDistrictId(string id)
     {
         var wards = await _context.Wards.Where(d => d.DistrictId == id).ToListAsync().ConfigureAwait(false);
 
         return Ok(wards);
     }
     
-    [HttpGet("{id:int}", Name = nameof(GetWardsByLocalAuthorityId))]
-    public async Task<IActionResult> GetWardsByLocalAuthorityId(int id)
+    [HttpGet("{id}", Name = nameof(GetWardsByLocalAuthorityId))]
+    public async Task<IActionResult> GetWardsByLocalAuthorityId(string id)
     {
         var wards = await _context.Wards.Where(d => d.LocalAuthorityId == id).ToListAsync().ConfigureAwait(false);
 
         return Ok(wards);
     }
 
-    [HttpGet("{id:int}", Name = nameof(GetWard))]
-    public async Task<IActionResult> GetWard(int id)
+    [HttpGet("{id}", Name = nameof(GetWard))]
+    public async Task<IActionResult> GetWard(string id)
     {
         var ward = await _context.Wards.FirstOrDefaultAsync(r => r.Id == id).ConfigureAwait(false);
 

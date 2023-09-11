@@ -10,6 +10,7 @@
       <ProjectReference Include="..\..\Common\Hurudza.Common.Services\Hurudza.Common.Services.csproj" />
       <ProjectReference Include="..\..\Common\Hurudza.Common.Utils\Hurudza.Common.Utils.csproj" />
       <ProjectReference Include="..\..\Data\Hurudza.Data.Models\Hurudza.Data.Models.csproj" />
+      <ProjectReference Include="..\..\Hurudza.Data.ViewModels\Hurudza.Data.UI.Models.csproj" />
     </ItemGroup>
 
     <ItemGroup>

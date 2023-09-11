@@ -1,8 +1,9 @@
+using Hurudza.Data.Models.Base;
+
 namespace Hurudza.Data.Models.Models;
 
-public class Location
+public class Location : BaseEntity
 {
-    public string? Id { get; set; }
     public string? Label { get; set; }
     public float Longitude { get; set; }
     public float Latitude { get; set; }

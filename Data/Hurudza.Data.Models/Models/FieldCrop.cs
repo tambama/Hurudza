@@ -4,9 +4,8 @@ namespace Hurudza.Data.Models.Models;
 
 public class FieldCrop : BaseEntity
 {
-    public string Id { get; set; }
-    public string FieldId { get; set; }
-    public int CropId { get; set; }
+    public required string FieldId { get; set; }
+    public required string CropId { get; set; }
     public DateTime? PlantedDate { get; set; }
     public DateTime? HarvestDate { get; set; }
     public float Size { get; set; }

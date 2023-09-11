@@ -8,13 +8,12 @@ using Hurudza.Apis.Base.Models;
 using Hurudza.Data.Context.Context;
 using Hurudza.Data.Context.Data;
 using Hurudza.Data.Models.Models;
-using Hurudza.Data.Models.ViewModels.UserManagement;
+using Hurudza.Data.UI.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using ApiResponse = Hurudza.Data.Models.Models.ApiResponse;
 using automapper = AutoMapper;
 
 namespace Hurudza.Apis.Core.Controllers

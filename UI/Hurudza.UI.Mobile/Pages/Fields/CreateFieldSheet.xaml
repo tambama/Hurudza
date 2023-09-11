@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<the49:BottomSheet xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:the49="https://schemas.the49.com/dotnet/2023/maui"
+             xmlns:inputLayout="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+             xmlns:editors="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
+             x:Class="Hurudza.UI.Mobile.Pages.Fields.CreateFieldSheet"
+             x:Name="this"
+             HasHandle="True"
+             HandleColor="Black"
+             IsCancelable="False">
+    <VerticalStackLayout Spacing="10">
+        <VerticalStackLayout Padding="16, 0">
+            <HorizontalStackLayout Spacing="16">
+                <Border StrokeShape="RoundRectangle 8" StrokeThickness="0">
+                    <Image Source="farm.png" HeightRequest="80" WidthRequest="20" />
+                </Border>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="FillAndExpand">
+                    <Label Text="Field Area" />
+                    <Label Text="{Binding Area}" FontSize="10" TextColor="Gray" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+            <Button Text="Add Point"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    BackgroundColor="CornflowerBlue"
+                    HorizontalOptions="FillAndExpand"
+                    Command="{Binding AddPointCommand}"/>
+        </VerticalStackLayout>
+        <Frame HeightRequest="1"
+               BackgroundColor="{StaticResource LightGray}"
+               HasShadow="False"
+               Padding="0" />
+        <VerticalStackLayout Padding="16, 0">
+            <inputLayout:SfTextInputLayout Hint="Title" 
+                                           IsHintAlwaysFloated="True" 
+                                           ContainerType="Outlined" 
+                                           ContainerBackground="Transparent">
+                <Entry Text="{Binding Title}" />
+            </inputLayout:SfTextInputLayout>
+            <inputLayout:SfTextInputLayout x:Name="size" 
+                                           Hint="Size (Ha)"
+                                           IsHintAlwaysFloated="True" 
+                                           ContainerType="Outlined" 
+                                           ContainerBackground="Transparent">
+                <editors:SfNumericEntry Value="{Binding Size}" CustomFormat="N2" />
+            </inputLayout:SfTextInputLayout>
+            <inputLayout:SfTextInputLayout Hint="Soil Type"
+                                           IsHintAlwaysFloated="True"
+                                           ContainerType="Outlined" 
+                                           ContainerBackground="Transparent">
+                <editors:SfComboBox ItemsSource="{Binding SoilTypes}"
+                                    TextMemberPath="Name"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Id"
+                                    SelectedItem="{Binding SelectedSoilType}"
+                                    Placeholder="Select a Soil Type"/>
+            </inputLayout:SfTextInputLayout>
+        </VerticalStackLayout>
+    </VerticalStackLayout>
+</the49:BottomSheet>

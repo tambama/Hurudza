@@ -4,9 +4,7 @@ using AutoMapper.QueryableExtensions;
 using Hurudza.Apis.Base.Models;
 using Hurudza.Data.Context.Context;
 using Hurudza.Data.Models.Models;
-using Hurudza.Data.Models.ViewModels.Core;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Hurudza.Data.UI.Models.ViewModels.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ApiResponse = Hurudza.Apis.Base.Models.ApiResponse;
@@ -15,7 +13,7 @@ using IConfigurationProvider = AutoMapper.IConfigurationProvider;
 namespace Hurudza.Apis.Core.Controllers;
 
 [Route("api/[controller]/[action]")]
-[Authorize]
+//[Authorize]
 [ApiController]
 [ApiVersion("1.0")]
 [Produces(MediaTypeNames.Application.Json)]
@@ -82,7 +80,7 @@ public class FarmsController : Controller
 
         if (farm == null) return NotFound();
 
-        farm.IsDeleted = true;
+        farm.Deleted = true;
         farm.IsActive = false;
 
         _context.Entry(farm).State = EntityState.Modified;

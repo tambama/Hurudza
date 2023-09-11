@@ -3,16 +3,16 @@ using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Hurudza.UI.Mobile.Models;
-using Hurudza.UI.Mobile.Services.Interfaces;
+using Hurudza.UI.Mobile.Services;
 using Microsoft.Maui.Maps;
 
 namespace Hurudza.UI.Mobile.ViewModels.Location;
 
 public partial class MapPageViewModel : ObservableObject
 {
-    private readonly ILocationService _locationService;
+    private readonly LocationService _locationService;
 
-    public MapPageViewModel(ILocationService locationService)
+    public MapPageViewModel(LocationService locationService)
     {
         _locationService = locationService;
     }

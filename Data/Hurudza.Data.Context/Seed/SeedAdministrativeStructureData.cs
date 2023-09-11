@@ -2,6 +2,7 @@ using System.Globalization;
 using CsvHelper;
 using Hurudza.Data.Context.Context;
 using Hurudza.Data.Models.Models;
+using Hurudza.Data.UI.Models.Models;
 
 namespace Hurudza.Data.Context.Seed;
 

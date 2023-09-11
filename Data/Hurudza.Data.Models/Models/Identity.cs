@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Hurudza.Data.Enums.Enums;
+using Microsoft.AspNetCore.Identity;
 
 namespace Hurudza.Data.Models.Models
 {
@@ -26,13 +27,6 @@ namespace Hurudza.Data.Models.Models
         public virtual ICollection<ApplicationUserLogin>? Logins { get; set; }
         public virtual ICollection<ApplicationUserToken>? Tokens { get; set; }
         public virtual ICollection<ApplicationUserRole>? UserRoles { get; set; }
-    }
-    
-    public enum RoleClass
-    {
-        System,
-        General,
-        Farm
     }
 
     public class ApplicationRole : IdentityRole

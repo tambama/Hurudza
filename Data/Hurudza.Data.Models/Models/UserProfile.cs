@@ -4,7 +4,6 @@ namespace Hurudza.Data.Models.Models;
 
 public class UserProfile: BaseEntity
 {
-    public string Id { get; set; }
     public required string UserId { get; set; }
     public required string FarmId { get; set; }
     public required string Role { get; set; }

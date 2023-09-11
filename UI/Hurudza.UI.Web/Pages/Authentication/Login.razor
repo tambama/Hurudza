@@ -2,6 +2,7 @@
 @using Hurudza.UI.Web.Cookie.Providers
 @using Hurudza.UI.Shared.Api.Interfaces
 @using Hurudza.UI.Shared.Models
+@using ApiResponses = Hurudza.UI.Shared.Models
 
 @inject IApiCall ApiCall;
 @inject AuthenticationStateProvider AuthStateProvider
@@ -48,7 +49,7 @@
     private async Task UserLogin()
     {
         var response =
-            await ApiCall.Add<ApiResponse<UserViewModel>, LoginViewModel>(await ApiCall.GetHttpClient(), "authentication/login",
+            await ApiCall.Add<ApiResponses.ApiResponse<UserViewModel>, LoginViewModel>(await ApiCall.GetHttpClient(), "authentication/login",
                 _loginViewModel);
 
         if (response == null)

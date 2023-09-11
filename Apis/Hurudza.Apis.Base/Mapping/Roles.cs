@@ -1,6 +1,6 @@
 using AutoMapper;
 using Hurudza.Data.Models.Models;
-using Hurudza.Data.Models.ViewModels.UserManagement;
+using Hurudza.Data.UI.Models.ViewModels.UserManagement;
 
 namespace Hurudza.Apis.Base.Mapping;
 

@@ -1,10 +1,7 @@
 @page "/fields"
 @attribute [Authorize]
 
-@using SoilType = Hurudza.Data.Models.Enums.SoilType
 @using Hurudza.UI.Web.Pages.Farms
-@using Hurudza.Data.Models.ViewModels.Core
-@using Hurudza.Data.Models.Models
 @using Hurudza.UI.Shared.Api.Interfaces
 @inject IApiCall ApiCall
 @inject NavigationManager Navigation
@@ -150,7 +147,7 @@
     Toast Alert;
     List<FieldViewModel> _fields;
     List<FarmViewModel> _farms;
-    List<Data.Models.Models.SoilTypeModel> _regions = Enum.GetValues<SoilType>().Select(x => new Data.Models.Models.SoilTypeModel(x)).ToList();
+    List<SoilTypeModel> _regions = Enum.GetValues<SoilType>().Select(x => new SoilTypeModel(x)).ToList();
     bool Enabled = true;
     bool Data = false;
     FieldViewModel SelectedField;

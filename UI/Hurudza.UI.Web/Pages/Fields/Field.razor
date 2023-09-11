@@ -1,9 +1,5 @@
 @page "/field/{id}"
 @attribute [Authorize]
-@using Hurudza.Data.Models.ViewModels.Core
-@using Hurudza.UI.Shared.Api.Interfaces
-@using Hurudza.UI.Shared.Models
-@using Hurudza.UI.Web.Models
 
 @inject IApiCall ApiCall
 @inject IJSRuntime JS
@@ -196,7 +192,7 @@ else
     FieldViewModel _field = null;
     Toast _alert;
     SfSpinner _spinner;
-    
+
     List<FieldCropViewModel> _fields;
     bool Enabled = true;
     bool Data = false;
@@ -241,33 +237,33 @@ else
                 flag = false;
                 break;
             case Action.Save:
-            {
-                if (SaveSpinner.Visible)
                 {
-                    args.Cancel = true;
+                    if (SaveSpinner.Visible)
+                    {
+                        args.Cancel = true;
+                        break;
+                    }
+
+                    await SaveSpinner.ShowAsync();
+                    if (!string.IsNullOrEmpty(args.Data.Id))
+                    {
+                        // if (!await UpdateField(args.Data))
+                        // {
+                        //     args.Cancel = true;
+                    // }
+                    }
+                    else
+                    {
+                        // if (!await SaveField(args.Data))
+                        // {
+                        //     args.Cancel = true;
+                    // }
+                    }
+
+
+                    await SaveSpinner.HideAsync();
                     break;
                 }
-
-                await SaveSpinner.ShowAsync();
-                if (!string.IsNullOrEmpty(args.Data.Id))
-                {
-                    // if (!await UpdateField(args.Data))
-                    // {
-                    //     args.Cancel = true;
-                    // }
-                }
-                else
-                {
-                    // if (!await SaveField(args.Data))
-                    // {
-                    //     args.Cancel = true;
-                    // }
-                }
-
-
-                await SaveSpinner.HideAsync();
-                break;
-            }
         }
     }
 
@@ -295,7 +291,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await ApiCall.Get<ApiResponse<FieldViewModel>>(await ApiCall.GetHttpClient(), "fields/getfield", Id);
+        var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<FieldViewModel>>(await ApiCall.GetHttpClient(), "fields/getfield", Id);
 
         if (response.Status == (int)HttpStatusCode.OK)
         {

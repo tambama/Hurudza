@@ -1,11 +1,10 @@
+using Hurudza.Data.Enums.Enums;
 using Hurudza.Data.Models.Base;
-using Hurudza.Data.Models.Enums;
 
 namespace Hurudza.Data.Models.Models;
 
 public class Field : BaseEntity
 {
-    public string? Id { get; set; }
     public required string Name { get; set; }
     public string? Description { get; set; }
     public SoilType SoilType { get; set; }

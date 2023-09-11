@@ -1,5 +1,5 @@
 using System.Net;
-using Hurudza.Data.Models.ViewModels.UserManagement;
+using Hurudza.Data.UI.Models.ViewModels.UserManagement;
 using Hurudza.UI.Shared.Api.Interfaces;
 using Hurudza.UI.Shared.Models;
 using Hurudza.UI.Web.Api.Interfaces;

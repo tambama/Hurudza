@@ -1,4 +1,5 @@
-﻿using Hurudza.Data.Models.Models;
+﻿using Hurudza.Data.Enums.Enums;
+using Hurudza.Data.Models.Models;
 
 namespace Hurudza.Data.Context.Data;
 

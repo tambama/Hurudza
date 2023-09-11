@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using Hurudza.Data.Models.ViewModels.UserManagement;
+using Hurudza.Data.UI.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Hurudza.UI.Web.Cookie.Providers;

@@ -46,7 +46,10 @@
             <FlyoutItem Title="Settings" Route="settings" FlyoutItemIsVisible="False">
                 <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}"/>
             </FlyoutItem>
-    
+            <FlyoutItem>
+                <ShellContent ContentTemplate="{DataTemplate map:CreateFieldPage}" Route="CreateFieldOnMap" />
+            </FlyoutItem>
+
             <!-- Phone -->
             <TabBar x:Name="PhoneTabs">
                 <Tab Title="Home" Icon="tab_home.png">

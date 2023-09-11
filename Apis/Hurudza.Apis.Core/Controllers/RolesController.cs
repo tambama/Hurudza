@@ -8,8 +8,8 @@ using Hurudza.Common.Emails.Services;
 using Hurudza.Common.Sms.Services;
 using Hurudza.Data.Context.Context;
 using Hurudza.Data.Models.Models;
-using Hurudza.Data.Models.ViewModels.UserManagement;
-using Microsoft.AspNetCore.Authorization;
+using Hurudza.Data.UI.Models.Models;
+using Hurudza.Data.UI.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +20,7 @@ using IConfigurationProvider = AutoMapper.IConfigurationProvider;
 namespace Hurudza.Apis.Core.Controllers
 {
     [Route("api/[controller]/[action]")]
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [ApiVersion("1.0")]
     [Produces(MediaTypeNames.Application.Json)]

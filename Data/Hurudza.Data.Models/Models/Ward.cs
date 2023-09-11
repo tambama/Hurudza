@@ -1,14 +1,13 @@
-﻿using System.Collections;
+﻿using Hurudza.Data.Models.Base;
 
 namespace Hurudza.Data.Models.Models;
 
-public class Ward
+public class Ward : BaseEntity
 {
-    public int Id { get; set; }
     public required string Name { get; set; }
-    public int? LocalAuthorityId { get; set; }
-    public int? DistrictId { get; set; }
-    public int? ProvinceId { get; set; }
+    public string? LocalAuthorityId { get; set; }
+    public string? DistrictId { get; set; }
+    public string? ProvinceId { get; set; }
     
     public virtual LocalAuthority? LocalAuthority { get; set; }
     public virtual District? District { get; set; }

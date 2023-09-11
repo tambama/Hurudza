@@ -1,6 +1,6 @@
 ﻿using Hurudza.Common.Services.Interfaces;
+using Hurudza.Data.Enums.Enums;
 using Hurudza.Data.Models.Base;
-using Hurudza.Data.Models.Enums;
 using Hurudza.Data.Models.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -72,7 +72,7 @@ public class HurudzaDbContext :
                         break;
                     case EntityState.Modified:
                         if (!string.IsNullOrEmpty(_currentUserService.UserId)) entry.Entity.ModifiedBy = _currentUserService.UserId;
-                        entry.Entity.ModifiedDate = _dateTimeService.Now;
+                        entry.Entity.UpdatedAt = _dateTimeService.Now;
                         break;
                 }
             }
@@ -282,6 +282,12 @@ public class HurudzaDbContext :
                 .HasForeignKey(c => c.CropId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        builder.Entity<SendGridTemplate>(b =>
+        {
+            b.Property(t => t.Id)
+                .ValueGeneratedOnAdd();
         });
     }
 }

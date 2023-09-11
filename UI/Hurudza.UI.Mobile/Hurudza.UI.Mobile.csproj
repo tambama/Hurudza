@@ -33,43 +33,69 @@
 
     <ItemGroup>
         <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#081B25"/>
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#081B25" />
 
         <!-- Splash Screen -->
-        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#081B25"/>
+        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#081B25" />
 
         <!-- Images -->
-        <MauiImage Include="Resources\Images\*"/>
-        <MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208"/>
+        <MauiImage Include="Resources\Images\*" />
+        <MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
 
         <!-- Custom Fonts -->
-        <MauiFont Include="Resources\Fonts\*"/>
+        <MauiFont Include="Resources\Fonts\*" />
 
         <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
-        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)"/>
+        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="Resources\AppIcon\appicon.svg"/>
-        <Resource Include="Resources\AppIcon\appicon.svg"/>
-        <None Remove="Resources\AppIcon\appiconfg.svg"/>
-        <Resource Include="Resources\AppIcon\appiconfg.svg"/>
-        <Resource Include="Resources\Splash\splash.svg"/>
+        <None Remove="Resources\AppIcon\appicon.svg" />
+        <None Remove="Resources\Images\ellipsis_h.svg" />
+        <None Remove="Resources\Images\ellipsis_v.svg" />
+        <None Remove="Resources\Images\farm.png" />
+        <None Remove="Resources\Images\information.png" />
+        <None Remove="Resources\Images\plus.png" />
+        <Resource Include="Resources\AppIcon\appicon.svg" />
+        <None Remove="Resources\AppIcon\appiconfg.svg" />
+        <Resource Include="Resources\AppIcon\appiconfg.svg" />
+        <Resource Include="Resources\Splash\splash.svg" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Hurudza.UI.Shared\Hurudza.UI.Shared.csproj"/>
+        <ProjectReference Include="..\Hurudza.UI.Shared\Hurudza.UI.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Maui" Version="5.3.0" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0"/>
+        <PackageReference Include="Esri.ArcGISRuntime" Version="200.2.0" />
+        <PackageReference Include="Microsoft.Datasync.Client.SQLiteStore" Version="5.1.8" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
         <PackageReference Include="Microsoft.Maui.Controls.Maps" Version="7.0.92" />
+        <PackageReference Include="Syncfusion.Maui.Core" Version="22.2.11" />
+        <PackageReference Include="Syncfusion.Maui.Inputs" Version="22.2.11" />
+        <PackageReference Include="The49.Maui.BottomSheet" Version="1.0.1" />
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="ViewModels\Authentication\"/>
+        <Folder Include="Platforms\Windows\Handlers\" />
+        <Folder Include="ViewModels\Authentication\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <MauiXaml Update="Pages\Farms\CreateFarmPage.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </MauiXaml>
+      <MauiXaml Update="Pages\Farms\CreateFarmSheet.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </MauiXaml>
+      <MauiXaml Update="Pages\Fields\CreateFieldSheet.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </MauiXaml>
+      <MauiXaml Update="Pages\Map\CreateFieldPage.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </MauiXaml>
     </ItemGroup>
 
 </Project>

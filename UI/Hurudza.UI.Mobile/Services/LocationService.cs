@@ -1,12 +1,14 @@
 using System.Diagnostics;
-using Hurudza.UI.Mobile.Services.Interfaces;
 
 namespace Hurudza.UI.Mobile.Services;
 
-public class LocationService : ILocationService
+public partial class LocationService
 {
     private CancellationTokenSource _cancelTokenSource;
     private bool _isCheckingLocation;
+
+    public event EventHandler<Location> LocationChanged;
+    public event EventHandler<string> StatusChanged;
 
     public async Task<Location> GetCurrentLocation()
     {
@@ -44,5 +46,33 @@ public class LocationService : ILocationService
     {
         if (_isCheckingLocation && _cancelTokenSource != null && _cancelTokenSource.IsCancellationRequested == false)
             _cancelTokenSource.Cancel();
+    }
+
+    public void Initialize()
+    {
+#if ANDROID
+        AndroidInitialize();
+#elif IOS
+        IosInitialize();
+#endif
+    }
+
+    public void Stop()
+    {
+#if ANDROID
+        AndroidStop();
+#elif IOS
+        IosStop();
+#endif
+    }
+
+    protected virtual void OnLocationChanged(Location e)
+    {
+        LocationChanged?.Invoke(this, e);
+    }
+
+    protected virtual void OnStatusChanged(string e)
+    {
+        StatusChanged?.Invoke(this, e);
     }
 }
