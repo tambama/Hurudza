@@ -3,230 +3,797 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:inputLayout="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
              xmlns:editors="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="Hurudza.UI.Mobile.Pages.Farms.CreateFarmPage"
-             Title="CreateFarmPage"
-             BackgroundColor="White">
-    <ScrollView>
-        <VerticalStackLayout Spacing="10">
-            <VerticalStackLayout Padding="16, 0">
-                <HorizontalStackLayout Spacing="16">
-                    <Border StrokeShape="RoundRectangle 8" StrokeThickness="0">
-                        <Image Source="farm.png" HeightRequest="80" WidthRequest="20" />
+             Title="New Farm">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackLayout Grid.Row="0"
+             BackgroundColor="White"
+             HeightRequest="50"
+             Padding="10,0">
+            <FlexLayout Direction="Row"
+                AlignItems="Center"
+                JustifyContent="SpaceBetween"
+                VerticalOptions="CenterAndExpand">
+                <Button Text="Cancel" TextColor="CornflowerBlue" BackgroundColor="Transparent" Command="{Binding CancelCommand}" />
+                <Label Text="{Binding CreateFarmTitle}" FontSize="Subtitle" FontAttributes="Bold" />
+                <Button Text="Save" TextColor="CornflowerBlue" FontSize="Subtitle" FontAttributes="Bold" BackgroundColor="Transparent" Command="{Binding AddFarmCommand}" />
+            </FlexLayout>
+        </StackLayout>
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="10" Margin="0,5,0,0">
+                <VerticalStackLayout Spacing="2">
+                    <Border>
+                        <toolkit:Expander x:Name="basicInformation" IsExpanded="True">
+                            <toolkit:Expander.Header>
+                                <Grid BackgroundColor="White" Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="Basic Information" FontSize="16" Grid.Column="0"/>
+                                    <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference basicInformation}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Rotation" Value="180" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                            </toolkit:Expander.Header>
+                            <toolkit:Expander.Content>
+                                <StackLayout Padding="10, 0">
+                                    <inputLayout:SfTextInputLayout Hint="Name *" 
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Entry Text="{Binding Name}" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Address *" 
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Entry Text="{Binding Address}" />
+                                    </inputLayout:SfTextInputLayout>
+                                </StackLayout>
+                            </toolkit:Expander.Content>
+                        </toolkit:Expander>
                     </Border>
-                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="FillAndExpand">
-                        <Label Text="New Farm" />
-                        <Label Text="{Binding Area}" FontSize="10" TextColor="Gray" />
-                    </VerticalStackLayout>
-                </HorizontalStackLayout>
-                <Button Text="Get Current Location"
-            TextColor="White"
-            FontAttributes="Bold"
-            BackgroundColor="CornflowerBlue"
-            HorizontalOptions="FillAndExpand"
-            Command="{Binding AddPointCommand}"/>
+                    <Border>
+                        <toolkit:Expander x:Name="contactDetails">
+                            <toolkit:Expander.Header>
+                                <Grid BackgroundColor="White" Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="Contact Details" FontSize="16" Grid.Column="0"/>
+                                    <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference contactDetails}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Rotation" Value="180" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                            </toolkit:Expander.Header>
+                            <toolkit:Expander.Content>
+                                <StackLayout Padding="10, 0">
+                                    <inputLayout:SfTextInputLayout Hint="Contact Person *" 
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Entry Text="{Binding ContactPerson}" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Contact Number *" 
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Entry Text="{Binding ContactNumber}" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Contact Email" 
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Entry Text="{Binding Email}" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Website" 
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Entry Text="{Binding Website}" />
+                                    </inputLayout:SfTextInputLayout>
+                                </StackLayout>
+                            </toolkit:Expander.Content>
+                        </toolkit:Expander>
+                    </Border>
+                    <Border>
+                        <toolkit:Expander x:Name="farmDetails">
+                            <toolkit:Expander.Header>
+                                <Grid BackgroundColor="White" Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="Farm Size" FontSize="16" Grid.Column="0"/>
+                                    <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference farmDetails}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Rotation" Value="180" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                            </toolkit:Expander.Header>
+                            <toolkit:Expander.Content>
+                                <StackLayout Padding="10, 0">
+                                    <inputLayout:SfTextInputLayout x:Name="size" 
+                                                                   Hint="Farm Size (Ha)"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfNumericEntry Value="{Binding FarmSize}" CustomFormat="N2" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="arable"
+                                                                   Hint="Arable (Ha)"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfNumericEntry Value="{Binding Arable}" CustomFormat="N2" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="cleared" 
+                                                                   Hint="Cleared (Ha)"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfNumericEntry Value="{Binding Cleared}" CustomFormat="N2" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="soilType" 
+                                                                   Hint="Soil Types"
+                                                                   HelperText="e.g sandy, loam, clay"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding SoilType}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="personnel" 
+                                                                   Hint="Farm Personnel"
+                                                                   HelperText="Workers,qualifications"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding Personnel}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="problems"
+                                                                   Hint="Problems"
+                                                                   HelperText="e.g pests and diseases"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding Problems}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                </StackLayout>
+                            </toolkit:Expander.Content>
+                        </toolkit:Expander>
+                    </Border>
+                    <Border>
+                        <toolkit:Expander x:Name="location">
+                            <toolkit:Expander.Header>
+                                <Grid BackgroundColor="White" Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="Location" FontSize="16" Grid.Column="0"/>
+                                    <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference location}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Rotation" Value="180" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                            </toolkit:Expander.Header>
+                            <toolkit:Expander.Content>
+                                <StackLayout Padding="10, 0">
+                                    <Button Text="Get Current Location"
+                                            TextColor="White"
+                                            FontAttributes="Bold"
+                                            BackgroundColor="CornflowerBlue"
+                                            HorizontalOptions="FillAndExpand"
+                                            Command="{Binding AddPointCommand}"
+                                            Margin="0,0,0,15"/>
+                                    <FlexLayout Direction="Row" AlignContent="SpaceEvenly" BackgroundColor="AliceBlue" HorizontalOptions="Center" Margin="0,0,0,10">
+                                        <BoxView HeightRequest="1" WidthRequest="20" BackgroundColor="{StaticResource MidGray}" />
+                                        <Label Text="or enter manually" FontSize="11" Margin="3,0" />
+                                        <BoxView HeightRequest="1" WidthRequest="20" BackgroundColor="{StaticResource MidGray}" />
+                                    </FlexLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="latitude"
+                                                                   Hint="Latitude"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfNumericEntry Value="{Binding Latitude}" CustomFormat="F8" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="longitude" 
+                                                                   Hint="Longitude"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined"
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfNumericEntry Value="{Binding Longitude}" CustomFormat="F8" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="elevation"
+                                                                   Hint="Elevation"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   HelperText="meters above sea level"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfNumericEntry Value="{Binding Elevation}" CustomFormat="N2" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="terrain" 
+                                                                   Hint="Terrain"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfComboBox ItemsSource="{Binding Terrains}"
+                                                            TextMemberPath="Name"
+                                                            DisplayMemberPath="Name"
+                                                            SelectedValuePath="Id"
+                                                            SelectedItem="{Binding Terrain}"
+                                                            Placeholder="Select Terrain"/>
+                                    </inputLayout:SfTextInputLayout>
+                                </StackLayout>
+                            </toolkit:Expander.Content>
+                        </toolkit:Expander>
+                    </Border>
+                    <Border>
+                        <toolkit:Expander x:Name="adminRegion">
+                            <toolkit:Expander.Header>
+                                <Grid BackgroundColor="White" Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="Administrative Region" FontSize="16" Grid.Column="0" />
+                                    <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference adminRegion}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Rotation" Value="180" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                            </toolkit:Expander.Header>
+                            <toolkit:Expander.Content>
+                                <StackLayout Padding="10, 0">
+                                    <inputLayout:SfTextInputLayout x:Name="region"
+                                                                   Hint="Farming Region"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfComboBox ItemsSource="{Binding Regions}"
+                                                            TextMemberPath="Name"
+                                                            DisplayMemberPath="Name"
+                                                            SelectedValuePath="Id"
+                                                            SelectedItem="{Binding SelectedFarmingRegion}"
+                                                            Placeholder="Select a Farming Region"/>
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="conference" 
+                                                                   Hint="Conference"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfComboBox ItemsSource="{Binding Conferences}"
+                                                            TextMemberPath="Name"
+                                                            DisplayMemberPath="Name"
+                                                            SelectedValuePath="Id"
+                                                            SelectedItem="{Binding SelectedConference}"
+                                                            Placeholder="Select a Conference"/>
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="province" 
+                                                                   Hint="Province"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfComboBox x:Name="provinces" 
+                                                            ItemsSource="{Binding Provinces}"
+                                                            TextMemberPath="Name"
+                                                            DisplayMemberPath="Name"
+                                                            SelectedValuePath="Id"
+                                                            SelectedItem="{Binding SelectedProvince}"
+                                                            Placeholder="Select a Province"
+                                                            SelectionChanged="Provinces_SelectionChanged"/>
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="district" 
+                                                                   Hint="District"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfComboBox x:Name="districts" 
+                                                            ItemsSource="{Binding Districts}"
+                                                            TextMemberPath="Name"
+                                                            DisplayMemberPath="Name"
+                                                            SelectedValuePath="Id"
+                                                            SelectedItem="{Binding SelectedDistrict}"
+                                                            Placeholder="Select a District"
+                                                            IsEditable="True"
+                                                            SelectionChanged="Districts_SelectionChanged"/>
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="localAuthority" 
+                                                                   Hint="Local Authority"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfComboBox x:Name="localAuthorities" 
+                                                            ItemsSource="{Binding LocalAuthorities}"
+                                                            TextMemberPath="Name"
+                                                            DisplayMemberPath="Name"
+                                                            SelectedValuePath="Id"
+                                                            SelectedItem="{Binding SelectedLocalAuthority}"
+                                                            Placeholder="Select a Local Authority"
+                                                            IsEditable="True" 
+                                                            SelectionChanged="LocalAuthorities_SelectionChanged"/>
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="ward"
+                                                                   Hint="Ward"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfComboBox x:Name="wards" 
+                                                            ItemsSource="{Binding Wards}"
+                                                            TextMemberPath="Name"
+                                                            DisplayMemberPath="Name"
+                                                            SelectedValuePath="Id"
+                                                            SelectedItem="{Binding SelectedWard}"
+                                                            Placeholder="Select a Ward"
+                                                            IsEditable="True" />
+                                    </inputLayout:SfTextInputLayout>
+                                </StackLayout>
+                            </toolkit:Expander.Content>
+                        </toolkit:Expander>
+                    </Border>
+                    <Border>
+                        <toolkit:Expander x:Name="waterResources">
+                            <toolkit:Expander.Header>
+                                <Grid BackgroundColor="White" Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="Water Resources" FontSize="16" Grid.Column="0"/>
+                                    <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference waterResources}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Rotation" Value="180" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                            </toolkit:Expander.Header>
+                            <toolkit:Expander.Content>
+                                <StackLayout Padding="10, 0">
+                                    <inputLayout:SfTextInputLayout x:Name="waterSource" 
+                                                                   Hint="Water Source"
+                                                                   HelperText="e.g dam,borehole"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding WaterSource}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="waterAvailability" 
+                                                                   Hint="Water Availability"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfComboBox ItemsSource="{Binding WaterAvailabilities}"
+                                                            TextMemberPath="Name"
+                                                            DisplayMemberPath="Name"
+                                                            SelectedValuePath="Id"
+                                                            SelectedItem="{Binding WaterAvailability}"
+                                                            Placeholder="Select Availability"/>
+                                    </inputLayout:SfTextInputLayout>
+                                    <StackLayout>
+                                        <Label Text="Irrigated?" />
+                                        <RadioButton Content="No" IsChecked="true" />
+                                        <RadioButton Content="Yes" />
+                                    </StackLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="irrigationSystem"
+                                                                   Hint="Irrigation Systems"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   HelperText="if any, specify type"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding IrrigationSystems}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                </StackLayout>
+                            </toolkit:Expander.Content>
+                        </toolkit:Expander>
+                    </Border>
+                    <Border>
+                        <toolkit:Expander x:Name="existingInfrustructure">
+                            <toolkit:Expander.Header>
+                                <Grid BackgroundColor="White" Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="Existing Infrustructure" FontSize="16" Grid.Column="0"/>
+                                    <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference existingInfrustructure}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Rotation" Value="180" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                            </toolkit:Expander.Header>
+                            <toolkit:Expander.Content>
+                                <StackLayout Padding="10, 0">
+                                    <inputLayout:SfTextInputLayout x:Name="Buildings" 
+                                                                   Hint="Buildings"
+                                                                   HelperText="classrooms, storage sheds, etc"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding Buildings}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="roadAccess" 
+                                                                   Hint="Road Access"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfComboBox ItemsSource="{Binding Roads}"
+                                                            TextMemberPath="Name"
+                                                            DisplayMemberPath="Name"
+                                                            SelectedValuePath="Id"
+                                                            SelectedItem="{Binding RoadAccess}"
+                                                            Placeholder="Select..."/>
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="securityMeasures" 
+                                                                   Hint="Security/Fencing"
+                                                                   HelperText="fencing type, security measures"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding SecurityMeasures}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout x:Name="equipment" 
+                                                                   Hint="Equipment"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding Equipment}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                </StackLayout>
+                            </toolkit:Expander.Content>
+                        </toolkit:Expander>
+                    </Border>
+                    <Border>
+                        <toolkit:Expander x:Name="history">
+                            <toolkit:Expander.Header>
+                                <Grid BackgroundColor="White" Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="School History" FontSize="16" Grid.Column="0"/>
+                                    <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference history}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Rotation" Value="180" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                            </toolkit:Expander.Header>
+                            <toolkit:Expander.Content>
+                                <StackLayout Padding="10, 0">
+                                    <inputLayout:SfTextInputLayout Hint="Year Established" 
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfNumericEntry Value="{Binding Year}" CustomFormat="0" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Founding Members / Institution" 
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding FoundingMembers}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Key Milestones" 
+                                                                   HelperText="Significant events"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding KeyMilestones}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                </StackLayout>
+                            </toolkit:Expander.Content>
+                        </toolkit:Expander>
+                    </Border>
+                    <Border>
+                        <toolkit:Expander x:Name="visionMission">
+                            <toolkit:Expander.Header>
+                                <Grid BackgroundColor="White" Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="Vision &amp; Mission" FontSize="16" Grid.Column="0"/>
+                                    <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference visionMission}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Rotation" Value="180" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                            </toolkit:Expander.Header>
+                            <toolkit:Expander.Content>
+                                <StackLayout Padding="10, 0">
+                                    <inputLayout:SfTextInputLayout Hint="Vision" 
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding Vision}" AutoSize="TextChanges"/>
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Mission" 
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding Mission}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                </StackLayout>
+                            </toolkit:Expander.Content>
+                        </toolkit:Expander>
+                    </Border>
+                    <Border>
+                        <toolkit:Expander x:Name="currentEnrollment">
+                            <toolkit:Expander.Header>
+                                <Grid BackgroundColor="White" Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="Current Enrollment" FontSize="16" Grid.Column="0"/>
+                                    <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference currentEnrollment}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Rotation" Value="180" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                            </toolkit:Expander.Header>
+                            <toolkit:Expander.Content>
+                                <StackLayout Padding="10, 0">
+                                    <inputLayout:SfTextInputLayout Hint="Male Students"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfNumericEntry Value="{Binding MaleStudents}" CustomFormat="0" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Female Students"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfNumericEntry Value="{Binding FemaleStudents}" CustomFormat="0" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Day Scholars"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfNumericEntry Value="{Binding DayScholars}" CustomFormat="0" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Boarding Scholars"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfNumericEntry Value="{Binding BoardingScholars}" CustomFormat="0" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Other Student Details"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding StudentDemographics}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                </StackLayout>
+                            </toolkit:Expander.Content>
+                        </toolkit:Expander>
+                    </Border>
+                    <Border>
+                        <toolkit:Expander x:Name="staffDetails">
+                            <toolkit:Expander.Header>
+                                <Grid BackgroundColor="White" Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="Staff Details" FontSize="16" Grid.Column="0"/>
+                                    <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference staffDetails}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Rotation" Value="180" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                            </toolkit:Expander.Header>
+                            <toolkit:Expander.Content>
+                                <StackLayout Padding="10, 0">
+                                    <inputLayout:SfTextInputLayout Hint="Male Teachers"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfNumericEntry Value="{Binding MaleTeachers}" CustomFormat="0" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Female Teachers"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <editors:SfNumericEntry Value="{Binding FemaleTeachers}" CustomFormat="0" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Other Staff"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   HelperText="Non teaching staff details"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding NonTeachingStaff}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                </StackLayout>
+                            </toolkit:Expander.Content>
+                        </toolkit:Expander>
+                    </Border>
+                    <Border>
+                        <toolkit:Expander x:Name="academicPerformance">
+                            <toolkit:Expander.Header>
+                                <Grid BackgroundColor="White" Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="Academic Performance" FontSize="16" Grid.Column="0"/>
+                                    <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference academicPerformance}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Rotation" Value="180" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                            </toolkit:Expander.Header>
+                            <toolkit:Expander.Content>
+                                <StackLayout Padding="10, 0">
+                                    <inputLayout:SfTextInputLayout Hint="Average Exam Scores"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   HelperText="For the past 3 years"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding AverageExamScores}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Extracurricular Achievements"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   HelperText="Sports, arts, etc"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding ExtracurricularAchievements}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                </StackLayout>
+                            </toolkit:Expander.Content>
+                        </toolkit:Expander>
+                    </Border>
+                    <Border>
+                        <toolkit:Expander x:Name="facilitiesInfrustucture">
+                            <toolkit:Expander.Header>
+                                <Grid BackgroundColor="White" Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="Facilities &amp; Infrustructure" FontSize="16" Grid.Column="0"/>
+                                    <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference facilitiesInfrusture}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Rotation" Value="180" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                            </toolkit:Expander.Header>
+                            <toolkit:Expander.Content>
+                                <StackLayout Padding="10, 0">
+                                    <inputLayout:SfTextInputLayout Hint="Classrooms"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   HelperText="Number, condition"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding Classrooms}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Laboratories"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   HelperText="Science, Computers, etc"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding Laboratories}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="SportsFacilities"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   HelperText="Playgrounds, Sports Equipment"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding SportsFacilities}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Library"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   HelperText="Books, digital resources"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding Library}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                </StackLayout>
+                            </toolkit:Expander.Content>
+                        </toolkit:Expander>
+                    </Border>
+                    <Border>
+                        <toolkit:Expander x:Name="communityEngagement">
+                            <toolkit:Expander.Header>
+                                <Grid BackgroundColor="White" Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="Community Engagement" FontSize="16" Grid.Column="0"/>
+                                    <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference communityEngagement}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Rotation" Value="180" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                            </toolkit:Expander.Header>
+                            <toolkit:Expander.Content>
+                                <StackLayout Padding="10, 0">
+                                    <inputLayout:SfTextInputLayout Hint="Community Programs"
+                                                                   IsHintAlwaysFloated="True" 
+                                                                   HelperText="Outreach, community service"
+                                                                   ContainerType="Outlined" 
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding CommunityPrograms}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                    <inputLayout:SfTextInputLayout Hint="Partnerships"
+                                                                   IsHintAlwaysFloated="True"
+                                                                   HelperText="With local business, NGOs, etc."
+                                                                   ContainerType="Outlined"
+                                                                   ContainerBackground="Transparent">
+                                        <Editor Text="{Binding Partnerships}" AutoSize="TextChanges" />
+                                    </inputLayout:SfTextInputLayout>
+                                </StackLayout>
+                            </toolkit:Expander.Content>
+                        </toolkit:Expander>
+                    </Border>
+                    <StackLayout BackgroundColor="White" Padding="10" Spacing="10">
+                        <inputLayout:SfTextInputLayout Hint="Extra Details" 
+                                                       IsHintAlwaysFloated="True" 
+                                                       ContainerType="Outlined" 
+                                                       ContainerBackground="Transparent">
+                            <Editor Text="{Binding Description}" AutoSize="TextChanges"  />
+                        </inputLayout:SfTextInputLayout>
+                        <inputLayout:SfTextInputLayout x:Name="recommendations"
+                                                       Hint="Recommendations"
+                                                       IsHintAlwaysFloated="True"
+                                                       ContainerType="Outlined"
+                                                       ContainerBackground="Transparent">
+                            <Editor Text="{Binding Recommendations}" AutoSize="TextChanges" />
+                        </inputLayout:SfTextInputLayout>
+                    </StackLayout>
+                </VerticalStackLayout>
             </VerticalStackLayout>
-            <Frame HeightRequest="1"
-       BackgroundColor="{StaticResource LightGray}"
-       HasShadow="False"
-       Padding="0" />
-            <VerticalStackLayout Padding="16, 0">
-                <inputLayout:SfTextInputLayout Hint="Name" 
-                       IsHintAlwaysFloated="True" 
-                       ContainerType="Outlined" 
-                       ContainerBackground="Transparent">
-                    <Entry Text="{Binding Name}" />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout Hint="Address" 
-                        IsHintAlwaysFloated="True" 
-                        ContainerType="Outlined" 
-                        ContainerBackground="Transparent">
-                    <Entry Text="{Binding Address}" />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout Hint="Description" 
-                        IsHintAlwaysFloated="True" 
-                        ContainerType="Outlined" 
-                        ContainerBackground="Transparent">
-                    <Editor Text="{Binding Description}"  />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout Hint="Contact Person" 
-                        IsHintAlwaysFloated="True" 
-                        ContainerType="Outlined" 
-                        ContainerBackground="Transparent">
-                    <Entry Text="{Binding Name}" />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout Hint="Contact Number" 
-                        IsHintAlwaysFloated="True" 
-                        ContainerType="Outlined" 
-                        ContainerBackground="Transparent">
-                    <Entry Text="{Binding PhoneNumber}" />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout Hint="Contact Email" 
-                       IsHintAlwaysFloated="True" 
-                       ContainerType="Outlined" 
-                       ContainerBackground="Transparent">
-                    <Entry Text="{Binding Email}" />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="size" 
-                       Hint="Farm Size (Ha)"
-                       IsHintAlwaysFloated="True" 
-                       ContainerType="Outlined" 
-                       ContainerBackground="Transparent">
-                    <editors:SfNumericEntry Value="{Binding Size}" CustomFormat="N2" />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="arable" 
-                        Hint="Arable (Ha)"
-                        IsHintAlwaysFloated="True" 
-                        ContainerType="Outlined" 
-                        ContainerBackground="Transparent">
-                    <editors:SfNumericEntry Value="{Binding Arable}" CustomFormat="N2" />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="cleared" 
-                        Hint="Cleared (Ha)"
-                        IsHintAlwaysFloated="True" 
-                        ContainerType="Outlined" 
-                        ContainerBackground="Transparent">
-                    <editors:SfNumericEntry Value="{Binding Cleared}" CustomFormat="N2" />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="waterSource" 
-                        Hint="Water Source"
-                        HelperText="e.g dam,borehole"
-                        IsHintAlwaysFloated="True" 
-                        ContainerType="Outlined" 
-                        ContainerBackground="Transparent">
-                    <Editor Text="{Binding WaterSource}"  />
-                </inputLayout:SfTextInputLayout>
-                <StackLayout>
-                    <Label Text="Irrigated?" />
-                    <RadioButton Content="No" IsChecked="true" />
-                    <RadioButton Content="Yes" />
-                </StackLayout>
-                <inputLayout:SfTextInputLayout x:Name="equipment" 
-                        Hint="Equipment"
-                        IsHintAlwaysFloated="True" 
-                        ContainerType="Outlined" 
-                        ContainerBackground="Transparent">
-                    <Editor Text="{Binding Equipment}"  />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="soilType" 
-                        Hint="Soil Types"
-                        HelperText="e.g sandy, loam, clay"
-                        IsHintAlwaysFloated="True" 
-                        ContainerType="Outlined" 
-                        ContainerBackground="Transparent">
-                    <Editor Text="{Binding SoilType}"  />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="personnel" 
-            Hint="Personnel"
-            IsHintAlwaysFloated="True" 
-            ContainerType="Outlined" 
-            ContainerBackground="Transparent">
-                    <Editor Text="{Binding Personnel}"  />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="problems" 
-            Hint="Problems"
-            HelperText="e.g pests and diseases"
-            IsHintAlwaysFloated="True" 
-            ContainerType="Outlined" 
-            ContainerBackground="Transparent">
-                    <Editor Text="{Binding Problems}"  />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="region" 
-                       Hint="Farming Region"
-                       IsHintAlwaysFloated="True"
-                       ContainerType="Outlined" 
-                       ContainerBackground="Transparent">
-                    <editors:SfComboBox ItemsSource="{Binding Regions}"
-                TextMemberPath="Name"
-                DisplayMemberPath="Name"
-                SelectedValuePath="Id"
-                SelectedItem="{Binding SelectedFarmingRegion}"
-                Placeholder="Select a Farming Region"/>
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="conference" 
-                       Hint="Conference"
-                       IsHintAlwaysFloated="True"
-                       ContainerType="Outlined" 
-                       ContainerBackground="Transparent">
-                    <editors:SfComboBox ItemsSource="{Binding Conferences}"
-                TextMemberPath="Name"
-                DisplayMemberPath="Name"
-                SelectedValuePath="Id"
-                SelectedItem="{Binding SelectedConference}"
-                Placeholder="Select a Conference"/>
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="province" 
-                       Hint="Province"
-                       IsHintAlwaysFloated="True"
-                       ContainerType="Outlined" 
-                       ContainerBackground="Transparent">
-                    <editors:SfComboBox ItemsSource="{Binding Provinces}"
-                TextMemberPath="Name"
-                DisplayMemberPath="Name"
-                SelectedValuePath="Id"
-                SelectedItem="{Binding SelectedProvince}"
-                Placeholder="Select a Province"/>
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="district" 
-                       Hint="District"
-                       IsHintAlwaysFloated="True"
-                       ContainerType="Outlined" 
-                       ContainerBackground="Transparent">
-                    <editors:SfComboBox ItemsSource="{Binding Districts}"
-                TextMemberPath="Name"
-                DisplayMemberPath="Name"
-                SelectedValuePath="Id"
-                SelectedItem="{Binding SelectedDistrict}"
-                Placeholder="Select a District"
-                IsEditable="True" />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="localAuthority" 
-                        Hint="Local Authority"
-                        IsHintAlwaysFloated="True"
-                        ContainerType="Outlined" 
-                        ContainerBackground="Transparent">
-                    <editors:SfComboBox ItemsSource="{Binding LocalAuthorites}"
-                TextMemberPath="Name"
-                DisplayMemberPath="Name"
-                SelectedValuePath="Id"
-                SelectedItem="{Binding SelectedLocalAuthority}"
-                Placeholder="Select a Local Authority"
-                IsEditable="False" />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="ward"
-                       Hint="Ward"
-                       IsHintAlwaysFloated="True"
-                       ContainerType="Outlined" 
-                       ContainerBackground="Transparent">
-                    <editors:SfComboBox ItemsSource="{Binding Wards}"
-                TextMemberPath="Name"
-                DisplayMemberPath="Name"
-                SelectedValuePath="Id"
-                SelectedItem="{Binding SelectedWard}"
-                Placeholder="Select a Ward"
-                IsEditable="False" />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="recommendations" 
-            Hint="Recommendations"
-            IsHintAlwaysFloated="True" 
-            ContainerType="Outlined" 
-            ContainerBackground="Transparent">
-                    <Editor Text="{Binding Recommendations}"  />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="latitude" 
-            Hint="Latitude"
-            IsHintAlwaysFloated="True" 
-            ContainerType="Outlined" 
-            ContainerBackground="Transparent">
-                    <editors:SfNumericEntry Value="{Binding Source=CurrentLocation, Path=Latitude}" />
-                </inputLayout:SfTextInputLayout>
-                <inputLayout:SfTextInputLayout x:Name="longitude" 
-Hint="Longitude"
-IsHintAlwaysFloated="True" 
-ContainerType="Outlined" 
-ContainerBackground="Transparent">
-                    <editors:SfNumericEntry Value="{Binding Source=CurrentLocation, Path=Longitude}" />
-                </inputLayout:SfTextInputLayout>
-            </VerticalStackLayout>
-        </VerticalStackLayout>
-    </ScrollView>
+        </ScrollView>
+        <ActivityIndicator Color="Black" IsRunning="{Binding IsRefreshing}" HorizontalOptions="Center" VerticalOptions="Center" />
+    </Grid>
 </ContentPage>

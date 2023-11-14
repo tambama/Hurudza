@@ -8,11 +8,7 @@ namespace Hurudza.Data.UI.Models.ViewModels.Base
 
         public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 
-
-        [Timestamp]
-        public byte[] Version { get; set; }
-
-        public virtual bool Deleted { get; set; }
+        public bool Deleted { get; set; } = false;
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public string? CreatorId { get; set; }
         public string? ModifiedBy { get; set; }

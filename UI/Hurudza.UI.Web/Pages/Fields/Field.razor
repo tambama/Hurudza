@@ -233,7 +233,7 @@ else
                 break;
             case Action.Delete when flag:
                 args.Cancel = true;
-                Dialog.Show();
+                await Dialog.ShowAsync();
                 flag = false;
                 break;
             case Action.Save:

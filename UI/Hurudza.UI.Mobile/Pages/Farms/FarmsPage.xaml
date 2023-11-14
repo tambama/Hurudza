@@ -2,6 +2,7 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="Hurudza.UI.Mobile.Pages.Farms.FarmsPage"
              BackgroundColor="White">
     <Grid>
@@ -14,20 +15,46 @@
         <HorizontalStackLayout Grid.Row="0" Padding="20, 10, 0, 5" >
             <Label Text="Farms" FontSize="Title" FontAttributes="Bold" />
         </HorizontalStackLayout>
-        <SearchBar Grid.Row="1" Placeholder="Search" Text="{Binding SearchText}"/>
+        <SearchBar Grid.Row="1" Placeholder="Search" Text="{Binding SearchText}" SearchCommand="{Binding SearchFarmCommand}" TextChanged="SearchBar_TextChanged" />
         <Frame Grid.Row="2" HeightRequest="5"  Padding="1" Margin="0, 10" BackgroundColor="{StaticResource LightGray}">
             <HorizontalStackLayout Padding="20, 0">
                 <Label Text="All Farms" FontSize="11"/>
             </HorizontalStackLayout>
         </Frame>
-        <ListView Grid.Row="3" ItemsSource="{Binding Farms}" HasUnevenRows="True">
+        <ListView x:Name="listView" 
+                  Grid.Row="3" 
+                  ItemsSource="{Binding Farms}" 
+                  HasUnevenRows="True" 
+                  IsRefreshing="{Binding IsRefreshing}" 
+                  RefreshControlColor="Black"
+                  IsPullToRefreshEnabled="True"
+                  RefreshCommand="{Binding InitCommand}"
+                  SelectedItem="{Binding SelectedFarm}" 
+                  SelectionMode="None">
+            <ListView.Behaviors>
+                <toolkit:EventToCommandBehavior EventName="ItemSelected" Command="{Binding SelectedFarmCommand}" />               
+            </ListView.Behaviors>
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ViewCell>
-                        <StackLayout Padding="10">
-                            <Label Text="{Binding Name}" FontSize="Large" />
-                            <Label Text="{Binding Size, StringFormat='Size: {0}ha'}" FontSize="Small" />
-                        </StackLayout>
+                        <ViewCell.ContextActions>
+                            <MenuItem Text="Edit"
+                                      Clicked="Edit_Clicked"
+                                      CommandParameter="{Binding .}" />
+                            <MenuItem Text="Delete"
+                                      Clicked="Delete_Clicked"
+                                      CommandParameter="{Binding .}"
+                                      IsDestructive="True"/>
+                        </ViewCell.ContextActions>
+                        <HorizontalStackLayout Spacing="16" Padding="16, 0">
+                            <Border StrokeShape="RoundRectangle 8" StrokeThickness="0">
+                                <Image Source="farm.png" HeightRequest="80" WidthRequest="20" />
+                            </Border>
+                            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="FillAndExpand">
+                                <Label Text="{Binding Name}" FontSize="18" />
+                                <Label Text="{Binding Size, StringFormat='Size: {0} ha'}" FontSize="Small" TextColor="Gray" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
                     </ViewCell>
                 </DataTemplate>
             </ListView.ItemTemplate>

@@ -8,13 +8,6 @@ namespace Hurudza.Apis.Base.Mapping
     {
         public Locations()
         {
-            CreateMap<Location, LocationViewModel>();
-
-            CreateMap<FarmLocation, FarmLocationViewModel>()
-                .ForMember(dst => dst.Farm, opts => opts.MapFrom(src => src.Farm.Name));
-
-            CreateMap<FieldLocation, FieldLocationViewModel>()
-                .ForMember(dst => dst.Field, opts => opts.MapFrom(src => src.Field.Name));
         }
     }
 }

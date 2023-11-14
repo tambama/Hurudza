@@ -2,13 +2,7 @@
 
 namespace Hurudza.UI.Mobile.Services.Interfaces
 {
-    public interface IProvinceService
+    public interface IProvinceService : IBaseService<Province>
     {
-        event EventHandler<ServiceEventArgs<Province>> ProvincesUpdated;
-
-        Task<IEnumerable<Province>> GetItemsAsync();
-        Task RefreshItemsAsync();
-        Task RemoveItemAsync(Province item);
-        Task SaveItemAsync(Province item);
     }
 }

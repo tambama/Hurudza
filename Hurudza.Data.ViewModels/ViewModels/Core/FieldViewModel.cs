@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Hurudza.Data.Enums.Enums;
+using Hurudza.Data.Models.Models;
 using Hurudza.Data.UI.Models.ViewModels.Base;
 
 namespace Hurudza.Data.UI.Models.ViewModels.Core;
@@ -15,5 +16,5 @@ public class FieldViewModel : BaseViewModel
     [Required(ErrorMessage = "Farm is required")]
     public required string FarmId { get; set; }
     public string? Farm { get; set; }
-    public List<FieldLocationViewModel> Locations { get; set; }
+    public List<FieldLocation> Locations { get; set; } = new List<FieldLocation>();
 }

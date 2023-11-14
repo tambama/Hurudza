@@ -106,7 +106,7 @@ try
             config =>
             {
                 config
-                    .WithOrigins("http://localhost:5113", "https://localhost:7148")
+                    .WithOrigins("http://localhost:5113", "https://localhost:7148", "*")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .SetIsOriginAllowed(x => true)

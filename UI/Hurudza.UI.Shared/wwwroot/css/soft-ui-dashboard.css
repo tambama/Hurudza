@@ -540,6 +540,10 @@ progress {
   display: none !important;
 }
 
+.hidden {
+  display: none !important;
+}
+
 .lead {
   font-size: 1.25rem;
   font-weight: 400;
@@ -11178,6 +11182,10 @@ fieldset:disabled .btn {
 
 .min-height-vh-80 {
   min-height: 80vh !important;
+}
+
+.min-height-vh-86 {
+    min-height: 86vh !important;
 }
 
 .min-height-vh-90 {
@@ -23286,11 +23294,11 @@ html {
   }
 
   .sidenav.fixed-start~.main-content {
-    margin-left: 17.125rem;
+    margin-left: 15.7rem;
   }
 
   .sidenav.fixed-end~.main-content {
-    margin-right: 17.125rem;
+    margin-right: 15.7rem;
   }
 }
 
@@ -23332,11 +23340,11 @@ html {
 
 @media (max-width: 1199.98px) {
   .g-sidenav-show.rtl .sidenav {
-    transform: translateX(17.125rem);
+    transform: translateX(16rem);
   }
 
   .g-sidenav-show:not(.rtl) .sidenav {
-    transform: translateX(-17.125rem);
+    transform: translateX(-16rem);
   }
 
   .g-sidenav-show .sidenav.fixed-start~.main-content {

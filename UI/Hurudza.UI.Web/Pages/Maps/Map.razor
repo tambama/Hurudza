@@ -1,0 +1,827 @@
+﻿@page "/map"
+@using System.Collections.ObjectModel;
+@using System.Diagnostics;
+@attribute [Authorize]
+
+@inject IJSRuntime JS
+@inject IApiCall ApiCall
+
+<style>
+    .e-listview .e-list-item {
+        color: black;
+        background-color: white;
+    }
+
+        .e-listview .e-list-item.e-focused {
+            color: white;
+            background-color: black;
+        }
+
+    #container .e-listview {
+        box-shadow: 0 1px 4px #ddd;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .sample {
+        justify-content: center;
+        min-height: 280px;
+    }
+
+    .vertical-center {
+        align-items: center;
+    }
+
+    .padding {
+        padding: 4px;
+    }
+
+    .flex {
+        display: flex;
+    }
+
+    .flex__center {
+        justify-content: center;
+    }
+
+    .margin {
+        margin: 10px;
+    }
+</style>
+
+<Toast @ref="Alert" />
+
+<div style="height:100%;width:100%;display:flex;flex-direction:row">
+    <div style="width:40%;padding:5px;" class="@ShowSchools">
+        <div style="display:flex;flex-direction:row;justify-content:space-between">
+            <div>
+                <h3>Schools</h3>
+            </div>
+            <button class="btn bg-white btn-icon-only" onclick="@ToggleSchools">
+                <i class="fa fa-plus"></i>
+            </button>
+        </div>
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search ...">
+        </div>
+        <div class="my-2">
+            <SfListView DataSource="@Farms" >
+                <ListViewFieldSettings TValue="FarmViewModel" Id="Id" Text="Name"></ListViewFieldSettings>
+                <ListViewTemplates TValue="FarmViewModel">
+                    <Template>
+                        @{
+                            FarmViewModel farm = (FarmViewModel)context;
+                            <div class="e-list-wrapper e-list-multi-line e-list-avatar" @onclick="(e => OnFarmSelect(farm))">
+                                <span class="e-list-item-header">@farm.Name</span>
+                                <span class="e-list-content"></span>
+                            </div>
+                        }
+                    </Template>
+                </ListViewTemplates>
+            </SfListView>
+        </div>
+    </div>
+    <div style="width:40%;padding:5px;overflow-x:hidden;overflow-y:auto;" class="max-height-vh-100 @ShowSchoolDetails">
+        <div class="col-12 mt-md-0 mt-4">
+            <div class="card h-100">
+                <div class="card-header pb-0 p-3">
+                    <div class="row">
+                        <div class="col-md-1 text-start">
+                            <a href="javascript:;" onclick="@GoBackToList">
+                                <i class="fas fa-arrow-left text-secondary text-sm" data-bs-toggle="tooltip" data-bs-placement="top" aria-hidden="true" aria-label="Go Back" data-bs-original-title="Go Back"></i><span class="sr-only">Go Back</span>
+                            </a>
+                        </div>
+                        <div class="col-md-7 d-flex align-items-center">
+                            <h6 class="mb-0">Profile Information</h6>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="javascript:;" onclick="@ShowEdit">
+                                <i class="fas fa-user-edit text-secondary text-sm" data-bs-toggle="tooltip" data-bs-placement="top" aria-hidden="true" aria-label="Edit Profile" data-bs-original-title="Edit Profile"></i><span class="sr-only">Edit Profile</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-3">
+                    <h5 class="mb-0">@_farm.Name</h5>
+                    <p class="text-sm">
+                        @_farm.Description
+                    </p>
+                    <hr class="horizontal gray-light my-4">
+                    <ul class="list-group">
+                        <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Address:</strong> &nbsp; @_farm.Address</li>
+                        <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Primary Contact:</strong> &nbsp; @_farm.ContactPerson</li>
+                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Mobile:</strong> &nbsp; @_farm.PhoneNumber</li>
+                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Email:</strong> &nbsp; @_farm.Email</li>
+                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Website:</strong> &nbsp; @_farm.Website</li>
+                    </ul>
+                    <hr class="horizontal gray-light my-2">
+                    <SfAccordion>
+                        <AccordionItems>
+                            <AccordionItem>
+                                <HeaderTemplate>
+                                    <div class="col-md-12 d-flex align-items-center">
+                                        <h6 class="mb-0">Basic Information</h6>
+                                    </div>
+                                </HeaderTemplate>
+                                <ContentTemplate>
+                                    <ul class="list-group">
+                                        <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Province:</strong> &nbsp; @_farm.Province</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Farming Region:</strong> &nbsp; @_farm.Region?.GetDescription()</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">District:</strong> &nbsp; @_farm.District</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Local Authority:</strong> &nbsp; @_farm.LocalAuthority</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Ward:</strong> &nbsp; @_farm.Ward</li>
+                                    </ul>
+                                </ContentTemplate>
+                            </AccordionItem>
+                            <AccordionItem>
+                                <HeaderTemplate>
+                                    <div class="col-md-12 d-flex align-items-center">
+                                        <h6 class="mb-0">Farm Size</h6>
+                                    </div>
+                                </HeaderTemplate>
+                                <ContentTemplate>
+                                    <ul class="list-group">
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Total Land Area:</strong> &nbsp; @_farm.Size ha</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Arable:</strong> &nbsp; @_farm.Arable ha</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Cleared:</strong> &nbsp; @_farm.Cleared ha</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Terrain Type:</strong> &nbsp; @_farm.Terrain?.GetDescription()</li>
+                                        <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Location:</strong> &nbsp; @_farm.Latitude, @_farm.Longitude</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Altitude:</strong> &nbsp; @_farm.Elevation m</li>
+                                    </ul>
+                                </ContentTemplate>
+                            </AccordionItem>
+                            <AccordionItem>
+                                <HeaderTemplate>
+                                    <div class="col-md-12 d-flex align-items-center">
+                                        <h6 class="mb-0">Infrastructure</h6>
+                                    </div>
+                                </HeaderTemplate>
+                                <ContentTemplate>
+                                    <ul class="list-group">
+                                        <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Water Source:</strong> &nbsp; @_farm.WaterSource</li>
+                                        <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Water Availability:</strong> &nbsp; @_farm.WaterAvailability?.GetDescription()</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Irrigation Systems:</strong> &nbsp; @_farm.IrrigationSystems</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Buildings:</strong> &nbsp; @_farm.Buildings</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Road Access:</strong> &nbsp; @_farm.RoadAccess?.GetDescription()</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Security:</strong> &nbsp; @_farm.SecurityMeasures</li>
+                                    </ul>
+                                </ContentTemplate>
+                            </AccordionItem>
+                            <AccordionItem>
+                                <HeaderTemplate>
+                                    <div class="col-md-12 d-flex align-items-center">
+                                        <h6 class="mb-0">Land Use</h6>
+                                    </div>
+                                </HeaderTemplate>
+                                <ContentTemplate>
+                                    <ul class="list-group">
+                                        <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Past Crops:</strong> &nbsp; @_farm.PastCrops</li>
+                                        <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Land Management:</strong> &nbsp; @_farm.LandManagementPractice</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Irrigation Systems:</strong> &nbsp; @_farm.IrrigationSystems</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Buildings:</strong> &nbsp; @_farm.Buildings</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Road Access:</strong> &nbsp; @_farm.RoadAccess?.GetDescription()</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Security:</strong> &nbsp; @_farm.SecurityMeasures</li>
+                                    </ul>
+                                </ContentTemplate>
+                            </AccordionItem>
+                        </AccordionItems>
+                    </SfAccordion>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 text-center mt-1">
+            <a class="btn bg-gradient-dark mb-0 text-end" href="javascript:;" onclick="@ShowFieldsList">Manage Fields</a>
+        </div>
+    </div>
+    <div style="width:40%;padding:5px;overflow-x:hidden;overflow-y:auto;" class="max-height-vh-100 @ShowFields">
+        <div class="col-12 mt-md-0 mt-4">
+            <div class="card h-100">
+                <div class="card-header pb-0 p-3">
+                    <div class="row">
+                        <div class="col-md-1 text-start">
+                            <a href="javascript:;" onclick="@GoBackToSchool">
+                                <i class="fas fa-arrow-left text-secondary text-sm" data-bs-toggle="tooltip" data-bs-placement="top" aria-hidden="true" aria-label="Go Back" data-bs-original-title="Go Back"></i><span class="sr-only">Go Back</span>
+                            </a>
+                        </div>
+                        <div class="col-md-7 d-flex align-items-center">
+                            <h6 class="mb-0">Fields</h6>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="javascript:;" onclick="@ShowEditField">
+                                <i class="fas fa-plus text-secondary text-sm" data-bs-toggle="tooltip" data-bs-placement="top" aria-hidden="true" aria-label="Edit Field" data-bs-original-title="Edit Field"></i><span class="sr-only">Edit Field</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-3">
+                    <h5 class="mb-0">@_farm.Name</h5>
+                    <hr class="horizontal gray-light my-4">
+                    <SfAccordion>
+                        <AccordionItems>
+                            <AccordionItem>
+                                <HeaderTemplate>
+                                    <div class="col-md-12 d-flex align-items-center">
+                                        <h6 class="mb-0">Block A</h6>
+                                    </div>
+                                </HeaderTemplate>
+                                <ContentTemplate>
+                                    <ul class="list-group">
+                                        <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Province:</strong> &nbsp; @_farm.Province</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Farming Region:</strong> &nbsp; @_farm.Region?.GetDescription()</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">District:</strong> &nbsp; @_farm.District</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Local Authority:</strong> &nbsp; @_farm.LocalAuthority</li>
+                                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Ward:</strong> &nbsp; @_farm.Ward</li>
+                                    </ul>
+                                </ContentTemplate>
+                            </AccordionItem>
+                        </AccordionItems>
+                    </SfAccordion>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="newFarm" style="width:40%;padding:5px;overflow-x:hidden;overflow-y:auto;" class="max-height-vh-100 @ShowAddSchool">
+        <div style="display:flex;flex-direction:row;justify-content:space-between">
+            <div>
+                @if (string.IsNullOrEmpty(_farm.Id))
+                {
+                    <h5>Add New Farm</h5>
+                }
+                else
+                {
+                    <h5>Edit Farm</h5>
+                }
+            </div>
+            <button class="btn bg-white btn-icon-only" onclick="@ToggleSchools">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="my-2">
+            <_ValidationSummary Errors="Errors" />
+            <EditForm role="form" Model="@_farm" OnValidSubmit="@SaveFarm">
+                <DataAnnotationsValidator />
+                <div>
+                    <div class="form-row">
+                        <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(_farm.Id)"></SfTextBox>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <SfTextBox ID="name" TValue="string" @bind-Value="@(_farm.Name)" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Name" />
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <SfTextBox ID="surname" TValue="string" @bind-Value="@(_farm.Address)" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Address" />
+                        </div>
+                        <div class="form-group">
+                            <label>Contact Person</label>
+                            <SfTextBox ID="contactPerson" TValue="string" @bind-Value="@(_farm.ContactPerson)" Placeholder="e.g. John Doe" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.ContactPerson" />
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <SfTextBox ID="phone" TValue="string" @bind-Value="@(_farm.PhoneNumber)" Placeholder="e.g. 0771234567" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.PhoneNumber" />
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <SfTextBox ID="email" TValue="string" @bind-Value="@(_farm.Email)" Placeholder="e.g. your@email.com" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Email" />
+                        </div>
+                        <div class="form-group">
+                            <label>Website</label>
+                            <SfTextBox ID="website" TValue="string" @bind-Value="@(_farm.Website)" Placeholder="e.g. www.school.ac.zw" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Website" />
+                        </div>
+                        <div class="form-group">
+                            <label>Farm Size (Hectares)</label>
+                            <SfNumericTextBox ID="size" TValue="float" @bind-Value="@(_farm.Size)" Decimals=3 Format="n3" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                            <ValidationMessage For="() => _farm.Size" />
+                        </div>
+                        <div class="form-group">
+                            <label>Arable (Hectares)</label>
+                            <SfNumericTextBox ID="arable" TValue="float" @bind-Value="@(_farm.Arable)" Decimals=3 Format="n3" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                            <ValidationMessage For="() => _farm.Arable" />
+                        </div>
+                        <div class="form-group">
+                            <label>Cleared (Hectares)</label>
+                            <SfNumericTextBox ID="cleared" TValue="float" @bind-Value="@(_farm.Cleared)" Decimals=3 Format="n3" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                            <ValidationMessage For="() => _farm.Cleared" />
+                        </div>
+                        <div class="form-group">
+                            <label>Soil Types</label>
+                            <SfTextBox ID="soilTypes" TValue="string" @bind-Value="@(_farm.SoilType)" Placeholder="e.g. loamy, sandy, clay" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.SoilType" />
+                        </div>
+                        <div class="form-group">
+                            <label>Personnel</label>
+                            <SfTextBox Multiline=true ID="personnel" TValue="string" @bind-Value="@(_farm.Personnel)" Placeholder="e.g. workers + qualifications" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Personnel" />
+                        </div>
+                        <div class="form-group">
+                            <label>Problems</label>
+                            <SfTextBox Multiline=true ID="problems" TValue="string" @bind-Value="@(_farm.Problems)" Placeholder="e.g. pests and diseases" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Problems" />
+                        </div>
+                        <div class="form-group">
+                            <label>Latitude</label>
+                            <SfNumericTextBox ID="latitude" TValue="double" @bind-Value="@(_farm.Latitude)" Decimals=15 Format="n15" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                            <ValidationMessage For="() => _farm.Latitude" />
+                        </div>
+                        <div class="form-group">
+                            <label>Longitude</label>
+                            <SfNumericTextBox ID="longitude" TValue="double" @bind-Value="@(_farm.Longitude)" Decimals=15 Format="n15" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                            <ValidationMessage For="() => _farm.Longitude" />
+                        </div>
+                        <div class="form-group">
+                            <label>Altitude</label>
+                            <SfNumericTextBox ID="altitude" TValue="double" @bind-Value="@(_farm.Elevation)" Decimals=8 Format="n8" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                            <ValidationMessage For="() => _farm.Elevation" />
+                        </div>
+                        <div class="form-group">
+                            <label>Terrain</label>
+                            <SfDropDownList ID="terrain" TValue="Terrain?" TItem="TerrainModel" @bind-Value="@(_farm.Terrain)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select Terrain" DataSource="@_terrains">
+                                <DropDownListFieldSettings Value="Terrain" Text="Name"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                        </div>
+                        <div class="form-group">
+                            <label>Farming Region</label>
+                            <SfDropDownList ID="region" TValue="Region?" TItem="RegionModel" @bind-Value="@(_farm.Region)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Region" DataSource="@_regions">
+                                <DropDownListFieldSettings Value="Region" Text="Name"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                        </div>
+                        <div class="form-group">
+                            <label>Conference</label>
+                            <SfDropDownList ID="conference" TValue="Conference?" TItem="ConferenceModel" @bind-Value="@(_farm.Conference)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select Conference" DataSource="@_conferences">
+                                <DropDownListFieldSettings Value="Conference" Text="Name"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                        </div>
+                        <div class="form-group">
+                            <label>Province</label>
+                            <SfComboBox ID="province" TValue="string" TItem="ProvinceViewModel" @bind-Value="@(_farm.ProvinceId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Province" DataSource="@_provinces">
+                                <ComboBoxEvents TItem="ProvinceViewModel" TValue="string" ValueChange="ProvinceChangeHandler"></ComboBoxEvents>
+                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                            </SfComboBox>
+                        </div>
+                        <div class="form-group">
+                            <label>District</label>
+                            <SfComboBox ID="district" TValue="string" TItem="DistrictViewModel" @bind-Value="@(_farm.DistrictId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a District" DataSource="@_districts">
+                                <ComboBoxEvents TItem="DistrictViewModel" TValue="string" ValueChange="DistrictChangeHandler"></ComboBoxEvents>
+                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                            </SfComboBox>
+                        </div>
+                        <div class="form-group">
+                            <label>Local Authority</label>
+                            <SfComboBox ID="localAuthority" TValue="string" TItem="LocalAuthorityViewModel" @bind-Value="@(_farm.LocalAuthorityId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Local Authority" DataSource="@_localAuthorities">
+                                <ComboBoxEvents TItem="LocalAuthorityViewModel" TValue="string" ValueChange="LocalAuthorityChangeHandler"></ComboBoxEvents>
+                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                            </SfComboBox>
+                        </div>
+                        <div class="form-group">
+                            <label>Ward</label>
+                            <SfComboBox ID="ward" TValue="string" TItem="WardViewModel" @bind-Value="@(_farm.WardId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Ward" DataSource="@_wards">
+                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                            </SfComboBox>
+                        </div>
+                        <div class="form-group">
+                            <label>Water Source</label>
+                            <SfTextBox Multiline=true ID="waterSource" TValue="string" @bind-Value="@(_farm.WaterSource)" Placeholder="e.g. dam, borehole, river" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.WaterSource" />
+                        </div>
+                        <div class="form-group">
+                            <label>Water Availability</label>
+                            <SfDropDownList ID="waterAvailability" TValue="WaterAvailability?" TItem="WaterAvailabilityModel" @bind-Value="@(_farm.WaterAvailability)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select Availability" DataSource="@_waterAvailabilities">
+                                <DropDownListFieldSettings Value="WaterAvailability" Text="Name"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                        </div>
+                        <div class="form-group">
+                            <label>Irrigation Systems</label>
+                            <SfTextBox Multiline=true ID="irrigationSystems" TValue="string" @bind-Value="@(_farm.IrrigationSystems)" Placeholder="if any, specify types" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.IrrigationSystems" />
+                        </div>
+                        <div class="form-group">
+                            <label>Buildings</label>
+                            <SfTextBox Multiline=true ID="buildings" TValue="string" @bind-Value="@(_farm.Buildings)" Placeholder="classrooms, storage sheds, etc." ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Buildings" />
+                        </div>
+                        <div class="form-group">
+                            <label>Road Access</label>
+                            <SfDropDownList ID="roadAccess" TValue="RoadAccess?" TItem="RoadAccessModel" @bind-Value="@(_farm.RoadAccess)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select Road Access" DataSource="@_roadAccess">
+                                <DropDownListFieldSettings Value="RoadAccess" Text="Name"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                        </div>
+                        <div class="form-group">
+                            <label>Security/Fencing</label>
+                            <SfTextBox Multiline=true ID="securityMeasures" TValue="string" @bind-Value="@(_farm.SecurityMeasures)" Placeholder="security measures, fencing type" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.SecurityMeasures" />
+                        </div>
+                        <div class="form-group">
+                            <label>Equipment</label>
+                            <SfTextBox Multiline=true ID="equipment" TValue="string" @bind-Value="@(_farm.Equipment)" Placeholder="tractors, planters, etc." ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Equipment" />
+                        </div>
+                        <div class="form-group">
+                            <label>Year Established</label>
+                            <SfNumericTextBox ID="yearEstablished" TValue="int" @bind-Value="@(_farm.Year)" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                            <ValidationMessage For="() => _farm.Year" />
+                        </div>
+                        <div class="form-group">
+                            <label>Founding Members / Institution</label>
+                            <SfTextBox Multiline=true ID="foundingMembers" TValue="string" @bind-Value="@(_farm.FoundingMembers)" Placeholder="individuals or institution" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.FoundingMembers" />
+                        </div>
+                        <div class="form-group">
+                            <label>Key Milestones</label>
+                            <SfTextBox Multiline=true ID="keyMilestones" TValue="string" @bind-Value="@(_farm.KeyMilestones)" Placeholder="significant events" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.KeyMilestones" />
+                        </div>
+                        <div class="form-group">
+                            <label>Vision</label>
+                            <SfTextBox Multiline=true ID="vision" TValue="string" @bind-Value="@(_farm.Vision)" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Vision" />
+                        </div>
+                        <div class="form-group">
+                            <label>Mission</label>
+                            <SfTextBox Multiline=true ID="mission" TValue="string" @bind-Value="@(_farm.Mission)" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Mission" />
+                        </div>
+                        <div class="form-group">
+                            <label>Male Students</label>
+                            <SfNumericTextBox ID="maleStudents" TValue="int" @bind-Value="@(_farm.MaleStudents)" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                            <ValidationMessage For="() => _farm.MaleStudents" />
+                        </div>
+                        <div class="form-group">
+                            <label>Female Students</label>
+                            <SfNumericTextBox ID="femaleStudents" TValue="int" @bind-Value="@(_farm.FemaleStudents)" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                            <ValidationMessage For="() => _farm.FemaleStudents" />
+                        </div>
+                        <div class="form-group">
+                            <label>Day Scholars</label>
+                            <SfNumericTextBox ID="dayScholars" TValue="int" @bind-Value="@(_farm.DayScholars)" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                            <ValidationMessage For="() => _farm.DayScholars" />
+                        </div>
+                        <div class="form-group">
+                            <label>Boarding Scholars</label>
+                            <SfNumericTextBox ID="boardingScholars" TValue="int" @bind-Value="@(_farm.BoardingScholars)" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                            <ValidationMessage For="() => _farm.BoardingScholars" />
+                        </div>
+                        <div class="form-group">
+                            <label>Other Student Details</label>
+                            <SfTextBox Multiline=true ID="studentDetails" TValue="string" @bind-Value="@(_farm.StudentDemographics)" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.StudentDemographics" />
+                        </div>
+                        <div class="form-group">
+                            <label>Male Teachers</label>
+                            <SfNumericTextBox ID="maleTeachers" TValue="int" @bind-Value="@(_farm.MaleTeachers)" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                            <ValidationMessage For="() => _farm.MaleTeachers" />
+                        </div>
+                        <div class="form-group">
+                            <label>Female Teachers</label>
+                            <SfNumericTextBox ID="femaleTeachers" TValue="int" @bind-Value="@(_farm.FemaleTeachers)" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                            <ValidationMessage For="() => _farm.FemaleTeachers" />
+                        </div>
+                        <div class="form-group">
+                            <label>Other Staff</label>
+                            <SfTextBox Multiline=true ID="otherStaff" TValue="string" @bind-Value="@(_farm.NonTeachingStaff)" Placeholder="Non teaching staff details" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.NonTeachingStaff" />
+                        </div>
+                        <div class="form-group">
+                            <label>Average Exam Score</label>
+                            <SfTextBox Multiline=true ID="averageExamScores" TValue="string" @bind-Value="@(_farm.AverageExamScores)" Placeholder="fore the past 3 years" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.AverageExamScores" />
+                        </div>
+                        <div class="form-group">
+                            <label>Extracurricular Achievements</label>
+                            <SfTextBox Multiline=true ID="extracurricularAchievements" TValue="string" @bind-Value="@(_farm.ExtraCurricularAchievements)" Placeholder="Sports, arts, etc" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.ExtraCurricularAchievements" />
+                        </div>
+                        <div class="form-group">
+                            <label>Classrooms</label>
+                            <SfTextBox Multiline=true ID="classrooms" TValue="string" @bind-Value="@(_farm.Classrooms)" Placeholder="Number, condition" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Classrooms" />
+                        </div>
+                        <div class="form-group">
+                            <label>Laboratories</label>
+                            <SfTextBox Multiline=true ID="laboratories" TValue="string" @bind-Value="@(_farm.Laboratories)" Placeholder="Science, Computers, etc" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Laboratories" />
+                        </div>
+                        <div class="form-group">
+                            <label>Sports Facilities</label>
+                            <SfTextBox Multiline=true ID="sportsFacilities" TValue="string" @bind-Value="@(_farm.SportsFacilities)" Placeholder="Playgrounds, Sports Equipment" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.SportsFacilities" />
+                        </div>
+                        <div class="form-group">
+                            <label>Library</label>
+                            <SfTextBox Multiline=true ID="library" TValue="string" @bind-Value="@(_farm.Library)" Placeholder="Books, digital resources" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Library" />
+                        </div>
+                        <div class="form-group">
+                            <label>Community Programs</label>
+                            <SfTextBox Multiline=true ID="communityPrograms" TValue="string" @bind-Value="@(_farm.CommunityPrograms)" Placeholder="Outreach, community service" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.CommunityPrograms" />
+                        </div>
+                        <div class="form-group">
+                            <label>Partnerships</label>
+                            <SfTextBox Multiline=true ID="partnerships" TValue="string" @bind-Value="@(_farm.Partnerships)" Placeholder="With local business, NGOs, etc." ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Partnerships" />
+                        </div>
+                        <div class="form-group">
+                            <label>Extra Details</label>
+                            <SfTextBox Multiline=true ID="extraDetails" TValue="string" @bind-Value="@(_farm.Description)" Placeholder="any other information" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Description" />
+                        </div>
+                        <div class="form-group">
+                            <label>Recommendations</label>
+                            <SfTextBox Multiline=true ID="recommendations" TValue="string" @bind-Value="@(_farm.Recommendations)" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Recommendations" />
+                        </div>
+                        <div class="form-group">
+                            <SfSpinner @ref="SaveSpinner"></SfSpinner>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-lg bg-dark btn-lg w-100 mt-4 mb-0 text-white">Save</button>
+                </div>
+                <ValidationSummary />
+            </EditForm>
+        </div>
+    </div>
+    <div id="newField" style="width:40%;padding:5px;overflow-x:hidden;overflow-y:auto;" class="max-height-vh-100 @ShowFieldEdit">
+        <div style="display:flex;flex-direction:row;justify-content:space-between">
+            <div>
+                @if (string.IsNullOrEmpty(_field.Id))
+                {
+                    <h5>Add New Field</h5>
+                }
+                else
+                {
+                    <h5>Edit Field</h5>
+                }
+            </div>
+            <button class="btn bg-white btn-icon-only" onclick="@BackToFields">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="my-2">
+            <_ValidationSummary Errors="Errors" />
+            <EditForm role="form" Model="@_field" OnValidSubmit="@SaveField">
+                <DataAnnotationsValidator />
+                <div>
+                    <div class="form-row">
+                        <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(_farm.Id)"></SfTextBox>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <SfTextBox ID="name" TValue="string" @bind-Value="@(_farm.Name)" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _farm.Name" />
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <SfTextBox ID="description" TValue="string" @bind-Value="@(_field.Description)" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _field.Description" />
+                        </div>
+                        <div class="form-group">
+                            <label>Soil Types</label>
+                            <SfTextBox ID="soilTypes" TValue="string" @bind-Value="@(_field.SoilType)" Placeholder="e.g. loamy, sandy, clay" ValidateOnInput="true"></SfTextBox>
+                            <ValidationMessage For="() => _field.SoilType" />
+                        </div>
+                        <div class="form-group">
+                            <label>Has Irrigation?</label>
+                            <input type="checkbox" value="@_field.Irrigation" name="Irrigation" id="Irrigation" />
+                            <ValidationMessage For="() => _field.Irrigation" />
+                        </div>
+                        <div class="form-group">
+                            <SfSpinner @ref="SaveSpinner"></SfSpinner>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-lg bg-dark btn-lg w-100 mt-4 mb-0 text-white">Save</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+    <div id="map" style="width:100%" class="min-height-vh-100"></div>
+</div>
+
+
+@code {
+    Toast Alert;
+    SfSpinner SaveSpinner;
+    List<FarmViewModel> Farms = new List<FarmViewModel>();
+    private FarmViewModel _farm = new FarmViewModel();
+    List<FieldViewModel> Fields = new List<FieldViewModel>();
+    private FieldViewModel _field = new FieldViewModel();
+    private List<string> Errors { get; set; } = new List<string>();
+
+    private string ShowSchools = "";
+    private string ShowAddSchool = "hidden";
+    private string ShowSchoolDetails = "hidden";
+    private string ShowFields = "hidden";
+    private string ShowFieldEdit = "hidden";
+
+    ObservableCollection<ProvinceViewModel> _provinces = new ObservableCollection<ProvinceViewModel>();
+    ObservableCollection<DistrictViewModel> _districts = new ObservableCollection<DistrictViewModel>();
+    ObservableCollection<DistrictViewModel> _allDistricts = new ObservableCollection<DistrictViewModel>();
+    ObservableCollection<LocalAuthorityViewModel> _localAuthorities = new ObservableCollection<LocalAuthorityViewModel>();
+    ObservableCollection<LocalAuthorityViewModel> _allLocalAuthorities = new ObservableCollection<LocalAuthorityViewModel>();
+    ObservableCollection<WardViewModel> _wards = new ObservableCollection<WardViewModel>();
+    ObservableCollection<WardViewModel> _allWards = new ObservableCollection<WardViewModel>();
+    List<RegionModel> _regions = Enum.GetValues<Region>().Select(x => new RegionModel(x)).ToList();
+    List<TerrainModel> _terrains = Enum.GetValues<Terrain>().Select(x => new TerrainModel(x)).ToList();
+    List<ConferenceModel> _conferences = Enum.GetValues<Conference>().Select(x => new ConferenceModel(x)).ToList();
+    List<WaterAvailabilityModel> _waterAvailabilities = Enum.GetValues<WaterAvailability>().Select(x => new WaterAvailabilityModel(x)).ToList();
+    List<RoadAccessModel> _roadAccess = Enum.GetValues<RoadAccess>().Select(x => new RoadAccessModel(x)).ToList();
+
+    private async Task SaveFarm()
+    {
+        await SaveSpinner.ShowAsync();
+        var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FarmViewModel>, FarmViewModel>(await ApiCall.GetHttpClient(), "farms/createfarm", _farm);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to save Farm, please try again!", showTitle: true, toastType: ToastType.Danger);
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        }
+
+        Farms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(await ApiCall.GetHttpClient(), "Farms/getFarms/")).ToList();
+
+        ToggleSchools();
+
+        await SaveSpinner.HideAsync();
+    }
+
+    async Task OnFarmSelect(FarmViewModel farm)
+    {
+        _farm = farm;
+
+        ShowSchoolDetails = "";
+        ShowSchools = "hidden";
+
+        if (farm.Latitude != 0)
+        {
+            double[] array = new[] { farm.Longitude, farm.Latitude };
+            await JS.InvokeVoidAsync("loadMap", array);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Farms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(await ApiCall.GetHttpClient(), "Farms/getFarms/")).ToList();
+
+        _provinces = (await ApiCall.Get<ObservableCollection<ProvinceViewModel>>(await ApiCall.GetHttpClient(), "provinces/getprovinces"));
+        _districts = (await ApiCall.Get<ObservableCollection<DistrictViewModel>>(await ApiCall.GetHttpClient(), "districts/getdistricts"));
+        _allDistricts = _districts;
+        _localAuthorities = (await ApiCall.Get<ObservableCollection<LocalAuthorityViewModel>>(await ApiCall.GetHttpClient(), "localAuthorities/getLocalAuthorities"));
+        _allLocalAuthorities = _localAuthorities;
+        _wards = (await ApiCall.Get<ObservableCollection<WardViewModel>>(await ApiCall.GetHttpClient(), "wards/getWards"));
+        _allWards = _wards;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            double[] array = new[] { 32.22477985792338, -18.76782376540298 };
+            await JS.InvokeVoidAsync("loadMap", array);
+        }
+    }
+
+    public void ProvinceChangeHandler(ChangeEventArgs<string, ProvinceViewModel> args)
+    {
+        var districts = _allDistricts.Where(d => d.ProvinceId == args.Value).OrderBy(w => w.Name).ToList();
+        _districts.Clear();
+
+        try
+        {
+            foreach (var item in districts)
+            {
+                _districts.Add(item);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+        }
+
+        StateHasChanged();
+    }
+
+    public void DistrictChangeHandler(ChangeEventArgs<string, DistrictViewModel> args)
+    {
+        var localAuthorities = _allLocalAuthorities.Where(l => l.DistrictId == args.Value).OrderBy(w => w.Name).ToList();
+        var wards = _allWards.Where(w => w.DistrictId == args.Value).OrderBy(w => w.Name).ToList();
+
+        _localAuthorities.Clear();
+        _wards.Clear();
+
+        try
+        {
+            foreach (var item in localAuthorities)
+            {
+                _localAuthorities.Add(item);
+            }
+
+            foreach (var item in wards)
+            {
+                _wards.Add(item);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+        }
+
+        StateHasChanged();
+    }
+
+    public void LocalAuthorityChangeHandler(ChangeEventArgs<string, LocalAuthorityViewModel> args)
+    {
+        var wards = _allWards.Where(w => w.LocalAuthorityId == args.Value).OrderBy(w => w.Name).ToList();
+        _wards.Clear();
+
+        try
+        {
+            foreach (var item in wards)
+            {
+                _wards.Add(item);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+        }
+
+        StateHasChanged();
+    }
+
+    public void ToggleSchools()
+    {
+        if (ShowAddSchool == "hidden")
+        {
+            ShowAddSchool = "";
+            ShowSchools = "hidden";
+        }
+        else
+        {
+            ShowAddSchool = "hidden";
+            ShowSchools = "";
+        }
+    }
+
+    public void GoBackToList()
+    {
+        _farm = new FarmViewModel();
+        ShowSchoolDetails = "hidden";
+        ShowSchools = "";
+        ShowAddSchool = "hidden";
+    }
+
+    public void GoBackToSchool()
+    {
+        ShowSchoolDetails = "";
+        ShowSchools = "hidden";
+        ShowAddSchool = "hidden";
+        ShowFields = "hidden";
+    }
+
+    public void ShowEdit()
+    {
+        ShowSchoolDetails = "hidden";
+        ShowAddSchool = "";
+        ShowSchools = "hidden";
+    }
+
+    public void ShowEditField()
+    {
+        ShowSchoolDetails = "hidden";
+        ShowAddSchool = "hidden";
+        ShowSchools = "hidden";
+        ShowFields = "hidden";
+        ShowFieldEdit = "hidden";
+    }
+
+    public void BackToFields()
+    {
+        ShowSchoolDetails = "hidden";
+        ShowAddSchool = "hidden";
+        ShowSchools = "hidden";
+        ShowFields = "";
+        ShowFieldEdit = "hidden";
+    }
+
+    public async Task ShowFieldsList()
+    {
+        Fields = await ApiCall.Get<IEnumerable<FieldViewModel>>(await ApiCall.GetHttpClient(), $"fields/getfields/{_farm.Id}");
+        ShowSchoolDetails = "hidden";
+        ShowAddSchool = "hidden";
+        ShowSchools = "hidden";
+        ShowFields = "";
+    }
+}

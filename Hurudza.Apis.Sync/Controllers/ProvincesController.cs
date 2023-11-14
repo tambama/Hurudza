@@ -12,6 +12,10 @@ namespace Hurudza.Apis.Sync.Controllers
         public ProvincesController(HurudzaDbContext context)
             : base(new EntityTableRepository<Province>(context))
         {
+            Options = new TableControllerOptions
+            {
+                EnableSoftDelete = true
+            };
         }
     }
 }

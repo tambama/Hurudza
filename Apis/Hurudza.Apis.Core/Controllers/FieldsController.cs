@@ -40,6 +40,18 @@ public class FieldsController : Controller
         return Ok(fields);
     }
 
+    [HttpGet("{id}", Name = nameof(GetFarmFields))]
+    public async Task<IActionResult> GetFarmFields(string id)
+    {
+        var fields = await _context.Fields
+            .Where(f => f.FarmId == id)
+            .ProjectTo<FieldViewModel>(_configuration)
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        return Ok(fields);
+    }
+
     [HttpGet("{id}", Name = nameof(GetField))]
     public async Task<IActionResult> GetField(string id)
     {

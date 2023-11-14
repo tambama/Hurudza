@@ -39,9 +39,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hurudza.Data.Migrator", "Da
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hurudza.Apis.Sync", "Hurudza.Apis.Sync\Hurudza.Apis.Sync.csproj", "{E760D706-1D4C-45BE-91CD-03DF29D209B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hurudza.Data.UI.Models", "Hurudza.Data.ViewModels\Hurudza.Data.UI.Models.csproj", "{7E9A968B-8244-4287-85DF-E9E7BEB7311F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hurudza.Data.UI.Models", "Hurudza.Data.ViewModels\Hurudza.Data.UI.Models.csproj", "{7E9A968B-8244-4287-85DF-E9E7BEB7311F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hurudza.Data.Enums", "Hurudza.Data.Enums\Hurudza.Data.Enums.csproj", "{A0917297-8B8F-4B6C-A618-BF2935362E2A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hurudza.Data.Enums", "Hurudza.Data.Enums\Hurudza.Data.Enums.csproj", "{A0917297-8B8F-4B6C-A618-BF2935362E2A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

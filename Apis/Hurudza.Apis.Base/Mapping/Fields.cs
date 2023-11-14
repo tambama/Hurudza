@@ -10,6 +10,7 @@ public class Fields : Profile
     {
         CreateMap<FieldViewModel, Field>();
         CreateMap<Field, FieldViewModel>()
-            .ForMember(dst => dst.Farm, opts => opts.MapFrom(src => src.Farm.Name));
+            .ForMember(dst => dst.Farm, opts => opts.MapFrom(src => src.Farm.Name))
+            .ForMember(dst => dst.Locations, opts => opts.MapFrom(src => src.Locations));
     }
 }

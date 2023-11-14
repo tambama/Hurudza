@@ -25,7 +25,7 @@ public class ProvincesController : Controller
     [HttpGet(Name = nameof(GetProvinces))]
     public async Task<IActionResult> GetProvinces()
     {
-        var provinces = await _context.Provinces.ToListAsync().ConfigureAwait(false);
+        var provinces = await _context.Provinces.OrderBy(p => p.Name).ToListAsync().ConfigureAwait(false);
 
         return Ok(provinces);
     }

@@ -10,10 +10,32 @@
         <toolkit:StatusBarBehavior StatusBarColor="White" StatusBarStyle="DarkContent" />
     </ContentPage.Behaviors>
 
-    <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
-        <BlazorWebView.RootComponents>
-            <RootComponent Selector="#app" ComponentType="{x:Type pages:Index}" />
-        </BlazorWebView.RootComponents>
-    </BlazorWebView>
+    <ContentPage.Content>
+        <VerticalStackLayout>
+            <Border>
+                <toolkit:Expander x:Name="BasicInformation">
+                    <toolkit:Expander.Header>
+                        <Grid BackgroundColor="White" Padding="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Label Text="Basic Information" FontSize="16" Grid.Column="0"/>
+                            <Image Source="caret_down.svg" Grid.Column="1" HeightRequest="20" WidthRequest="20">
+                                <Image.Triggers>
+                                    <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference BasicInformation}, Path=IsExpanded}" Value="True">
+                                        <Setter Property="Rotation" Value="180" />
+                                    </DataTrigger>
+                                </Image.Triggers>
+                            </Image>
+                        </Grid>
+                    </toolkit:Expander.Header>
+                    <toolkit:Expander.Content>
+                        <StackLayout Padding="10" HeightRequest="100" BackgroundColor="AliceBlue"></StackLayout>
+                    </toolkit:Expander.Content>
+                </toolkit:Expander>
+            </Border>
+        </VerticalStackLayout>
+    </ContentPage.Content>
     
 </ContentPage>

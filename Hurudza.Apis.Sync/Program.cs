@@ -4,14 +4,10 @@ using Hurudza.Common.Services.Interfaces;
 using Hurudza.Common.Services.Services;
 using Hurudza.Data.Context.Context;
 using Microsoft.AspNetCore.Datasync;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var connectionString = builder.Configuration.GetConnectionString("HurudzaConnection");
 
 if (connectionString == null)
@@ -27,63 +23,44 @@ builder.Services.AddDbContext<HurudzaDbContext>(options => options.UseSqlServer(
 builder.Services.AddDatasyncControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddControllers(options =>
 {
-    c.AddServer(new OpenApiServer { Url = builder.Configuration["ApiSettings:CoreUrl"] });
-    c.OperationFilter<SwaggerDefaultValues>();
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Header,
-        Description = "Please enter token",
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "bearer"
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    options.Filters.Add(typeof(HttpGlobalExceptionFilter));
+})
+        .AddNewtonsoftJson(options =>
         {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                },
-                Array.Empty<string>()
-            }
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+        });
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("HurudzaCors",
+        config =>
+        {
+            config
+                .WithOrigins("http://localhost:5291", "https://localhost:7068", "https://fq57mn8s-7068.uks1.devtunnels.ms")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .SetIsOriginAllowed(x => true)
+                .AllowCredentials();
         });
 });
-builder.Services.AddApiVersioning();
-builder.Services.AddVersionedApiExplorer(options =>
-{
-    options.DefaultApiVersion = ApiVersion.Parse("1.0");
-    options.AssumeDefaultVersionWhenUnspecified = true;
-});
-builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddTransient<IDateTimeService, DateTimeService>();
 
 var app = builder.Build();
 
-// Configure and run the web service.
-using var scope = app.Services.CreateScope();
-var provider = scope.ServiceProvider.GetRequiredService<IApiVersionDescriptionProvider>();
+app.UseCors("HurudzaCors");
 
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.DisplayOperationId();
-        foreach (var description in provider.ApiVersionDescriptions.OrderByDescending(_ => _.ApiVersion))
-        {
-            c.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", $"Hurudza {description.GroupName}");
-        }
-    });
+    app.UseSwaggerUI();
 }
 
 app.MapControllers();

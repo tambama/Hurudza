@@ -16,6 +16,9 @@ using Hurudza.UI.Shared.Api.Interfaces;
 using Hurudza.UI.Shared.Api;
 using Hurudza.UI.Web.Api.Interfaces;
 using Hurudza.UI.Mobile.Services.Interfaces;
+using Hurudza.UI.Mobile.Pages.Dashboard;
+using Hurudza.UI.Mobile.ViewModels;
+using Hurudza.UI.Mobile.Helpers;
 
 namespace Hurudza.UI.Mobile;
 
@@ -26,16 +29,18 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
+            .ConfigureSyncfusionCore()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("fa-solid-900.ttf", "FontAwesome");
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-SemiBold.ttf", "OpenSansSemiBold");
+                fonts.AddFont("Roboto-Medium.ttf", "Roboto-Medium");
+                fonts.AddFont("Roboto-Regular.ttf", "Roboto-Regular");
             })
             .UseMauiMaps()
             .UseMauiCommunityToolkit()
-            .UseBottomSheet()
-            .ConfigureSyncfusionCore();
+            .UseBottomSheet();
 
         builder.Services.AddMauiBlazorWebView();
 
@@ -81,17 +86,27 @@ public static class MauiProgram
         builder.Services.AddSingleton<IApiCall, ApiCall>();
         builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>();
         builder.Services.AddSingleton<IProvinceService, ProvinceService>();
+        builder.Services.AddSingleton<IDistrictService, DistrictService>();
+        builder.Services.AddSingleton<ILocalAuthorityService, LocalAuthorityService>();
+        builder.Services.AddSingleton<IWardService, WardService>();
+        builder.Services.AddSingleton<IFarmService, FarmService>();
+        builder.Services.AddSingleton<ICropService, CropService>();
+        builder.Services.AddSingleton<IFieldCropService, FieldCropService>();
+        builder.Services.AddSingleton<IFieldService, FieldService>();
+        builder.Services.AddSingleton<ILocationsService, LocationsService>();
         
         // ViewModels
         builder.Services.AddSingleton<MapPageViewModel>();
         builder.Services.AddSingleton<CreateFieldOnMapViewModel>();
         builder.Services.AddSingleton<FarmsViewModel>();
+        builder.Services.AddSingleton<HomeViewModel>();
         
         // Pages
         builder.Services.AddSingleton<MapPage>();
         builder.Services.AddSingleton<CreateFieldPage>();
         builder.Services.AddSingleton<LoginPage>();
         builder.Services.AddSingleton<FarmsPage>();
+        builder.Services.AddSingleton<HomePage>();
 
         var app = builder.Build();
 
