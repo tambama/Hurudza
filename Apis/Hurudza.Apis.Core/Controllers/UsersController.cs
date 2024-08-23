@@ -1,9 +1,8 @@
 ﻿using System.Net;
 using System.Net.Mime;
+using Asp.Versioning;
 using AutoMapper.QueryableExtensions;
 using Hurudza.Apis.Base.Models;
-using Hurudza.Common.Emails.Helpers;
-using Hurudza.Common.Emails.Services;
 using Hurudza.Common.Sms.Services;
 using Hurudza.Common.Utils.Exceptions;
 using Hurudza.Common.Utils.Extensions;
@@ -33,8 +32,6 @@ namespace Hurudza.Apis.Core.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfigurationProvider _configuration;
         private readonly ISmsService _smsService;
-        private readonly ISendGridEmailService _sendGridEmailService;
-        private readonly ISendGridMessageHelper _sendGridMessageHelper;
         private readonly EmailSettings _emailSettings;
 
         public UsersController(
@@ -42,17 +39,13 @@ namespace Hurudza.Apis.Core.Controllers
             UserManager<ApplicationUser> userManager,
             IConfigurationProvider configuration,
             ISmsService smsService,
-            IOptions<EmailSettings> emailSettings,
-            ISendGridEmailService sendGridEmailService,
-            ISendGridMessageHelper sendGridMessageHelper)
+            IOptions<EmailSettings> emailSettings)
         {
             _context = context;
             _userManager = userManager;
             _configuration = configuration;
             _smsService = smsService;
             _emailSettings = emailSettings.Value;
-            _sendGridEmailService = sendGridEmailService;
-            _sendGridMessageHelper = sendGridMessageHelper;
         }
 
         // GET: api/users
@@ -181,40 +174,6 @@ namespace Hurudza.Apis.Core.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            #region Email Notification
-
-            if (false)
-            {
-                var company = await _context.Farms.SingleOrDefaultAsync(c => c.Id == vm.FarmId)
-                    .ConfigureAwait(false);
-
-                var placeholderDictionary = new Dictionary<string, string>()
-                {
-                    {"name", user.Fullname},
-                    {"url", $"{_emailSettings.Url}/account/confirmaccount?cid={company.Id}&email={user.Email}&iid="}
-                };
-
-                var template =
-                    await _context.SendGridTemplates.FirstOrDefaultAsync(t =>
-                        t.Name == SendGridTemplateName.DohweAccountConfirmation);
-
-                var message = _sendGridMessageHelper.ConstructNewSendGridMessageWithPersonalizations(
-                    template.TemplateId,
-                    placeholderDictionary, user.Email, _emailSettings.SupportEmail);
-
-                var emailResult =
-                    await _sendGridEmailService.SendSendGridEmailWithPersonalization(_emailSettings.SendgridApiKey,
-                        message);
-
-                if (emailResult.Success)
-                {
-                    emailResult.Message =
-                        $"A link to verify your email has been sent to {user.Email}. Please check all your email folders. You can still proceed to login and verify later";
-                }
-            }
-
-            #endregion
-
             var response = await _context.Users.ProjectTo<UserViewModel>(_configuration)
                 .FirstOrDefaultAsync(u => u.Id == user.Id);
 
@@ -270,40 +229,6 @@ namespace Hurudza.Apis.Core.Controllers
 
             await _context.AddAsync(profile);
             await _context.SaveChangesAsync();
-
-            #region Email Notification
-
-            if (false)
-            {
-                var company = await _context.Farms.SingleOrDefaultAsync(c => c.Id == vm.FarmId)
-                    .ConfigureAwait(false);
-
-                var placeholderDictionary = new Dictionary<string, string>()
-                {
-                    {"name", user.Fullname},
-                    {"url", $"{_emailSettings.Url}/account/confirmaccount?cid={company.Id}&email={user.Email}&iid="}
-                };
-
-                var template =
-                    await _context.SendGridTemplates.FirstOrDefaultAsync(t =>
-                        t.Name == SendGridTemplateName.DohweAccountConfirmation);
-
-                var message = _sendGridMessageHelper.ConstructNewSendGridMessageWithPersonalizations(
-                    template.TemplateId,
-                    placeholderDictionary, user.Email, _emailSettings.SupportEmail);
-
-                var emailResult =
-                    await _sendGridEmailService.SendSendGridEmailWithPersonalization(_emailSettings.SendgridApiKey,
-                        message);
-
-                if (emailResult.Success)
-                {
-                    emailResult.Message =
-                        $"A link to verify your email has been sent to {user.Email}. Please check all your email folders. You can still proceed to login and verify later";
-                }
-            }
-
-            #endregion
 
             var response = await _context.Users.ProjectTo<UserViewModel>(_configuration)
                 .FirstOrDefaultAsync(u => u.Id == user.Id);
@@ -468,39 +393,13 @@ namespace Hurudza.Apis.Core.Controllers
                 await _smsService.Send(user.PhoneNumber.GetMsisdn("263"),
                     $"Your password reset code is {user.RegistrationToken}");
 
-            #region Email Notification
-
-            var placeholderDictionary = new Dictionary<string, string>()
-            {
-                {"name", user.Fullname},
-                {"code", user.RegistrationToken}
-            };
-
-            var template =
-                await _context.SendGridTemplates.FirstOrDefaultAsync(t =>
-                    t.Name == SendGridTemplateName.DohwePasswordResetCode);
-
-            var message = _sendGridMessageHelper.ConstructNewSendGridMessageWithPersonalizations(template.TemplateId,
-                placeholderDictionary, user.Email, _emailSettings.SupportEmail);
-
-            var emailResult =
-                await _sendGridEmailService.SendSendGridEmailWithPersonalization(_emailSettings.SendgridApiKey,
-                    message);
-
-            if (emailResult.Success)
-            {
-                emailResult.Message = $"A code has been successfully sent to {username}";
-            }
-
-            #endregion
-
             return Ok(new ApiOkResponse(new ResetPasswordViewModel
             {
                 Code = user.RegistrationToken,
                 Username = user.UserName,
                 TokenValidity = user.TokenValidity,
                 Token = token
-            }, emailResult.Message));
+            }, "Succesfully sent password reset code"));
         }
 
         // POST api/users

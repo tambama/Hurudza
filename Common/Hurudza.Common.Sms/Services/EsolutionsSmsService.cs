@@ -45,7 +45,7 @@ public class EsolutionsSmsService: ISmsService
             var responseString = await response.Content.ReadAsStringAsync();
             var smsResponse = JsonConvert.DeserializeObject<SmsResponse>(responseString);
 
-            return smsResponse.Status;
+            return smsResponse?.Status ?? string.Empty;
         }
         catch (Exception ex)
         {

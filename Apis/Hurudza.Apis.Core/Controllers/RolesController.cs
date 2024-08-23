@@ -1,10 +1,9 @@
 ﻿using System.Net;
 using System.Net.Mime;
 using System.Security.Claims;
+using Asp.Versioning;
 using AutoMapper.QueryableExtensions;
 using Hurudza.Apis.Base.Models;
-using Hurudza.Common.Emails.Helpers;
-using Hurudza.Common.Emails.Services;
 using Hurudza.Common.Sms.Services;
 using Hurudza.Data.Context.Context;
 using Hurudza.Data.Models.Models;
@@ -32,8 +31,6 @@ namespace Hurudza.Apis.Core.Controllers
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IConfigurationProvider _configuration;
         private readonly ISmsService _smsService;
-        private readonly ISendGridEmailService _sendGridEmailService;
-        private readonly ISendGridMessageHelper _sendGridMessageHelper;
         private readonly EmailSettings _emailSettings;
 
         public RolesController(
@@ -41,17 +38,13 @@ namespace Hurudza.Apis.Core.Controllers
             UserManager<ApplicationUser> userManager,
             IConfigurationProvider configuration,
             ISmsService smsService,
-            IOptions<EmailSettings> emailSettings,
-            ISendGridEmailService sendGridEmailService,
-            ISendGridMessageHelper sendGridMessageHelper)
+            IOptions<EmailSettings> emailSettings)
         {
             _context = context;
             _userManager = userManager;
             _configuration = configuration;
             _smsService = smsService;
             _emailSettings = emailSettings.Value;
-            _sendGridEmailService = sendGridEmailService;
-            _sendGridMessageHelper = sendGridMessageHelper;
         }
 
         [HttpGet(Name = nameof(GetRoles))]

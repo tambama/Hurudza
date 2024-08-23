@@ -8,6 +8,10 @@ namespace Hurudza.Apis.Base.Mapping
     {
         public Locations()
         {
+            CreateMap<FieldLocation, FieldLocationViewModel>().ReverseMap();
+            CreateMap<FarmLocation, FarmLocationViewModel>().ReverseMap();
+            CreateMap<FieldLocation, CoordinateViewModel>().ReverseMap();
+            CreateMap<FarmLocation, CoordinateViewModel>().ReverseMap();
         }
     }
 }

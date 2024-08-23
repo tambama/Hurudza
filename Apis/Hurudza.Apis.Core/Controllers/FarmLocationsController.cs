@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mime;
+using Asp.Versioning;
 using Hurudza.Apis.Base.Models;
 using Hurudza.Data.Context.Context;
 using Hurudza.Data.Models.Models;

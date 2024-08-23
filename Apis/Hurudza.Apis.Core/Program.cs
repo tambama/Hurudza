@@ -1,9 +1,9 @@
 using System.Reflection;
 using System.Text;
+using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
 using Hurudza.Apis.Base.Infrastructure.Filters;
 using Hurudza.Apis.Base.Services;
-using Hurudza.Common.Emails.Helpers;
-using Hurudza.Common.Emails.Services;
 using Hurudza.Common.Services.Interfaces;
 using Hurudza.Common.Services.Services;
 using Hurudza.Common.Sms.Services;
@@ -13,8 +13,6 @@ using Hurudza.Data.Models.Models;
 using Hurudza.Data.UI.Models.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -29,14 +27,14 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-    
+
     builder.Host.UseSerilog((ctx, lc) => lc
         .ReadFrom.Configuration(ctx.Configuration));
 
-// Add services to the container.
+    // Add services to the container.
 
     builder.Services.AddControllers();
-    
+
     var assembly = Assembly.Load("Hurudza.Apis.Base");
     builder.Services.AddAutoMapper(assembly);
     builder.Services.AddHttpContextAccessor();
@@ -64,10 +62,10 @@ try
         })
         .AddEntityFrameworkStores<HurudzaDbContext>()
         .AddDefaultTokenProviders();
-    
+
     builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
         opt.TokenLifespan = TimeSpan.FromMinutes(5));
-    
+
     // Adding Authentication  
     builder.Services.AddAuthentication(options =>
         {
@@ -99,7 +97,7 @@ try
         {
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
         });
-    
+
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("HurudzaCors",
@@ -113,8 +111,8 @@ try
                     .AllowCredentials();
             });
     });
-    
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddSwaggerGen(c =>
     {
         c.AddServer(new OpenApiServer { Url = builder.Configuration["ApiSettings:CoreUrl"] });
@@ -143,22 +141,28 @@ try
             }
         });
     });
-    builder.Services.AddApiVersioning();
-    builder.Services.AddVersionedApiExplorer(options =>
+
+    builder.Services.AddSwaggerGen(c =>
     {
-        options.DefaultApiVersion = ApiVersion.Parse("1.0");
-        options.AssumeDefaultVersionWhenUnspecified = true;
+        c.AddServer(new OpenApiServer { Url = builder.Configuration["ApiSettings:CoreUrl"] });
+        c.OperationFilter<SwaggerDefaultValues>();
     });
+    builder.Services.AddApiVersioning(options =>
+    {
+        options.DefaultApiVersion = new ApiVersion(1, 0);
+        options.AssumeDefaultVersionWhenUnspecified = true;
+        options.ReportApiVersions = true;
+    })
+        .AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "'v'VVV";
+            options.SubstituteApiVersionInUrl = true;
+        });
+
     builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
-    
     builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
     builder.Services.AddTransient<IDateTimeService, DateTimeService>();
-    
-    // Email Service
-    builder.Services.Configure<EmailSettings>(options => builder.Configuration.GetSection(EmailSettings.Settings).Bind(options));
-    builder.Services.AddTransient<ISendGridMessageHelper, SendGridMessageHelper>();
-    builder.Services.AddTransient<ISendGridEmailService, SendGridEmailService>();
 
     // Sms Service
     builder.Services.Configure<SmsSettings>(options => builder.Configuration.GetSection(SmsSettings.Settings).Bind(options));
@@ -166,15 +170,15 @@ try
 
     var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+    // Configure the HTTP request pipeline.
     using var scope = app.Services.CreateScope();
-    var provider = scope.ServiceProvider.GetRequiredService<IApiVersionDescriptionProvider>();
     var context = scope.ServiceProvider.GetRequiredService<HurudzaDbContext>();
-    
+    var apiVersionDescriptionProvider = scope.ServiceProvider.GetRequiredService<IApiVersionDescriptionProvider>();
+
     await InitializeDatabase(app, context);
-    
+
     app.UseCors("HurudzaCors");
-    
+
     if (app.Environment.IsDevelopment())
     {
         app.UseDeveloperExceptionPage();
@@ -182,9 +186,9 @@ try
         app.UseSwaggerUI(c =>
         {
             c.DisplayOperationId();
-            foreach (var description in provider.ApiVersionDescriptions.OrderByDescending(_ => _.ApiVersion))
+            foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions.OrderByDescending(_ => _.ApiVersion))
             {
-                c.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", $"Hurudza {description.GroupName}");
+                c.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", $"Dohwe {description.GroupName}");
             }
         });
     }
@@ -215,7 +219,7 @@ static async Task InitializeDatabase(WebApplication app, HurudzaDbContext dbCont
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
     dbContext.Database.Migrate();
-    
+
     SeedClaimsData.SeedClaims(dbContext);
     SeedRoleData.SeedRoles(dbContext, roleManager);
     SeedSendGridData.SeedSendGridTemplates(dbContext);

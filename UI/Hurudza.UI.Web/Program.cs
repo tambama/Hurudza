@@ -1,17 +1,15 @@
 using Blazored.LocalStorage;
-using Hurudza.UI.Shared.Api;
-using Hurudza.UI.Shared.Api.Interfaces;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Hurudza.UI.Web;
 using Hurudza.UI.Web.Api;
-using Hurudza.UI.Web.Api.Interfaces;
 using Hurudza.UI.Web.Cookie.Handlers;
 using Hurudza.UI.Web.Cookie.Providers;
 using Microsoft.AspNetCore.Components.Authorization;
 using Syncfusion.Blazor;
+using Hurudza.UI.Shared.Api.Interfaces;
 
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NHaF5cXmVCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdgWXZccHRcRWZdVER3VkE=");
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MzE2NTc3NUAzMjM1MmUzMDJlMzBuZVptV2VlNXVBdnB0di9RcVJ0NUZRT1EwWDdQZHZBcWJXWEdHWkZDTXZZPQ==");
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");

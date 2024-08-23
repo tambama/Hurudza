@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Hurudza.Common.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace Common.Services.Services
 {

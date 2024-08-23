@@ -4,6 +4,8 @@ using Android.OS;
 using Location = Android.Locations.Location;
 using MauiLocation = Microsoft.Maui.Devices.Sensors.Location;
 using AndroidApp = Android.App.Application;
+using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Devices.Sensors;
 
 namespace Hurudza.UI.Mobile.Services;
 

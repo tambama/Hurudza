@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mime;
+using Asp.Versioning;
 using AutoMapper.QueryableExtensions;
 using Hurudza.Apis.Base.Models;
 using Hurudza.Data.Context.Context;
@@ -38,6 +39,18 @@ public class FarmsController : Controller
             .ConfigureAwait(false);
 
         return Ok(farms);
+    }
+
+    [HttpGet("{id}", Name = nameof(GetFarmDetails))]
+    public async Task<IActionResult> GetFarmDetails(string id)
+    {
+        var farm = await _context.Farms
+            .Include(f => f.Fields)
+            .ProjectTo<FarmMapViewModel>(_configuration)
+            .FirstOrDefaultAsync(f => f.Id == id)
+            .ConfigureAwait(false);
+
+        return Ok(farm);
     }
 
     [HttpPost(Name = nameof(CreateFarm))]

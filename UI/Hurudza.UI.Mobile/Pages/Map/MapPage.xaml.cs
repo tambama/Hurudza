@@ -2,6 +2,7 @@ using Hurudza.UI.Mobile.Controls;
 using Hurudza.UI.Mobile.Services;
 using Hurudza.UI.Mobile.ViewModels.Location;
 using Microsoft.Maui.Maps;
+using Microsoft.Maui.Devices.Sensors;
 
 namespace Hurudza.UI.Mobile.Pages.Map;
 

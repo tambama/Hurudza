@@ -2,6 +2,7 @@
 using Hurudza.UI.Mobile.Services.Interfaces;
 using Microsoft.Datasync.Client;
 using Microsoft.Datasync.Client.SQLiteStore;
+using Microsoft.Maui.Storage;
 
 namespace Hurudza.UI.Mobile.Services
 {

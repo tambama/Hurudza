@@ -2,10 +2,17 @@
 
 public class FileViewModel
 {
-    public FileViewModel(byte[] data)
+    public FileViewModel()
     {
+        
+    }
+
+    public FileViewModel(byte[] data, string? farmId = null)
+    {
+        FarmId = farmId;
         Data = data;
     }
 
+    public string? FarmId { get; set; }
     public byte[] Data { get; set; }
 }

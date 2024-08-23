@@ -1,4 +1,6 @@
 ﻿using CoreLocation;
+using Microsoft.Maui.Devices.Sensors;
+using Microsoft.Maui.ApplicationModel;
 
 namespace Hurudza.UI.Mobile.Services;
 

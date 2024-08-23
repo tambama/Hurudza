@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Hurudza.Data.UI.Models.ViewModels.Base
+﻿namespace Hurudza.Data.UI.Models.ViewModels.Base
 {
     public class BaseViewModel
     {

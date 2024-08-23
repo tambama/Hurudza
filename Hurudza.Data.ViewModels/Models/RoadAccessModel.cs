@@ -1,4 +1,3 @@
-using Hurudza.Common.Utils.Extensions;
 using Hurudza.Data.Enums.Enums;
 
 namespace Hurudza.Data.UI.Models.Models;
@@ -12,5 +11,5 @@ public class RoadAccessModel
 
     public RoadAccess RoadAccess { get; set; }
 
-    public virtual string Name => RoadAccess.GetDescription();
+    public virtual string Name => RoadAccess.ToString("G");
 }

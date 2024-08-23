@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.Maui.Devices.Sensors;
 
 namespace Hurudza.UI.Mobile.Services;
 

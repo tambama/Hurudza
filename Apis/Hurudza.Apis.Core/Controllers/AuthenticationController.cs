@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Mime;
 using System.Security.Claims;
 using System.Text;
+using Asp.Versioning;
 using AutoMapper.QueryableExtensions;
 using Hurudza.Apis.Base.Models;
 using Hurudza.Data.Context.Context;

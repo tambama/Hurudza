@@ -1,4 +1,5 @@
-﻿namespace Hurudza.UI.Mobile;
+﻿using Microsoft.Maui.ApplicationModel;
+namespace Hurudza.UI.Mobile;
 
 using System.Linq;
 using Android.Gms.Maps;

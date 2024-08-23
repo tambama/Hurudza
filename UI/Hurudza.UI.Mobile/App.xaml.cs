@@ -1,5 +1,6 @@
 ﻿using Hurudza.UI.Mobile.Pages.Map;
 using System.Diagnostics;
+using Microsoft.Maui.Devices;
 
 namespace Hurudza.UI.Mobile;
 

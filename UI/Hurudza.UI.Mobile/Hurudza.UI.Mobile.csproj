@@ -1,104 +1,92 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
-
-    <PropertyGroup>
-        <TargetFrameworks>net7.0-android;net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
-        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
-        <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
-        <!-- <TargetFrameworks>$(TargetFrameworks);net7.0-tizen</TargetFrameworks> -->
-        <OutputType>Exe</OutputType>
-        <RootNamespace>Hurudza.UI.Mobile</RootNamespace>
-        <UseMaui>true</UseMaui>
-        <SingleProject>true</SingleProject>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <EnableDefaultCssItems>false</EnableDefaultCssItems>
-
-        <!-- Display name -->
-        <ApplicationTitle>Hurudza</ApplicationTitle>
-
-        <!-- App Identifier -->
-        <ApplicationId>com.thinkstack.hurudza</ApplicationId>
-        <ApplicationIdGuid>70234DC8-6160-45ED-9E16-83BDA985DAF4</ApplicationIdGuid>
-
-        <!-- Versions -->
-        <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-        <ApplicationVersion>1</ApplicationVersion>
-
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-        <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#081B25" />
-
-        <!-- Splash Screen -->
-        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#081B25" />
-
-        <!-- Images -->
-        <MauiImage Include="Resources\Images\*" />
-        <MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
-
-        <!-- Custom Fonts -->
-        <MauiFont Include="Resources\Fonts\*" />
-
-        <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
-        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Remove="Resources\AppIcon\appicon.svg" />
-        <None Remove="Resources\Images\caret_down.svg" />
-        <None Remove="Resources\Images\ellipsis_h.svg" />
-        <None Remove="Resources\Images\ellipsis_v.svg" />
-        <None Remove="Resources\Images\farm.png" />
-        <None Remove="Resources\Images\information.png" />
-        <None Remove="Resources\Images\plus.png" />
-        <Resource Include="Resources\AppIcon\appicon.svg" />
-        <None Remove="Resources\AppIcon\appiconfg.svg" />
-        <Resource Include="Resources\AppIcon\appiconfg.svg" />
-        <Resource Include="Resources\Splash\splash.svg" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\Hurudza.UI.Shared\Hurudza.UI.Shared.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Maui" Version="5.3.0" />
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
-        <PackageReference Include="Esri.ArcGISRuntime" Version="200.2.0" />
-        <PackageReference Include="Microsoft.Datasync.Client.SQLiteStore" Version="6.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
-        <PackageReference Include="Microsoft.Maui.Controls.Maps" Version="7.0.92" />
-        <PackageReference Include="Syncfusion.Maui.Core" Version="22.2.12" />
-        <PackageReference Include="Syncfusion.Maui.Expander" Version="22.2.12" />
-        <PackageReference Include="Syncfusion.Maui.Inputs" Version="22.2.12" />
-        <PackageReference Include="Syncfusion.Maui.ListView" Version="22.2.12" />
-        <PackageReference Include="The49.Maui.BottomSheet" Version="1.0.1" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Platforms\Windows\Handlers\" />
-        <Folder Include="ViewModels\Authentication\" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <MauiXaml Update="Pages\Farms\CreateFarmPage.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </MauiXaml>
-      <MauiXaml Update="Pages\Farms\CreateFarmSheet.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </MauiXaml>
-      <MauiXaml Update="Pages\Fields\CreateFieldSheet.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </MauiXaml>
-      <MauiXaml Update="Pages\Map\CreateFieldPage.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </MauiXaml>
-    </ItemGroup>
-
+	<PropertyGroup>
+		<TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
+		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
+		<!-- <TargetFrameworks>$(TargetFrameworks);net7.0-tizen</TargetFrameworks> -->
+		<OutputType>Library</OutputType>
+		<RootNamespace>Hurudza.UI.Mobile</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<EnableDefaultCssItems>false</EnableDefaultCssItems>
+		<!-- Display name -->
+		<ApplicationTitle>Hurudza</ApplicationTitle>
+		<!-- App Identifier -->
+		<ApplicationId>com.thinkstack.hurudza</ApplicationId>
+		<ApplicationIdGuid>70234DC8-6160-45ED-9E16-83BDA985DAF4</ApplicationIdGuid>
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+	</PropertyGroup>
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#081B25" />
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#081B25" />
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
+		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Remove="Resources\AppIcon\appicon.svg" />
+		<None Remove="Resources\Images\caret_down.svg" />
+		<None Remove="Resources\Images\ellipsis_h.svg" />
+		<None Remove="Resources\Images\ellipsis_v.svg" />
+		<None Remove="Resources\Images\farm.png" />
+		<None Remove="Resources\Images\information.png" />
+		<None Remove="Resources\Images\plus.png" />
+		<Resource Include="Resources\AppIcon\appicon.svg" />
+		<None Remove="Resources\AppIcon\appiconfg.svg" />
+		<Resource Include="Resources\AppIcon\appiconfg.svg" />
+		<Resource Include="Resources\Splash\splash.svg" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Hurudza.UI.Shared\Hurudza.UI.Shared.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Maui" Version="7.0.1" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+		<PackageReference Include="Esri.ArcGISRuntime" Version="200.3.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.10" />
+		<PackageReference Include="Microsoft.Datasync.Client.SQLiteStore" Version="6.1.0" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.10" />
+		<PackageReference Include="Microsoft.Maui.Controls.Maps" Version="8.0.10" />
+		<PackageReference Include="Syncfusion.Maui.Core" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Maui.Expander" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Maui.Inputs" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Maui.ListView" Version="25.1.35" />
+		<PackageReference Include="The49.Maui.BottomSheet" Version="8.0.3" />
+	</ItemGroup>
+	<ItemGroup>
+		<Folder Include="Platforms\Windows\Handlers\" />
+		<Folder Include="ViewModels\Authentication\" />
+	</ItemGroup>
+	<ItemGroup>
+		<MauiXaml Update="Pages\Farms\CreateFarmPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Pages\Farms\CreateFarmSheet.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Pages\Fields\CreateFieldSheet.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Pages\Map\CreateFieldPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="8.0.10" />
+	</ItemGroup>
 </Project>

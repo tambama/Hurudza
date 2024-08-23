@@ -12,8 +12,10 @@ public class Location : BaseEntity
 
 public class FieldLocation : Location
 {
+    public string? FarmId { get; set; }
     public string? FieldId { get; set; }
     public virtual Field? Field { get; set; }
+    public virtual Farm? Farm { get; set; }
 }
 
 public class FarmLocation : Location

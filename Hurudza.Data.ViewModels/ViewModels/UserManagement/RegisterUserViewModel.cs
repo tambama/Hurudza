@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Hurudza.Data.Enums.Enums;
 
-namespace Hurudza.Data.UI.Enums.ViewModels.UserManagement;
+namespace Hurudza.Data.UI.Models.ViewModels.UserManagement;
 
 public class RegisterUserViewModel
 {

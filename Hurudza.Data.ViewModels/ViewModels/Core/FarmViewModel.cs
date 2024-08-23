@@ -76,3 +76,24 @@ public class FarmViewModel : BaseViewModel
     public string? District { get; set; }
     public string? Province { get; set; }
 }
+
+public class FarmMapViewModel : BaseViewModel
+{
+    public string? Name { get; set; }
+    public float Size { get; set; }
+    public float Arable { get; set; }
+    public float Cleared { get; set; }
+    public Terrain? Terrain { get; set; }
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
+    public double[] Center => [Longitude, Latitude];
+    public string? SoilType { get; set; }
+
+    public List<List<double>> FarmCoordinates { get; set; } = new List<List<double>>();
+    public List<List<List<double>>> FarmPolygon => new List<List<List<double>>>()
+    {
+        FarmCoordinates
+    };
+
+    public List<FieldViewModel> Fields { get; set; } = new List<FieldViewModel>();
+}

@@ -1,313 +1,35 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
-
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
-        <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Blazored.LocalStorage" Version="4.4.0" />
-        <PackageReference Include="IdentityModel" Version="6.2.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.12" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="7.0.12" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.12" PrivateAssets="all" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
-        <PackageReference Include="Syncfusion.Blazor.Buttons" Version="23.1.41" />
-        <PackageReference Include="Syncfusion.Blazor.Calendars" Version="23.1.41" />
-        <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="23.1.41" />
-        <PackageReference Include="Syncfusion.Blazor.Grid" Version="23.1.41" />
-        <PackageReference Include="Syncfusion.Blazor.Inputs" Version="23.1.41" />
-        <PackageReference Include="Syncfusion.Blazor.Lists" Version="23.1.41" />
-        <PackageReference Include="Syncfusion.Blazor.Navigations" Version="23.1.41" />
-        <PackageReference Include="Syncfusion.Blazor.Notifications" Version="23.1.41" />
-        <PackageReference Include="Syncfusion.Blazor.Popups" Version="23.1.41" />
-        <PackageReference Include="Syncfusion.Blazor.Spinner" Version="23.1.41" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <AdditionalFiles Include="Pages\Authentication\Authentication.razor" />
-      <AdditionalFiles Include="Pages\Authentication\Login.razor" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\Common\Hurudza.Common.Utils\Hurudza.Common.Utils.csproj" />
-      <ProjectReference Include="..\Hurudza.UI.Shared\Hurudza.UI.Shared.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="wwwroot\sample-data\weather.json" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\app.css" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\bootstrap\bootstrap.min.css" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\bootstrap\bootstrap.min.css.map" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\nucleo-icons.css" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\nucleo-svg.css" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\FONT-LICENSE" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\css\open-iconic-bootstrap.min.css" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.eot" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.otf" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.ttf" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.woff" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\ICON-LICENSE" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\README.md" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\soft-ui-dashboard.css" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\soft-ui-dashboard.css.map" />
-      <_ContentIncludedByDefault Remove="wwwroot\css\soft-ui-dashboard.min.css" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\.DS_Store" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\apple-icon.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\bg-smart-home-1.jpeg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\bg-smart-home-2.jpeg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\bg1.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\bruce-mars.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved-10.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved-11.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved-6.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved-8.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved0.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved1.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved10.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved11-small.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved11.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved12.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved13.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved14.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved19.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved2.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved21.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved3.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved4.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved5-small.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved5.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved6-small.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved6.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved7.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved8.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\curved9.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\curved-images\white-curved.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\down-arrow-dark.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\down-arrow-white.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\down-arrow.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\favicon.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\home-decor-1.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\home-decor-2.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\home-decor-3.jpeg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\home-decor-3.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\illustrations\dark-lock-ill.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\illustrations\rocket-dark.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\illustrations\rocket-white.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\ivana-square.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\ivancik.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\kal-visuals-square.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\logo-ct-dark.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\logo-ct.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\logos\mastercard.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\logos\visa.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\marie.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\shapes\pattern-lines.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\shapes\shape-1.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\shapes\shape-2.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\shapes\shape-3.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\shapes\wave-down.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\shapes\wave-up.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\shapes\waves-gray.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\shapes\waves-white.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\small-logos\icon-sun-cloud.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\small-logos\logo-atlassian.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\small-logos\logo-invision.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\small-logos\logo-jira.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\small-logos\logo-slack.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\small-logos\logo-spotify.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\small-logos\logo-webdev.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\small-logos\logo-xd.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\team-1.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\team-2.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\team-3.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\team-4.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\theme\angular.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\theme\bootstrap.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\theme\dribbble.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\theme\dropbox.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\theme\mastercard.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\theme\paypal.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\theme\react.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\theme\sketch.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\theme\slack.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\theme\spotify.jpeg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\theme\tim.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\theme\unass.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\theme\visa.png" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\theme\vue.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\img\vr-bg.jpg" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\bootstrap-grid.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\bootstrap-reboot.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\bootstrap-utilities.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\bootstrap.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\forms\_floating-labels.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\forms\_form-check.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\forms\_form-control.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\forms\_form-range.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\forms\_form-select.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\forms\_form-text.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\forms\_input-group.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\forms\_labels.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\forms\_validation.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\helpers\_clearfix.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\helpers\_color-bg.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\helpers\_colored-links.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\helpers\_position.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\helpers\_ratio.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\helpers\_stacks.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\helpers\_stretched-link.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\helpers\_text-truncation.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\helpers\_visually-hidden.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\helpers\_vr.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_alert.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_backdrop.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_banner.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_border-radius.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_box-shadow.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_breakpoints.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_buttons.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_caret.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_clearfix.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_color-scheme.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_container.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_deprecate.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_forms.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_gradients.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_grid.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_image.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_list-group.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_lists.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_pagination.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_reset-text.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_resize.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_table-variants.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_text-truncate.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_transition.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_utilities.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\mixins\_visually-hidden.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\utilities\_api.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\vendor\_rfs.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_accordion.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_alert.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_badge.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_breadcrumb.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_button-group.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_buttons.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_card.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_carousel.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_close.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_containers.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_dropdown.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_forms.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_functions.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_grid.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_helpers.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_images.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_list-group.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_maps.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_mixins.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_modal.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_nav.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_navbar.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_offcanvas.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_pagination.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_placeholders.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_popover.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_progress.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_reboot.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_root.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_spinners.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_tables.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_toasts.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_tooltip.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_transitions.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_type.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_utilities.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\bootstrap\_variables.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\cards\card-background.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\custom\_styles.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\custom\_variables.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\forms\_form-check.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\forms\_form-select.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\forms\_form-switch.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\forms\_forms.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\forms\_input-group.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\forms\_inputs.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\forms\_labels.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\mixins\mixins.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\mixins\_badge.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\mixins\_colored-shadows.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\mixins\_container.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\mixins\_hover.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\mixins\_social-buttons.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\plugins\free\plugins.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\plugins\free\_flatpickr.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\plugins\free\_nouislider.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\plugins\free\_perfect-scrollbar.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\plugins\free\_prism.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\theme.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_animations.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_avatars.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_badge.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_breadcrumb.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_cards-extend.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_cards.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_choices.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_dark-version.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_dropdowns.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_fixed-plugin.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_form-switch.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_full-calendar.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_header.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_info-areas.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_misc-extend.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_misc.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_navbar-vertical.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_navbar.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_pagination.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_rtl.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_social-buttons.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_table.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_timeline.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_utilities-extend.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_utilities.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\variables\_virtual-reality.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_alert.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_avatars.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_badge.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_breadcrumbs.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_buttons.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_cards.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_dark-version.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_dropdown.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_dropup.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_fixed-plugin.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_footer.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_forms.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_gradients.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_header.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_info-areas.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_misc.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_nav.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_navbar-vertical.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_navbar.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_pagination.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_popovers.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_progress.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_rtl.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_social-buttons.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_tables.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_tilt.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_timeline.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_tooltips.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_typography.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_utilities-extend.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_utilities.scss" />
-      <_ContentIncludedByDefault Remove="wwwroot\scss\soft-ui-dashboard\_variables.scss" />
-    </ItemGroup>
-
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+		<PackageReference Include="IdentityModel" Version="6.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="8.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.3" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+		<PackageReference Include="SharpKml.Core" Version="6.0.0" />
+		<PackageReference Include="Syncfusion.Blazor.Buttons" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Calendars" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.DropDowns" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Grid" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Inputs" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Lists" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Navigations" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Notifications" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Popups" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Spinner" Version="25.1.35" />
+	</ItemGroup>
+	<ItemGroup>
+		<AdditionalFiles Include="Pages\Authentication\Authentication.razor" />
+		<AdditionalFiles Include="Pages\Authentication\Login.razor" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Common\Hurudza.Common.Utils\Hurudza.Common.Utils.csproj" />
+	  <ProjectReference Include="..\..\Hurudza.Data.ViewModels\Hurudza.Data.UI.Models.csproj" />
+	  <ProjectReference Include="..\Hurudza.UI.Shared\Hurudza.UI.Shared.csproj" />
+	</ItemGroup>
 </Project>

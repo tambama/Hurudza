@@ -7,6 +7,7 @@ using Microsoft.Maui.Maps;
 using System.Collections.Specialized;
 using The49.Maui.BottomSheet;
 using ServiceProvider = Hurudza.UI.Mobile.Extensions.ServiceProvider;
+using Microsoft.Maui.Devices.Sensors;
 
 namespace Hurudza.UI.Mobile.Pages.Map;
 

@@ -1,4 +1,3 @@
-using Hurudza.Common.Utils.Extensions;
 using Hurudza.Data.Enums.Enums;
 
 namespace Hurudza.Data.UI.Models.Models;
@@ -12,5 +11,5 @@ public class TerrainModel
 
     public Terrain Terrain { get; set; }
 
-    public virtual string Name => Terrain.GetDescription();
+    public virtual string Name => Terrain.ToString("G");
 }

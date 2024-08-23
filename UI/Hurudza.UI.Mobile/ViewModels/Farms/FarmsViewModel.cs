@@ -13,6 +13,8 @@ using Microsoft.Datasync.Client;
 using System.Collections.ObjectModel;
 using Region = Hurudza.Data.Enums.Enums.Region;
 using Sensors = Microsoft.Maui.Devices.Sensors;
+using Microsoft.Maui.ApplicationModel.Communication;
+using Microsoft.Maui.ApplicationModel;
 
 namespace Hurudza.UI.Mobile.ViewModels.Farms
 {

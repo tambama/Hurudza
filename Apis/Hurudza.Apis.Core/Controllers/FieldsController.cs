@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mime;
+using Asp.Versioning;
 using AutoMapper.QueryableExtensions;
 using Hurudza.Apis.Base.Models;
 using Hurudza.Data.Context.Context;
@@ -44,6 +45,7 @@ public class FieldsController : Controller
     public async Task<IActionResult> GetFarmFields(string id)
     {
         var fields = await _context.Fields
+            .Include(f => f.Locations)
             .Where(f => f.FarmId == id)
             .ProjectTo<FieldViewModel>(_configuration)
             .ToListAsync()

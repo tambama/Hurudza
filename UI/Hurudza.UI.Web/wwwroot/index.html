@@ -25,7 +25,7 @@
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
 </head>
 
-<body class="g-sidenav-show bg-gray-100">
+<body class="g-sidenav-show bg-gray-100" id="body">
 <div id="app">
     <svg class="loading-progress">
         <circle r="40%" cx="50%" cy="50%" />
@@ -68,17 +68,105 @@
 <script src="_content/Hurudza.UI.Shared/js/soft-ui-dashboard.min.js?v=1.0.7"></script>
 <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
 <script>
-    function loadMap(center){
+    function loadMap(farm) {
+        console.log(farm);
         mapboxgl.accessToken = 'pk.eyJ1IjoicGVuaWVsdCIsImEiOiJjbGt3Y2gxM3YweWtrM3FwbW9jaWNkMWVyIn0.cDAgTWNXN-TVJROjgoWQiw';
-        console.log(center);
         const map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/satellite-v9',
-            center: center,
+            center: [32.2247662278443, -18.767832680211384],
             zoom: 14
+        });
+
+        map.on('load', () => {
+            // Add a data source containing GeoJSON data.
+            map.addSource('maine', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Polygon',
+                        'coordinates': farm.farmPolygon
+                    }
+                }
+            });
+
+            // Add a black outline around the polygon
+            map.addLayer({
+                'id': 'outline',
+                'type': 'line',
+                'source': 'maine',
+                'layout': {},
+                'paint': {
+                    'line-color': '#000',
+                    'line-width': 3
+                }
+            });
+
+            // Iterate over all fields and add them to the map
+            for (const field of farm.fields) {
+                map.addSource(field.id, {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'Polygon',
+                            'coordinates': field.coordinates
+                        }
+                    }
+                });
+
+                // Add a new Layer to visualize the polygon
+                map.addLayer({
+                    'id': field.id,
+                    'type': 'fill',
+                    'source': field.id, // reference the data source
+                    'layout': {},
+                    'paint': {
+                        'fill-color': '#0080ff',
+                        'fill-opacity': 0.1
+                    }
+                });
+
+                // Add a black outline around the polygon
+                map.addLayer({
+                    'id': 'outline' + field.id,
+                    'type': 'line',
+                    'source': field.id,
+                    'layout': {},
+                    'paint': {
+                        'line-color': '#ff0000',
+                        'line-width': 1
+                    }
+                });
+
+                // When a click event occurs on a feature in the fields layer,
+                // open a popup at the location of the click, with description
+                // HTML from the click event's  properties.
+                map.on('click', field.id, (e) => {
+                    new mapboxgl.Popup()
+                        .setLngLat(e.lngLat)
+                        .setHTML(field.name)
+                        .addTo(map);
+                });
+
+                // Change the cursor to a pointer when
+                // the mouse is over the field layer.
+                map.on('mouseenter', field.id, () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+
+                map.on('mouseleave', field.id, () => {
+                    map.getCanvas().style.cursor = '';
+                });
+            }
         });
     }
 </script>
+    <script>
+        const element = document.getElementById("body");
+        element.classList.add("g-sidenav-hidden");
+    </script>
 </body>
 
 </html>
