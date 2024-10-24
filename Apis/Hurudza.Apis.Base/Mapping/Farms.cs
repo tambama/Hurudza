@@ -8,7 +8,6 @@ public class Farms : Profile
 {
     public Farms()
     {
-        CreateMap<FarmViewModel, Farm>();
         CreateMap<Farm, FarmViewModel>()
             .ForMember(dst => dst.Province, opts => opts.MapFrom(src => src.Province.Name))
             .ForMember(dst => dst.District, opts => opts.MapFrom(src => src.District.Name))
@@ -16,5 +15,7 @@ public class Farms : Profile
             .ForMember(dst => dst.Ward, opts => opts.MapFrom(src => src.Ward.Name));
         CreateMap<Farm, FarmMapViewModel>()
             .ForMember(dst => dst.FarmCoordinates, opts => opts.MapFrom(src => src.Locations.OrderBy(l => l.CreatedDate).Select(l => new List<double>() { l.Longitude, l.Latitude })));
+
+        CreateMap<Farm, FarmListViewModel>();
     }
 }

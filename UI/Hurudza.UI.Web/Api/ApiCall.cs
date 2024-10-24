@@ -3,6 +3,7 @@ using Blazored.LocalStorage;
 using Hurudza.Common.Utils.Extensions;
 using Hurudza.UI.Shared.Api.Interfaces;
 using IdentityModel.Client;
+using Serilog;
 
 namespace Hurudza.UI.Web.Api;
 
@@ -45,8 +46,9 @@ public class ApiCall : IApiCall
                 return result;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Log.Error(ex, ex.Message);
             return default;
         }
     }
@@ -65,8 +67,9 @@ public class ApiCall : IApiCall
                 return result;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Log.Error(ex, ex.Message);
             return default;
         }
     }
@@ -83,8 +86,9 @@ public class ApiCall : IApiCall
                 return result;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Log.Error(ex, ex.Message);
             return default;
         }
     }
@@ -102,8 +106,9 @@ public class ApiCall : IApiCall
                 return result;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Log.Error(ex, ex.Message);
             return default;
         }
     }
@@ -121,8 +126,9 @@ public class ApiCall : IApiCall
                 return result;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Log.Error(ex, ex.Message);
             return default;
         }
     }
@@ -142,6 +148,7 @@ public class ApiCall : IApiCall
         }
         catch (Exception ex)
         {
+            Log.Error(ex, ex.Message);
             return default;
         }
     }
@@ -159,8 +166,9 @@ public class ApiCall : IApiCall
                 return result;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Log.Error(ex.Message, ex);
             return default;
         }
     }
@@ -178,8 +186,9 @@ public class ApiCall : IApiCall
                 return result;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Log.Error(ex.Message, ex);
             return default;
         }
     }
@@ -197,8 +206,9 @@ public class ApiCall : IApiCall
                 return result;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Log.Error(ex.Message, ex);
             return default;
         }
     }
@@ -216,8 +226,9 @@ public class ApiCall : IApiCall
                 return result;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Log.Error(ex.Message, ex);
             return default;
         }
     }
@@ -235,8 +246,9 @@ public class ApiCall : IApiCall
                 return result;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Log.Error(ex.Message, ex);
             return default;
         }
     }
@@ -254,8 +266,9 @@ public class ApiCall : IApiCall
                 return result;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Log.Error(ex.Message, ex);
             return default;
         }
     }

@@ -20,4 +20,7 @@
   <ItemGroup>
     <Folder Include="wwwroot\img\flags\" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="wwwroot\assets\.DS_Store" />
+  </ItemGroup>
 </Project>

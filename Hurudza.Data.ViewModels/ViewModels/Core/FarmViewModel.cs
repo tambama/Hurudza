@@ -79,6 +79,7 @@ public class FarmViewModel : BaseViewModel
 
 public class FarmMapViewModel : BaseViewModel
 {
+    public string Id { get; set; }
     public string? Name { get; set; }
     public float Size { get; set; }
     public float Arable { get; set; }
@@ -87,6 +88,7 @@ public class FarmMapViewModel : BaseViewModel
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public double[] Center => [Longitude, Latitude];
+    public bool IsPolygon => FarmCoordinates.Count > 0;
     public string? SoilType { get; set; }
 
     public List<List<double>> FarmCoordinates { get; set; } = new List<List<double>>();
@@ -96,4 +98,10 @@ public class FarmMapViewModel : BaseViewModel
     };
 
     public List<FieldViewModel> Fields { get; set; } = new List<FieldViewModel>();
+}
+
+public class FarmListViewModel
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
 }

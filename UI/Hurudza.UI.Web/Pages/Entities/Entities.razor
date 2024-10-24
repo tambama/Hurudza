@@ -1,0 +1,286 @@
+@page "/entities"
+@using System.Collections.ObjectModel;
+@using System.Diagnostics;
+@attribute [Authorize]
+
+@inject IApiCall ApiCall
+@inject AuthenticationStateProvider AuthStateProvider
+
+<Toast @ref="Alert" />
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Entities</h6>
+            </div>
+            <div class="card-body px-2 pt-0 pb-2">
+                <SfGrid DataSource="@EntityList"
+                        @ref="Grid"
+                        AllowPaging="true"
+                        AllowExcelExport="true"
+                        AllowSorting="true"
+                        AllowMultiSorting="true"
+                        EnableStickyHeader="true"
+                        AllowResizing="true"
+                        AllowFiltering="true"
+                        AllowSelection="true"
+                        Toolbar="@(new List<string>() { "Add", "ExcelExport", "Print", "Search" })"
+                        ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Edit", "Delete", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                    <GridPageSettings PageSize="12"></GridPageSettings>
+                    <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
+                    <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="EntityViewModel"></GridEvents>
+                    <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog">
+                        <HeaderTemplate>
+                            @{
+                                var text = GetHeader((context as EntityViewModel));
+                                <span>@text</span>
+                            }
+                        </HeaderTemplate>
+                        <Validator>
+                            <DataAnnotationsValidator></DataAnnotationsValidator>
+                        </Validator>
+                        <Template>
+                            @{
+                                var Entity = (context as EntityViewModel);
+                                <div>
+                                    <div class="form-row">
+                                        <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(Entity.Id)"></SfTextBox>
+                                        <div class="form-group">
+                                            <label>Name</label>
+                                            <SfTextBox ID="name" TValue="string" @bind-Value="@(Entity.Name)" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => Entity.Name" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Description</label>
+                                            <SfTextBox ID="description" TValue="string" @bind-Value="@(Entity.Description)" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => Entity.Description" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Phone Number</label>
+                                            <SfTextBox ID="phoneNumber" TValue="string" @bind-Value="@(Entity.PhoneNumber)" Placeholder="e.g. 263771234567" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => Entity.PhoneNumber" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <SfTextBox ID="email" TValue="string" @bind-Value="@(Entity.Email)" Placeholder="e.g. your@email.com" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => Entity.Email" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Entity Type</label>
+                                            <SfDropDownList ID="entityType" TValue="EntityType" TItem="EntityTypeModel" @bind-Value="@(Entity.EntityType)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select Entity Type" DataSource="@_entityTypes">
+                                                <DropDownListFieldSettings Value="EntityType" Text="Name"></DropDownListFieldSettings>
+                                            </SfDropDownList>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <SfSpinner @ref="SaveSpinner"></SfSpinner>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </Template>
+                    </GridEditSettings>
+                    <GridColumns>
+                        <GridColumn Field=@nameof(EntityViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                        <GridColumn Field=@nameof(EntityViewModel.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                        <GridColumn Field=@nameof(EntityViewModel.EntityType) HeaderText="Type" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                        <GridColumn Field=@nameof(EntityViewModel.PhoneNumber) HeaderText="Phone Number" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                        <GridColumn Field=@nameof(EntityViewModel.Email) HeaderText="Email" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                        <GridColumn Field=@nameof(EntityViewModel.Description) HeaderText="Description" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn HeaderText="Actions" Width="150">
+                            <GridCommandColumns>
+                                <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-edit", CssClass = "e-flat" })"></GridCommandColumn>
+                                <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-delete", CssClass = "e-flat" })"></GridCommandColumn>
+                            </GridCommandColumns>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+                <SfDialog @ref="Dialog" Width="250px" Visible="false" ShowCloseIcon="true" IsModal="true">
+                    <DialogEvents Closed="Closed"></DialogEvents>
+                    <DialogTemplates>
+                        <Header> Delete Record</Header>
+                        <Content>
+                            You are about to Delete a Record @SelectedEntity.Name?
+                            <div class="form-group">
+                                <SfSpinner @ref="DeleteSpinner"></SfSpinner>
+                            </div>
+                        </Content>
+                    </DialogTemplates>
+                    <DialogButtons>
+                        <DialogButton OnClick="@OkClick" Content="OK" IsPrimary="true"></DialogButton>
+                        <DialogButton OnClick="@CancelClick" Content="Cancel"></DialogButton>
+                    </DialogButtons>
+                </SfDialog>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    SfGrid<EntityViewModel> Grid;
+    SfDialog Dialog;
+    SfSpinner SaveSpinner;
+    SfSpinner DeleteSpinner;
+    Toast Alert;
+    List<EntityViewModel> EntityList;
+    List<EntityTypeModel> _entityTypes = Enum.GetValues<EntityType>().Select(x => new EntityTypeModel(x)).ToList();
+    bool Enabled = true;
+    bool Data = false;
+    EntityViewModel SelectedEntity;
+    bool flag = true;
+    ClaimsPrincipal Entity;
+    bool ShowSaveSpinner { get; set; } = false;
+
+    private string GetHeader(EntityViewModel Value)
+    {
+        if (string.IsNullOrEmpty(Value.Id))
+        {
+            return "Add New Entity";
+        }
+        else
+        {
+            return "Edit Details of " + Value.Name;
+        }
+    }
+
+    private void Closed()
+    {
+        flag = true;
+    }
+
+    private async Task ActionBeginHandler(ActionEventArgs<EntityViewModel> args)
+    {
+        switch (args.RequestType)
+        {
+            case Action.FilterChoiceRequest:
+                args.FilterChoiceCount = 100;
+                break;
+            case Action.Add:
+                Data = true;
+                break;
+            case Action.Delete when flag:
+                args.Cancel = true;
+                await Dialog.ShowAsync();
+                flag = false;
+                break;
+            case Action.Save:
+                {
+                    if (SaveSpinner.Visible)
+                    {
+                        args.Cancel = true;
+                        break;
+                    }
+
+                    await SaveSpinner.ShowAsync();
+                    if (!string.IsNullOrEmpty(args.Data.Id))
+                    {
+                        if (!await UpdateEntity(args.Data))
+                        {
+                            args.Cancel = true;
+                        }
+                    }
+                    else
+                    {
+                        if (!await SaveEntity(args.Data))
+                        {
+                            args.Cancel = true;
+                        }
+                    }
+
+
+                    await SaveSpinner.HideAsync();
+                    break;
+                }
+        }
+    }
+
+    private void RowSelectHandler(RowSelectEventArgs<EntityViewModel> args)
+    {
+        SelectedEntity = args.Data;
+    }
+
+    private async Task OkClick()
+    {
+        await DeleteSpinner.ShowAsync();
+        if (await DeleteEntity(SelectedEntity))
+        {
+            await Grid.DeleteRecordAsync();
+            await Dialog.HideAsync();
+        }
+        await DeleteSpinner.HideAsync();
+    }
+
+    private async Task CancelClick()
+    {
+        await Dialog.HideAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        EntityList = (await ApiCall.Get<IEnumerable<EntityViewModel>>(await ApiCall.GetHttpClient(), "Entities/getEntities/")).ToList();
+    }
+
+    private async Task<bool> SaveEntity(EntityViewModel model)
+    {
+        var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<EntityViewModel>, EntityViewModel>(await ApiCall.GetHttpClient(), "Entities/createEntity", model);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to save Entity, please try again!", showTitle: true, toastType: ToastType.Danger);
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        }
+
+        return false;
+    }
+
+    private async Task<bool> UpdateEntity(EntityViewModel model)
+    {
+        var response = await ApiCall.Update<ApiResponse<EntityViewModel>, EntityViewModel>(await ApiCall.GetHttpClient(), "Entities/updateEntity", model.Id, model);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to update Entity, please try again!", showTitle: true, toastType: ToastType.Danger);
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        }
+
+        return false;
+    }
+
+    private async Task<bool> DeleteEntity(EntityViewModel model)
+    {
+        var response = await ApiCall.Remove<ApiResponse<EntityViewModel>>(await ApiCall.GetHttpClient(), "Entities/deleteEntity", model.Id);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to delete Entity, please try again!", showTitle: true, toastType: ToastType.Danger);
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        }
+
+        return false;
+    }
+}

@@ -35,6 +35,13 @@ public static class StringExtentions
         string output = cultInfo.ToTitleCase(cleaned);
         return output;
     }
+    
+    // extension method to convert a string to a - seperated lowercase string
+    public static string ToIDCase(this string value)
+    {
+        var transformed = value.Trim().Replace(" ", "-").ToLower();
+        return transformed;
+    }
 
     public static string GetTextBeforeNumber(this string text)
     {

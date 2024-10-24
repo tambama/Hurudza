@@ -67,4 +67,6 @@ public class Farm : BaseEntity
     public virtual ICollection<Field> Fields { get; set; }
     public virtual ICollection<FarmLocation> Locations { get; set; }
     public virtual ICollection<FieldLocation> FieldLocations { get; set; }
+    
+    public virtual ICollection<FarmOwner> Owners { get; set; }
 }

@@ -22,7 +22,27 @@ public class FieldViewModel : BaseViewModel
             Id = Id.Replace("-", string.Empty);
             var locations = Locations.OrderBy(l => l.CreatedDate).Select(l => new List<double> { l.Longitude, l.Latitude }).ToList();
 
-            return new List<List<List<double>>> {  locations };
+            if (locations != null || locations.Count == 0)
+            {
+                return new List<List<List<double>>> {  locations };
+            }
+            else
+            {
+                return new List<List<List<double>>>();
+            }
         }
     }
+}
+
+public class CreateFieldViewModel : BaseViewModel
+{
+    [Required(ErrorMessage = "Name is required")]
+    public string? Name { get; set; }
+    public string? Description { get; set; }
+    public SoilType SoilType { get; set; }
+    public bool Irrigation { get; set; }
+    public float Size { get; set; }
+    [Required(ErrorMessage = "Farm is required")]
+    public string? FarmId { get; set; }
+    public string? Farm { get; set; }
 }

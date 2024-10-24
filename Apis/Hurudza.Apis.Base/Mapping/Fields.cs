@@ -9,8 +9,9 @@ public class Fields : Profile
     public Fields()
     {
         CreateMap<FieldViewModel, Field>();
+        CreateMap<CreateFieldViewModel, Field>();
         CreateMap<Field, FieldViewModel>()
             .ForMember(dst => dst.Farm, opts => opts.MapFrom(src => src.Farm.Name))
-            .ForMember(dst => dst.Locations, opts => opts.MapFrom(src => src.Locations));
+            .ForMember(dst => dst.Locations, opts => opts.MapFrom(src => src.Locations.OrderBy(l => l.CreatedDate)));
     }
 }

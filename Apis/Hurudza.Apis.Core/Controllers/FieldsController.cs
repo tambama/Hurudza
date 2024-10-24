@@ -63,14 +63,15 @@ public class FieldsController : Controller
     }
 
     [HttpPost(Name = nameof(CreateField))]
-    public async Task<IActionResult> CreateField([FromBody] FieldViewModel model)
+    public async Task<IActionResult> CreateField([FromBody] CreateFieldViewModel model)
     {
         var field = _configuration.CreateMapper().Map<Field>(model);
 
         await _context.AddAsync(field).ConfigureAwait(false);
         await _context.SaveChangesAsync().ConfigureAwait(false);
 
-        return Ok(new ApiOkResponse(field, "Field successfully created"));
+        var newField = _configuration.CreateMapper().Map<FieldViewModel>(field);
+        return Ok(new ApiOkResponse(newField, "Field successfully created"));
     }
     
     [HttpPut("{id}", Name = nameof(UpdateField))]

@@ -50,6 +50,10 @@ public class HurudzaDbContext :
     public DbSet<Field> Fields { get; set; }
     public DbSet<Location> Locations { get; set; }
     
+    // Farms Ownership
+    public DbSet<Entity> Entities { get; set; }
+    public DbSet<FarmOwner> FarmOwners { get; set; }
+    
     // Crops
     public DbSet<Crop> Crops { get; set; }
     public DbSet<FieldCrop> FieldCrops { get; set; }
@@ -288,6 +292,21 @@ public class HurudzaDbContext :
         {
             b.Property(t => t.Id)
                 .ValueGeneratedOnAdd();
+        });
+
+        builder.Entity<Entity>(b =>
+        {
+            b.Property(t => t.Id).ValueGeneratedOnAdd();
+        });
+
+        builder.Entity<FarmOwner>(b =>
+        {
+            b.Property(f => f.Id).ValueGeneratedOnAdd();
+
+            b.HasOne(f => f.Farm).WithMany(f => f.Owners).HasForeignKey(f => f.FarmId).IsRequired(true)
+                .OnDelete(DeleteBehavior.NoAction);
+            b.HasOne(f => f.Entity).WithMany(f => f.FarmOwners).HasForeignKey(f => f.EntityId).IsRequired(true)
+                .OnDelete(DeleteBehavior.NoAction);
         });
     }
 }

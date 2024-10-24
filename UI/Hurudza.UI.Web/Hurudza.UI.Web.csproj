@@ -26,6 +26,7 @@
 	<ItemGroup>
 		<AdditionalFiles Include="Pages\Authentication\Authentication.razor" />
 		<AdditionalFiles Include="Pages\Authentication\Login.razor" />
+		<AdditionalFiles Include="Pages\Entities\Entities.razor" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Common\Hurudza.Common.Utils\Hurudza.Common.Utils.csproj" />
