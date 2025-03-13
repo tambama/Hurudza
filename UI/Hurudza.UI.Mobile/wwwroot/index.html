@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Hurudza</title>
+    <base href="/" />
+    <!--     Fonts and icons     -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+    <!-- Nucleo Icons -->
+    <link href="_content/Hurudza.UI.Shared/css/nucleo-icons.css" rel="stylesheet" />
+    <link href="_content/Hurudza.UI.Shared/css/nucleo-svg.css" rel="stylesheet" />
+    <!-- Font Awesome Icons -->
+    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+    <link href="_content/Hurudza.UI.Shared/css/nucleo-svg.css" rel="stylesheet" />
+    <!-- CSS Files -->
+    <link id="pagestyle" href="_content/Hurudza.UI.Shared/css/soft-ui-dashboard.css?v=1.0.8" rel="stylesheet" />
+    <link href="_content/Hurudza.UI.Shared/css/app.css" rel="stylesheet" />
+    <link href="Hurudza.UI.Mobile.styles.css" rel="stylesheet" />
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+</head>
+
+<body>
+
+<div id="app">
+    <svg class="loading-progress">
+        <circle r="40%" cx="50%" cy="50%" />
+        <circle r="40%" cx="50%" cy="50%" />
+    </svg>
+    <div class="loading-progress-text"></div>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+<script src="_framework/blazor.webview.js" autostart="false"></script>
+
+<!--   Core JS Files   -->
+<script src="_content/Hurudza.UI.Shared/js/core/popper.min.js"></script>
+<script src="_content/Hurudza.UI.Shared/js/core/bootstrap.min.js"></script>
+<script src="_content/Hurudza.UI.Shared/js/plugins/perfect-scrollbar.min.js"></script>
+<script src="_content/Hurudza.UI.Shared/js/plugins/smooth-scrollbar.min.js"></script>
+<script>
+    var win = navigator.platform.indexOf('Win') > -1;
+    if (win && document.querySelector('#sidenav-scrollbar')) {
+        var options = {
+            damping: '0.5'
+        }
+        Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+    }
+</script>
+<!-- Github buttons -->
+<script async defer src="_content/Hurudza.UI.Shared/https://buttons.github.io/buttons.js"></script>
+<!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
+<script src="_content/Hurudza.UI.Shared/js/soft-ui-dashboard.min.js?v=1.0.7"></script>
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+<script>
+    function loadMap(center){
+        mapboxgl.accessToken = 'pk.eyJ1IjoicGVuaWVsdCIsImEiOiJjbGt3Y2gxM3YweWtrM3FwbW9jaWNkMWVyIn0.cDAgTWNXN-TVJROjgoWQiw';
+        console.log(center);
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v12',
+            center: center,
+            zoom: 9
+        });
+    }
+</script>
+
+</body>
+
+</html>

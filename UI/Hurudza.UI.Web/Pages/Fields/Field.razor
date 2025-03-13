@@ -1,0 +1,321 @@
+@page "/field/{id}"
+@attribute [Authorize]
+
+@inject IApiCall ApiCall
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+
+@if (_field == null)
+{
+    <SfSpinner Visible="true"></SfSpinner>
+}
+else
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-4">@_field.Farm</h5>
+                    <div class="row">
+                        <div class="col-xl-5 col-lg-6 text-center">
+                            <div id="map" class="w-100 border-radius-lg shadow-lg mx-auto"></div>
+                        </div>
+                        <div class="col-lg-5 mx-auto">
+                            <h3 class="mt-lg-0 mt-4">@_field.Name</h3>
+                            <h6 class="mb-1 mt-0">Size: @_field.Size Ha</h6>
+                            @if (_field.Irrigation)
+                            {
+                                <span class="badge badge-success">Irrigation</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger">No Irrigation</span>
+                            }
+                            <br>
+                            <label class="mt-0">Description</label>
+                            <p>
+                                @_field.Description
+                            </p>
+                            <div class="row mt-0">
+                                <div class="col-lg-6">
+                                    <button class="btn bg-gradient-primary mb-0 mt-lg-auto w-100" type="button" name="button" @onclick="ShowEditDialog">Update Details</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-5">
+                        <div class="col-12">
+                            <h5 class="ms-3">Crops</h5>
+                            <SfGrid
+                                DataSource="@_fields"
+                                @ref="Grid"
+                                AllowPaging="true"
+                                AllowExcelExport="true"
+                                AllowSorting="true"
+                                AllowMultiSorting="true"
+                                EnableStickyHeader="true"
+                                AllowResizing="true"
+                                AllowFiltering="true"
+                                AllowSelection="true"
+                                Toolbar="@(new List<string>() { "Add", "ExcelExport", "Print", "Search" })"
+                                ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Edit", "Delete", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                                <GridPageSettings PageSize="12"></GridPageSettings>
+                                <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
+                                <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="FieldCropViewModel"></GridEvents>
+                                <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog">
+                                    @* <HeaderTemplate> *@
+                                    @*     @{ *@
+                                    @*         var text = GetHeader((context as FieldCropViewModel)); *@
+                                    @*         <span>@text</span> *@
+                                    @*     } *@
+                                    @* </HeaderTemplate> *@
+                                    @* <Validator> *@
+                                    @*     <DataAnnotationsValidator></DataAnnotationsValidator> *@
+                                    @* </Validator> *@
+                                    @* <Template> *@
+                                    @*     @{ *@
+                                    @*         var Field = (context as FieldCropViewModel); *@
+                                    @*         <div> *@
+                                    @*             <div class="form-row"> *@
+                                    @*                 <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(Field.Id)"></SfTextBox> *@
+                                    @*                 <div class="form-group"> *@
+                                    @*                     <label>Farm</label> *@
+                                    @*                     <SfComboBox ID="farm" TValue="string" TItem="FarmViewModel" @bind-Value="@(Field.FarmId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Farm" DataSource="@_farms"> *@
+                                    @*                         <ComboBoxEvents TItem="FarmViewModel" TValue="string"></ComboBoxEvents> *@
+                                    @*                         <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings> *@
+                                    @*                     </SfComboBox> *@
+                                    @*                 </div> *@
+                                    @*                 <div class="form-group"> *@
+                                    @*                     <label>Field Name</label> *@
+                                    @*                     <SfTextBox ID="name" TValue="string" @bind-Value="@(Field.Name)" ValidateOnInput="true"></SfTextBox> *@
+                                    @*                     <ValidationMessage For="() => Field.Name"/> *@
+                                    @*                 </div> *@
+                                    @*                 <div class="form-group"> *@
+                                    @*                     <label>Description</label> *@
+                                    @*                     <SfTextBox ID="name" TValue="string" @bind-Value="@(Field.Description)" Multiline="true" ValidateOnInput="true"></SfTextBox> *@
+                                    @*                     <ValidationMessage For="() => Field.Description"/> *@
+                                    @*                 </div> *@
+                                    @*                 <div class="form-group"> *@
+                                    @*                     <label>Size (Hectares)</label> *@
+                                    @*                     <SfNumericTextBox ID="size" TValue="float" @bind-Value="@(Field.Size)" Decimals=3 Format="n3" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox> *@
+                                    @*                     <ValidationMessage For="() => Field.Size"/> *@
+                                    @*                 </div> *@
+                                    @*                 <div class="form-group"> *@
+                                    @*                     <label>Soil Type</label> *@
+                                    @*                     <SfDropDownList ID="region" TValue="SoilType" TItem="SoilTypeModel" @bind-Value="@(Field.SoilType)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Soil Type" DataSource="@_regions"> *@
+                                    @*                         <DropDownListFieldSettings Value="SoilType" Text="Name"></DropDownListFieldSettings> *@
+                                    @*                     </SfDropDownList> *@
+                                    @*                 </div> *@
+                                    @*                 <div class="form-group"> *@
+                                    @*                     <SfCheckBox Label="Is under Irrigation?" @bind-Checked="@(Field.Irrigation)"></SfCheckBox> *@
+                                    @*                 </div> *@
+                                    @*                 <div class="form-group"> *@
+                                    @*                     <SfSpinner @ref="SaveSpinner"></SfSpinner> *@
+                                    @*                 </div> *@
+                                    @*             </div> *@
+                                    @*         </div> *@
+                                    @*     } *@
+                                    @* </Template> *@
+                                </GridEditSettings>
+                                <GridColumns>
+                                    <GridColumn Field=@nameof(FieldCropViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                    <GridColumn Field=@nameof(FieldCropViewModel.Field) HeaderText="Field" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                                    <GridColumn Field=@nameof(FieldCropViewModel.Crop) HeaderText="Crop" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                                    <GridColumn Field=@nameof(FieldCropViewModel.Size) HeaderText="Size (Ha)" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                                    <GridColumn Field=@nameof(FieldCropViewModel.Irrigation) HeaderText="Irrigated" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                                    <GridColumn Field=@nameof(FieldCropViewModel.PlantedDate) HeaderText="Plant Date" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                                    <GridColumn Field=@nameof(FieldCropViewModel.HarvestDate) HeaderText="Harvest Date" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" Width="120">
+                                        <Template>
+                                            @{
+                                                var field = (context as FieldCropViewModel);
+                                                <div class="template_checkbox">
+                                                    @if (field.Irrigation)
+                                                    {
+                                                        <input type="checkbox" checked>
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="checkbox">
+                                                    }
+                                                </div>
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn HeaderText="Actions" TextAlign="TextAlign.Center" Width="150">
+                                        <GridCommandColumns>
+                                            <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-edit", CssClass = "e-flat" })"></GridCommandColumn>
+                                            <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-delete", CssClass = "e-flat" })"></GridCommandColumn>
+                                        </GridCommandColumns>
+                                    </GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                            <SfDialog @ref="Dialog" Width="250px" Visible="false" ShowCloseIcon="true" IsModal="true">
+                                <DialogEvents Closed="Closed"></DialogEvents>
+                                <DialogTemplates>
+                                    <Header> Delete Record</Header>
+                                    <Content>
+                                        You are about to Delete a Record @SelectedField.Crop?
+                                        <div class="form-group">
+                                            <SfSpinner @ref="DeleteSpinner"></SfSpinner>
+                                        </div>
+                                    </Content>
+                                </DialogTemplates>
+                                <DialogButtons>
+                                    <DialogButton OnClick="@OkClick" Content="OK" IsPrimary="true"></DialogButton>
+                                    <DialogButton OnClick="@CancelClick" Content="Cancel"></DialogButton>
+                                </DialogButtons>
+                            </SfDialog>
+                            <SfDialog @ref="EditFieldDialog" Visible="false" ShowCloseIcon="true" IsModal="true" Width="250px">
+                                <DialogTemplates>
+                                    <Content> This is a Dialog with content </Content>
+                                </DialogTemplates>
+                            </SfDialog>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code
+{
+    [Parameter]
+    public required string Id { get; set; }
+
+    SfGrid<FieldCropViewModel> Grid;
+    SfDialog Dialog;
+    SfDialog EditFieldDialog;
+    SfSpinner SaveSpinner;
+    SfSpinner DeleteSpinner;
+    FieldViewModel _field = null;
+    Toast _alert;
+    SfSpinner _spinner;
+
+    List<FieldCropViewModel> _fields;
+    bool Enabled = true;
+    bool Data = false;
+    FieldCropViewModel SelectedField;
+    bool flag = true;
+
+    private string GetHeader(FieldCropViewModel Value)
+    {
+        if (string.IsNullOrEmpty(Value.Id))
+        {
+            return "Add New Field";
+        }
+        else
+        {
+            return "Edit Details of " + Value.Crop;
+        }
+    }
+
+    private void Closed()
+    {
+        flag = true;
+    }
+
+    private async Task ShowEditDialog()
+    {
+        await EditFieldDialog.ShowAsync();
+    }
+
+    private async Task ActionBeginHandler(ActionEventArgs<FieldCropViewModel> args)
+    {
+        switch (args.RequestType)
+        {
+            case Action.FilterChoiceRequest:
+                args.FilterChoiceCount = 100;
+                break;
+            case Action.Add:
+                Data = true;
+                break;
+            case Action.Delete when flag:
+                args.Cancel = true;
+                await Dialog.ShowAsync();
+                flag = false;
+                break;
+            case Action.Save:
+                {
+                    if (SaveSpinner.Visible)
+                    {
+                        args.Cancel = true;
+                        break;
+                    }
+
+                    await SaveSpinner.ShowAsync();
+                    if (!string.IsNullOrEmpty(args.Data.Id))
+                    {
+                        // if (!await UpdateField(args.Data))
+                        // {
+                        //     args.Cancel = true;
+                    // }
+                    }
+                    else
+                    {
+                        // if (!await SaveField(args.Data))
+                        // {
+                        //     args.Cancel = true;
+                    // }
+                    }
+
+
+                    await SaveSpinner.HideAsync();
+                    break;
+                }
+        }
+    }
+
+    private void RowSelectHandler(RowSelectEventArgs<FieldCropViewModel> args)
+    {
+        SelectedField = args.Data;
+        Navigation.NavigateTo($"/field/{SelectedField.Id}");
+    }
+
+    private async Task OkClick()
+    {
+        await DeleteSpinner.ShowAsync();
+        // if (await DeleteField(SelectedField))
+        // {
+        //     await Grid.DeleteRecordAsync();
+        //     await Dialog.HideAsync();
+        // }
+        await DeleteSpinner.HideAsync();
+    }
+
+    private async Task CancelClick()
+    {
+        await Dialog.HideAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<FieldViewModel>>(await ApiCall.GetHttpClient(), "fields/getfield", Id);
+
+        if (response.Status == (int)HttpStatusCode.OK)
+        {
+            _field = response.Result;
+        }
+        else
+        {
+            _alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_field != null)
+        {
+            double[] array = new[] { -17.767358, 31.153375 };
+            await JS.InvokeVoidAsync("loadMap", array);
+        }
+    }
+}
+
+<style>
+      #map {
+        width: 100%;
+        height: 100%;
+      }
+</style>

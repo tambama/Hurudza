@@ -1,0 +1,78 @@
+@page "/authentication/login"
+@using System.Net
+@using Blazored.LocalStorage
+@using Hurudza.Data.UI.Models.Models;
+@using Hurudza.Data.UI.Models.ViewModels.UserManagement;
+@using Hurudza.UI.Shared.Api.Interfaces;
+
+@inject IApiCall ApiCall;
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorageService;
+
+<div class="card card-plain">
+    <div class="card-header pb-0 text-start">
+        <h4 class="font-weight-bolder">Sign In</h4>
+        <p class="mb-0">Enter your email and password to sign in</p>
+    </div>
+    <div class="card-body">
+        <_ValidationSummary Errors="Errors"/>
+        <EditForm role="form" Model="@_loginViewModel" OnValidSubmit="@UserLogin">
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            <div class="mb-3">
+                <InputText @bind-Value="_loginViewModel.Username" type="email" class="form-control form-control-lg" placeholder="Email" aria-label="Email" />
+            </div>
+            <div class="mb-3">
+                <InputText @bind-Value="_loginViewModel.Password" type="password" class="form-control form-control-lg" placeholder="Password" aria-label="Password" />
+            </div>
+            <div class="form-check form-switch">
+                <InputCheckbox @bind-Value="_loginViewModel.RememberMe" class="form-check-input" type="checkbox" id="rememberMe" />
+                <label class="form-check-label" for="rememberMe">Remember me</label>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-lg bg-gradient-success btn-lg w-100 mt-4 mb-0">Sign in</button>
+            </div>
+        </EditForm>
+    </div>
+    <div class="card-footer text-center pt-0 px-lg-2 px-1">
+        <p class="mb-4 text-sm mx-auto">
+            Don't have an account?
+            <a href="javascript:;" class="text-primary text-gradient font-weight-bold">Sign up</a>
+        </p>
+    </div>
+</div>
+
+@code {
+    private readonly LoginViewModel _loginViewModel = new LoginViewModel();
+    private List<string> Errors { get; set; } = new List<string>();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+
+    private async Task UserLogin()
+    {
+        var response =
+            await ApiCall.Add<ApiResponse<UserViewModel>, LoginViewModel>(await ApiCall.GetHttpClient(), "authentication/login",
+                _loginViewModel);
+
+        if (response == null)
+        {
+            Errors.Add("Login failed. Please contact System Admin");
+        }
+        else
+        {
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                await LocalStorageService.SetItemAsStringAsync("token", response.Result.Token);
+                NavigationManager.NavigateTo("/", true);
+            }
+            else
+            {
+                Errors.Add(response.Title);
+            }
+        }
+    }
+
+}

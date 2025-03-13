@@ -1,0 +1,52 @@
+﻿@using Hurudza.UI.Web.Cookie.Providers
+@inject IApiCall ApiCall
+@inject ILocalStorageService LocalStorageService;
+@inject AuthenticationStateProvider AuthStateProvider
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly" OnNavigateAsync="@OnNavigateAsync">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                <NotAuthorized>
+                    @if (context.User.Identity?.IsAuthenticated != true)
+                    {
+                        <RedirectToLogin/>
+                    }
+                    else
+                    {
+                        <p role="alert">You are not authorized to access this resource.</p>
+                    }
+                </NotAuthorized>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
+        </Found>
+        <NotFound>
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <p role="alert">Sorry, there's nothing at this address.</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>
+
+@code{
+    private async Task OnNavigateAsync(NavigationContext args)
+    {
+        var auth =  await LocalStorageService.GetItemAsync<string>("token");
+        var user = (await(AuthStateProvider as CustomAuthStateProvider)
+            .GetAuthenticationStateAsync()).User;
+        
+        if(user.Identity != null && !string.IsNullOrEmpty(auth) && !user.Identity.IsAuthenticated )
+        {
+            var response = await ApiCall.Get<ApiResponse<UserViewModel>>(await ApiCall.GetHttpClient(), "authentication/getloggedinprofile/");
+            if (response != null && response.Status == (int)HttpStatusCode.OK)
+            {
+                (AuthStateProvider as CustomAuthStateProvider)?.SetAuthInfo(response.Result);
+            }
+            else
+            {
+                await LocalStorageService.RemoveItemAsync("token");
+            }
+        }
+    }
+}

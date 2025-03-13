@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<the49:BottomSheet xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:the49="https://schemas.the49.com/dotnet/2023/maui"
+             xmlns:inputLayout="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+             xmlns:editors="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
+             x:Class="Hurudza.UI.Mobile.Pages.Farms.CreateFarmSheet"
+             x:Name="this"
+             HasHandle="True"
+             HandleColor="Black"
+             IsCancelable="False">
+    <VerticalStackLayout Spacing="10">
+        <VerticalStackLayout Padding="16, 0">
+            <HorizontalStackLayout Spacing="16">
+                <Border StrokeShape="RoundRectangle 8" StrokeThickness="0">
+                    <Image Source="farm.png" HeightRequest="80" WidthRequest="20" />
+                </Border>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="FillAndExpand">
+                    <Label Text="New Farm" />
+                    <Label Text="{Binding Area}" FontSize="10" TextColor="Gray" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+            <Button Text="Get Current Location"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    BackgroundColor="CornflowerBlue"
+                    HorizontalOptions="FillAndExpand"
+                    Command="{Binding AddPointCommand}" />
+        </VerticalStackLayout>
+        <Frame HeightRequest="1"
+               BackgroundColor="{StaticResource LightGray}"
+               HasShadow="False"
+               Padding="0" />
+        <ScrollView VerticalOptions="FillAndExpand">
+            <VerticalStackLayout Padding="16, 0">
+                <inputLayout:SfTextInputLayout Hint="Name" 
+                               IsHintAlwaysFloated="True" 
+                               ContainerType="Outlined" 
+                               ContainerBackground="Transparent">
+                    <Entry Text="{Binding Name}" />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout Hint="Address" 
+                                IsHintAlwaysFloated="True" 
+                                ContainerType="Outlined" 
+                                ContainerBackground="Transparent">
+                    <Entry Text="{Binding Address}" />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout Hint="Description" 
+                                IsHintAlwaysFloated="True" 
+                                ContainerType="Outlined" 
+                                ContainerBackground="Transparent">
+                    <Editor Text="{Binding Description}"  />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout Hint="Contact Person" 
+                                IsHintAlwaysFloated="True" 
+                                ContainerType="Outlined" 
+                                ContainerBackground="Transparent">
+                    <Entry Text="{Binding Name}" />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout Hint="Contact Number" 
+                                IsHintAlwaysFloated="True" 
+                                ContainerType="Outlined" 
+                                ContainerBackground="Transparent">
+                    <Entry Text="{Binding PhoneNumber}" />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout Hint="Contact Email" 
+                               IsHintAlwaysFloated="True" 
+                               ContainerType="Outlined" 
+                               ContainerBackground="Transparent">
+                    <Entry Text="{Binding Email}" />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="size" 
+                               Hint="Farm Size (Ha)"
+                               IsHintAlwaysFloated="True" 
+                               ContainerType="Outlined" 
+                               ContainerBackground="Transparent">
+                    <editors:SfNumericEntry Value="{Binding Size}" CustomFormat="N2" />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="arable" 
+                                Hint="Arable (Ha)"
+                                IsHintAlwaysFloated="True" 
+                                ContainerType="Outlined" 
+                                ContainerBackground="Transparent">
+                    <editors:SfNumericEntry Value="{Binding Arable}" CustomFormat="N2" />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="cleared" 
+                                Hint="Cleared (Ha)"
+                                IsHintAlwaysFloated="True" 
+                                ContainerType="Outlined" 
+                                ContainerBackground="Transparent">
+                    <editors:SfNumericEntry Value="{Binding Cleared}" CustomFormat="N2" />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="waterSource" 
+                                Hint="Water Source"
+                                HelperText="e.g dam,borehole"
+                                IsHintAlwaysFloated="True" 
+                                ContainerType="Outlined" 
+                                ContainerBackground="Transparent">
+                    <Editor Text="{Binding WaterSource}"  />
+                </inputLayout:SfTextInputLayout>
+                <StackLayout>
+                    <Label Text="Irrigated?" />
+                    <RadioButton Content="No" IsChecked="true" />
+                    <RadioButton Content="Yes" />
+                </StackLayout>
+                <inputLayout:SfTextInputLayout x:Name="equipment" 
+                                Hint="Equipment"
+                                IsHintAlwaysFloated="True" 
+                                ContainerType="Outlined" 
+                                ContainerBackground="Transparent">
+                    <Editor Text="{Binding Equipment}"  />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="soilType" 
+                                Hint="Soil Types"
+                                HelperText="e.g sandy, loam, clay"
+                                IsHintAlwaysFloated="True" 
+                                ContainerType="Outlined" 
+                                ContainerBackground="Transparent">
+                    <Editor Text="{Binding SoilType}"  />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="personnel" 
+                    Hint="Personnel"
+                    IsHintAlwaysFloated="True" 
+                    ContainerType="Outlined" 
+                    ContainerBackground="Transparent">
+                    <Editor Text="{Binding Personnel}"  />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="problems" 
+                    Hint="Problems"
+                    HelperText="e.g pests and diseases"
+                    IsHintAlwaysFloated="True" 
+                    ContainerType="Outlined" 
+                    ContainerBackground="Transparent">
+                    <Editor Text="{Binding Problems}"  />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="region" 
+                               Hint="Farming Region"
+                               IsHintAlwaysFloated="True"
+                               ContainerType="Outlined" 
+                               ContainerBackground="Transparent">
+                    <editors:SfComboBox ItemsSource="{Binding FarmingRegions}"
+                        TextMemberPath="Name"
+                        DisplayMemberPath="Name"
+                        SelectedValuePath="Id"
+                        SelectedItem="{Binding SelectedFarmingRegion}"
+                        Placeholder="Select a Farming Region"/>
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="conference" 
+                               Hint="Conference"
+                               IsHintAlwaysFloated="True"
+                               ContainerType="Outlined" 
+                               ContainerBackground="Transparent">
+                    <editors:SfComboBox ItemsSource="{Binding Conferences}"
+                        TextMemberPath="Name"
+                        DisplayMemberPath="Name"
+                        SelectedValuePath="Id"
+                        SelectedItem="{Binding SelectedConference}"
+                        Placeholder="Select a Conference"/>
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="province" 
+                               Hint="Province"
+                               IsHintAlwaysFloated="True"
+                               ContainerType="Outlined" 
+                               ContainerBackground="Transparent">
+                    <editors:SfComboBox ItemsSource="{Binding Provinces}"
+                        TextMemberPath="Name"
+                        DisplayMemberPath="Name"
+                        SelectedValuePath="Id"
+                        SelectedItem="{Binding SelectedProvince}"
+                        Placeholder="Select a Province"/>
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="district" 
+                               Hint="District"
+                               IsHintAlwaysFloated="True"
+                               ContainerType="Outlined" 
+                               ContainerBackground="Transparent">
+                    <editors:SfComboBox ItemsSource="{Binding Districts}"
+                        TextMemberPath="Name"
+                        DisplayMemberPath="Name"
+                        SelectedValuePath="Id"
+                        SelectedItem="{Binding SelectedDistrict}"
+                        Placeholder="Select a District"
+                        IsEditable="True" />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="localAuthority" 
+                                Hint="Local Authority"
+                                IsHintAlwaysFloated="True"
+                                ContainerType="Outlined" 
+                                ContainerBackground="Transparent">
+                    <editors:SfComboBox ItemsSource="{Binding LocalAuthorites}"
+                        TextMemberPath="Name"
+                        DisplayMemberPath="Name"
+                        SelectedValuePath="Id"
+                        SelectedItem="{Binding SelectedLocalAuthority}"
+                        Placeholder="Select a Local Authority"
+                        IsEditable="False" />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="ward"
+                               Hint="Ward"
+                               IsHintAlwaysFloated="True"
+                               ContainerType="Outlined" 
+                               ContainerBackground="Transparent">
+                    <editors:SfComboBox ItemsSource="{Binding Wards}"
+                        TextMemberPath="Name"
+                        DisplayMemberPath="Name"
+                        SelectedValuePath="Id"
+                        SelectedItem="{Binding SelectedWard}"
+                        Placeholder="Select a Ward"
+                        IsEditable="False" />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="recommendations" 
+                    Hint="Recommendations"
+                    IsHintAlwaysFloated="True" 
+                    ContainerType="Outlined" 
+                    ContainerBackground="Transparent">
+                    <Editor Text="{Binding Recommendations}"  />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="latitude" 
+                    Hint="Latitude"
+                    IsHintAlwaysFloated="True" 
+                    ContainerType="Outlined" 
+                    ContainerBackground="Transparent">
+                    <editors:SfNumericEntry Value="{Binding Source=CurrentLocation, Path=Latitude}" />
+                </inputLayout:SfTextInputLayout>
+                <inputLayout:SfTextInputLayout x:Name="longitude" 
+        Hint="Longitude"
+        IsHintAlwaysFloated="True" 
+        ContainerType="Outlined" 
+        ContainerBackground="Transparent">
+                    <editors:SfNumericEntry Value="{Binding Source=CurrentLocation, Path=Longitude}" />
+                </inputLayout:SfTextInputLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+    </VerticalStackLayout>
+</the49:BottomSheet>

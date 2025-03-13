@@ -1,0 +1,287 @@
+@page "/ownership"
+@using System.Collections.ObjectModel;
+@using System.Diagnostics;
+@attribute [Authorize]
+
+@inject IApiCall ApiCall
+@inject AuthenticationStateProvider AuthStateProvider
+
+<Toast @ref="Alert" />
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Ownership</h6>
+            </div>
+            <div class="card-body px-2 pt-0 pb-2">
+                <SfGrid DataSource="@OwnershipList"
+                        @ref="Grid"
+                        AllowPaging="true"
+                        AllowExcelExport="true"
+                        AllowSorting="true"
+                        AllowMultiSorting="true"
+                        EnableStickyHeader="true"
+                        AllowResizing="true"
+                        AllowFiltering="true"
+                        AllowSelection="true"
+                        Toolbar="@(new List<string>() { "Add", "ExcelExport", "Print", "Search" })"
+                        ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Edit", "Delete", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                    <GridPageSettings PageSize="12"></GridPageSettings>
+                    <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
+                    <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="FarmOwnerViewModel"></GridEvents>
+                    <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog">
+                        <HeaderTemplate>
+                            @{
+                                var text = GetHeader((context as FarmOwnerViewModel));
+                                <span>@text</span>
+                            }
+                        </HeaderTemplate>
+                        <Validator>
+                            <DataAnnotationsValidator></DataAnnotationsValidator>
+                        </Validator>
+                        <Template>
+                            @{
+                                var Owner = (context as FarmOwnerViewModel);
+                                <div>
+                                    <div class="form-row">
+                                        <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(Owner.Id)"></SfTextBox>
+                                        <div class="form-group">
+                                            <label>Farm</label>
+                                            <SfComboBox ID="farm" TValue="string" TItem="FarmListViewModel" @bind-Value="@(Owner.FarmId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Farm" DataSource="@_farms">
+                                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                                            </SfComboBox>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Farm</label>
+                                            <SfComboBox ID="entity" TValue="string" TItem="EntityListViewModel" @bind-Value="@(Owner.EntityId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select Owner" DataSource="@_entities">
+                                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                                            </SfComboBox>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Ownership Type</label>
+                                            <SfDropDownList ID="OwnershipType" TValue="OwnershipType" TItem="OwnershipTypeModel" @bind-Value="@(Owner.OwnershipType)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select Ownership Type" DataSource="@_OwnerTypes">
+                                                <DropDownListFieldSettings Value="OwnershipType" Text="Name"></DropDownListFieldSettings>
+                                            </SfDropDownList>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Start of Ownership</label>
+                                            <SfDatePicker ID="startOfOwnership" TValue="DateTime" @bind-Value="@(Owner.StartOfOwnership)" Placeholder='Choose a Date' Start='CalendarView.Decade' Depth='CalendarView.Year'></SfDatePicker>
+                                            <ValidationMessage For="() => Owner.StartOfOwnership" />
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <SfSpinner @ref="SaveSpinner"></SfSpinner>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </Template>
+                    </GridEditSettings>
+                    <GridColumns>
+                        <GridColumn Field=@nameof(FarmOwnerViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                        <GridColumn Field=@nameof(FarmOwnerViewModel.Farm) HeaderText="Farm" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                        <GridColumn Field=@nameof(FarmOwnerViewModel.Entity) HeaderText="Owner" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                        <GridColumn Field=@nameof(FarmOwnerViewModel.OwnershipType) HeaderText="Ownership" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(FarmOwnerViewModel.StartOfOwnership) HeaderText="From" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                        <GridColumn Field=@nameof(FarmOwnerViewModel.EndOfOwnership) HeaderText="To" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                        <GridColumn HeaderText="Actions" Width="150">
+                            <GridCommandColumns>
+                                <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-edit", CssClass = "e-flat" })"></GridCommandColumn>
+                                <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-delete", CssClass = "e-flat" })"></GridCommandColumn>
+                            </GridCommandColumns>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+                <SfDialog @ref="Dialog" Width="250px" Visible="false" ShowCloseIcon="true" IsModal="true">
+                    <DialogEvents Closed="Closed"></DialogEvents>
+                    <DialogTemplates>
+                        <Header> Delete Record</Header>
+                        <Content>
+                            You are about to Delete a Record of @SelectedOwner.Entity?
+                            <div class="form-group">
+                                <SfSpinner @ref="DeleteSpinner"></SfSpinner>
+                            </div>
+                        </Content>
+                    </DialogTemplates>
+                    <DialogButtons>
+                        <DialogButton OnClick="@OkClick" Content="OK" IsPrimary="true"></DialogButton>
+                        <DialogButton OnClick="@CancelClick" Content="Cancel"></DialogButton>
+                    </DialogButtons>
+                </SfDialog>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    SfGrid<FarmOwnerViewModel> Grid;
+    SfDialog Dialog;
+    SfSpinner SaveSpinner;
+    SfSpinner DeleteSpinner;
+    Toast Alert;
+    List<FarmOwnerViewModel> OwnershipList;
+    ObservableCollection<FarmListViewModel> _farms = new ObservableCollection<FarmListViewModel>();
+    ObservableCollection<EntityListViewModel> _entities = new ObservableCollection<EntityListViewModel>();
+    List<OwnershipTypeModel> _OwnerTypes = Enum.GetValues<OwnershipType>().Select(x => new OwnershipTypeModel(x)).ToList();
+    bool Enabled = true;
+    bool Data = false;
+    FarmOwnerViewModel SelectedOwner;
+    bool flag = true;
+    ClaimsPrincipal Owner;
+    bool ShowSaveSpinner { get; set; } = false;
+
+    private string GetHeader(FarmOwnerViewModel Value)
+    {
+        if (string.IsNullOrEmpty(Value.Id))
+        {
+            return "Add New Owner";
+        }
+        else
+        {
+            return "Edit Details";
+        }
+    }
+
+    private void Closed()
+    {
+        flag = true;
+    }
+
+    private async Task ActionBeginHandler(ActionEventArgs<FarmOwnerViewModel> args)
+    {
+        switch (args.RequestType)
+        {
+            case Action.FilterChoiceRequest:
+                args.FilterChoiceCount = 100;
+                break;
+            case Action.Add:
+                Data = true;
+                break;
+            case Action.Delete when flag:
+                args.Cancel = true;
+                await Dialog.ShowAsync();
+                flag = false;
+                break;
+            case Action.Save:
+                {
+                    if (SaveSpinner.Visible)
+                    {
+                        args.Cancel = true;
+                        break;
+                    }
+
+                    await SaveSpinner.ShowAsync();
+                    if (!string.IsNullOrEmpty(args.Data.Id))
+                    {
+                        if (!await UpdateOwner(args.Data))
+                        {
+                            args.Cancel = true;
+                        }
+                    }
+                    else
+                    {
+                        if (!await SaveOwner(args.Data))
+                        {
+                            args.Cancel = true;
+                        }
+                    }
+
+
+                    await SaveSpinner.HideAsync();
+                    break;
+                }
+        }
+    }
+
+    private void RowSelectHandler(RowSelectEventArgs<FarmOwnerViewModel> args)
+    {
+        SelectedOwner = args.Data;
+    }
+
+    private async Task OkClick()
+    {
+        await DeleteSpinner.ShowAsync();
+        if (await DeleteOwner(SelectedOwner))
+        {
+            await Grid.DeleteRecordAsync();
+            await Dialog.HideAsync();
+        }
+        await DeleteSpinner.HideAsync();
+    }
+
+    private async Task CancelClick()
+    {
+        await Dialog.HideAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        OwnershipList = (await ApiCall.Get<IEnumerable<FarmOwnerViewModel>>(await ApiCall.GetHttpClient(), "FarmOwners/getFarmOwners/")).ToList();
+        _farms = (await ApiCall.Get<ObservableCollection<FarmListViewModel>>(await ApiCall.GetHttpClient(), "farms/getfarmlist"));
+        _entities = (await ApiCall.Get<ObservableCollection<EntityListViewModel>>(await ApiCall.GetHttpClient(), "entities/getentitylist"));
+    }
+
+    private async Task<bool> SaveOwner(FarmOwnerViewModel model)
+    {
+        var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FarmOwnerViewModel>, FarmOwnerViewModel>(await ApiCall.GetHttpClient(), "FarmOwners/createFarmOwner", model);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to save Owner, please try again!", showTitle: true, toastType: ToastType.Danger);
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        }
+
+        return false;
+    }
+
+    private async Task<bool> UpdateOwner(FarmOwnerViewModel model)
+    {
+        var response = await ApiCall.Update<ApiResponse<FarmOwnerViewModel>, FarmOwnerViewModel>(await ApiCall.GetHttpClient(), "FarmOwners/updateFarmOwner", model.Id, model);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to update Owner, please try again!", showTitle: true, toastType: ToastType.Danger);
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        }
+
+        return false;
+    }
+
+    private async Task<bool> DeleteOwner(FarmOwnerViewModel model)
+    {
+        var response = await ApiCall.Remove<ApiResponse<FarmOwnerViewModel>>(await ApiCall.GetHttpClient(), "FarmOwners/deleteOwner", model.Id);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to delete Owner, please try again!", showTitle: true, toastType: ToastType.Danger);
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        }
+
+        return false;
+    }
+}

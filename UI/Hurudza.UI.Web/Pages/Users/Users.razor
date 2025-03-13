@@ -1,0 +1,289 @@
+@page "/users"
+@attribute [Authorize]
+
+@using Hurudza.Data.UI.Models.ViewModels.UserManagement;
+@using Hurudza.UI.Shared.Api.Interfaces
+@inject IApiCall ApiCall
+@inject AuthenticationStateProvider AuthStateProvider
+
+<Toast @ref="Alert"/>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>System Users</h6>
+            </div>
+            <div class="card-body px-2 pt-0 pb-2">
+                <SfGrid
+                    DataSource="@SystemUsers"
+                    @ref="Grid"
+                    AllowPaging="true"
+                    AllowExcelExport="true"
+                    AllowSorting="true"
+                    AllowMultiSorting="true"
+                    EnableStickyHeader="true"
+                    AllowResizing="true"
+                    AllowFiltering="true"
+                    AllowSelection="true"
+                    Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "ExcelExport", "Print", "Search" })"
+                    ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Edit", "Delete", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                    <GridPageSettings PageSize="12"></GridPageSettings>
+                    <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
+                    <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="UserViewModel"></GridEvents>
+                    <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog">
+                        <HeaderTemplate>
+                            @{
+                                var text = GetHeader((context as UserViewModel));
+                                <span>@text</span>
+                            }
+                        </HeaderTemplate>
+                        <Validator>
+                            <DataAnnotationsValidator></DataAnnotationsValidator>
+                        </Validator>
+                        <Template>
+                            @{
+                                var User = (context as UserViewModel);
+                                <div>
+                                    <div class="form-row">
+                                        <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(User.Id)"></SfTextBox>
+                                        <div class="form-group">
+                                            <label>Firstname</label>
+                                            <SfTextBox ID="firstname" TValue="string" @bind-Value="@(User.Firstname)" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => User.Firstname"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Surname</label>
+                                            <SfTextBox ID="surname" TValue="string" @bind-Value="@(User.Surname)" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => User.Surname"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <SfTextBox ID="email" TValue="string" @bind-Value="@(User.Email)" Placeholder="e.g. your@email.com" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => User.Email"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Phone Number</label>
+                                            <SfTextBox ID="phone" TValue="string" @bind-Value="@(User.PhoneNumber)" Placeholder="e.g. 0771234567" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => User.PhoneNumber"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Role</label>
+                                            <SfDropDownList ID="role" TValue="string" TItem="RoleViewModel" @bind-Value="@(User.Role)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a role" DataSource="@Roles">
+                                                <DropDownListFieldSettings Value="Name" Text="Description"></DropDownListFieldSettings>
+                                            </SfDropDownList>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Password</label>
+                                            <SfTextBox ID="password" TValue="string" @bind-Value="@(User.Password)" Type="InputType.Password" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => User.Password"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <SfSpinner @ref="SaveSpinner"></SfSpinner>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </Template>
+                    </GridEditSettings>
+                    <GridColumns>
+                        <GridColumn Field=@nameof(UserViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                        <GridColumn Field=@nameof(UserViewModel.Surname) HeaderText="Surname" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(UserViewModel.Firstname) HeaderText="Firstname" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(UserViewModel.Email) HeaderText="Email" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(UserViewModel.PhoneNumber) HeaderText="Phone Number" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(UserViewModel.Role) HeaderText="Role" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                    </GridColumns>
+                </SfGrid>
+                <SfDialog @ref="Dialog" Width="250px" Visible="false" ShowCloseIcon="true" IsModal="true">
+                    <DialogEvents Closed="Closed"></DialogEvents>
+                    <DialogTemplates>
+                        <Header> Delete Record</Header>
+                        <Content>
+                            You are about to Delete a Record @SelectedUser.Fullname?
+                            <div class="form-group">
+                                <SfSpinner @ref="DeleteSpinner"></SfSpinner>
+                            </div>
+                        </Content>
+                    </DialogTemplates>
+                    <DialogButtons>
+                        <DialogButton OnClick="@OkClick" Content="OK" IsPrimary="true"></DialogButton>
+                        <DialogButton OnClick="@CancelClick" Content="Cancel"></DialogButton>
+                    </DialogButtons>
+                </SfDialog>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code{
+    SfGrid<UserViewModel> Grid;
+    SfDialog Dialog;
+    SfSpinner SaveSpinner;
+    SfSpinner DeleteSpinner;
+    Toast Alert;
+    List<UserViewModel> SystemUsers;
+    List<RoleViewModel> Roles;
+    bool Enabled = true;
+    bool Data = false;
+    UserViewModel SelectedUser;
+    bool flag = true;
+    ClaimsPrincipal user;
+    bool ShowSaveSpinner { get; set; } = false;
+
+    private string GetHeader(UserViewModel Value)
+    {
+        if (string.IsNullOrEmpty(Value.Id))
+        {
+            return "Add New User";
+        }
+        else
+        {
+            return "Edit Details of " + Value.Fullname;
+        }
+    }
+
+    private void Closed()
+    {
+        flag = true;
+    }
+
+    private async Task ActionBeginHandler(ActionEventArgs<UserViewModel> args)
+    {
+        switch (args.RequestType)
+        {
+            case Action.FilterChoiceRequest:
+                args.FilterChoiceCount = 100;
+                break;
+            case Action.Add:
+                Data = true;
+                break;
+            case Action.Delete when flag:
+                args.Cancel = true;
+                await Dialog.ShowAsync();
+                flag = false;
+                break;
+            case Action.Save:
+            {
+                if (SaveSpinner.Visible)
+                {
+                    args.Cancel = true;
+                    break;
+                }
+
+                await SaveSpinner.ShowAsync();
+                if (!string.IsNullOrEmpty(args.Data.Id))
+                {
+                    if (!await UpdateUser(args.Data))
+                    {
+                        args.Cancel = true;
+                    }
+                }
+                else
+                {
+                    if (!await SaveUser(args.Data))
+                    {
+                        args.Cancel = true;
+                    }
+                }
+
+
+                await SaveSpinner.HideAsync();
+                break;
+            }
+        }
+    }
+
+    private void RowSelectHandler(RowSelectEventArgs<UserViewModel> args)
+    {
+        SelectedUser = args.Data;
+    }
+
+    private async Task OkClick()
+    {
+        await DeleteSpinner.ShowAsync();
+        if (await DeleteUser(SelectedUser))
+        {
+            await Grid.DeleteRecordAsync();
+            await Dialog.HideAsync();
+        }
+        await DeleteSpinner.HideAsync();
+    }
+
+    private async Task CancelClick()
+    {
+        await Dialog.HideAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = (await (AuthStateProvider as CustomAuthStateProvider)?.GetAuthenticationStateAsync()).User;
+
+        SystemUsers = (await ApiCall.Get<IEnumerable<UserViewModel>>(await ApiCall.GetHttpClient(), "users/getusers/")).ToList();
+
+        Roles = (await ApiCall.Get<IEnumerable<RoleViewModel>>(await ApiCall.GetHttpClient(), "roles/getroles")).ToList();
+    }
+
+    private async Task<bool> SaveUser(UserViewModel model)
+    {
+        var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<UserViewModel>, UserViewModel>(await ApiCall.GetHttpClient(), "authentication/register", model);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to save user, please try again!", showTitle: true, toastType: ToastType.Danger);
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        }
+
+        return false;
+    }
+
+    private async Task<bool> UpdateUser(UserViewModel model)
+    {
+        var response = await ApiCall.Update<UI.Shared.Models.ApiResponse<UserViewModel>, UserViewModel>(await ApiCall.GetHttpClient(), "users/updateuser", model.Id, model);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to update user, please try again!", showTitle: true, toastType: ToastType.Danger);
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        }
+
+        return false;
+    }
+
+    private async Task<bool> DeleteUser(UserViewModel model)
+    {
+        var response = await ApiCall.Remove<ApiResponse<UserViewModel>>(await ApiCall.GetHttpClient(), "users/deleteuser", model.Id);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to delete user, please try again!", showTitle: true, toastType: ToastType.Danger);
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        }
+
+        return false;
+    }
+}

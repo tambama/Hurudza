@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+		<PackageReference Include="IdentityModel" Version="6.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="8.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.3" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+		<PackageReference Include="SharpKml.Core" Version="6.0.0" />
+		<PackageReference Include="Syncfusion.Blazor.Buttons" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Calendars" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.DropDowns" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Grid" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Inputs" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Lists" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Navigations" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Notifications" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Popups" Version="25.1.35" />
+		<PackageReference Include="Syncfusion.Blazor.Spinner" Version="25.1.35" />
+	</ItemGroup>
+	<ItemGroup>
+		<AdditionalFiles Include="Pages\Authentication\Authentication.razor" />
+		<AdditionalFiles Include="Pages\Authentication\Login.razor" />
+		<AdditionalFiles Include="Pages\Entities\Entities.razor" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Common\Hurudza.Common.Utils\Hurudza.Common.Utils.csproj" />
+	  <ProjectReference Include="..\..\Hurudza.Data.ViewModels\Hurudza.Data.UI.Models.csproj" />
+	  <ProjectReference Include="..\Hurudza.UI.Shared\Hurudza.UI.Shared.csproj" />
+	</ItemGroup>
+</Project>
