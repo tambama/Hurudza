@@ -45,7 +45,7 @@ try
 
     // For Entity Framework
     builder.Services.AddDbContext<HurudzaDbContext>(options =>
-        options.UseSqlServer(connectionString, x =>
+        options.UseNpgsql(connectionString, x =>
         {
             x.MigrationsAssembly("Hurudza.Data.Context");
         }));

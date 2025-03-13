@@ -34,6 +34,8 @@ public class HurudzaDbContext :
         _currentUserService = currentUserService;
         _dateTimeService = dateTimeService;
         _loggerFactory = loggerFactory;
+        
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
 
     // User Management

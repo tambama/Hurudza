@@ -6,5 +6,6 @@
         West = 2,
         North = 3,
         South = 4,
+        Central = 5,
     }
 }

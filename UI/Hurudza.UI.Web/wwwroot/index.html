@@ -4,20 +4,20 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="apple-touch-icon" sizes="76x76" href="_content/Hurudza.UI.Shared/assets/img/apple-icon.png">
-    <link rel="icon" type="image/png" href="_content/Hurudza.UI.Shared/favicon.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="_content/Hurudza.UI.Shared/img/apple-icon.png">
+    <link rel="icon" type="image/png" href="_content/Hurudza.UI.Shared/img/favicon.png">
     <title>Hurudza</title>
     <base href="/" />
     <!--     Fonts and icons     -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
     <!-- Nucleo Icons -->
-    <link href="_content/Hurudza.UI.Shared/assets/css/nucleo-icons.css" rel="stylesheet" />
-    <link href="_content/Hurudza.UI.Shared/assets/css/nucleo-svg.css" rel="stylesheet" />
+    <link href="_content/Hurudza.UI.Shared/css/nucleo-icons.css" rel="stylesheet" />
+    <link href="_content/Hurudza.UI.Shared/css/nucleo-svg.css" rel="stylesheet" />
     <!-- Font Awesome Icons -->
-    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/1e180ee9e6.js" crossorigin="anonymous"></script>
     <link href="_content/Hurudza.UI.Shared/css/nucleo-svg.css" rel="stylesheet" />
     <!-- CSS Files -->
-    <link id="pagestyle" href="_content/Hurudza.UI.Shared/assets/css/soft-ui-dashboard.css?v=1.1.1" rel="stylesheet" />
+    <link id="pagestyle" href="_content/Hurudza.UI.Shared/css/soft-ui-dashboard.css?v=1.1.5" rel="stylesheet" />
     <link href="_content/Hurudza.UI.Shared/css/app.css" rel="stylesheet" />
     <link href="Hurudza.UI.Web.styles.css" rel="stylesheet" />
     <link href="_content/Syncfusion.Blazor.Themes/bootstrap5.css" rel="stylesheet" />
@@ -53,6 +53,121 @@
 <script src="_content/Hurudza.UI.Shared/assets/js/plugins/threejs.js"></script>
 <script src="_content/Hurudza.UI.Shared/assets/js/plugins/orbit-controls.js"></script>
 <script>
+    (function() {
+    const container = document.getElementById("globe");
+    const canvas = container.getElementsByTagName("canvas")[0];
+
+    const globeRadius = 100;
+    const globeWidth = 4098 / 2;
+    const globeHeight = 1968 / 2;
+
+    function convertFlatCoordsToSphereCoords(x, y) {
+        let latitude = ((x - globeWidth) / globeWidth) * - 180;
+        let longitude = ((y - globeHeight) / globeHeight) * - 90;
+        latitude = (latitude * Math.PI) / 180;
+        longitude = (longitude * Math.PI) / 180;
+        const radius = Math.cos(longitude) * globeRadius;
+
+        return {
+            x: Math.cos(latitude) * radius,
+            y: Math.sin(longitude) * globeRadius,
+            z: Math.sin(latitude) * radius
+        };
+    }
+
+    function makeMagic(points) {
+        const {
+            width,
+            height
+        } = container.getBoundingClientRect();
+
+        // 1. Setup scene
+        const scene = new THREE.Scene();
+        // 2. Setup camera
+        const camera = new THREE.PerspectiveCamera(45, width / height);
+        // 3. Setup renderer
+        const renderer = new THREE.WebGLRenderer({
+            canvas,
+            antialias: true
+        });
+        renderer.setSize(width, height);
+        // 4. Add points to canvas
+        // - Single geometry to contain all points.
+        const mergedGeometry = new THREE.Geometry();
+        // - Material that the dots will be made of.
+        const pointGeometry = new THREE.SphereGeometry(0.5, 1, 1);
+        const pointMaterial = new THREE.MeshBasicMaterial({
+            color: "#989db5",
+        });
+
+        for (let point of points) {
+            const {
+                x,
+                y,
+                z
+            } = convertFlatCoordsToSphereCoords(
+                point.x,
+                point.y,
+                width,
+                height
+            );
+
+            if (x && y && z) {
+                pointGeometry.translate(x, y, z);
+                mergedGeometry.merge(pointGeometry);
+                pointGeometry.translate(-x, -y, -z);
+            }
+        }
+
+        const globeShape = new THREE.Mesh(mergedGeometry, pointMaterial);
+        scene.add(globeShape);
+
+        container.classList.add("peekaboo");
+
+        // Setup orbital controls
+        camera.orbitControls = new THREE.OrbitControls(camera, canvas);
+        camera.orbitControls.enableKeys = false;
+        camera.orbitControls.enablePan = false;
+        camera.orbitControls.enableZoom = false;
+        camera.orbitControls.enableDamping = false;
+        camera.orbitControls.enableRotate = true;
+        camera.orbitControls.autoRotate = true;
+        camera.position.z = -265;
+
+        function animate() {
+            // orbitControls.autoRotate is enabled so orbitControls.update
+            // must be called inside animation loop.
+            camera.orbitControls.update();
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+    }
+
+    function hasWebGL() {
+        const gl =
+            canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        if (gl && gl instanceof WebGLRenderingContext) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function init() {
+        if (hasWebGL()) {
+            window
+            window.fetch("https://raw.githubusercontent.com/creativetimofficial/public-assets/master/soft-ui-dashboard-pro/assets/js/points.json")
+                .then(response => response.json())
+                .then(data => {
+                    makeMagic(data.points);
+                });
+        }
+    }
+    init();
+    })();
+</script>
+<script>
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {
         var options = {
@@ -71,7 +186,8 @@
 <!-- Github buttons -->
 <script async defer src="https://buttons.github.io/buttons.js"></script>
 <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
-<script src="_content/Hurudza.UI.Shared/assets/js/soft-ui-dashboard.min.js"></script>
+<script src="_content/Hurudza.UI.Shared/js/soft-ui-dashboard.min.js"></script>
+<script src="/Pages/Maps/Map.razor.js"></script>
     <script>
         const element = document.getElementById("body");
         element.classList.add("g-sidenav-hidden");

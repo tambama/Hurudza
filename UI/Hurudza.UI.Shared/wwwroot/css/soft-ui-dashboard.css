@@ -4619,7 +4619,7 @@ fieldset:disabled .btn {
   --bs-nav-tabs-border-color: #dee2e6;
   --bs-nav-tabs-border-radius: 0.5rem;
   --bs-nav-tabs-link-hover-border-color: #e9ecef #e9ecef #dee2e6;
-  --bs-nav-tabs-link-active-color: #495057;
+  --bs-nav-tabs-link-active-color: #141727;
   --bs-nav-tabs-link-active-bg: #fff;
   --bs-nav-tabs-link-active-border-color: #dee2e6 #dee2e6 #fff;
   border-bottom: var(--bs-nav-tabs-border-width) solid var(--bs-nav-tabs-border-color);
@@ -22713,6 +22713,14 @@ html {
   fill: #141727;
 }
 
+.navbar-vertical.navbar-expand-xs .navbar-nav>.nav-item>.nav-link .icon i .color-background {
+  fill: #3A416F;
+}
+
+.navbar-vertical.navbar-expand-xs .navbar-nav>.nav-item>.nav-link .icon i .color-foreground {
+  fill: #141727;
+}
+
 .navbar-vertical.navbar-expand-xs .lavalamp-object {
   width: calc(100% - 1rem) !important;
   background: theme-color("primary");
@@ -23673,11 +23681,11 @@ html {
 }
 
 .navbar-vertical .navbar-nav .nav-item .nav-link .icon i {
-  color: #141727;
+  color: #3A416F
 }
 
-.navbar-vertical .navbar-nav .nav-item .nav-link .icon i {
-  color: #fff;
+.navbar-vertical .navbar-nav .nav-item .nav-link.active .icon i {
+  color: #ffffff;
 }
 
 .nav.nav-pills {

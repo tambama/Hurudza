@@ -68,8 +68,61 @@ public class FarmsController : Controller
     [HttpPost(Name = nameof(CreateFarm))]
     public async Task<IActionResult> CreateFarm([FromBody] FarmViewModel model)
     {
-        var farm = _configuration.CreateMapper().Map<Farm>(model);
-
+        var farm = new Farm();
+        farm.Name = model.Name;
+        farm.Address = model.Address;
+        farm.Description = model.Description;
+        farm.Vision = model.Vision;
+        farm.ContactPerson = model.ContactPerson;
+        farm.PhoneNumber = model.PhoneNumber;
+        farm.Email = model.Email;
+        farm.Website = model.Website ;
+        farm.Year = model.Year;
+        farm.FoundingMembers = model.FoundingMembers;
+        farm.KeyMilestones = model.KeyMilestones;
+        farm.Size = model.Size;
+        farm.Arable = model.Arable;
+        farm.Cleared = model.Cleared;
+        farm.PastCrops = model.PastCrops;
+        farm.LandManagementPractice = model.LandManagementPractice;
+        farm.SecurityMeasures = model.SecurityMeasures;
+        farm.WaterSource = model.WaterSource;
+        farm.WaterAvailability = model.WaterAvailability ?? WaterAvailability.Seasonal;
+        farm.Irrigated = model.Irrigated;
+        farm.Equipment = model.Equipment;
+        farm.SoilType = model.SoilType;
+        farm.RoadAccess = model.RoadAccess ?? RoadAccess.Dust;
+        farm.Problems = model.Problems;
+        farm.Personnel = model.Personnel;
+        farm.Recommendations = model.Recommendations;
+        farm.WardId  = model.WardId;
+        farm.LocalAuthorityId  = model.LocalAuthorityId;
+        farm.DistrictId  = model.DistrictId;
+        farm.ProvinceId = model.ProvinceId;
+        farm.Region = model.Region ?? Region.I;
+        farm.Conference = model.Conference ?? Conference.East;
+        farm.CommunityPrograms = model.CommunityPrograms;
+        farm.Partnerships = model.Partnerships;
+        farm.Classrooms = model.Classrooms;
+        farm.Laboratories = model.Laboratories;
+        farm.SportsFacilities = model.SportsFacilities;
+        farm.Library = model.Library;
+        farm.AverageExamScores = model.AverageExamScores;
+        farm.ExtraCurricularAchievements = model.ExtraCurricularAchievements;
+        farm.MaleTeachers = model.MaleTeachers;
+        farm.FemaleTeachers = model.FemaleTeachers;
+        farm.MaleStudents = model.MaleStudents;
+        farm.FemaleStudents = model.FemaleStudents;
+        farm.StudentDemographics = model.StudentDemographics;
+        farm.DayScholars = model.DayScholars;
+        farm.BoardingScholars = model.BoardingScholars;
+        farm.NonTeachingStaff = model.NonTeachingStaff;
+        farm.Terrain = model.Terrain ?? Terrain.Flat;
+        farm.Latitude = model.Latitude;
+        farm.Longitude = model.Longitude;
+        farm.Elevation = model.Elevation;
+        farm.Buildings = model.Buildings;
+        
         await _context.AddAsync(farm).ConfigureAwait(false);
         await _context.SaveChangesAsync().ConfigureAwait(false);
 
@@ -122,6 +175,7 @@ public class FarmsController : Controller
         farm.WardId  = model.WardId;
         farm.LocalAuthorityId  = model.LocalAuthorityId;
         farm.DistrictId  = model.DistrictId;
+        farm.ProvinceId  = model.ProvinceId;
         farm.Region = model.Region ?? Region.I;
         farm.Conference = model.Conference ?? Conference.East;
         farm.CommunityPrograms = model.CommunityPrograms;

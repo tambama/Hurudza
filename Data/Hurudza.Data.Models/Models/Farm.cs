@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Hurudza.Data.Enums.Enums;
 using Hurudza.Data.Models.Base;
 
@@ -5,14 +6,19 @@ namespace Hurudza.Data.Models.Models;
 
 public class Farm : BaseEntity
 {
-    public required string Name { get; set; }
-    public required string Address { get; set; }
+    [Required]
+    public string Name { get; set; }
+    [Required]
+    public string Address { get; set; }
     public string? Description { get; set; }
     public string? Vision { get; set; }
     public string? Mission { get; set; }
-    public required string ContactPerson { get; set; }
-    public required string PhoneNumber { get; set; }
-    public required string Email { get; set; }
+    [Required]
+    public string ContactPerson { get; set; }
+    [Required]
+    public string PhoneNumber { get; set; }
+    [Required]
+    public string Email { get; set; }
     public string? Website { get; set; }
     public int Year { get; set; }
     public string? FoundingMembers { get; set; }

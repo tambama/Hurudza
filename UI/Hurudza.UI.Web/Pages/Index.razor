@@ -1,6 +1,8 @@
 ﻿@page "/"
 @attribute [Authorize]
 
+@inject IApiCall ApiCall
+
 <div class="row">
 <div class="col-lg-7 position-relative z-index-2">
 <div class="card card-plain mb-4">
@@ -21,16 +23,15 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Today's Money</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Centers</p>
                             <h5 class="font-weight-bolder mb-0">
-                                $53,000
-                                <span class="text-success text-sm font-weight-bolder">+55%</span>
+                                @_baseStatistics.Centers
                             </h5>
                         </div>
                     </div>
                     <div class="col-4 text-end">
-                        <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
-                            <i class="ni ni-money-coins text-lg opacity-10" aria-hidden="true"></i>
+                        <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
+                            <i class="ni ni-building text-lg opacity-10" aria-hidden="true"></i>
                         </div>
                     </div>
                 </div>
@@ -41,15 +42,15 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Today's Users</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Land</p>
                             <h5 class="font-weight-bolder mb-0">
-                                2,300
-                                <span class="text-success text-sm font-weight-bolder">+3%</span>
+                                @_baseStatistics.TotalLand
+                                <span class="text-dark text-sm font-weight-bolder">ha</span>
                             </h5>
                         </div>
                     </div>
                     <div class="col-4 text-end">
-                        <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                        <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
                             <i class="ni ni-world text-lg opacity-10" aria-hidden="true"></i>
                         </div>
                     </div>
@@ -63,15 +64,15 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">New Clients</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Arable Land</p>
                             <h5 class="font-weight-bolder mb-0">
-                                +3,462
-                                <span class="text-danger text-sm font-weight-bolder">-2%</span>
+                                @_baseStatistics.Arable
+                                <span class="text-dark text-sm font-weight-bolder">ha</span>
                             </h5>
                         </div>
                     </div>
                     <div class="col-4 text-end">
-                        <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                        <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
                             <i class="ni ni-paper-diploma text-lg opacity-10" aria-hidden="true"></i>
                         </div>
                     </div>
@@ -83,16 +84,16 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Sales</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Tillage</p>
                             <h5 class="font-weight-bolder mb-0">
-                                $103,430
-                                <span class="text-success text-sm font-weight-bolder">+5%</span>
+                                @_baseStatistics.Tillage
+                                <span class="text-dark text-sm font-weight-bolder">ha</span>
                             </h5>
                         </div>
                     </div>
                     <div class="col-4 text-end">
-                        <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
-                            <i class="ni ni-cart text-lg opacity-10" aria-hidden="true"></i>
+                        <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
+                            <i class="ni ni-map-big text-lg opacity-10" aria-hidden="true"></i>
                         </div>
                     </div>
                 </div>
@@ -105,136 +106,43 @@
         <div class="card ">
             <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
-                    <h6 class="mb-2">Sales by Country</h6>
+                    <h6 class="mb-2">The Big 5</h6>
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table align-items-center ">
+                <table class="table align-items-center">
                     <tbody>
-                    <tr>
-                        <td class="w-30">
-                            <div class="d-flex px-2 py-1 align-items-center">
-                                <div>
-                                    <img src="_content/Hurudza.UI.Shared//assets/img/icons/flags/US.png" alt="Country flag">
+                    @foreach (var farm in _farms)
+                    {
+                        <tr>
+                            <td class="w-30">
+                                <div class="d-flex px-2 py-1 align-items-center">
+                                    <div class="ms-4">
+                                        <p class="text-xs font-weight-bold mb-0">Center:</p>
+                                        <h6 class="text-sm mb-0">@farm.Name</h6>
+                                    </div>
                                 </div>
-                                <div class="ms-4">
-                                    <p class="text-xs font-weight-bold mb-0">Country:</p>
-                                    <h6 class="text-sm mb-0">United States</h6>
+                            </td>
+                            <td>
+                                <div class="text-center">
+                                    <p class="text-xs font-weight-bold mb-0">Size:</p>
+                                    <h6 class="text-sm mb-0">@farm.Size</h6>
                                 </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="text-center">
-                                <p class="text-xs font-weight-bold mb-0">Sales:</p>
-                                <h6 class="text-sm mb-0">2500</h6>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="text-center">
-                                <p class="text-xs font-weight-bold mb-0">Value:</p>
-                                <h6 class="text-sm mb-0">$230,900</h6>
-                            </div>
-                        </td>
-                        <td class="align-middle text-sm">
-                            <div class="col text-center">
-                                <p class="text-xs font-weight-bold mb-0">Bounce:</p>
-                                <h6 class="text-sm mb-0">29.9%</h6>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="w-30">
-                            <div class="d-flex px-2 py-1 align-items-center">
-                                <div>
-                                    <img src="_content/Hurudza.UI.Shared/assets/img/icons/flags/DE.png" alt="Country flag">
+                            </td>
+                            <td>
+                                <div class="text-center">
+                                    <p class="text-xs font-weight-bold mb-0">Arable:</p>
+                                    <h6 class="text-sm mb-0">@farm.Arable</h6>
                                 </div>
-                                <div class="ms-4">
-                                    <p class="text-xs font-weight-bold mb-0">Country:</p>
-                                    <h6 class="text-sm mb-0">Germany</h6>
+                            </td>
+                            <td class="align-middle text-sm">
+                                <div class="col text-center">
+                                    <p class="text-xs font-weight-bold mb-0">Tillage:</p>
+                                    <h6 class="text-sm mb-0">@farm.Tillage</h6>
                                 </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="text-center">
-                                <p class="text-xs font-weight-bold mb-0">Sales:</p>
-                                <h6 class="text-sm mb-0">3.900</h6>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="text-center">
-                                <p class="text-xs font-weight-bold mb-0">Value:</p>
-                                <h6 class="text-sm mb-0">$440,000</h6>
-                            </div>
-                        </td>
-                        <td class="align-middle text-sm">
-                            <div class="col text-center">
-                                <p class="text-xs font-weight-bold mb-0">Bounce:</p>
-                                <h6 class="text-sm mb-0">40.22%</h6>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="w-30">
-                            <div class="d-flex px-2 py-1 align-items-center">
-                                <div>
-                                    <img src="_content/Hurudza.UI.Shared/assets/img/icons/flags/GB.png" alt="Country flag">
-                                </div>
-                                <div class="ms-4">
-                                    <p class="text-xs font-weight-bold mb-0">Country:</p>
-                                    <h6 class="text-sm mb-0">Great Britain</h6>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="text-center">
-                                <p class="text-xs font-weight-bold mb-0">Sales:</p>
-                                <h6 class="text-sm mb-0">1.400</h6>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="text-center">
-                                <p class="text-xs font-weight-bold mb-0">Value:</p>
-                                <h6 class="text-sm mb-0">$190,700</h6>
-                            </div>
-                        </td>
-                        <td class="align-middle text-sm">
-                            <div class="col text-center">
-                                <p class="text-xs font-weight-bold mb-0">Bounce:</p>
-                                <h6 class="text-sm mb-0">23.44%</h6>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="w-30">
-                            <div class="d-flex px-2 py-1 align-items-center">
-                                <div>
-                                    <img src="_content/Hurudza.UI.Shared/assets/img/icons/flags/BR.png" alt="Country flag">
-                                </div>
-                                <div class="ms-4">
-                                    <p class="text-xs font-weight-bold mb-0">Country:</p>
-                                    <h6 class="text-sm mb-0">Brasil</h6>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="text-center">
-                                <p class="text-xs font-weight-bold mb-0">Sales:</p>
-                                <h6 class="text-sm mb-0">562</h6>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="text-center">
-                                <p class="text-xs font-weight-bold mb-0">Value:</p>
-                                <h6 class="text-sm mb-0">$143,960</h6>
-                            </div>
-                        </td>
-                        <td class="align-middle text-sm">
-                            <div class="col text-center">
-                                <p class="text-xs font-weight-bold mb-0">Bounce:</p>
-                                <h6 class="text-sm mb-0">32.14%</h6>
-                            </div>
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
+                    }
                     </tbody>
                 </table>
             </div>
@@ -250,3 +158,16 @@
         </div>
     </div>
 </div>
+
+@code{
+
+    BaseStatisticsViewModel _baseStatistics = new BaseStatisticsViewModel();
+    List<FarmStatisticsViewModel> _farms = new List<FarmStatisticsViewModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _baseStatistics = await ApiCall.Get<BaseStatisticsViewModel>(await ApiCall.GetHttpClient(), "statistics/getbasestatistics");
+        _farms = await ApiCall.Get<List<FarmStatisticsViewModel>>(await ApiCall.GetHttpClient(), "Statistics/GetBigFiveStatistics");
+    }
+
+}

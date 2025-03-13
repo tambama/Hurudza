@@ -1,6 +1,7 @@
 using AutoMapper;
 using Hurudza.Data.Models.Models;
 using Hurudza.Data.UI.Models.ViewModels.Core;
+using Hurudza.Data.UI.Models.ViewModels.Stats;
 
 namespace Hurudza.Apis.Base.Mapping;
 
@@ -16,6 +17,8 @@ public class Farms : Profile
         CreateMap<Farm, FarmMapViewModel>()
             .ForMember(dst => dst.FarmCoordinates, opts => opts.MapFrom(src => src.Locations.OrderBy(l => l.CreatedDate).Select(l => new List<double>() { l.Longitude, l.Latitude })));
 
+        CreateMap<Farm, FarmStatisticsViewModel>();
+        
         CreateMap<Farm, FarmListViewModel>();
     }
 }

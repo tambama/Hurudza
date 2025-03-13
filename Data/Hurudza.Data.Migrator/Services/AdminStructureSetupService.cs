@@ -16,7 +16,7 @@ namespace Hurudza.Data.Migrator.Services
         public AdminStructureSetupService(HurudzaDbContext context)
         {
             this.context = context;
-            ROOT_PATH = OperatingSystem.IsMacOS() ? "/Users/peniel/Docs/Party" : "D:\\Documents\\Musangano\\Voters";
+            ROOT_PATH = OperatingSystem.IsMacOS() ? "/Users/peniel/Code/Party/Roll" : "D:\\Documents\\Musangano\\Voters";
         }
 
         public async Task ImportBulkVoters()

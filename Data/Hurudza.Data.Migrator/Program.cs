@@ -23,10 +23,10 @@ try
     IConfiguration config = builder.Services.GetRequiredService<IConfiguration>();
 
     var services = new ServiceCollection();
-    string connectionString = "Data Source=(localdb)\\mssqllocaldb;Initial Catalog=Hurudza.Apis.Core;TrustServerCertificate=true";
+    string connectionString = "Server=localhost;Port=5432;Database=Hurudza;Username=postgres;Password=Password+1;";
     // For Entity Framework
     services.AddDbContext<HurudzaDbContext>(options =>
-        options.UseSqlServer(connectionString, x =>
+        options.UseNpgsql(connectionString, x =>
         {
             x.MigrationsAssembly("Hurudza.Data.Context");
         }));
