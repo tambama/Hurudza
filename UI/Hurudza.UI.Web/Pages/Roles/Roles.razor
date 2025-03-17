@@ -1,0 +1,341 @@
+@page "/roles"
+@attribute [Authorize]
+
+@using Hurudza.Data.UI.Models.ViewModels.UserManagement;
+@using Hurudza.UI.Shared.Api.Interfaces
+@inject IApiCall ApiCall
+@inject AuthenticationStateProvider AuthStateProvider
+
+<Toast @ref="Alert"/>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>System Roles</h6>
+            </div>
+            <div class="card-body px-2 pt-0 pb-2">
+                <SfGrid
+                    DataSource="@Roles"
+                    @ref="Grid"
+                    AllowPaging="true"
+                    AllowExcelExport="true"
+                    AllowSorting="true"
+                    AllowMultiSorting="true"
+                    EnableStickyHeader="true"
+                    AllowResizing="true"
+                    AllowFiltering="true"
+                    AllowSelection="true"
+                    Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "ExcelExport", "Print", "Search" })"
+                    ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Edit", "Delete", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                    <GridPageSettings PageSize="12"></GridPageSettings>
+                    <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
+                    <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="RoleViewModel"></GridEvents>
+                    <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog">
+                        <HeaderTemplate>
+                            @{
+                                var text = GetHeader((context as RoleViewModel));
+                                <span>@text</span>
+                            }
+                        </HeaderTemplate>
+                        <Validator>
+                            <DataAnnotationsValidator></DataAnnotationsValidator>
+                        </Validator>
+                        <Template>
+                            @{
+                                var Role = (context as RoleViewModel);
+                                <div>
+                                    <div class="form-row">
+                                        <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(Role.Id)"></SfTextBox>
+                                        <div class="form-group">
+                                            <label>Role Name</label>
+                                            <SfTextBox ID="roleName" TValue="string" @bind-Value="@(Role.Name)" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => Role.Name"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Description</label>
+                                            <SfTextBox ID="description" TValue="string" @bind-Value="@(Role.Description)" ValidateOnInput="true"></SfTextBox>
+                                            <ValidationMessage For="() => Role.Description"/>
+                                        </div>
+                                        
+                                        @if (AvailableClaims != null && AvailableClaims.Any())
+                                        {
+                                            <div class="form-group">
+                                                <label>Permissions</label>
+                                                <div class="row">
+                                                    @foreach (var claimType in AvailableClaims.GroupBy(c => c.ClaimType))
+                                                    {
+                                                        <div class="col-md-4 mb-3">
+                                                            <div class="card">
+                                                                <div class="card-header">
+                                                                    <h6>@claimType.Key</h6>
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    @foreach (var claim in claimType)
+                                                                    {
+                                                                        <div class="form-check">
+                                                                            <SfCheckBox 
+                                                                                Label="@GetClaimDisplayName(claim.ClaimValue)" 
+                                                                                Checked="@GetClaimSelected(Role, claim.ClaimValue)"
+                                                                                ValueChange="@((Syncfusion.Blazor.Buttons.ChangeEventArgs<bool> args) => HandleClaimToggle(Role, claim, args))">
+                                                                            </SfCheckBox>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                        
+                                        <div class="form-group">
+                                            <SfSpinner @ref="SaveSpinner"></SfSpinner>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </Template>
+                    </GridEditSettings>
+                    <GridColumns>
+                        <GridColumn Field=@nameof(RoleViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                        <GridColumn Field=@nameof(RoleViewModel.Name) HeaderText="Role Name" TextAlign="TextAlign.Center" Width="150"></GridColumn>
+                        <GridColumn Field=@nameof(RoleViewModel.Description) HeaderText="Description" TextAlign="TextAlign.Center" Width="250"></GridColumn>
+                    </GridColumns>
+                </SfGrid>
+                <SfDialog @ref="Dialog" Width="400px" Visible="false" ShowCloseIcon="true" IsModal="true">
+                    <DialogEvents Closed="Closed"></DialogEvents>
+                    <DialogTemplates>
+                        <Header> Delete Role</Header>
+                        <Content>
+                            <p>Are you sure you want to delete the role: @SelectedRole?.Description?</p>
+                            <p class="text-danger">This action will affect all users assigned to this role.</p>
+                            <div class="form-group">
+                                <SfSpinner @ref="DeleteSpinner"></SfSpinner>
+                            </div>
+                        </Content>
+                    </DialogTemplates>
+                    <DialogButtons>
+                        <DialogButton OnClick="@OkClick" Content="Delete" IsPrimary="true"></DialogButton>
+                        <DialogButton OnClick="@CancelClick" Content="Cancel"></DialogButton>
+                    </DialogButtons>
+                </SfDialog>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code{
+    SfGrid<RoleViewModel> Grid;
+    SfDialog Dialog;
+    SfSpinner SaveSpinner;
+    SfSpinner DeleteSpinner;
+    Toast Alert;
+    List<RoleViewModel> Roles;
+    List<ClaimViewModel> AvailableClaims;
+    bool Enabled = true;
+    bool Data = false;
+    RoleViewModel SelectedRole;
+    bool flag = true;
+    ClaimsPrincipal user;
+    Dictionary<string, List<ClaimViewModel>> SelectedClaims = new Dictionary<string, List<ClaimViewModel>>();
+
+    private string GetHeader(RoleViewModel Value)
+    {
+        if (string.IsNullOrEmpty(Value.Id))
+        {
+            return "Add New Role";
+        }
+        else
+        {
+            return "Edit Role: " + Value.Description;
+        }
+    }
+
+    private void Closed()
+    {
+        flag = true;
+    }
+
+    private async Task ActionBeginHandler(ActionEventArgs<RoleViewModel> args)
+    {
+        switch (args.RequestType)
+        {
+            case Action.FilterChoiceRequest:
+                args.FilterChoiceCount = 100;
+                break;
+            case Action.Add:
+                Data = true;
+                break;
+            case Action.Delete when flag:
+                args.Cancel = true;
+                SelectedRole = args.Data;
+                await Dialog.ShowAsync();
+                flag = false;
+                break;
+            case Action.Save:
+            {
+                if (SaveSpinner.Visible)
+                {
+                    args.Cancel = true;
+                    break;
+                }
+
+                await SaveSpinner.ShowAsync();
+                if (!string.IsNullOrEmpty(args.Data.Id))
+                {
+                    if (!await UpdateRole(args.Data))
+                    {
+                        args.Cancel = true;
+                    }
+                }
+                else
+                {
+                    if (!await SaveRole(args.Data))
+                    {
+                        args.Cancel = true;
+                    }
+                }
+
+                await SaveSpinner.HideAsync();
+                break;
+            }
+        }
+    }
+
+    private void RowSelectHandler(RowSelectEventArgs<RoleViewModel> args)
+    {
+        SelectedRole = args.Data;
+    }
+
+    private async Task OkClick()
+    {
+        await DeleteSpinner.ShowAsync();
+        if (await DeleteRole(SelectedRole))
+        {
+            await Grid.DeleteRecordAsync();
+            await Dialog.HideAsync();
+        }
+        await DeleteSpinner.HideAsync();
+    }
+
+    private async Task CancelClick()
+    {
+        await Dialog.HideAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = (await (AuthStateProvider as CustomAuthStateProvider)?.GetAuthenticationStateAsync()).User;
+
+        Roles = (await ApiCall.Get<IEnumerable<RoleViewModel>>(await ApiCall.GetHttpClient(), "roles/getroles")).ToList();
+        AvailableClaims = (await ApiCall.Get<IEnumerable<ClaimViewModel>>(await ApiCall.GetHttpClient(), "claims/getallclaims")).ToList();
+    }
+
+    private bool GetClaimSelected(RoleViewModel role, string claimValue)
+    {
+        if (role.Permissions == null) return false;
+        return role.Permissions.Any(p => p.ClaimValue == claimValue);
+    }
+
+    private void HandleClaimToggle(RoleViewModel role, ClaimViewModel claim, Syncfusion.Blazor.Buttons.ChangeEventArgs<bool> args)
+    {
+        if (role.Permissions == null)
+        {
+            role.Permissions = new List<ClaimViewModel>();
+        }
+
+        if (args.Value)
+        {
+            if (!role.Permissions.Any(p => p.ClaimValue == claim.ClaimValue))
+            {
+                role.Permissions.Add(claim);
+            }
+        }
+        else
+        {
+            var existingClaim = role.Permissions.FirstOrDefault(p => p.ClaimValue == claim.ClaimValue);
+            if (existingClaim != null)
+            {
+                role.Permissions.Remove(existingClaim);
+            }
+        }
+    }
+
+    private string GetClaimDisplayName(string claimValue)
+    {
+        // Convert from format like "Farm.View" to "View"
+        if (claimValue.Contains('.'))
+        {
+            return claimValue.Split('.')[1];
+        }
+        return claimValue;
+    }
+
+    private async Task<bool> SaveRole(RoleViewModel model)
+    {
+        var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<RoleViewModel>, RoleViewModel>(
+            await ApiCall.GetHttpClient(), "roles/createrole", model);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to save role, please try again!", showTitle: true, toastType: ToastType.Danger);
+            return false;
+        }
+        
+        if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show("Role created successfully", showTitle: true, toastType: ToastType.Success);
+            // Refresh the role list
+            Roles = (await ApiCall.Get<IEnumerable<RoleViewModel>>(await ApiCall.GetHttpClient(), "roles/getroles")).ToList();
+            return true;
+        }
+        
+        Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        return false;
+    }
+
+    private async Task<bool> UpdateRole(RoleViewModel model)
+    {
+        var response = await ApiCall.Update<UI.Shared.Models.ApiResponse<RoleViewModel>, RoleViewModel>(
+            await ApiCall.GetHttpClient(), "roles/updaterole", model.Id, model);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to update role, please try again!", showTitle: true, toastType: ToastType.Danger);
+            return false;
+        }
+        
+        if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show("Role updated successfully", showTitle: true, toastType: ToastType.Success);
+            // Refresh the role list
+            Roles = (await ApiCall.Get<IEnumerable<RoleViewModel>>(await ApiCall.GetHttpClient(), "roles/getroles")).ToList();
+            return true;
+        }
+        
+        Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        return false;
+    }
+
+    private async Task<bool> DeleteRole(RoleViewModel model)
+    {
+        var response = await ApiCall.Remove<UI.Shared.Models.ApiResponse<RoleViewModel>>(
+            await ApiCall.GetHttpClient(), "roles/deleterole", model.Id);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to delete role, please try again!", showTitle: true, toastType: ToastType.Danger);
+            return false;
+        }
+        
+        if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show("Role deleted successfully", showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        
+        Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        return false;
+    }
+}

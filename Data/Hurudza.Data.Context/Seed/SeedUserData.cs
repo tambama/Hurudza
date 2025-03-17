@@ -1,5 +1,6 @@
 using Hurudza.Data.Context.Context;
 using Hurudza.Data.Context.Data;
+using Hurudza.Data.Data;
 using Hurudza.Data.Models.Models;
 using Microsoft.AspNetCore.Identity;
 using Serilog;

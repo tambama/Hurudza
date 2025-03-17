@@ -1,4 +1,4 @@
-﻿namespace Hurudza.Data.Context.Data;
+﻿namespace Hurudza.Data.Data;
 
 public static class ApiRoles
 {

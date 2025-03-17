@@ -1226,7 +1226,38 @@
 
     async Task LoadClusters()
     {
-        await _mapModule.InvokeVoidAsync("loadClusters", _mapInstance).AsTask();
+        var farms = _farms;
+        
+        // Create the GeoJSON FeatureCollection
+        var featureCollection = new
+        {
+            type = "FeatureCollection",
+            crs = new
+            {
+                type = "name",
+                properties = new
+                {
+                    name = "urn:ogc:def:crs:OGC:1.3:CRS84"
+                }
+            },
+            features = farms.Select(f => new
+            {
+                type = "Feature",
+                properties = new
+                {
+                    id = f.Id,
+                    name = f.Name,
+                    size = f.Size
+                },
+                geometry = new
+                {
+                    type = "Point",
+                    coordinates = new[] { f.Longitude, f.Latitude, f.Elevation }
+                }
+            }).ToArray()
+        };
+        
+        await _mapModule.InvokeVoidAsync("loadFarms", _mapInstance, featureCollection).AsTask();
     }
 
     #endregion

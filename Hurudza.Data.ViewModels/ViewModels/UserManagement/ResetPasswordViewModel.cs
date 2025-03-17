@@ -5,7 +5,7 @@ namespace Hurudza.Data.UI.Models.ViewModels.UserManagement;
 public class ResetPasswordViewModel
 {
     [Required]
-    public required string Code { get; set; }
+    public string Code { get; set; }
     [Required]
     [Display(Name = "Code")]
     [Compare(nameof(Code), ErrorMessage = "Code does not match")]
@@ -15,7 +15,7 @@ public class ResetPasswordViewModel
     [Required]
     public string? Username { get; set; }
     [Required]
-    public required string Token { get; set; }
+    public string Token { get; set; }
     [Required]
     public DateTime? TokenValidity { get; set; }
 }

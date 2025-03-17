@@ -30,6 +30,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Common\Hurudza.Common.Utils\Hurudza.Common.Utils.csproj" />
+	  <ProjectReference Include="..\..\Data\Hurudza.Data.Data\Hurudza.Data.Data.csproj" />
 	  <ProjectReference Include="..\..\Hurudza.Data.ViewModels\Hurudza.Data.UI.Models.csproj" />
 	  <ProjectReference Include="..\Hurudza.UI.Shared\Hurudza.UI.Shared.csproj" />
 	</ItemGroup>

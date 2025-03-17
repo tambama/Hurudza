@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Hurudza.Common.Services\Hurudza.Common.Services.csproj" />
     <ProjectReference Include="..\..\Hurudza.Data.ViewModels\Hurudza.Data.UI.Models.csproj" />
+    <ProjectReference Include="..\Hurudza.Data.Data\Hurudza.Data.Data.csproj" />
     <ProjectReference Include="..\Hurudza.Data.Models\Hurudza.Data.Models.csproj" />
   </ItemGroup>
 </Project>

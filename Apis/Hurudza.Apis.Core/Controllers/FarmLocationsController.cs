@@ -6,6 +6,8 @@ using Hurudza.Data.Context.Context;
 using Hurudza.Data.Models.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using ApiResponse = Hurudza.Apis.Base.Models.ApiResponse;
 
 namespace Hurudza.Apis.Core.Controllers;
@@ -23,6 +25,54 @@ public class FarmLocationsController : Controller
     public FarmLocationsController(HurudzaDbContext context)
     {
         _context = context;
+    }
+
+    [HttpGet(Name = nameof(GetAllFarmLocations))]
+    public async Task<IActionResult> GetAllFarmLocations()
+    {
+        // Get all farm locations from the database
+        var farmLocations = await _context.Farms
+            .Where(f => f.IsActive && f.Latitude != 0 && f.Longitude != 0)
+            .Select(f => new
+            {
+                f.Id,
+                f.Name,
+                f.Latitude,
+                f.Longitude,
+                f.Elevation
+            })
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        // Create the GeoJSON FeatureCollection
+        var featureCollection = new
+        {
+            type = "FeatureCollection",
+            crs = new
+            {
+                type = "name",
+                properties = new
+                {
+                    name = "urn:ogc:def:crs:OGC:1.3:CRS84"
+                }
+            },
+            features = farmLocations.Select(f => new
+            {
+                type = "Feature",
+                properties = new
+                {
+                    id = f.Id,
+                    name = f.Name
+                },
+                geometry = new
+                {
+                    type = "Point",
+                    coordinates = new[] { f.Longitude, f.Latitude, f.Elevation }
+                }
+            }).ToArray()
+        };
+
+        return Ok(featureCollection);
     }
     
     [HttpGet(Name = nameof(GetFarmLocations))]

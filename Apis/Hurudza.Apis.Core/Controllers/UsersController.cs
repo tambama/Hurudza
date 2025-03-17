@@ -3,499 +3,423 @@ using System.Net.Mime;
 using Asp.Versioning;
 using AutoMapper.QueryableExtensions;
 using Hurudza.Apis.Base.Models;
-using Hurudza.Common.Sms.Services;
-using Hurudza.Common.Utils.Exceptions;
-using Hurudza.Common.Utils.Extensions;
-using Hurudza.Common.Utils.Helpers;
 using Hurudza.Data.Context.Context;
 using Hurudza.Data.Models.Models;
-using Hurudza.Data.UI.Models.Models;
 using Hurudza.Data.UI.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+using ApiResponse = Hurudza.Apis.Base.Models.ApiResponse;
 using IConfigurationProvider = AutoMapper.IConfigurationProvider;
 
-namespace Hurudza.Apis.Core.Controllers
+namespace Hurudza.Apis.Core.Controllers;
+
+[Route("api/[controller]/[action]")]
+[Authorize]
+[ApiController]
+[ApiVersion("1.0")]
+[Produces(MediaTypeNames.Application.Json)]
+[Consumes(MediaTypeNames.Application.Json)]
+public class UsersController : ControllerBase
 {
-    [Route("api/[controller]/[action]")]
-    //[Authorize]
-    [ApiController]
-    [ApiVersion("1.0")]
-    [Produces(MediaTypeNames.Application.Json)]
-    [Consumes(MediaTypeNames.Application.Json)]
-    public class UsersController : ControllerBase
+    private readonly HurudzaDbContext _context;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<ApplicationRole> _roleManager;
+    private readonly IConfigurationProvider _configuration;
+
+    public UsersController(
+        HurudzaDbContext context,
+        UserManager<ApplicationUser> userManager,
+        RoleManager<ApplicationRole> roleManager,
+        IConfigurationProvider configuration)
     {
-        private readonly HurudzaDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IConfigurationProvider _configuration;
-        private readonly ISmsService _smsService;
-        private readonly EmailSettings _emailSettings;
+        _context = context;
+        _userManager = userManager;
+        _roleManager = roleManager;
+        _configuration = configuration;
+    }
 
-        public UsersController(
-            HurudzaDbContext context,
-            UserManager<ApplicationUser> userManager,
-            IConfigurationProvider configuration,
-            ISmsService smsService,
-            IOptions<EmailSettings> emailSettings)
+    [HttpGet(Name = nameof(GetUsers))]
+    public async Task<IActionResult> GetUsers()
+    {
+        var users = await _context.Users
+            .Where(u => u.IsActive)
+            .ProjectTo<UserViewModel>(_configuration)
+            .ToListAsync();
+
+        // Load roles for each user
+        foreach (var user in users)
         {
-            _context = context;
-            _userManager = userManager;
-            _configuration = configuration;
-            _smsService = smsService;
-            _emailSettings = emailSettings.Value;
+            var appUser = await _userManager.FindByIdAsync(user.Id);
+            if (appUser != null)
+            {
+                var roles = await _userManager.GetRolesAsync(appUser);
+                user.Role = roles.FirstOrDefault();
+            }
         }
 
-        // GET: api/users
-        [HttpGet("", Name = nameof(GetUsers))]
-        public async Task<IActionResult> GetUsers()
-        {
-            var users = await _context.Users
-                .Where(u => u.IsActive)
-                .ProjectTo<UserViewModel>(_configuration)
-                .ToListAsync();
+        return Ok(users);
+    }
 
-            return Ok(users);
+    [HttpGet("{id}", Name = nameof(GetUser))]
+    public async Task<IActionResult> GetUser(string id)
+    {
+        var user = await _context.Users
+            .ProjectTo<UserViewModel>(_configuration)
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user == null) 
+            return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, "User not found"));
+
+        // Load user roles
+        var appUser = await _userManager.FindByIdAsync(id);
+        if (appUser != null)
+        {
+            var roles = await _userManager.GetRolesAsync(appUser);
+            user.Role = roles.FirstOrDefault();
         }
 
-        // GET api/users/5
-        [HttpGet("{id}", Name = nameof(GetUser))]
-        public async Task<IActionResult> GetUser(string id)
+        // Load user profiles
+        var profiles = await _context.UserProfiles
+            .Where(p => p.UserId == id)
+            .ProjectTo<UserProfileViewModel>(_configuration)
+            .ToListAsync();
+
+        user.Profiles = profiles;
+
+        return Ok(new ApiOkResponse(user));
+    }
+    
+    [HttpGet("{username}", Name = nameof(GetUserByUsername))]
+    public async Task<IActionResult> GetUserByUsername(string username)
+    {
+        var user = await _context.Users
+            .ProjectTo<UserViewModel>(_configuration)
+            .FirstOrDefaultAsync(u => u.UserName == username);
+
+        if (user == null) 
+            return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, "User not found"));
+
+        // Load user roles
+        var appUser = await _userManager.FindByNameAsync(username);
+        if (appUser != null)
         {
-            var user = await _context.Users
-                .ProjectTo<UserViewModel>(_configuration)
-                .FirstOrDefaultAsync(u => u.Id == id);
-
-            if (user == null) return NotFound();
-
-            return Ok(user);
+            var roles = await _userManager.GetRolesAsync(appUser);
+            user.Role = roles.FirstOrDefault();
         }
 
-        [HttpGet("{username}", Name = nameof(GetUserByUsername))]
-        public async Task<IActionResult> GetUserByUsername(string username)
+        return Ok(new ApiOkResponse(user));
+    }
+
+    [HttpGet("{farmId}", Name = nameof(GetFarmUsers))]
+    public async Task<IActionResult> GetFarmUsers(string farmId)
+    {
+        var userProfiles = await _context.UserProfiles
+            .Where(p => p.FarmId == farmId && p.IsActive)
+            .ToListAsync();
+
+        var users = new List<UserViewModel>();
+        foreach (var profile in userProfiles)
         {
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserName.ToLower() == username.Trim().ToLower())
-                .ConfigureAwait(false);
-
-            if (user == null) return NotFound();
-
-            return Ok(user);
+            var user = await _userManager.FindByIdAsync(profile.UserId);
+            if (user != null && user.IsActive)
+            {
+                var userViewModel = _configuration.CreateMapper().Map<UserViewModel>(user);
+                userViewModel.Role = profile.Role;
+                userViewModel.FarmId = farmId;
+                userViewModel.ProfileId = profile.Id;
+                
+                users.Add(userViewModel);
+            }
         }
 
-        [HttpGet("{companyId}", Name = nameof(GetCompanyUsers))]
-        public async Task<IActionResult> GetCompanyUsers(string companyId)
-        {
-            var users = await (from p in _context.UserProfiles
-                    where p.FarmId == companyId
-                    select p)
-                .ProjectTo<UserViewModel>(_configuration)
-                .Where(u => !string.IsNullOrEmpty(u.Email))
-                .ToListAsync()
-                .ConfigureAwait(false);
+        return Ok(users);
+    }
 
-            return Ok(users);
+    [HttpPost(Name = nameof(CreateUser))]
+    [Authorize(Roles = "SystemAdministrator,Administrator")]
+    public async Task<IActionResult> CreateUser([FromBody] UserViewModel model)
+    {
+        // Check if user already exists
+        var existingUser = await _userManager.FindByNameAsync(model.Email);
+        if (existingUser != null)
+            return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, "User with this email already exists"));
+
+        // Create new user
+        var user = new ApplicationUser
+        {
+            UserName = model.Email,
+            Email = model.Email,
+            Firstname = model.Firstname,
+            Surname = model.Surname,
+            PhoneNumber = model.PhoneNumber,
+            EmailConfirmed = true // Auto-confirm email for admin-created users
+        };
+
+        var result = await _userManager.CreateAsync(user, model.Password ?? "Password+1");
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors.Select(e => e.Description).ToList();
+            return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, 
+                "Failed to create user: " + string.Join(", ", errors)));
         }
 
-        // POST api/users
-        [HttpPost("", Name = nameof(CreateUser))]
-        public async Task<IActionResult> CreateUser([FromBody] UserViewModel vm)
+        // Assign role
+        if (!string.IsNullOrEmpty(model.Role))
         {
-            var user = await _userManager.FindByNameAsync(vm.Email);
-
-            var hasAccount = user != null;
-
-            if (user == null)
+            result = await _userManager.AddToRoleAsync(user, model.Role);
+            if (!result.Succeeded)
             {
-                user = new ApplicationUser
-                {
-                    UserName = vm.Email,
-                    Firstname = vm.Firstname,
-                    Surname = vm.Surname,
-                    Email = vm.Email,
-                    PhoneNumber = vm.PhoneNumber.GetMsisdn("0"),
-                };
-
-                var result = await _userManager.CreateAsync(user, vm.Password);
-
-                if (!result.Succeeded) throw new CustomException($"Failed to create user {user.UserName}");
+                await _userManager.DeleteAsync(user); // Rollback user creation
+                var errors = result.Errors.Select(e => e.Description).ToList();
+                return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, 
+                    "Failed to assign role: " + string.Join(", ", errors)));
             }
-
-            var listProfile = await _context.UserProfiles
-                .FirstOrDefaultAsync(p =>
-                    p.UserId == user.Id && p.FarmId == vm.FarmId);
-
-            if (listProfile != null)
-            {
-                listProfile.IsActive = true;
-                listProfile.Deleted = false;
-
-                _context.Update(listProfile);
-                await _context.SaveChangesAsync();
-
-                return Ok(new ApiOkResponse(await _context.Users.ProjectTo<UserViewModel>(_configuration)
-                    .FirstOrDefaultAsync(u => u.Id == user.Id)));
-            }
-
-            var role = await _userManager.AddToRoleAsync(user, vm.Role);
-
-            if (!role.Succeeded)
-                throw new CustomException($"Failed to add {user.UserName} to role {vm.Role}");
-
-            var profile =
-                await _context.UserProfiles.FirstOrDefaultAsync(p =>
-                    p.UserId == user.Id && p.FarmId == vm.FarmId);
-
-            if (profile != null)
-            {
-                // user is in company but in different list
-                // move them to this list
-                profile.IsActive = true;
-                profile.Deleted = false;
-
-                _context.Update(profile);
-
-                await _context.SaveChangesAsync();
-            }
-            else
-            {
-                // user is not in this company
-                // create a new profile for them
-                profile = new UserProfile
-                {
-                    FarmId = vm.FarmId,
-                    UserId = user.Id,
-                    Role = vm.Role
-                };
-
-                await _context.AddAsync(profile);
-                await _context.SaveChangesAsync();
-            }
-
-            var response = await _context.Users.ProjectTo<UserViewModel>(_configuration)
-                .FirstOrDefaultAsync(u => u.Id == user.Id);
-
-            return Ok(new ApiOkResponse(response));
         }
-        
-        // POST api/users
-        [HttpPost("", Name = nameof(InsertCompanyUser))]
-        public async Task<IActionResult> InsertCompanyUser([FromBody] UserViewModel vm)
+
+        // Create user profile if farm ID is provided
+        if (!string.IsNullOrEmpty(model.FarmId))
         {
-            var user = await _userManager.FindByNameAsync(vm.UserName);
-
-            if (user == null)
+            var profile = new UserProfile
             {
-                user = new ApplicationUser
-                {
-                    UserName = vm.UserName,
-                    Firstname = vm.Firstname,
-                    Surname = vm.Surname,
-                    Email = vm.Email,
-                    PhoneNumber = vm.PhoneNumber.GetMsisdn("0"),
-                };
-
-                var result = await _userManager.CreateAsync(user, "Password+1");
-
-                if (!result.Succeeded) throw new CustomException($"Failed to create user {user.UserName}");
-            }
-
-            var profile = await _context.UserProfiles
-                .FirstOrDefaultAsync(p =>
-                    p.UserId == user.Id && p.FarmId == vm.FarmId);
-
-            if (profile != null)
-            {
-                profile.IsActive = true;
-                profile.Deleted = false;
-
-                _context.Update(profile);
-                await _context.SaveChangesAsync();
-
-                return Ok(new ApiOkResponse(await _context.Users.ProjectTo<UserViewModel>(_configuration)
-                    .FirstOrDefaultAsync(u => u.Id == user.Id), "User already exists!"));
-            }
-
-            // user is not in this company
-            // create a new profile for them
-            profile = new UserProfile
-            {
-                FarmId = vm.FarmId,
                 UserId = user.Id,
-                Role = vm.Role
+                FarmId = model.FarmId,
+                Role = model.Role ?? "User" // Default role if none provided
             };
 
-            await _context.AddAsync(profile);
+            await _context.UserProfiles.AddAsync(profile);
             await _context.SaveChangesAsync();
-
-            var response = await _context.Users.ProjectTo<UserViewModel>(_configuration)
-                .FirstOrDefaultAsync(u => u.Id == user.Id);
-
-            return Ok(new ApiOkResponse(response, "Successfully added new user!"));
         }
 
-        // PUT api/Users/5
-        [HttpPut("{id}", Name = nameof(UpdateUser))]
-        public async Task<IActionResult> UpdateUser(string id, [FromBody] UserViewModel vm)
+        var createdUser = await _context.Users
+            .ProjectTo<UserViewModel>(_configuration)
+            .FirstOrDefaultAsync(u => u.Id == user.Id);
+
+        return Ok(new ApiOkResponse(createdUser, "User created successfully"));
+    }
+
+    [HttpPut("{id}", Name = nameof(UpdateUser))]
+    [Authorize(Roles = "SystemAdministrator,Administrator")]
+    public async Task<IActionResult> UpdateUser(string id, [FromBody] UserViewModel model)
+    {
+        if (id != model.Id)
+            return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, "User ID mismatch"));
+
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+            return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, "User not found"));
+
+        // Update basic properties
+        user.Firstname = model.Firstname;
+        user.Surname = model.Surname;
+        user.Email = model.Email;
+        user.PhoneNumber = model.PhoneNumber;
+        user.UserName = model.Email; // Keep username and email in sync
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
         {
-            if (id != vm.Id) return BadRequest();
-
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null) return NotFound();
-
-            user.PhoneNumber = vm.PhoneNumber;
-            user.Email = vm.Email;
-            user.Firstname = vm.Firstname;
-            user.Surname = vm.Surname;
-            user.UserName = vm.Email;
-
-            await _userManager.UpdateAsync(user);
-
-            if (!string.IsNullOrEmpty(vm.Password))
-            {
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user).ConfigureAwait(false);
-
-                await _userManager.ResetPasswordAsync(user, token, vm.Password);
-            }
-
-            var roles = await _userManager.GetRolesAsync(user);
-
-            await _userManager.RemoveFromRolesAsync(user, roles);
-
-            await _userManager.AddToRoleAsync(user, vm.Role);
-
-            return Ok(new ApiOkResponse(user, "User updated successfully"));
+            var errors = result.Errors.Select(e => e.Description).ToList();
+            return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, 
+                "Failed to update user: " + string.Join(", ", errors)));
         }
-        
-        // PUT api/Users/5
-        [HttpPut("{id}", Name = nameof(UpdateCompanyUser))]
-        public async Task<IActionResult> UpdateCompanyUser(string id, [FromBody] UserViewModel vm)
+
+        // Update password if provided
+        if (!string.IsNullOrEmpty(model.Password))
         {
-            if (id != vm.Id) return BadRequest();
-
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null) return NotFound();
-
-            user.PhoneNumber = vm.PhoneNumber;
-            user.Email = vm.Email;
-            user.Firstname = vm.Firstname;
-            user.Surname = vm.Surname;
-            user.UserName = vm.UserName;
-
-            await _userManager.UpdateAsync(user);
-
-            if (vm.IsAdmin)
+            // First remove existing password
+            var removePasswordResult = await _userManager.RemovePasswordAsync(user);
+            if (removePasswordResult.Succeeded)
             {
-                var roles = await _userManager.GetRolesAsync(user);
-                await _userManager.RemoveFromRolesAsync(user, roles);
-                await _userManager.AddToRoleAsync(user, vm.Role);
+                // Then add new password
+                result = await _userManager.AddPasswordAsync(user, model.Password);
+                if (!result.Succeeded)
+                {
+                    var errors = result.Errors.Select(e => e.Description).ToList();
+                    return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, 
+                        "Failed to update password: " + string.Join(", ", errors)));
+                }
             }
-            else
+        }
+
+        // Update role if provided
+        if (!string.IsNullOrEmpty(model.Role))
+        {
+            // First remove all current roles
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            if (currentRoles.Any())
             {
-                var profile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.Id == vm.ProfileId)
-                    .ConfigureAwait(false);
-
-                profile.Role = vm.Role;
-
-                _context.Update(profile);
+                result = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                if (!result.Succeeded)
+                {
+                    var errors = result.Errors.Select(e => e.Description).ToList();
+                    return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, 
+                        "Failed to remove current roles: " + string.Join(", ", errors)));
+                }
             }
+
+            // Then add new role
+            result = await _userManager.AddToRoleAsync(user, model.Role);
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors.Select(e => e.Description).ToList();
+                return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, 
+                    "Failed to assign new role: " + string.Join(", ", errors)));
+            }
+
+            // Update role in profile if ProfileId is provided
+            if (!string.IsNullOrEmpty(model.ProfileId))
+            {
+                var profile = await _context.UserProfiles.FindAsync(model.ProfileId);
+                if (profile != null)
+                {
+                    profile.Role = model.Role;
+                    _context.UserProfiles.Update(profile);
+                    await _context.SaveChangesAsync();
+                }
+            }
+        }
+
+        var updatedUser = await _context.Users
+            .ProjectTo<UserViewModel>(_configuration)
+            .FirstOrDefaultAsync(u => u.Id == user.Id);
+
+        return Ok(new ApiOkResponse(updatedUser, "User updated successfully"));
+    }
+
+    [HttpPut("{id}", Name = nameof(UpdateUserRole))]
+    [Authorize(Roles = "SystemAdministrator,Administrator")]
+    public async Task<IActionResult> UpdateUserRole(string id, [FromBody] UpdateUserRoleViewModel model)
+    {
+        if (id != model.Id)
+            return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, "User ID mismatch"));
+
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+            return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, "User not found"));
+
+        // Remove from old role if specified
+        if (!string.IsNullOrEmpty(model.FromRole))
+        {
+            var result = await _userManager.RemoveFromRoleAsync(user, model.FromRole);
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors.Select(e => e.Description).ToList();
+                return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, 
+                    "Failed to remove from current role: " + string.Join(", ", errors)));
+            }
+        }
+
+        // Add to new role
+        var addResult = await _userManager.AddToRoleAsync(user, model.ToRole);
+        if (!addResult.Succeeded)
+        {
+            var errors = addResult.Errors.Select(e => e.Description).ToList();
+            return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, 
+                "Failed to assign new role: " + string.Join(", ", errors)));
+        }
+
+        // Update role in profile if farm ID is provided
+        if (!string.IsNullOrEmpty(model.FarmId))
+        {
+            var profile = await _context.UserProfiles
+                .FirstOrDefaultAsync(p => p.UserId == id && p.FarmId == model.FarmId);
             
-            await _context.SaveChangesAsync().ConfigureAwait(false);
-
-            return Ok(new ApiOkResponse(user, "Successfully updated user details!"));
-        }
-
-        // PUT api/Users/5
-        [HttpPut("{id}", Name = nameof(ChangeUsername))]
-        public async Task<IActionResult> ChangeUsername(string id, [FromBody] UpdateUsernameViewModel vm)
-        {
-            if (id != vm.Id) return BadRequest();
-
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null) return NotFound();
-
-            var exists = await _userManager.FindByNameAsync(vm.Username);
-
-            if (exists != null) throw new CustomException("Username already taken.");
-
-            user.UserName = vm.Username;
-
-            await _userManager.UpdateAsync(user);
-
-            return Ok(user);
-        }
-
-        // PUT api/Users/5
-        [HttpPut("{id}", Name = nameof(ChangeRole))]
-        public async Task<IActionResult> ChangeRole(string id, [FromBody] UpdateUserRoleViewModel vm)
-        {
-            if (id != vm.Id) return BadRequest();
-
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null) return NotFound();
-
-            await _userManager.RemoveFromRoleAsync(user, vm.FromRole);
-            await _userManager.AddToRoleAsync(user, vm.ToRole);
-
-            var userProfile =
-                await _context.UserProfiles.FirstOrDefaultAsync(p =>
-                    p.UserId == user.Id && p.FarmId == vm.FarmId);
-
-            userProfile.Role = vm.ToRole;
-
-            _context.Entry(userProfile).State = EntityState.Modified;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(user);
-        }
-
-        [AllowAnonymous]
-        [HttpPut("{id}", Name = nameof(AddToRole))]
-        public async Task<IActionResult> AddToRole(string id, [FromBody] UpdateUserRoleViewModel vm)
-        {
-            if (id != vm.Id) return BadRequest();
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == id.Trim().ToLower())
-                .ConfigureAwait(false);
-
-            if (user == null) return NotFound();
-
-            await _userManager.AddToRoleAsync(user, vm.ToRole);
-
-            return Ok();
-        }
-
-        // GET api/users/5
-        [AllowAnonymous]
-        [HttpGet("{username}", Name = nameof(ForgotPassword))]
-        public async Task<IActionResult> ForgotPassword(string username)
-        {
-            var user = await _userManager.FindByNameAsync(username);
-
-            if (user == null) throw new NotFoundException($"User {username} was not found");
-
-            user.TokenValidity = DateTime.Now.AddMinutes(5);
-            user.RegistrationToken = Codes.GetRegistrationToken();
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var result = await _userManager.UpdateAsync(user);
-
-            if (!result.Succeeded) throw new CustomException($"Failed to send reset link. Please try again");
-
-            if (username.IsPhone())
-                await _smsService.Send(user.PhoneNumber.GetMsisdn("263"),
-                    $"Your password reset code is {user.RegistrationToken}");
-
-            return Ok(new ApiOkResponse(new ResetPasswordViewModel
+            if (profile != null)
             {
-                Code = user.RegistrationToken,
-                Username = user.UserName,
-                TokenValidity = user.TokenValidity,
-                Token = token
-            }, "Succesfully sent password reset code"));
-        }
-
-        // POST api/users
-        [AllowAnonymous]
-        [HttpPost("", Name = nameof(ResetPassword))]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel vm)
-        {
-            var user = await _userManager.FindByNameAsync(vm.Username);
-
-            if (user == null) throw new NotFoundException($"User {vm.Username} was not found");
-
-            var result = await _userManager.ResetPasswordAsync(user, vm.Token, vm.NewPassword);
-
-            if (!result.Succeeded) throw new Exception($"Unable to reset password. Please retry.");
-
-            return Ok(new ApiOkResponse("Password was reset successfully."));
-        }
-
-        // POST api/users
-        [AllowAnonymous]
-        [HttpPost("", Name = nameof(CreatePassword))]
-        public async Task<IActionResult> CreatePassword([FromBody] CreatePasswordViewModel vm)
-        {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.RegistrationToken == vm.RegistrationToken)
-                .ConfigureAwait(false);
-
-            if (user == null) throw new NotFoundException($"User was not found");
-
-            var result = await _userManager.AddPasswordAsync(user, vm.Password).ConfigureAwait(false);
-
-            if (!result.Succeeded) throw new Exception($"Unable to reset password. Please retry.");
-
-            return Ok(new ApiOkResponse(vm, "Password was reset successfully."));
-        }
-
-        // DELETE api/users/5
-        [HttpDelete("{id}", Name = nameof(DeleteUser))]
-        public async Task<IActionResult> DeleteUser(string id)
-        {
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null) return NotFound();
-
-            user.IsDeleted = true;
-            user.IsActive = false;
-
-            _context.Entry(user).State = EntityState.Modified;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new ApiOkResponse(user, $"{user.Fullname} was deleted successfully"));
-        }
-
-        // DELETE api/users/5
-        [HttpDelete("{id}", Name = nameof(Deactivate))]
-        public async Task<IActionResult> Deactivate(string id)
-        {
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null) return NotFound();
-
-            user.IsActive = false;
-            user.IsDeleted = true;
-
-            _context.Entry(user).State = EntityState.Modified;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(user);
-        }
-
-        // POST api/users
-        [HttpPost("", Name = nameof(DeleteFarmUser))]
-        public async Task<IActionResult> DeleteFarmUser([FromBody] UserViewModel vm)
-        {
-            var user = await _userManager.FindByNameAsync(vm.UserName);
-
-            if (user == null)
-            {
-                return Ok(new Base.Models.ApiResponse((int) HttpStatusCode.NotFound, $"User {user.UserName} was not found"));
+                profile.Role = model.ToRole;
+                _context.UserProfiles.Update(profile);
+                await _context.SaveChangesAsync();
             }
+        }
 
-            var profile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.Id == vm.ProfileId);
+        return Ok(new ApiOkResponse(null, "User role updated successfully"));
+    }
 
-            if (profile == null) return Ok(new ApiOkResponse(null, "Successfully added new user!"));
-            
+    [HttpDelete("{id}", Name = nameof(DeleteUser))]
+    [Authorize(Roles = "SystemAdministrator,Administrator")]
+    public async Task<IActionResult> DeleteUser(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+            return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, "User not found"));
+
+        // Soft delete - mark as inactive rather than hard delete
+        user.IsActive = false;
+        user.IsDeleted = true;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors.Select(e => e.Description).ToList();
+            return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, 
+                "Failed to delete user: " + string.Join(", ", errors)));
+        }
+
+        // Also deactivate all profiles
+        var profiles = await _context.UserProfiles.Where(p => p.UserId == id).ToListAsync();
+        foreach (var profile in profiles)
+        {
             profile.IsActive = false;
             profile.Deleted = true;
-
-            _context.Update(profile);
-            await _context.SaveChangesAsync();
-
-            return Ok(new ApiOkResponse(await _context.Users.ProjectTo<UserViewModel>(_configuration)
-                    .FirstOrDefaultAsync(u => u.Id == user.Id), 
-                $"User {vm.UserName} deactivated successfully!"));
-
         }
+        await _context.SaveChangesAsync();
+
+        return Ok(new ApiOkResponse(null, "User deleted successfully"));
+    }
+
+    [HttpPost(Name = nameof(ResetPassword))]
+    [Authorize(Roles = "SystemAdministrator,Administrator")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel model)
+    {
+        var user = await _userManager.FindByNameAsync(model.Username);
+        if (user == null)
+            return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, "User not found"));
+
+        // Generate password reset token
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        
+        // Reset password
+        var result = await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
+        
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors.Select(e => e.Description).ToList();
+            return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, 
+                "Failed to reset password: " + string.Join(", ", errors)));
+        }
+
+        return Ok(new ApiOkResponse(null, "Password reset successfully"));
+    }
+
+    [HttpGet(Name = nameof(GetUserRoles))]
+    [Authorize(Roles = "SystemAdministrator,Administrator")]
+    public async Task<IActionResult> GetUserRoles(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, "User not found"));
+
+        var roles = await _userManager.GetRolesAsync(user);
+        return Ok(roles);
+    }
+
+    [HttpGet(Name = nameof(GetUserClaims))]
+    [Authorize(Roles = "SystemAdministrator,Administrator")]
+    public async Task<IActionResult> GetUserClaims(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, "User not found"));
+
+        var claims = await _userManager.GetClaimsAsync(user);
+        var claimViewModels = claims.Select(c => new ClaimViewModel
+        {
+            ClaimType = c.Type,
+            ClaimValue = c.Value
+        }).ToList();
+
+        return Ok(claimViewModels);
     }
 }

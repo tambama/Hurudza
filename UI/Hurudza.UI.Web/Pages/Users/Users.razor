@@ -1,5 +1,5 @@
 @page "/users"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "SystemAdministrator,Administrator")]
 
 @using Hurudza.Data.UI.Models.ViewModels.UserManagement;
 @using Hurudza.UI.Shared.Api.Interfaces
@@ -11,8 +11,13 @@
 <div class="row">
     <div class="col-12">
         <div class="card mb-4">
-            <div class="card-header pb-0">
+            <div class="card-header pb-0 d-flex justify-content-between align-items-center">
                 <h6>System Users</h6>
+                <div>
+                    <button class="btn btn-sm btn-success" @onclick="@(() => ShowAddUserModal())">
+                        <i class="fa fa-plus me-2"></i>Add User
+                    </button>
+                </div>
             </div>
             <div class="card-body px-2 pt-0 pb-2">
                 <SfGrid
@@ -26,12 +31,12 @@
                     AllowResizing="true"
                     AllowFiltering="true"
                     AllowSelection="true"
-                    Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "ExcelExport", "Print", "Search" })"
+                    Toolbar="@(new List<string>() { "Edit", "Delete", "ExcelExport", "Print", "Search" })"
                     ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Edit", "Delete", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
                     <GridPageSettings PageSize="12"></GridPageSettings>
                     <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
                     <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="UserViewModel"></GridEvents>
-                    <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog">
+                    <GridEditSettings AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog">
                         <HeaderTemplate>
                             @{
                                 var text = GetHeader((context as UserViewModel));
@@ -77,6 +82,7 @@
                                             <label>Password</label>
                                             <SfTextBox ID="password" TValue="string" @bind-Value="@(User.Password)" Type="InputType.Password" ValidateOnInput="true"></SfTextBox>
                                             <ValidationMessage For="() => User.Password"/>
+                                            <small class="text-muted">Leave blank to keep current password</small>
                                         </div>
                                         <div class="form-group">
                                             <SfSpinner @ref="SaveSpinner"></SfSpinner>
@@ -90,35 +96,282 @@
                         <GridColumn Field=@nameof(UserViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
                         <GridColumn Field=@nameof(UserViewModel.Surname) HeaderText="Surname" TextAlign="TextAlign.Center" Width="120"></GridColumn>
                         <GridColumn Field=@nameof(UserViewModel.Firstname) HeaderText="Firstname" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                        <GridColumn Field=@nameof(UserViewModel.Email) HeaderText="Email" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(UserViewModel.Email) HeaderText="Email" TextAlign="TextAlign.Center" Width="150"></GridColumn>
                         <GridColumn Field=@nameof(UserViewModel.PhoneNumber) HeaderText="Phone Number" TextAlign="TextAlign.Center" Width="120"></GridColumn>
                         <GridColumn Field=@nameof(UserViewModel.Role) HeaderText="Role" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn HeaderText="Actions" Width="120">
+                            <GridCommandColumns>
+                                <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-edit", CssClass = "e-flat" })"></GridCommandColumn>
+                                <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-delete", CssClass = "e-flat" })"></GridCommandColumn>
+                            </GridCommandColumns>
+                        </GridColumn>
                     </GridColumns>
                 </SfGrid>
-                <SfDialog @ref="Dialog" Width="250px" Visible="false" ShowCloseIcon="true" IsModal="true">
+                <SfDialog @ref="Dialog" Width="400px" Visible="false" ShowCloseIcon="true" IsModal="true">
                     <DialogEvents Closed="Closed"></DialogEvents>
                     <DialogTemplates>
-                        <Header> Delete Record</Header>
+                        <Header> Delete User</Header>
                         <Content>
-                            You are about to Delete a Record @SelectedUser.Fullname?
+                            <p>Are you sure you want to delete the user: @SelectedUser?.Fullname?</p>
                             <div class="form-group">
                                 <SfSpinner @ref="DeleteSpinner"></SfSpinner>
                             </div>
                         </Content>
                     </DialogTemplates>
                     <DialogButtons>
-                        <DialogButton OnClick="@OkClick" Content="OK" IsPrimary="true"></DialogButton>
+                        <DialogButton OnClick="@OkClick" Content="Delete" IsPrimary="true"></DialogButton>
                         <DialogButton OnClick="@CancelClick" Content="Cancel"></DialogButton>
                     </DialogButtons>
+                </SfDialog>
+
+                @* Add User Modal *@
+                <SfDialog @ref="AddUserDialog" Width="600px" Height="550px" Visible="false" ShowCloseIcon="true" IsModal="true">
+                    <DialogEvents Closed="async () => await AddUserDialog.HideAsync()"></DialogEvents>
+                    <DialogTemplates>
+                        <Header>Add New User</Header>
+                        <Content>
+                            <EditForm Model="@NewUser" OnValidSubmit="@HandleAddUserSubmit">
+                                <DataAnnotationsValidator />
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Firstname <span class="text-danger">*</span></label>
+                                        <SfTextBox ID="newFirstname" TValue="string" @bind-Value="@(NewUser.Firstname)" ValidateOnInput="true"></SfTextBox>
+                                        <ValidationMessage For="() => NewUser.Firstname"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Surname <span class="text-danger">*</span></label>
+                                        <SfTextBox ID="newSurname" TValue="string" @bind-Value="@(NewUser.Surname)" ValidateOnInput="true"></SfTextBox>
+                                        <ValidationMessage For="() => NewUser.Surname"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Email <span class="text-danger">*</span></label>
+                                        <SfTextBox ID="newEmail" TValue="string" @bind-Value="@(NewUser.Email)" Placeholder="e.g. your@email.com" ValidateOnInput="true"></SfTextBox>
+                                        <ValidationMessage For="() => NewUser.Email"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Phone Number <span class="text-danger">*</span></label>
+                                        <SfTextBox ID="newPhone" TValue="string" @bind-Value="@(NewUser.PhoneNumber)" Placeholder="e.g. 0771234567" ValidateOnInput="true"></SfTextBox>
+                                        <ValidationMessage For="() => NewUser.PhoneNumber"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Role <span class="text-danger">*</span></label>
+                                        <SfDropDownList ID="newRole" TValue="string" TItem="RoleViewModel" @bind-Value="@(NewUser.Role)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a role" DataSource="@Roles">
+                                            <DropDownListFieldSettings Value="Name" Text="Description"></DropDownListFieldSettings>
+                                        </SfDropDownList>
+                                        <ValidationMessage For="() => NewUser.Role"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Password <span class="text-danger">*</span></label>
+                                        <SfTextBox ID="newPassword" TValue="string" @bind-Value="@(NewUser.Password)" Type="InputType.Password" ValidateOnInput="true"></SfTextBox>
+                                        <ValidationMessage For="() => NewUser.Password"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Confirm Password <span class="text-danger">*</span></label>
+                                        <SfTextBox ID="confirmPassword" TValue="string" @bind-Value="@ConfirmPassword" Type="InputType.Password" ValidateOnInput="true"></SfTextBox>
+                                        @if (!string.IsNullOrEmpty(PasswordError))
+                                        {
+                                            <div class="text-danger">@PasswordError</div>
+                                        }
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(AddUserError))
+                                    {
+                                        <div class="alert alert-danger">@AddUserError</div>
+                                    }
+
+                                    <div class="form-group d-flex justify-content-end mt-3">
+                                        <button type="button" class="btn btn-secondary me-2" @onclick="async () => await AddUserDialog.HideAsync()">Cancel</button>
+                                        <button type="submit" class="btn btn-success">
+                                            @if (IsAddingUser)
+                                            {
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                <span>Adding...</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Add User</span>
+                                            }
+                                        </button>
+                                    </div>
+                                </div>
+                            </EditForm>
+                        </Content>
+                    </DialogTemplates>
                 </SfDialog>
             </div>
         </div>
     </div>
 </div>
 
+@* User Profile Details Dialog *@
+<SfDialog @ref="UserDetailsDialog" Width="800px" Height="600px" Visible="false" ShowCloseIcon="true" IsModal="true">
+    <DialogEvents Closed="async () => await UserDetailsDialog.HideAsync()"></DialogEvents>
+    <DialogTemplates>
+        <Header>User Details: @SelectedUser?.Fullname</Header>
+        <Content>
+            @if (SelectedUser != null)
+            {
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Basic Information</h5>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <p class="text-muted mb-0">Full Name</p>
+                                        <p class="font-weight-bold">@SelectedUser.Fullname</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="text-muted mb-0">Email</p>
+                                        <p class="font-weight-bold">@SelectedUser.Email</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="text-muted mb-0">Phone</p>
+                                        <p class="font-weight-bold">@SelectedUser.PhoneNumber</p>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <p class="text-muted mb-0">Role</p>
+                                        <p class="font-weight-bold">@SelectedUser.Role</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="text-muted mb-0">Username</p>
+                                        <p class="font-weight-bold">@SelectedUser.UserName</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (SelectedUser.Profiles != null && SelectedUser.Profiles.Any())
+                {
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Assigned Farms</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                            <tr>
+                                                <th>Farm</th>
+                                                <th>Role</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @foreach (var profile in SelectedUser.Profiles)
+                                            {
+                                                <tr>
+                                                    <td>@profile.Farm</td>
+                                                    <td>@profile.Role</td>
+                                                    <td>
+                                                        @if (profile.LoggedIn)
+                                                        {
+                                                            <span class="badge bg-success">Active</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-secondary">Inactive</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-info">Edit</button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Actions</h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <button class="btn btn-warning" @onclick="() => ShowResetPasswordModal(SelectedUser)">
+                                            <i class="fa fa-lock me-2"></i>Reset Password
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-primary" @onclick="() => Grid.StartEdit()">
+                                            <i class="fa fa-edit me-2"></i>Edit User
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-danger" @onclick="() => ShowDeleteDialog(SelectedUser)">
+                                            <i class="fa fa-trash me-2"></i>Delete User
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+@* Reset Password Dialog *@
+<SfDialog @ref="ResetPasswordDialog" Width="500px" Height="400px" Visible="false" ShowCloseIcon="true" IsModal="true">
+    <DialogEvents Closed="async () => await ResetPasswordDialog.HideAsync()"></DialogEvents>
+    <DialogTemplates>
+        <Header>Reset Password for @ResetPasswordModel?.Username</Header>
+        <Content>
+            <EditForm Model="@ResetPasswordModel" OnValidSubmit="@HandleResetPasswordSubmit">
+                <DataAnnotationsValidator />
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>New Password <span class="text-danger">*</span></label>
+                        <SfTextBox ID="newPassword" TValue="string" @bind-Value="@(ResetPasswordModel.NewPassword)" Type="InputType.Password" ValidateOnInput="true"></SfTextBox>
+                        <ValidationMessage For="() => ResetPasswordModel.NewPassword"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password <span class="text-danger">*</span></label>
+                        <SfTextBox ID="confirmNewPassword" TValue="string" @bind-Value="@ResetConfirmPassword" Type="InputType.Password" ValidateOnInput="true"></SfTextBox>
+                        @if (!string.IsNullOrEmpty(ResetPasswordError))
+                        {
+                            <div class="text-danger">@ResetPasswordError</div>
+                        }
+                    </div>
+
+                    <div class="form-group d-flex justify-content-end mt-3">
+                        <button type="button" class="btn btn-secondary me-2" @onclick="async () => await ResetPasswordDialog.HideAsync()">Cancel</button>
+                        <button type="submit" class="btn btn-success">
+                            @if (IsResettingPassword)
+                            {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span>Resetting...</span>
+                            }
+                            else
+                            {
+                                <span>Reset Password</span>
+                            }
+                        </button>
+                    </div>
+                </div>
+            </EditForm>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
 @code{
     SfGrid<UserViewModel> Grid;
     SfDialog Dialog;
+    SfDialog AddUserDialog;
+    SfDialog UserDetailsDialog;
+    SfDialog ResetPasswordDialog;
     SfSpinner SaveSpinner;
     SfSpinner DeleteSpinner;
     Toast Alert;
@@ -130,6 +383,19 @@
     bool flag = true;
     ClaimsPrincipal user;
     bool ShowSaveSpinner { get; set; } = false;
+
+    // Add User Form
+    UserViewModel NewUser = new();
+    string ConfirmPassword = string.Empty;
+    string AddUserError = string.Empty;
+    string PasswordError = string.Empty;
+    bool IsAddingUser = false;
+
+    // Reset Password Form
+    ResetPasswordViewModel ResetPasswordModel = new();
+    string ResetConfirmPassword = string.Empty;
+    string ResetPasswordError = string.Empty;
+    bool IsResettingPassword = false;
 
     private string GetHeader(UserViewModel Value)
     {
@@ -156,12 +422,12 @@
                 args.FilterChoiceCount = 100;
                 break;
             case Action.Add:
-                Data = true;
+                args.Cancel = true; // We'll handle adding via our custom modal
+                ShowAddUserModal();
                 break;
             case Action.Delete when flag:
                 args.Cancel = true;
-                await Dialog.ShowAsync();
-                flag = false;
+                ShowDeleteDialog(args.Data);
                 break;
             case Action.Save:
             {
@@ -187,7 +453,6 @@
                     }
                 }
 
-
                 await SaveSpinner.HideAsync();
                 break;
             }
@@ -197,6 +462,43 @@
     private void RowSelectHandler(RowSelectEventArgs<UserViewModel> args)
     {
         SelectedUser = args.Data;
+        ShowUserDetails(SelectedUser);
+    }
+
+    private async Task ShowUserDetails(UserViewModel user)
+    {
+        SelectedUser = user;
+        await UserDetailsDialog.ShowAsync();
+    }
+
+    private async Task ShowAddUserModal()
+    {
+        // Reset form and errors
+        NewUser = new UserViewModel();
+        ConfirmPassword = string.Empty;
+        PasswordError = string.Empty;
+        AddUserError = string.Empty;
+
+        await AddUserDialog.ShowAsync();
+    }
+
+    private async Task ShowResetPasswordModal(UserViewModel user)
+    {
+        ResetPasswordModel = new ResetPasswordViewModel
+        {
+            Username = user.Email
+        };
+        ResetConfirmPassword = string.Empty;
+        ResetPasswordError = string.Empty;
+
+        await ResetPasswordDialog.ShowAsync();
+    }
+
+    private async Task ShowDeleteDialog(UserViewModel user)
+    {
+        SelectedUser = user;
+        flag = false;
+        await Dialog.ShowAsync();
     }
 
     private async Task OkClick()
@@ -206,6 +508,9 @@
         {
             await Grid.DeleteRecordAsync();
             await Dialog.HideAsync();
+
+            // Refresh user list
+            await LoadData();
         }
         await DeleteSpinner.HideAsync();
     }
@@ -215,12 +520,67 @@
         await Dialog.HideAsync();
     }
 
+    private async Task HandleAddUserSubmit()
+    {
+        // Validate passwords match
+        if (NewUser.Password != ConfirmPassword)
+        {
+            PasswordError = "Passwords do not match";
+            return;
+        }
+
+        PasswordError = string.Empty;
+        AddUserError = string.Empty;
+        IsAddingUser = true;
+
+        var result = await SaveUser(NewUser);
+
+        IsAddingUser = false;
+
+        if (result)
+        {
+            await AddUserDialog.HideAsync();
+            await LoadData(); // Refresh the user list
+        }
+    }
+
+    private async Task HandleResetPasswordSubmit()
+    {
+        // Validate passwords match
+        if (ResetPasswordModel.NewPassword != ResetConfirmPassword)
+        {
+            ResetPasswordError = "Passwords do not match";
+            return;
+        }
+
+        ResetPasswordError = string.Empty;
+        IsResettingPassword = true;
+
+        var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<object>, ResetPasswordViewModel>(
+            await ApiCall.GetHttpClient(), "users/resetpassword", ResetPasswordModel);
+
+        IsResettingPassword = false;
+
+        if (response != null && response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show("Password reset successfully", showTitle: true, toastType: ToastType.Success);
+            await ResetPasswordDialog.HideAsync();
+        }
+        else
+        {
+            ResetPasswordError = response?.Title ?? "Failed to reset password";
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         user = (await (AuthStateProvider as CustomAuthStateProvider)?.GetAuthenticationStateAsync()).User;
+        await LoadData();
+    }
 
+    private async Task LoadData()
+    {
         SystemUsers = (await ApiCall.Get<IEnumerable<UserViewModel>>(await ApiCall.GetHttpClient(), "users/getusers/")).ToList();
-
         Roles = (await ApiCall.Get<IEnumerable<RoleViewModel>>(await ApiCall.GetHttpClient(), "roles/getroles")).ToList();
     }
 
@@ -231,17 +591,18 @@
         if (response == null)
         {
             Alert.Show("Failed to save user, please try again!", showTitle: true, toastType: ToastType.Danger);
-        }
-        else if (response.Status == (int)HttpStatusCode.OK)
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
-            return true;
-        }
-        else
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+            AddUserError = "Failed to save user, please try again!";
+            return false;
         }
 
+        if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title ?? "User created successfully", showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+
+        Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+        AddUserError = response.Title;
         return false;
     }
 
@@ -252,17 +613,17 @@
         if (response == null)
         {
             Alert.Show("Failed to update user, please try again!", showTitle: true, toastType: ToastType.Danger);
-        }
-        else if (response.Status == (int)HttpStatusCode.OK)
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
-            return true;
-        }
-        else
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+            return false;
         }
 
+        if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title ?? "User updated successfully", showTitle: true, toastType: ToastType.Success);
+            await LoadData(); // Refresh user list
+            return true;
+        }
+
+        Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
         return false;
     }
 
@@ -273,17 +634,16 @@
         if (response == null)
         {
             Alert.Show("Failed to delete user, please try again!", showTitle: true, toastType: ToastType.Danger);
-        }
-        else if (response.Status == (int)HttpStatusCode.OK)
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
-            return true;
-        }
-        else
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+            return false;
         }
 
+        if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title ?? "User deleted successfully", showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+
+        Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
         return false;
     }
 }
