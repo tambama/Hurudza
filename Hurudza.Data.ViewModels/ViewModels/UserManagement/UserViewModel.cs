@@ -33,4 +33,27 @@ public class UserViewModel : BaseViewModel
     public string? Farm { get; set; }
     public string? FarmId { get; set; }
     public List<UserProfileViewModel>? Profiles { get; set; } = new List<UserProfileViewModel>();
+    
+    // New properties for enhanced authorization
+    public List<ClaimViewModel>? Permissions { get; set; } = new List<ClaimViewModel>();
+    
+    // Helper methods to check permissions
+    public bool HasPermission(string permissionName)
+    {
+        if (Permissions == null) return false;
+        return Permissions.Any(p => p.ClaimValue == permissionName);
+    }
+    
+    public bool HasAnyPermission(params string[] permissionNames)
+    {
+        if (Permissions == null) return false;
+        return Permissions.Any(p => permissionNames.Contains(p.ClaimValue));
+    }
+    
+    public bool HasAllPermissions(params string[] permissionNames)
+    {
+        if (Permissions == null) return false;
+        var userPermissions = Permissions.Select(p => p.ClaimValue).ToList();
+        return permissionNames.All(p => userPermissions.Contains(p));
+    }
 }

@@ -22,6 +22,7 @@
 		<PackageReference Include="Syncfusion.Blazor.Notifications" Version="25.1.35" />
 		<PackageReference Include="Syncfusion.Blazor.Popups" Version="25.1.35" />
 		<PackageReference Include="Syncfusion.Blazor.Spinner" Version="25.1.35" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.6.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<AdditionalFiles Include="Pages\Authentication\Authentication.razor" />

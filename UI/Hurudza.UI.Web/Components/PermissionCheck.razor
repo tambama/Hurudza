@@ -1,0 +1,45 @@
+@namespace Hurudza.UI.Web.Components
+@using Hurudza.UI.Web.Cookie.Providers
+@inject AuthenticationStateProvider AuthProvider
+
+@if (_hasPermission)
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string Permission { get; set; }
+
+    [Parameter]
+    public string[] AnyPermission { get; set; }
+
+    [Parameter]
+    public string[] AllPermissions { get; set; }
+
+    private bool _hasPermission = false;
+
+    protected override void OnInitialized()
+    {
+        var authProvider = AuthProvider as CustomAuthStateProvider;
+        
+        if (authProvider != null)
+        {
+            if (!string.IsNullOrEmpty(Permission))
+            {
+                _hasPermission = authProvider.UserHasPermission(Permission);
+            }
+            else if (AnyPermission != null && AnyPermission.Length > 0)
+            {
+                _hasPermission = authProvider.UserHasAnyPermission(AnyPermission);
+            }
+            else if (AllPermissions != null && AllPermissions.Length > 0)
+            {
+                _hasPermission = authProvider.UserHasAllPermissions(AllPermissions);
+            }
+        }
+    }
+}

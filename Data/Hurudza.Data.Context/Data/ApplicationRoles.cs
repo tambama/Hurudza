@@ -17,12 +17,12 @@ public static class ApplicationRoles
                 RoleClass = RoleClass.System,
                 RoleClaims = new List<ApplicationRoleClaim>
                 {
-                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = ApiClaims.FarmView},
+                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FarmView},
                     
-                    new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = ApiClaims.UserDelete},
-                    new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = ApiClaims.UserManage},
+                    new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = Claims.UserDelete},
+                    new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = Claims.UserManage},
                     
-                    new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = ApiClaims.FieldView},
+                    new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = Claims.FieldView},
                 }
             },
             new()
@@ -32,14 +32,14 @@ public static class ApplicationRoles
                 RoleClass = RoleClass.System,
                 RoleClaims = new List<ApplicationRoleClaim>
                 {
-                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = ApiClaims.FarmDelete},
-                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = ApiClaims.FarmManage},
+                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FarmDelete},
+                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FarmManage},
 
-                    new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = ApiClaims.UserDelete},
-                    new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = ApiClaims.UserManage},
+                    new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = Claims.UserDelete},
+                    new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = Claims.UserManage},
 
-                    new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = ApiClaims.FieldDelete},
-                    new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = ApiClaims.FieldManage},
+                    new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = Claims.FieldDelete},
+                    new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = Claims.FieldManage},
                 }
             },
             new()
@@ -49,12 +49,12 @@ public static class ApplicationRoles
                 RoleClass = RoleClass.General,
                 RoleClaims = new List<ApplicationRoleClaim>
                 {
-                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = ApiClaims.FarmManage },
+                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FarmManage },
                     
-                    new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = ApiClaims.UserView},
+                    new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = Claims.UserView},
 
-                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = ApiClaims.FieldDelete}, 
-                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = ApiClaims.FieldManage}, 
+                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FieldDelete}, 
+                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FieldManage}, 
                 }
             },
             new()
@@ -64,13 +64,13 @@ public static class ApplicationRoles
                 RoleClass = RoleClass.Farm,
                 RoleClaims = new List<ApplicationRoleClaim>
                 {
-                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = ApiClaims.FarmManage },
+                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FarmManage },
                     
-                    new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = ApiClaims.UserDelete},
-                    new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = ApiClaims.UserManage},
+                    new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = Claims.UserDelete},
+                    new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = Claims.UserManage},
 
-                    new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = ApiClaims.FieldDelete}, 
-                    new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = ApiClaims.FieldManage}, 
+                    new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = Claims.FieldDelete}, 
+                    new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = Claims.FieldManage}, 
                 }
             },
         };

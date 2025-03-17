@@ -71,38 +71,19 @@ namespace Hurudza.Apis.Core.Controllers
                 .ProjectTo<UserProfileViewModel>(_configurationProvider)
                 .ToListAsync();
 
+            string role = string.Empty;
+
             if (profiles.Count > 0)
                 profiles[0].LoggedIn = true;
             else
             {
                 var userRole = (await _userManager.GetRolesAsync(user)).First();
                 profiles.Add(new UserProfileViewModel { Farm = "System", Fullname = "Administrator", Role = userRole, LoggedIn = true });
+                role = userRole;
             }
 
-            var authClaims = new List<Claim>
-            {
-                new(ClaimTypes.PrimarySid, user.Id),
-                new(ClaimTypes.Name, user.UserName),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            };
-
-            var loggedIn = profiles.First(p => p.LoggedIn);
-            authClaims.Add(new Claim(ClaimTypes.Role, loggedIn.Role));
-
-            var role = await _roleManager.FindByNameAsync(loggedIn.Role);
-            var roleClaims = await _roleManager.GetClaimsAsync(role);
-
-            authClaims.AddRange(roleClaims.ToList());
-            
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(3),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-            );
+            // Generate token with roles and claims
+            var token = await GenerateJwtToken(user, profiles);
 
             var login = new UserViewModel
             {
@@ -112,12 +93,15 @@ namespace Hurudza.Apis.Core.Controllers
                 UserName = user.UserName,
                 PhoneNumber = user.PhoneNumber,
                 Email = user.Email,
-                Token = new JwtSecurityTokenHandler().WriteToken(token),
-                Profiles = profiles
+                Token = token,
+                Profiles = profiles,
+                Role = role
             };
 
-            return Ok(new ApiOkResponse(login));
+            // Add user permissions
+            login.Permissions = await GetUserPermissions(user);
 
+            return Ok(new ApiOkResponse(login));
         }
         
         [HttpGet(Name = nameof(GetUserProfile))]
@@ -138,38 +122,19 @@ namespace Hurudza.Apis.Core.Controllers
                 .ProjectTo<UserProfileViewModel>(_configurationProvider)
                 .ToListAsync();
 
+            var role = string.Empty;
+
             if (profiles.Count > 0)
                 profiles[0].LoggedIn = true;
             else
             {
                 var userRole = (await _userManager.GetRolesAsync(user)).First();
                 profiles.Add(new UserProfileViewModel { Farm = "System", Fullname = "Administrator", Role = userRole, LoggedIn = true });
+                role = userRole;
             }
 
-            var authClaims = new List<Claim>
-            {
-                new(ClaimTypes.PrimarySid, user.Id),
-                new(ClaimTypes.Name, user.UserName),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            };
-
-            var loggedIn = profiles.First(p => p.LoggedIn);
-            authClaims.Add(new Claim(ClaimTypes.Role, loggedIn.Role));
-
-            var role = await _roleManager.FindByNameAsync(loggedIn.Role);
-            var roleClaims = await _roleManager.GetClaimsAsync(role);
-
-            authClaims.AddRange(roleClaims.ToList());
-            
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(3),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-            );
+            // Generate token with roles and claims
+            var token = await GenerateJwtToken(user, profiles);
 
             var login = new UserViewModel
             {
@@ -179,12 +144,15 @@ namespace Hurudza.Apis.Core.Controllers
                 UserName = user.UserName,
                 PhoneNumber = user.PhoneNumber,
                 Email = user.Email,
-                Token = new JwtSecurityTokenHandler().WriteToken(token),
-                Profiles = profiles
+                Token = token,
+                Profiles = profiles,
+                Role = role
             };
 
-            return Ok(new ApiOkResponse(login));
+            // Add user permissions
+            login.Permissions = await GetUserPermissions(user);
 
+            return Ok(new ApiOkResponse(login));
         }
         
         [HttpGet(Name = nameof(GetLoggedInProfile))]
@@ -204,6 +172,8 @@ namespace Hurudza.Apis.Core.Controllers
                 .Where(p => p.UserId == user.Id)
                 .ProjectTo<UserProfileViewModel>(_configurationProvider)
                 .ToListAsync();
+            
+            var role = string.Empty;
 
             if (profiles.Count > 0)
                 profiles[0].LoggedIn = true;
@@ -211,32 +181,11 @@ namespace Hurudza.Apis.Core.Controllers
             {
                 var userRole = (await _userManager.GetRolesAsync(user)).First();
                 profiles.Add(new UserProfileViewModel { Farm = "System", Fullname = "Administrator", Role = userRole, LoggedIn = true });
+                role = userRole;
             }
 
-            var authClaims = new List<Claim>
-            {
-                new(ClaimTypes.PrimarySid, user.Id),
-                new(ClaimTypes.Name, user.UserName),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            };
-
-            var loggedIn = profiles.First(p => p.LoggedIn);
-            authClaims.Add(new Claim(ClaimTypes.Role, loggedIn.Role));
-
-            var role = await _roleManager.FindByNameAsync(loggedIn.Role);
-            var roleClaims = await _roleManager.GetClaimsAsync(role);
-
-            authClaims.AddRange(roleClaims.ToList());
-            
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(3),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-            );
+            // Generate token with roles and claims
+            var token = await GenerateJwtToken(user, profiles);
 
             var login = new UserViewModel
             {
@@ -246,12 +195,15 @@ namespace Hurudza.Apis.Core.Controllers
                 UserName = user.UserName,
                 PhoneNumber = user.PhoneNumber,
                 Email = user.Email,
-                Token = new JwtSecurityTokenHandler().WriteToken(token),
-                Profiles = profiles
+                Token = token,
+                Profiles = profiles,
+                Role = role
             };
 
-            return Ok(new ApiOkResponse(login));
+            // Add user permissions
+            login.Permissions = await GetUserPermissions(user);
 
+            return Ok(new ApiOkResponse(login));
         }
         
         [HttpPost(Name = nameof(SwitchProfile))]
@@ -263,37 +215,21 @@ namespace Hurudza.Apis.Core.Controllers
                 .Where(p => p.UserId == user.Id)
                 .ProjectTo<UserProfileViewModel>(_configurationProvider)
                 .ToListAsync();
+            
+            var role = string.Empty;
 
             if (profiles.Count > 0)
                 profiles.First(p => p.FarmId == model.FarmId).LoggedIn = true;
             else
-                profiles.Add(new UserProfileViewModel { Farm = "System", Fullname = user.Fullname, Role = ApiRoles.SystemAdministrator, LoggedIn = true });
-
-            var authClaims = new List<Claim>
             {
-                new(ClaimTypes.PrimarySid, user.Id),
-                new(ClaimTypes.Name, user.UserName),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            };
+                var userRole = (await _userManager.GetRolesAsync(user)).First();
+                profiles.Add(new UserProfileViewModel { Farm = "System", Fullname = "Administrator", Role = userRole, LoggedIn = true });
+                role = userRole;
+            }
 
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(3),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-            );
+            // Generate token with roles and claims
+            var token = await GenerateJwtToken(user, profiles);
             
-            var loggedIn = profiles.First(p => p.LoggedIn);
-            authClaims.Add(new Claim(ClaimTypes.Role, loggedIn.Role));
-
-            var role = await _roleManager.FindByNameAsync(loggedIn.Role);
-            var roleClaims = await _roleManager.GetClaimsAsync(role);
-
-            authClaims.AddRange(roleClaims.ToList());
-
             var login = new UserViewModel
             {
                 Id = user.Id,
@@ -302,9 +238,13 @@ namespace Hurudza.Apis.Core.Controllers
                 UserName = user.UserName,
                 PhoneNumber = user.PhoneNumber,
                 Email = user.Email,
-                Token = new JwtSecurityTokenHandler().WriteToken(token),
-                Profiles = profiles
+                Token = token,
+                Profiles = profiles,
+                Role = role
             };
+
+            // Add user permissions
+            login.Permissions = await GetUserPermissions(user);
 
             return Ok(new ApiOkResponse(login));
         }
@@ -343,6 +283,111 @@ namespace Hurudza.Apis.Core.Controllers
                 .FirstOrDefaultAsync(u => u.UserName == user.UserName).ConfigureAwait(false);
 
             return Ok(new ApiOkResponse(newUser, "User created successfully!"));
+        }
+
+        [HttpGet(Name = nameof(GetUserPermissions))]
+        public async Task<IActionResult> GetUserPermissions()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.PrimarySid);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized, "User not authenticated"));
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, "User not found"));
+            }
+
+            var permissions = await GetUserPermissions(user);
+            return Ok(new ApiOkResponse(permissions));
+        }
+
+        // Helper methods
+        private async Task<string> GenerateJwtToken(ApplicationUser user, List<UserProfileViewModel> profiles)
+        {
+            var activeProfile = profiles.FirstOrDefault(p => p.LoggedIn);
+            var roleName = activeProfile?.Role ?? (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "";
+            
+            var authClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.PrimarySid, user.Id),
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, roleName)
+            };
+
+            // Add active profile farm ID if available
+            if (activeProfile != null && !string.IsNullOrEmpty(activeProfile.FarmId))
+            {
+                authClaims.Add(new Claim("FarmId", activeProfile.FarmId));
+            }
+
+            // Add role-based claims
+            var role = await _roleManager.FindByNameAsync(roleName);
+            if (role != null)
+            {
+                var roleClaims = await _roleManager.GetClaimsAsync(role);
+                foreach (var claim in roleClaims)
+                {
+                    authClaims.Add(new Claim("Permission", claim.Value));
+                }
+            }
+
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JWT:ValidIssuer"],
+                audience: _configuration["JWT:ValidAudience"],
+                expires: DateTime.Now.AddHours(3),
+                claims: authClaims,
+                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private async Task<List<ClaimViewModel>> GetUserPermissions(ApplicationUser user)
+        {
+            var permissions = new List<ClaimViewModel>();
+            
+            // Get all roles assigned to the user
+            var roles = await _userManager.GetRolesAsync(user);
+            
+            // Get all claims for each role
+            foreach (var roleName in roles)
+            {
+                var role = await _roleManager.FindByNameAsync(roleName);
+                if (role != null)
+                {
+                    var roleClaims = await _roleManager.GetClaimsAsync(role);
+                    foreach (var claim in roleClaims)
+                    {
+                        permissions.Add(new ClaimViewModel
+                        {
+                            ClaimType = claim.Type,
+                            ClaimValue = claim.Value
+                        });
+                    }
+                }
+            }
+            
+            // Add direct user claims
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            foreach (var claim in userClaims)
+            {
+                permissions.Add(new ClaimViewModel
+                {
+                    ClaimType = claim.Type,
+                    ClaimValue = claim.Value
+                });
+            }
+            
+            // Remove duplicates
+            return permissions.GroupBy(p => p.ClaimValue)
+                .Select(g => g.First())
+                .ToList();
         }
     }
 }
