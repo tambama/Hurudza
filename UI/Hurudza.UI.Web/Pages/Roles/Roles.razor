@@ -16,7 +16,7 @@
             </div>
             <div class="card-body px-2 pt-0 pb-2">
                 <SfGrid
-                    DataSource="@Roles"
+                    DataSource="@RolesList"
                     @ref="Grid"
                     AllowPaging="true"
                     AllowExcelExport="true"
@@ -131,7 +131,7 @@
     SfSpinner SaveSpinner;
     SfSpinner DeleteSpinner;
     Toast Alert;
-    List<RoleViewModel> Roles;
+    List<RoleViewModel> RolesList;
     List<ClaimViewModel> AvailableClaims;
     bool Enabled = true;
     bool Data = false;
@@ -228,7 +228,7 @@
     {
         user = (await (AuthStateProvider as CustomAuthStateProvider)?.GetAuthenticationStateAsync()).User;
 
-        Roles = (await ApiCall.Get<IEnumerable<RoleViewModel>>(await ApiCall.GetHttpClient(), "roles/getroles")).ToList();
+        RolesList = (await ApiCall.Get<IEnumerable<RoleViewModel>>(await ApiCall.GetHttpClient(), "roles/getroles")).ToList();
         AvailableClaims = (await ApiCall.Get<IEnumerable<ClaimViewModel>>(await ApiCall.GetHttpClient(), "claims/getallclaims")).ToList();
     }
 
@@ -245,7 +245,7 @@
             role.Permissions = new List<ClaimViewModel>();
         }
 
-        if (args.Value)
+        if (args.Checked)
         {
             if (!role.Permissions.Any(p => p.ClaimValue == claim.ClaimValue))
             {
@@ -287,7 +287,7 @@
         {
             Alert.Show("Role created successfully", showTitle: true, toastType: ToastType.Success);
             // Refresh the role list
-            Roles = (await ApiCall.Get<IEnumerable<RoleViewModel>>(await ApiCall.GetHttpClient(), "roles/getroles")).ToList();
+            RolesList = (await ApiCall.Get<IEnumerable<RoleViewModel>>(await ApiCall.GetHttpClient(), "roles/getroles")).ToList();
             return true;
         }
         
@@ -310,7 +310,7 @@
         {
             Alert.Show("Role updated successfully", showTitle: true, toastType: ToastType.Success);
             // Refresh the role list
-            Roles = (await ApiCall.Get<IEnumerable<RoleViewModel>>(await ApiCall.GetHttpClient(), "roles/getroles")).ToList();
+            RolesList = (await ApiCall.Get<IEnumerable<RoleViewModel>>(await ApiCall.GetHttpClient(), "roles/getroles")).ToList();
             return true;
         }
         
