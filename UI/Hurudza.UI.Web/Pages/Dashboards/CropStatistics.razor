@@ -65,7 +65,7 @@
                                     <SfChart>
                                         <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
                                         <ChartPrimaryYAxis Title="Hectares"></ChartPrimaryYAxis>
-                                        <ChartLegend Visible="true" Position="LegendPosition.Bottom"></ChartLegend>
+                                        <ChartLegendSettings Visible="true" Position="LegendPosition.Bottom"></ChartLegendSettings>
                                         <ChartSeriesCollection>
                                             <ChartSeries DataSource="@_cropStats" XName="CropName" YName="TotalHectares" Type="ChartSeriesType.Column" Name="Total Hectares"></ChartSeries>
                                         </ChartSeriesCollection>
@@ -82,7 +82,7 @@
                                     <SfChart>
                                         <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
                                         <ChartPrimaryYAxis Title="Hectares"></ChartPrimaryYAxis>
-                                        <ChartLegend Visible="true" Position="LegendPosition.Bottom"></ChartLegend>
+                                        <ChartLegendSettings Visible="true" Position="LegendPosition.Bottom"></ChartLegendSettings>
                                         <ChartSeriesCollection>
                                             <ChartSeries DataSource="@_cropStats" XName="CropName" YName="IrrigatedHectares" Type="ChartSeriesType.StackingColumn" Name="Irrigated" Fill="#4CAF50"></ChartSeries>
                                             <ChartSeries DataSource="@_cropStats" XName="CropName" YName="NonIrrigatedHectares" Type="ChartSeriesType.StackingColumn" Name="Non-Irrigated" Fill="#FFC107"></ChartSeries>

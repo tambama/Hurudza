@@ -1,155 +1,245 @@
 ﻿@page "/"
 @attribute [Authorize]
 
+@using Hurudza.Data.Data
+@using Hurudza.UI.Web.Helpers
 @inject IApiCall ApiCall
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="row">
-<div class="col-lg-7 position-relative z-index-2">
-<div class="card card-plain mb-4">
-    <div class="card-body p-3">
+    <div class="col-lg-7 position-relative z-index-2">
+        <div class="card card-plain mb-4">
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="d-flex flex-column h-100">
+                            <h2 class="font-weight-bolder mb-0">General Statistics</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="row">
-            <div class="col-lg-6">
-                <div class="d-flex flex-column h-100">
-                    <h2 class="font-weight-bolder mb-0">General Statistics</h2>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-lg-5 col-sm-6">
-        <div class="card  mb-4">
-            <div class="card-body p-3">
-                <div class="row">
-                    <div class="col-8">
-                        <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Centers</p>
-                            <h5 class="font-weight-bolder mb-0">
-                                @_baseStatistics.Centers
-                            </h5>
-                        </div>
-                    </div>
-                    <div class="col-4 text-end">
-                        <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
-                            <i class="ni ni-building text-lg opacity-10" aria-hidden="true"></i>
+            <div class="col-lg-5 col-sm-6">
+                <div class="card  mb-4">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Centers</p>
+                                    <h5 class="font-weight-bolder mb-0">
+                                        @_baseStatistics.Centers
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
+                                    <i class="ni ni-building text-lg opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="card ">
-            <div class="card-body p-3">
-                <div class="row">
-                    <div class="col-8">
-                        <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Land</p>
-                            <h5 class="font-weight-bolder mb-0">
-                                @_baseStatistics.TotalLand
-                                <span class="text-dark text-sm font-weight-bolder">ha</span>
-                            </h5>
-                        </div>
-                    </div>
-                    <div class="col-4 text-end">
-                        <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
-                            <i class="ni ni-world text-lg opacity-10" aria-hidden="true"></i>
+                <div class="card ">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Land</p>
+                                    <h5 class="font-weight-bolder mb-0">
+                                        @_baseStatistics.TotalLand
+                                        <span class="text-dark text-sm font-weight-bolder">ha</span>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
+                                    <i class="ni ni-world text-lg opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="col-lg-5 col-sm-6 mt-sm-0 mt-4">
-        <div class="card  mb-4">
-            <div class="card-body p-3">
-                <div class="row">
-                    <div class="col-8">
-                        <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Arable Land</p>
-                            <h5 class="font-weight-bolder mb-0">
-                                @_baseStatistics.Arable
-                                <span class="text-dark text-sm font-weight-bolder">ha</span>
-                            </h5>
-                        </div>
-                    </div>
-                    <div class="col-4 text-end">
-                        <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
-                            <i class="ni ni-paper-diploma text-lg opacity-10" aria-hidden="true"></i>
+            <div class="col-lg-5 col-sm-6 mt-sm-0 mt-4">
+                <div class="card  mb-4">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Arable Land</p>
+                                    <h5 class="font-weight-bolder mb-0">
+                                        @_baseStatistics.Arable
+                                        <span class="text-dark text-sm font-weight-bolder">ha</span>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
+                                    <i class="ni ni-paper-diploma text-lg opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="card ">
-            <div class="card-body p-3">
-                <div class="row">
-                    <div class="col-8">
-                        <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Tillage</p>
-                            <h5 class="font-weight-bolder mb-0">
-                                @_baseStatistics.Tillage
-                                <span class="text-dark text-sm font-weight-bolder">ha</span>
-                            </h5>
-                        </div>
-                    </div>
-                    <div class="col-4 text-end">
-                        <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
-                            <i class="ni ni-map-big text-lg opacity-10" aria-hidden="true"></i>
+                <div class="card ">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Tillage</p>
+                                    <h5 class="font-weight-bolder mb-0">
+                                        @_baseStatistics.Tillage
+                                        <span class="text-dark text-sm font-weight-bolder">ha</span>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
+                                    <i class="ni ni-map-big text-lg opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-<div class="row mt-4">
-    <div class="col-12 col-lg-10">
-        <div class="card ">
-            <div class="card-header pb-0 p-3">
-                <div class="d-flex justify-content-between">
-                    <h6 class="mb-2">The Big 5</h6>
+        <div class="row mt-4">
+            <div class="col-12 col-lg-10">
+                <div class="card ">
+                    <div class="card-header pb-0 p-3">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="mb-2">The Big 5</h6>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-items-center">
+                            <tbody>
+                            @foreach (var farm in _farms)
+                            {
+                                <tr>
+                                    <td class="w-30">
+                                        <div class="d-flex px-2 py-1 align-items-center">
+                                            <div class="ms-4">
+                                                <p class="text-xs font-weight-bold mb-0">Center:</p>
+                                                <h6 class="text-sm mb-0">@farm.Name</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-center">
+                                            <p class="text-xs font-weight-bold mb-0">Size:</p>
+                                            <h6 class="text-sm mb-0">@farm.Size</h6>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-center">
+                                            <p class="text-xs font-weight-bold mb-0">Arable:</p>
+                                            <h6 class="text-sm mb-0">@farm.Arable</h6>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle text-sm">
+                                        <div class="col text-center">
+                                            <p class="text-xs font-weight-bold mb-0">Tillage:</p>
+                                            <h6 class="text-sm mb-0">@farm.Tillage</h6>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            <div class="table-responsive">
-                <table class="table align-items-center">
-                    <tbody>
-                    @foreach (var farm in _farms)
-                    {
-                        <tr>
-                            <td class="w-30">
-                                <div class="d-flex px-2 py-1 align-items-center">
-                                    <div class="ms-4">
-                                        <p class="text-xs font-weight-bold mb-0">Center:</p>
-                                        <h6 class="text-sm mb-0">@farm.Name</h6>
+        </div>
+        <div class="row mt-4">
+            <div class="col-12 col-lg-10">
+                <div class="card">
+                    <div class="card-header pb-0 p-3">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="mb-2">Current Season Crops</h6>
+                            <a href="/crop-statistics" class="btn btn-link text-secondary m-0 p-0">
+                                View All <i class="fa fa-arrow-right text-xs ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if (_cropStats == null || !_cropStats.Any())
+                        {
+                            <div class="text-center py-3">
+                                <p class="text-secondary mb-0">No crop data available for the current season.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="chart-container" style="position: relative; height:250px; width:100%">
+                                        <SfChart>
+                                            <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
+                                            <ChartPrimaryYAxis Title="Hectares"></ChartPrimaryYAxis>
+                                            <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                                            <ChartSeriesCollection>
+                                                <ChartSeries DataSource="@_cropStats.Take(5)" XName="CropName" YName="TotalHectares"
+                                                             Type="ChartSeriesType.Column" Name="Hectares" Fill="#4CAF50"></ChartSeries>
+                                            </ChartSeriesCollection>
+                                        </SfChart>
                                     </div>
                                 </div>
-                            </td>
-                            <td>
-                                <div class="text-center">
-                                    <p class="text-xs font-weight-bold mb-0">Size:</p>
-                                    <h6 class="text-sm mb-0">@farm.Size</h6>
+                                <div class="col-md-6">
+                                    <div class="table-responsive">
+                                        <table class="table align-items-center mb-0">
+                                            <thead>
+                                            <tr>
+                                                <th class="text-uppercase text-xxs font-weight-bolder opacity-7">Crop</th>
+                                                <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Hectares</th>
+                                                <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Irrigated %</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @foreach (var stat in _cropStats.Take(5))
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                <h6 class="mb-0 text-sm">@stat.CropName</h6>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <p class="text-sm font-weight-bold mb-0">@stat.TotalHectares.ToString("F2")</p>
+                                                    </td>
+                                                    <td>
+                                                        @{
+                                                            var irrigationPct = stat.TotalHectares > 0
+                                                                ? Math.Round((stat.IrrigatedHectares / stat.TotalHectares) * 100, 1)
+                                                                : 0;
+                                                        }
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="text-sm font-weight-bold mb-0 me-2">@irrigationPct%</span>
+                                                            <div>
+                                                                <div class="progress">
+                                                                    <div class="progress-bar bg-gradient-info" role="progressbar"
+                                                                         aria-valuenow="@irrigationPct" aria-valuemin="0"
+                                                                         aria-valuemax="100" style="width: @irrigationPct%"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </td>
-                            <td>
-                                <div class="text-center">
-                                    <p class="text-xs font-weight-bold mb-0">Arable:</p>
-                                    <h6 class="text-sm mb-0">@farm.Arable</h6>
-                                </div>
-                            </td>
-                            <td class="align-middle text-sm">
-                                <div class="col text-center">
-                                    <p class="text-xs font-weight-bold mb-0">Tillage:</p>
-                                    <h6 class="text-sm mb-0">@farm.Tillage</h6>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-</div>
 </div>
 <div class="row">
     <div class="col-12">
@@ -160,10 +250,9 @@
 </div>
 
 @code{
-
     BaseStatisticsViewModel _baseStatistics = new BaseStatisticsViewModel();
     List<FarmStatisticsViewModel> _farms = new List<FarmStatisticsViewModel>();
-    
+
     private List<CropStatistic> _cropStats;
 
     private class CropStatistic
@@ -175,38 +264,42 @@
         public float NonIrrigatedHectares { get; set; }
     }
 
-// Update the OnInitializedAsync method to include:
     protected override async Task OnInitializedAsync()
     {
-        _baseStatistics = await ApiCall.Get<BaseStatisticsViewModel>(await ApiCall.GetHttpClient(), "statistics/getbasestatistics");
-        _farms = await ApiCall.Get<List<FarmStatisticsViewModel>>(await ApiCall.GetHttpClient(), "Statistics/GetBigFiveStatistics");
-    
-        // Load crop statistics
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-    
-        if (user.IsInRole(ApiRoles.SystemAdministrator) || user.IsInRole(ApiRoles.Administrator))
+        // Load base statistics
+        _baseStatistics = await ApiCall.Get<BaseStatisticsViewModel>(
+            await ApiCall.GetHttpClient(), "statistics/getbasestatistics");
+        _farms = await ApiCall.Get<List<FarmStatisticsViewModel>>(
+            await ApiCall.GetHttpClient(), "Statistics/GetBigFiveStatistics");
+
+        try
         {
-            // For admin users, load system-wide stats
-            _cropStats = await ApiCall.Get<List<CropStatistic>>(
-                await ApiCall.GetHttpClient(), "fieldcrops/getcropstatistics");
-        }
-        else
-        {
-            // For farm users, load farm-specific stats
-            var farmId = user.FindFirstValue("FarmId");
-            if (!string.IsNullOrEmpty(farmId))
+            // Load crop statistics based on user role
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.IsInRole(ApiRoles.SystemAdministrator) || user.IsInRole(ApiRoles.Administrator))
             {
+                // For admin users, load system-wide stats
                 _cropStats = await ApiCall.Get<List<CropStatistic>>(
-                    await ApiCall.GetHttpClient(), $"fieldcrops/getfarmcropstatistics/{farmId}");
+                    await ApiCall.GetHttpClient(), "fieldcrops/getcropstatistics");
+            }
+            else
+            {
+                // For farm users, load farm-specific stats
+                var farmId = user.FindFirstValue("FarmId");
+                if (!string.IsNullOrEmpty(farmId))
+                {
+                    _cropStats = await ApiCall.Get<List<CropStatistic>>(
+                        await ApiCall.GetHttpClient(), $"fieldcrops/getfarmcropstatistics/{farmId}");
+                }
             }
         }
+        catch (Exception ex)
+        {
+            // Log the error or handle it as appropriate
+            Console.WriteLine($"Error loading crop statistics: {ex.Message}");
+            _cropStats = new List<CropStatistic>();
+        }
     }
-
-    protected override async Task OnInitializedAsync()
-    {
-        _baseStatistics = await ApiCall.Get<BaseStatisticsViewModel>(await ApiCall.GetHttpClient(), "statistics/getbasestatistics");
-        _farms = await ApiCall.Get<List<FarmStatisticsViewModel>>(await ApiCall.GetHttpClient(), "Statistics/GetBigFiveStatistics");
-    }
-
 }
