@@ -163,6 +163,45 @@
 
     BaseStatisticsViewModel _baseStatistics = new BaseStatisticsViewModel();
     List<FarmStatisticsViewModel> _farms = new List<FarmStatisticsViewModel>();
+    
+    private List<CropStatistic> _cropStats;
+
+    private class CropStatistic
+    {
+        public string CropName { get; set; }
+        public float TotalHectares { get; set; }
+        public int FieldCount { get; set; }
+        public float IrrigatedHectares { get; set; }
+        public float NonIrrigatedHectares { get; set; }
+    }
+
+// Update the OnInitializedAsync method to include:
+    protected override async Task OnInitializedAsync()
+    {
+        _baseStatistics = await ApiCall.Get<BaseStatisticsViewModel>(await ApiCall.GetHttpClient(), "statistics/getbasestatistics");
+        _farms = await ApiCall.Get<List<FarmStatisticsViewModel>>(await ApiCall.GetHttpClient(), "Statistics/GetBigFiveStatistics");
+    
+        // Load crop statistics
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+    
+        if (user.IsInRole(ApiRoles.SystemAdministrator) || user.IsInRole(ApiRoles.Administrator))
+        {
+            // For admin users, load system-wide stats
+            _cropStats = await ApiCall.Get<List<CropStatistic>>(
+                await ApiCall.GetHttpClient(), "fieldcrops/getcropstatistics");
+        }
+        else
+        {
+            // For farm users, load farm-specific stats
+            var farmId = user.FindFirstValue("FarmId");
+            if (!string.IsNullOrEmpty(farmId))
+            {
+                _cropStats = await ApiCall.Get<List<CropStatistic>>(
+                    await ApiCall.GetHttpClient(), $"fieldcrops/getfarmcropstatistics/{farmId}");
+            }
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

@@ -1,0 +1,245 @@
+@page "/crop-statistics"
+@page "/farm/{farmId}/crop-statistics"
+
+@attribute [Authorize]
+@using Hurudza.UI.Web.Helpers
+@inject IApiCall ApiCall
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<Toast @ref="Alert"/>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <div class="row">
+                    <div class="col-md-8 d-flex align-items-center">
+                        @if (string.IsNullOrEmpty(FarmId))
+                        {
+                            <h6 class="mb-0">System-wide Crop Statistics</h6>
+                        }
+                        else
+                        {
+                            <h6 class="mb-0">Crop Statistics for @_farmName</h6>
+                        }
+                    </div>
+                    <div class="col-md-4 text-end">
+                        @if (!string.IsNullOrEmpty(FarmId))
+                        {
+                            <a href="/farm/@FarmId" class="btn btn-sm btn-info me-2">
+                                <i class="fas fa-arrow-left me-1"></i> Back to Farm
+                            </a>
+                        }
+                        <button class="btn btn-sm btn-primary" @onclick="LoadData">
+                            <i class="fas fa-sync-alt me-1"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (_loading)
+                {
+                    <div class="text-center py-5">
+                        <SfSpinner></SfSpinner>
+                        <p class="mt-3">Loading statistics...</p>
+                    </div>
+                }
+                else if (_cropStats == null || !_cropStats.Any())
+                {
+                    <div class="text-center py-5">
+                        <div class="alert alert-info">
+                            <p class="mb-0">No crop data available for the current season.</p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header py-3">
+                                    <h6 class="mb-0">Crop Distribution (Hectares)</h6>
+                                </div>
+                                <div class="card-body">
+                                    <SfChart>
+                                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
+                                        <ChartPrimaryYAxis Title="Hectares"></ChartPrimaryYAxis>
+                                        <ChartLegend Visible="true" Position="LegendPosition.Bottom"></ChartLegend>
+                                        <ChartSeriesCollection>
+                                            <ChartSeries DataSource="@_cropStats" XName="CropName" YName="TotalHectares" Type="ChartSeriesType.Column" Name="Total Hectares"></ChartSeries>
+                                        </ChartSeriesCollection>
+                                    </SfChart>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header py-3">
+                                    <h6 class="mb-0">Irrigation vs Non-Irrigation</h6>
+                                </div>
+                                <div class="card-body">
+                                    <SfChart>
+                                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
+                                        <ChartPrimaryYAxis Title="Hectares"></ChartPrimaryYAxis>
+                                        <ChartLegend Visible="true" Position="LegendPosition.Bottom"></ChartLegend>
+                                        <ChartSeriesCollection>
+                                            <ChartSeries DataSource="@_cropStats" XName="CropName" YName="IrrigatedHectares" Type="ChartSeriesType.StackingColumn" Name="Irrigated" Fill="#4CAF50"></ChartSeries>
+                                            <ChartSeries DataSource="@_cropStats" XName="CropName" YName="NonIrrigatedHectares" Type="ChartSeriesType.StackingColumn" Name="Non-Irrigated" Fill="#FFC107"></ChartSeries>
+                                        </ChartSeriesCollection>
+                                    </SfChart>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header py-3">
+                            <h6 class="mb-0">Crop Statistics</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table align-items-center mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-uppercase text-xxs font-weight-bolder opacity-7">Crop</th>
+                                            <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Total Hectares</th>
+                                            <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Irrigated (Ha)</th>
+                                            <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Non-Irrigated (Ha)</th>
+                                            <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Field Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var stat in _cropStats)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex px-2 py-1">
+                                                        <div class="d-flex flex-column justify-content-center">
+                                                            <h6 class="mb-0 text-sm">@stat.CropName</h6>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <p class="text-sm font-weight-bold mb-0">@stat.TotalHectares.ToString("F2")</p>
+                                                </td>
+                                                <td>
+                                                    <p class="text-sm font-weight-bold mb-0">@stat.IrrigatedHectares.ToString("F2")</p>
+                                                </td>
+                                                <td>
+                                                    <p class="text-sm font-weight-bold mb-0">@stat.NonIrrigatedHectares.ToString("F2")</p>
+                                                </td>
+                                                <td>
+                                                    <p class="text-sm font-weight-bold mb-0">@stat.FieldCount</p>
+                                                </td>
+                                            </tr>
+                                        }
+                                        <tr class="bg-light">
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        <h6 class="mb-0 text-sm font-weight-bold">TOTAL</h6>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <p class="text-sm font-weight-bold mb-0">@_cropStats.Sum(s => s.TotalHectares).ToString("F2")</p>
+                                            </td>
+                                            <td>
+                                                <p class="text-sm font-weight-bold mb-0">@_cropStats.Sum(s => s.IrrigatedHectares).ToString("F2")</p>
+                                            </td>
+                                            <td>
+                                                <p class="text-sm font-weight-bold mb-0">@_cropStats.Sum(s => s.NonIrrigatedHectares).ToString("F2")</p>
+                                            </td>
+                                            <td>
+                                                <p class="text-sm font-weight-bold mb-0">@_cropStats.Sum(s => s.FieldCount)</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string? FarmId { get; set; }
+    
+    private Toast Alert;
+    private bool _loading = true;
+    private string _farmName = "Farm";
+    private List<CropStatistic> _cropStats;
+    private bool _isAdmin;
+    
+    private class CropStatistic
+    {
+        public string CropName { get; set; }
+        public float TotalHectares { get; set; }
+        public int FieldCount { get; set; }
+        public float IrrigatedHectares { get; set; }
+        public float NonIrrigatedHectares { get; set; }
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await (AuthStateProvider as AuthenticationStateProvider).GetAuthenticationStateAsync();
+        _isAdmin = authState.User.IsAdministrator();
+        
+        // If non-admin user tries to access system-wide stats, redirect to their farm
+        if (!_isAdmin && string.IsNullOrEmpty(FarmId))
+        {
+            var farmId = authState.User.GetCurrentFarmId();
+            if (!string.IsNullOrEmpty(farmId))
+            {
+                Navigation.NavigateTo($"/farm/{farmId}/crop-statistics");
+                return;
+            }
+        }
+        
+        await LoadData();
+    }
+    
+    private async Task LoadData()
+    {
+        _loading = true;
+        
+        try
+        {
+            if (!string.IsNullOrEmpty(FarmId))
+            {
+                // Load farm name
+                var farmResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<FarmViewModel>>(
+                    await ApiCall.GetHttpClient(), "farms/getfarm", FarmId);
+                
+                if (farmResponse.Status == (int)HttpStatusCode.OK && farmResponse.Result != null)
+                {
+                    _farmName = farmResponse.Result.Name;
+                }
+                
+                // Load farm-specific crop statistics
+                _cropStats = await ApiCall.Get<List<CropStatistic>>(
+                    await ApiCall.GetHttpClient(), $"fieldcrops/getfarmcropstatistics/{FarmId}");
+            }
+            else
+            {
+                // Load system-wide crop statistics
+                _cropStats = await ApiCall.Get<List<CropStatistic>>(
+                    await ApiCall.GetHttpClient(), "fieldcrops/getcropstatistics");
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading crop statistics: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            _cropStats = new List<CropStatistic>();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

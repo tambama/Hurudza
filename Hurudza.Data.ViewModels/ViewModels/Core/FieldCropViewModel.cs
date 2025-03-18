@@ -6,7 +6,7 @@ namespace Hurudza.Data.UI.Models.ViewModels.Core;
 public class FieldCropViewModel : BaseViewModel
 {
     [Required(ErrorMessage = "Field must be selected")]
-    public required string FieldId { get; set; }
+    public string FieldId { get; set; }
     [Required(ErrorMessage = "Crop must be selected")]
     public string? CropId { get; set; }
     public DateTime? PlantedDate { get; set; }

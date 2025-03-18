@@ -12,7 +12,7 @@ export function addMapToElement(element) {
     });
 }
 
-export function drawPolygon(map, id, coordinates, isField = false, name = 'Farm'){
+export function drawPolygon(map, id, coordinates, isField = false, name = 'Farm', cropData = null){
     let lineColor = isField ? '#ff0000' : '#40b7d5';
     // Add a data source containing GeoJSON data.
     map.addSource('hurudza-' + id, {
@@ -22,6 +22,10 @@ export function drawPolygon(map, id, coordinates, isField = false, name = 'Farm'
             'geometry': {
                 'type': 'Polygon',
                 'coordinates': coordinates
+            },
+            'properties': {
+                'name': name,
+                'cropData': cropData
             }
         }
     });
@@ -46,18 +50,39 @@ export function drawPolygon(map, id, coordinates, isField = false, name = 'Farm'
             'source': 'hurudza-' + id, // reference the data source
             'layout': {},
             'paint': {
-                'fill-color': '#0080ff',
-                'fill-opacity': 0.1
+                'fill-color': cropData ? '#74c476' : '#0080ff', // Green for fields with crops, blue for empty fields
+                'fill-opacity': 0.2
             }
         });
 
         // When a click event occurs on a feature in the fields layer,
         // open a popup at the location of the click, with description
-        // HTML from the click event's  properties.
+        // HTML from the click event's properties.
         map.on('click', 'fill-' + id, (e) => {
+            const coordinates = e.lngLat;
+            const feature = e.features[0];
+            const name = feature.properties.name;
+            const cropData = feature.properties.cropData;
+
+            let popupContent = `<div><h4>${name}</h4>`;
+
+            if (cropData && Object.keys(cropData).length > 0) {
+                popupContent += `
+                    <p><strong>Current Crop:</strong> ${cropData.crop}</p>
+                    <p><strong>Planted:</strong> ${cropData.plantedDate ? new Date(cropData.plantedDate).toLocaleDateString() : 'Not set'}</p>
+                    <p><strong>Expected Harvest:</strong> ${cropData.harvestDate ? new Date(cropData.harvestDate).toLocaleDateString() : 'Not set'}</p>
+                    <p><strong>Area Planted:</strong> ${cropData.size} ha</p>
+                    <p><strong>Irrigation:</strong> ${cropData.irrigation ? 'Yes' : 'No'}</p>
+                `;
+            } else {
+                popupContent += `<p>No crops currently planted</p>`;
+            }
+
+            popupContent += `</div>`;
+
             new mapboxgl.Popup()
-                .setLngLat(e.lngLat)
-                .setHTML(name)
+                .setLngLat(coordinates)
+                .setHTML(popupContent)
                 .addTo(map);
         });
 

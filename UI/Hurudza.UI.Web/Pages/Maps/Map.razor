@@ -326,7 +326,7 @@
                     <hr class="horizontal gray-light my-4">
                     <ul class="list-group">
                         <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong
-                                class="text-dark">Description:</strong> &nbsp; @_field.Description</li>
+                                                                                   class="text-dark">Description:</strong> &nbsp; @_field.Description</li>
                         <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Size:</strong>
                             &nbsp; @_field.Size</li>
                         <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Soil Type:</strong>
@@ -334,6 +334,10 @@
                         <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Irrigation:</strong>
                             &nbsp; @(_field.Irrigation ? "Yes" : "No")</li>
                     </ul>
+                    <div class="col-12 text-center mt-1">
+                        <a class="btn bg-gradient-success mb-0 text-end me-2" href="/field/@_field.Id/crops">Manage Crops</a>
+                        <!-- Existing buttons would go here -->
+                    </div>
                     <SfAccordion>
                         <AccordionItems>
                             <AccordionItem>
@@ -1142,6 +1146,10 @@
     async Task OnFieldSelect(FieldViewModel field)
     {
         _field = field;
+        // Load the latest crop data for this field
+        var fieldCrops = await ApiCall.Get<IEnumerable<FieldCropViewModel>>(await ApiCall.GetHttpClient(), $"fieldcrops/getfieldfieldcrops/{field.Id}");
+        var currentCrop = fieldCrops.OrderByDescending(c => c.PlantedDate).FirstOrDefault();
+    
         _fieldLocations = field.Locations;
 
         _showSchools = "hidden";
@@ -1150,6 +1158,28 @@
         _showFields = "hidden";
         _showFieldEdit = "hidden";
         _showFieldDetails = "";
+    
+        // This modification should go in the part where you call drawPolygon for fields
+        // Inside the method that loops through farmMap.Fields, you would add:
+        if (_mapModule != null)
+        {
+            // Create a JSON object to pass to the JavaScript method
+            object cropDataObj = null;
+            if (currentCrop != null)
+            {
+                cropDataObj = new
+                {
+                    crop = currentCrop.Crop,
+                    plantedDate = currentCrop.PlantedDate,
+                    harvestDate = currentCrop.HarvestDate,
+                    size = currentCrop.Size,
+                    irrigation = currentCrop.Irrigation
+                };
+            }
+        
+            await _mapModule.InvokeVoidAsync("drawPolygon", _mapInstance,
+                field.Id, field.Coordinates, true, field.Name, cropDataObj).AsTask();
+        }
     }
 
     public void ProvinceChangeHandler(ChangeEventArgs<string, ProvinceViewModel> args)

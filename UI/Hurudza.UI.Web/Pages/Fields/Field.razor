@@ -1,4 +1,7 @@
 @page "/field/{id}"
+
+@using Hurudza.UI.Web.Pages.Fields.Components
+
 @attribute [Authorize]
 
 @inject IApiCall ApiCall
@@ -44,6 +47,7 @@ else
                             </div>
                         </div>
                     </div>
+                    <FieldCropDetails FieldId="@Id" />
                     <div class="row mt-5">
                         <div class="col-12">
                             <h5 class="ms-3">Crops</h5>

@@ -1,0 +1,409 @@
+@page "/field/{id}/crops"
+@attribute [Authorize]
+
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.UI.Shared.Api.Interfaces
+@inject IApiCall ApiCall
+@inject NavigationManager Navigation
+
+<Toast @ref="Alert"/>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <div class="row">
+                    <div class="col-md-1 text-start">
+                        <a href="javascript:;" @onclick="GoBack">
+                            <i class="fas fa-arrow-left text-secondary text-sm" data-bs-toggle="tooltip"
+                               data-bs-placement="top" aria-hidden="true" aria-label="Go Back"
+                               data-bs-original-title="Go Back"></i><span class="sr-only">Go Back</span>
+                        </a>
+                    </div>
+                    <div class="col-md-7 d-flex align-items-center">
+                        <h6>Manage Crops for @_field.Name</h6>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-success btn-sm" @onclick="ShowAddCropDialog">
+                            <i class="fas fa-plus me-2"></i> Add Crop
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body px-2 pt-0 pb-2">
+                @if (_crops != null && _crops.Any())
+                {
+                    <SfGrid
+                        DataSource="@_crops"
+                        @ref="Grid"
+                        AllowPaging="true"
+                        AllowExcelExport="true"
+                        AllowSorting="true"
+                        AllowMultiSorting="true"
+                        EnableStickyHeader="true"
+                        AllowResizing="true"
+                        AllowFiltering="true"
+                        AllowSelection="true"
+                        Toolbar="@(new List<string>() { "ExcelExport", "Print", "Search" })"
+                        ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Edit", "Delete", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                        <GridPageSettings PageSize="12"></GridPageSettings>
+                        <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
+                        <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="FieldCropViewModel"></GridEvents>
+                        <GridEditSettings AllowAdding="false" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog">
+                            <HeaderTemplate>
+                                @{
+                                    var text = GetHeader((context as FieldCropViewModel));
+                                    <span>@text</span>
+                                }
+                            </HeaderTemplate>
+                            <Template>
+                                @{
+                                    var fieldCrop = (context as FieldCropViewModel);
+                                    <div>
+                                        <div class="form-row">
+                                            <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(fieldCrop.Id)"></SfTextBox>
+                                            <div class="form-group">
+                                                <label>Crop</label>
+                                                <SfComboBox ID="crop" TValue="string" TItem="CropViewModel" @bind-Value="@(fieldCrop.CropId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Crop" DataSource="@_availableCrops">
+                                                    <ComboBoxEvents TItem="CropViewModel" TValue="string"></ComboBoxEvents>
+                                                    <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                                                </SfComboBox>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Size (Hectares)</label>
+                                                <SfNumericTextBox ID="size" TValue="float" @bind-Value="@(fieldCrop.Size)" Decimals=3 Format="n3" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                                                <ValidationMessage For="() => fieldCrop.Size"/>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Planted Date</label>
+                                                <SfDatePicker ID="plantedDate" TValue="DateTime?" @bind-Value="@(fieldCrop.PlantedDate)" Format="yyyy-MM-dd"></SfDatePicker>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Expected Harvest Date</label>
+                                                <SfDatePicker ID="harvestDate" TValue="DateTime?" @bind-Value="@(fieldCrop.HarvestDate)" Format="yyyy-MM-dd"></SfDatePicker>
+                                            </div>
+                                            <div class="form-group">
+                                                <SfCheckBox Label="Is Irrigated" @bind-Checked="@(fieldCrop.Irrigation)"></SfCheckBox>
+                                            </div>
+                                            <div class="form-group">
+                                                <SfSpinner @ref="SaveSpinner"></SfSpinner>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </Template>
+                        </GridEditSettings>
+                        <GridColumns>
+                            <GridColumn Field=@nameof(FieldCropViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field=@nameof(FieldCropViewModel.Field) HeaderText="Field" TextAlign="TextAlign.Center" Width="100" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                            <GridColumn Field=@nameof(FieldCropViewModel.Crop) HeaderText="Crop" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                            <GridColumn Field=@nameof(FieldCropViewModel.Size) HeaderText="Size (Ha)" TextAlign="TextAlign.Center" Width="100"></GridColumn>
+                            <GridColumn Field=@nameof(FieldCropViewModel.PlantedDate) HeaderText="Planted Date" TextAlign="TextAlign.Center" Width="120" Format="yyyy-MM-dd" Type="ColumnType.Date"></GridColumn>
+                            <GridColumn Field=@nameof(FieldCropViewModel.HarvestDate) HeaderText="Harvest Date" TextAlign="TextAlign.Center" Width="120" Format="yyyy-MM-dd" Type="ColumnType.Date"></GridColumn>
+                            <GridColumn Field=@nameof(FieldCropViewModel.Irrigation) HeaderText="Irrigation" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" Width="100">
+                                <Template>
+                                    @{
+                                        var fieldCrop = (context as FieldCropViewModel);
+                                        <div class="template_checkbox">
+                                            @if (fieldCrop.Irrigation)
+                                            {
+                                                <input type="checkbox" checked>
+                                            }
+                                            else
+                                            {
+                                                <input type="checkbox">
+                                            }
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText="Actions" TextAlign="TextAlign.Center" Width="100">
+                                <GridCommandColumns>
+                                    <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-edit", CssClass = "e-flat" })"></GridCommandColumn>
+                                    <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-delete", CssClass = "e-flat" })"></GridCommandColumn>
+                                </GridCommandColumns>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                }
+                else
+                {
+                    <div class="text-center p-4">
+                        <p>No crops have been planted on this field.</p>
+                        <button class="btn btn-success" @onclick="ShowAddCropDialog">Plant a Crop</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<SfDialog @ref="Dialog" Width="250px" Visible="false" ShowCloseIcon="true" IsModal="true">
+    <DialogEvents Closed="Closed"></DialogEvents>
+    <DialogTemplates>
+        <Header> Delete Crop</Header>
+        <Content>
+            Are you sure you want to delete this crop record?
+            <div class="form-group">
+                <SfSpinner @ref="DeleteSpinner"></SfSpinner>
+            </div>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton OnClick="@OkClick" Content="OK" IsPrimary="true"></DialogButton>
+        <DialogButton OnClick="@CancelClick" Content="Cancel"></DialogButton>
+    </DialogButtons>
+</SfDialog>
+
+<SfDialog @ref="AddCropDialog" Width="500px" Visible="false" ShowCloseIcon="true" IsModal="true">
+    <DialogEvents Closed="CloseAddCropDialog"></DialogEvents>
+    <DialogTemplates>
+        <Header>Add New Crop</Header>
+        <Content>
+            <EditForm Model="@_newCrop" OnValidSubmit="@AddCrop">
+                <DataAnnotationsValidator></DataAnnotationsValidator>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Crop</label>
+                        <SfComboBox ID="crop" TValue="string" TItem="CropViewModel" @bind-Value="@(_newCrop.CropId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Crop" DataSource="@_availableCrops">
+                            <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                        </SfComboBox>
+                        <ValidationMessage For="() => _newCrop.CropId"/>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Size (Hectares)</label>
+                        <SfNumericTextBox ID="size" TValue="float" @bind-Value="@(_newCrop.Size)" Decimals=3 Format="n3" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                        <ValidationMessage For="() => _newCrop.Size"/>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Planted Date</label>
+                        <SfDatePicker ID="plantedDate" TValue="DateTime?" @bind-Value="@(_newCrop.PlantedDate)" Format="yyyy-MM-dd"></SfDatePicker>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Expected Harvest Date</label>
+                        <SfDatePicker ID="harvestDate" TValue="DateTime?" @bind-Value="@(_newCrop.HarvestDate)" Format="yyyy-MM-dd"></SfDatePicker>
+                    </div>
+                    <div class="form-group mt-3">
+                        <SfCheckBox Label="Is Irrigated" @bind-Checked="@(_newCrop.Irrigation)"></SfCheckBox>
+                    </div>
+                    <div class="form-group mt-3">
+                        <SfSpinner @ref="AddCropSpinner"></SfSpinner>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-success">Add Crop</button>
+                    <button type="button" @onclick="CloseAddCropDialog" class="btn btn-secondary ms-2">Cancel</button>
+                </div>
+            </EditForm>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+    [Parameter] public required string Id { get; set; }
+
+    SfGrid<FieldCropViewModel> Grid;
+    SfDialog Dialog;
+    SfDialog AddCropDialog;
+    SfSpinner SaveSpinner;
+    SfSpinner DeleteSpinner;
+    SfSpinner AddCropSpinner;
+    Toast Alert;
+    List<FieldCropViewModel> _crops;
+    List<CropViewModel> _availableCrops;
+    FieldViewModel _field = new();
+    FieldCropViewModel _selectedCrop;
+    FieldCropViewModel _newCrop = new();
+    bool flag = true;
+
+    private string GetHeader(FieldCropViewModel Value)
+    {
+        return "Edit Crop Details";
+    }
+
+    private void Closed()
+    {
+        flag = true;
+    }
+
+    private async Task ActionBeginHandler(ActionEventArgs<FieldCropViewModel> args)
+    {
+        switch (args.RequestType)
+        {
+            case Action.FilterChoiceRequest:
+                args.FilterChoiceCount = 100;
+                break;
+            case Action.Delete when flag:
+                args.Cancel = true;
+                _selectedCrop = args.Data;
+                await Dialog.ShowAsync();
+                flag = false;
+                break;
+            case Action.Save:
+            {
+                if (SaveSpinner.Visible)
+                {
+                    args.Cancel = true;
+                    break;
+                }
+
+                await SaveSpinner.ShowAsync();
+                if (!await UpdateFieldCrop(args.Data))
+                {
+                    args.Cancel = true;
+                }
+
+                await SaveSpinner.HideAsync();
+                break;
+            }
+        }
+    }
+
+    private void RowSelectHandler(RowSelectEventArgs<FieldCropViewModel> args)
+    {
+        _selectedCrop = args.Data;
+    }
+
+    private async Task OkClick()
+    {
+        await DeleteSpinner.ShowAsync();
+        if (await DeleteFieldCrop(_selectedCrop))
+        {
+            await Grid.DeleteRecordAsync();
+            await Dialog.HideAsync();
+        }
+
+        await DeleteSpinner.HideAsync();
+    }
+
+    private async Task CancelClick()
+    {
+        await Dialog.HideAsync();
+    }
+
+    private void ShowAddCropDialog()
+    {
+        _newCrop = new FieldCropViewModel { FieldId = Id };
+        AddCropDialog.ShowAsync();
+    }
+
+    private async Task CloseAddCropDialog()
+    {
+        AddCropDialog.HideAsync();
+    }
+
+    private async Task AddCrop()
+    {
+        await AddCropSpinner.ShowAsync();
+
+        _newCrop.FieldId = Id;
+
+        var success = await SaveFieldCrop(_newCrop);
+
+        await AddCropSpinner.HideAsync();
+
+        if (success)
+        {
+            await CloseAddCropDialog();
+            await LoadData();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        // Get field details
+        var fieldResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<FieldViewModel>>(await ApiCall.GetHttpClient(), "fields/getfield", Id);
+        if (fieldResponse.Status == (int)HttpStatusCode.OK)
+        {
+            _field = fieldResponse.Result;
+
+            // Get field crops
+            _crops = (await ApiCall.Get<IEnumerable<FieldCropViewModel>>(await ApiCall.GetHttpClient(), $"fieldcrops/getfieldfieldcrops/{Id}")).ToList();
+
+            // Get available crops
+            _availableCrops = (await ApiCall.Get<IEnumerable<CropViewModel>>(await ApiCall.GetHttpClient(), "crops/getcrops")).ToList();
+        }
+        else
+        {
+            Alert.Show("Failed to load field details", showTitle: true, toastType: ToastType.Danger);
+            Navigation.NavigateTo("/fields");
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo($"/field/{Id}");
+    }
+
+    private async Task<bool> SaveFieldCrop(FieldCropViewModel model)
+    {
+        var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldCropViewModel>, FieldCropViewModel>(
+            await ApiCall.GetHttpClient(), "fieldcrops/createfieldcrop", model);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to save crop, please try again!", showTitle: true, toastType: ToastType.Danger);
+            return false;
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+            return false;
+        }
+    }
+
+    private async Task<bool> UpdateFieldCrop(FieldCropViewModel model)
+    {
+        var response = await ApiCall.Update<UI.Shared.Models.ApiResponse<FieldCropViewModel>, FieldCropViewModel>(
+            await ApiCall.GetHttpClient(), "fieldcrops/updatefieldcrop", model.Id, model);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to update crop, please try again!", showTitle: true, toastType: ToastType.Danger);
+            return false;
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+            return false;
+        }
+    }
+
+    private async Task<bool> DeleteFieldCrop(FieldCropViewModel model)
+    {
+        var response = await ApiCall.Remove<UI.Shared.Models.ApiResponse<FieldCropViewModel>>(
+            await ApiCall.GetHttpClient(), "fieldcrops/deletefieldcrop", model.Id);
+
+        if (response == null)
+        {
+            Alert.Show("Failed to delete crop, please try again!", showTitle: true, toastType: ToastType.Danger);
+            return false;
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+            return true;
+        }
+        else
+        {
+            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+            return false;
+        }
+    }
+
+}

@@ -1,0 +1,113 @@
+@inject IApiCall ApiCall
+
+<div class="card mb-4">
+    <div class="card-header pb-0">
+        <h6 class="mb-0">Current Crops</h6>
+    </div>
+    <div class="card-body">
+        @if (_loading)
+        {
+            <div class="text-center py-3">
+                <SfSpinner></SfSpinner>
+            </div>
+        }
+        else if (_crops == null || !_crops.Any())
+        {
+            <div class="text-center py-3">
+                <p class="text-secondary mb-0">No crops currently planted on this field.</p>
+                <a href="/field/@FieldId/crops" class="btn btn-sm btn-success mt-2">Plant a Crop</a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-items-center mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-uppercase text-xxs font-weight-bolder opacity-7">Crop</th>
+                            <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Size (Ha)</th>
+                            <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Planted</th>
+                            <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Expected Harvest</th>
+                            <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Irrigation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var crop in _crops.OrderByDescending(c => c.PlantedDate))
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex px-2 py-1">
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <h6 class="mb-0 text-sm">@crop.Crop</h6>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-weight-bold mb-0">@crop.Size.ToString("F2")</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-weight-bold mb-0">
+                                        @(crop.PlantedDate.HasValue ? crop.PlantedDate.Value.ToString("yyyy-MM-dd") : "Not set")
+                                    </p>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-weight-bold mb-0">
+                                        @(crop.HarvestDate.HasValue ? crop.HarvestDate.Value.ToString("yyyy-MM-dd") : "Not set")
+                                    </p>
+                                </td>
+                                <td>
+                                    <span class="badge badge-sm bg-gradient-@(crop.Irrigation ? "success" : "secondary")">
+                                        @(crop.Irrigation ? "Yes" : "No")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center mt-3">
+                <a href="/field/@FieldId/crops" class="btn btn-sm btn-primary">Manage Crops</a>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string FieldId { get; set; }
+    
+    private bool _loading = true;
+    private List<FieldCropViewModel> _crops;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(FieldId))
+        {
+            await LoadData();
+        }
+    }
+    
+    private async Task LoadData()
+    {
+        _loading = true;
+        
+        try
+        {
+            _crops = (await ApiCall.Get<IEnumerable<FieldCropViewModel>>(
+                await ApiCall.GetHttpClient(), $"fieldcrops/getfieldfieldcrops/{FieldId}")).ToList();
+        }
+        catch
+        {
+            _crops = new List<FieldCropViewModel>();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}
