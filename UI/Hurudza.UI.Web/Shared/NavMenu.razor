@@ -36,11 +36,11 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link @MapActive" href="/map" onclick="@ActivateMap">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center  me-2 d-flex align-items-center justify-content-center">
-                        <i class="ni ni-world text-lg opacity-10" aria-hidden="true"></i>
+                <a class="nav-link @StatsActive" href="/dashboard" onclick="@ActivateStats">
+                    <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center d-flex align-items-center justify-content-center me-2">
+                        <i class="ni ni-chart-bar-32 text-lg opacity-10" aria-hidden="true"></i>
                     </div>
-                    <span class="nav-link-text ms-1">Map</span>
+                    <span class="nav-link-text ms-1">Statistics</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -129,7 +129,7 @@
 @code
 {
     private string DashboardActive = "active";
-    private string MapActive = "";
+    private string StatsActive = "";
     private string FarmsActive = "";
     private string FieldsActive = "";
     private string OwnershipActive = "";
@@ -183,10 +183,10 @@
         DashboardActive = "active";
     }
 
-    private void ActivateMap()
+    private void ActivateStats()
     {
         ResetAllMenus();
-        MapActive = "active";
+        StatsActive = "active";
     }
 
     private void ActivateFarms()
@@ -228,7 +228,7 @@
     private void ResetAllMenus()
     {
         DashboardActive = "";
-        MapActive = "";
+        StatsActive = "";
         FarmsActive = "";
         FieldsActive = "";
         CropsActive = "";

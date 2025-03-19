@@ -1,4 +1,4 @@
-﻿@page "/map"
+﻿@page "/"
 @implements IAsyncDisposable
 @using System.Collections.ObjectModel;
 @using System.Diagnostics;
@@ -1132,10 +1132,28 @@ async Task OnFieldSelect(FieldViewModel field)
         // Introduce a small delay to ensure UI state is updated
         await Task.Delay(150);
         
-        // This modification uses the new drawPolygon approach which includes a complete reset
+        // Need to keep the farm boundary but clear other fields
         if (_mapModule != null)
         {
-            // Create a JSON object to pass to the JavaScript method
+            // First clear all field-related layers but keep farm boundaries
+            // We need to redraw the farm boundary first
+            var farmMap = await ApiCall.Get<FarmMapViewModel>(await ApiCall.GetHttpClient(), $"farms/GetFarmDetails/{_farm.Id}");
+            
+            // Draw the farm boundary
+            if (farmMap.IsPolygon)
+            {
+                await _mapModule.InvokeVoidAsync("drawPolygon", 
+                    _mapInstance,
+                    _farm.Id, 
+                    farmMap.FarmPolygon,
+                    false, // Not a field
+                    _farm.Name,
+                    null, // No crop data
+                    true // Clear existing layers before drawing
+                ).AsTask();
+            }
+            
+            // Create crop data object to pass to JavaScript
             object cropDataObj = null;
             if (currentCrop != null)
             {
@@ -1149,14 +1167,15 @@ async Task OnFieldSelect(FieldViewModel field)
                 };
             }
             
-            // Ensure we await the JS call to prevent parallel execution
+            // Now draw just this field on top of the farm boundary
             await _mapModule.InvokeVoidAsync("drawPolygon", 
                 _mapInstance,
                 field.Id, 
                 field.Coordinates, 
-                true, 
+                true, // This is a field
                 field.Name, 
-                cropDataObj
+                cropDataObj,
+                false // Don't clear farm boundary
             ).AsTask();
         }
     }
@@ -1198,17 +1217,21 @@ async Task OnFarmSelect(FarmViewModel farm)
                 farmMap.Longitude
             ).AsTask();
 
-            // Draw the farm boundary if available
+            // Draw the farm boundary if available - with clearExisting=true to ensure clean map
             if (farmMap.IsPolygon)
             {
                 await _mapModule.InvokeVoidAsync("drawPolygon", 
                     _mapInstance,
                     farm.Id, 
-                    farmMap.FarmPolygon
+                    farmMap.FarmPolygon,
+                    false, // Not a field
+                    farm.Name, 
+                    null, // No crop data for farm
+                    true // Clear existing layers
                 ).AsTask();
             }
 
-            // Draw each field individually - with a small delay between each
+            // Draw all fields INSIDE the farm boundary - without clearing the map
             foreach (var field in farmMap.Fields)
             {
                 // Get the latest crop for this field
@@ -1233,18 +1256,16 @@ async Task OnFarmSelect(FarmViewModel farm)
                     };
                 }
                 
-                // Draw the field with a small delay between each to prevent race conditions
+                // Draw field with isField=true but clearExisting=false to keep farm boundary
                 await _mapModule.InvokeVoidAsync("drawPolygon", 
                     _mapInstance,
                     field.Id, 
                     field.Coordinates, 
-                    true, 
+                    true, // This is a field
                     field.Name, 
-                    cropDataObj
+                    cropDataObj,
+                    false // Don't clear existing layers (keep farm boundary)
                 ).AsTask();
-                
-                // Small delay between drawing fields
-                await Task.Delay(100);
             }
         }
 
@@ -1461,7 +1482,7 @@ async Task OnFarmSelect(FarmViewModel farm)
         _showFieldDetails = "hidden";
     }
 
-    void ShowEditField()
+    async Task ShowEditField()
     {
         _showSchools = "hidden";
         _showAddSchool = "hidden";
@@ -1471,17 +1492,77 @@ async Task OnFarmSelect(FarmViewModel farm)
         _showFieldDetails = "hidden";
 
         _fieldEdit.FarmId = _farm.Id;
+
+        await _saveSpinner.HideAsync();
     }
 
-    void BackToFields()
+    async Task BackToFields()
+{
+    _showSchools = "hidden";
+    _showAddSchool = "hidden";
+    _showSchoolDetails = "hidden";
+    _showFields = "";
+    _showFieldEdit = "hidden";
+    _showFieldDetails = "hidden";
+    
+    // When going back to fields list, redraw the farm and all its fields
+    if (_mapModule != null)
     {
-        _showSchools = "hidden";
-        _showAddSchool = "hidden";
-        _showSchoolDetails = "hidden";
-        _showFields = "";
-        _showFieldEdit = "hidden";
-        _showFieldDetails = "hidden";
+        // Get farm details
+        var farmMap = await ApiCall.Get<FarmMapViewModel>(await ApiCall.GetHttpClient(), $"farms/GetFarmDetails/{_farm.Id}");
+        
+        // Draw the farm boundary with clearExisting=true to clear the map first
+        if (farmMap.IsPolygon)
+        {
+            await _mapModule.InvokeVoidAsync("drawPolygon", 
+                _mapInstance,
+                _farm.Id, 
+                farmMap.FarmPolygon,
+                false, // Not a field
+                _farm.Name, 
+                null, // No crop data
+                true // Clear existing layers
+            ).AsTask();
+        }
+
+        // Draw all fields inside the farm boundary
+        foreach (var field in farmMap.Fields)
+        {
+            // Get the latest crop for this field
+            var fieldCrops = await ApiCall.Get<IEnumerable<FieldCropViewModel>>(
+                await ApiCall.GetHttpClient(), 
+                $"fieldcrops/getfieldfieldcrops/{field.Id}"
+            );
+            
+            var currentCrop = fieldCrops.OrderByDescending(c => c.PlantedDate).FirstOrDefault();
+            
+            // Create crop data object if a crop exists
+            object cropDataObj = null;
+            if (currentCrop != null)
+            {
+                cropDataObj = new
+                {
+                    crop = currentCrop.Crop,
+                    plantedDate = currentCrop.PlantedDate,
+                    harvestDate = currentCrop.HarvestDate,
+                    size = currentCrop.Size,
+                    irrigation = currentCrop.Irrigation
+                };
+            }
+            
+            // Draw field without clearing existing layers
+            await _mapModule.InvokeVoidAsync("drawPolygon", 
+                _mapInstance,
+                field.Id, 
+                field.Coordinates, 
+                true, // This is a field
+                field.Name, 
+                cropDataObj,
+                false // Don't clear existing layers (keep farm boundary)
+            ).AsTask();
+        }
     }
+}
 
     async Task ShowFieldsList()
     {

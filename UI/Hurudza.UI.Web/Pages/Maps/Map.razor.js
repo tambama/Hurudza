@@ -12,10 +12,12 @@ export function addMapToElement(element) {
     });
 }
 
-// Completely refactored drawPolygon function
-export async function drawPolygon(map, id, coordinates, isField = false, name = 'Farm', cropData = null) {
-    // Wait for map reset to complete
-    await resetMapForField(map);
+// Refactored drawPolygon function that supports proper layering of farm and fields
+export async function drawPolygon(map, id, coordinates, isField = false, name = 'Farm', cropData = null, clearExisting = false) {
+    // If clearExisting flag is true, clear all layers before drawing
+    if (clearExisting) {
+        await resetMapForField(map);
+    }
 
     // Define source and layer IDs
     const sourceId = 'hurudza-' + id;
@@ -23,6 +25,12 @@ export async function drawPolygon(map, id, coordinates, isField = false, name = 
     const fillLayerId = 'fill-' + id;
 
     try {
+        // Check if this source already exists (to avoid duplicates)
+        if (sourceExists(map, sourceId)) {
+            console.log(`Source ${sourceId} already exists, skipping creation`);
+            return true;
+        }
+
         // Add the source
         map.addSource(sourceId, {
             'type': 'geojson',
