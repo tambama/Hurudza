@@ -1106,50 +1106,20 @@
     #endregion
 
     #region FormEventHandlers
-
-    async Task OnFarmSelect(FarmViewModel farm)
-    {
-        await _saveSpinner.ShowAsync();
-        _farm = farm;
-
-        var farmMap = await ApiCall.Get<FarmMapViewModel>(await ApiCall.GetHttpClient(), $"farms/GetFarmDetails/{_farm.Id}");
-
-        _showSchools = "hidden";
-        _showAddSchool = "hidden";
-        _showSchoolDetails = "";
-        _showFields = "hidden";
-        _showFieldEdit = "hidden";
-        _showFieldDetails = "hidden";
-
-        if (farmMap.Latitude != 0 && _mapModule is not null)
-        {
-            // mapInstance = await mapModule.InvokeAsync<IJSObjectReference>("loadFarmMap", mapElement, farmMap);
-            await _mapModule.InvokeVoidAsync("setMapCenter", _mapInstance,
-                farmMap.Latitude, farmMap.Longitude).AsTask();
-
-            if (farmMap.IsPolygon)
-            {
-                await _mapModule.InvokeVoidAsync("drawPolygon", _mapInstance,
-                    farm.Id, farmMap.FarmPolygon).AsTask();
-            }
-
-            foreach (var field in farmMap.Fields)
-            {
-                await _mapModule.InvokeVoidAsync("drawPolygon", _mapInstance,
-                    field.Id, field.Coordinates, true, field.Name).AsTask();
-            }
-        }
-
-        await _saveSpinner.HideAsync();
-    }
-
-    async Task OnFieldSelect(FieldViewModel field)
+    
+async Task OnFieldSelect(FieldViewModel field)
+{
+    try
     {
         _field = field;
+        
         // Load the latest crop data for this field
-        var fieldCrops = await ApiCall.Get<IEnumerable<FieldCropViewModel>>(await ApiCall.GetHttpClient(), $"fieldcrops/getfieldfieldcrops/{field.Id}");
+        var fieldCrops = await ApiCall.Get<IEnumerable<FieldCropViewModel>>(
+            await ApiCall.GetHttpClient(), 
+            $"fieldcrops/getfieldfieldcrops/{field.Id}"
+        );
+        
         var currentCrop = fieldCrops.OrderByDescending(c => c.PlantedDate).FirstOrDefault();
-    
         _fieldLocations = field.Locations;
 
         _showSchools = "hidden";
@@ -1159,8 +1129,10 @@
         _showFieldEdit = "hidden";
         _showFieldDetails = "";
     
-        // This modification should go in the part where you call drawPolygon for fields
-        // Inside the method that loops through farmMap.Fields, you would add:
+        // Introduce a small delay to ensure UI state is updated
+        await Task.Delay(150);
+        
+        // This modification uses the new drawPolygon approach which includes a complete reset
         if (_mapModule != null)
         {
             // Create a JSON object to pass to the JavaScript method
@@ -1176,11 +1148,115 @@
                     irrigation = currentCrop.Irrigation
                 };
             }
-        
-            await _mapModule.InvokeVoidAsync("drawPolygon", _mapInstance,
-                field.Id, field.Coordinates, true, field.Name, cropDataObj).AsTask();
+            
+            // Ensure we await the JS call to prevent parallel execution
+            await _mapModule.InvokeVoidAsync("drawPolygon", 
+                _mapInstance,
+                field.Id, 
+                field.Coordinates, 
+                true, 
+                field.Name, 
+                cropDataObj
+            ).AsTask();
         }
     }
+    catch (Exception ex)
+    {
+        _alert.Show($"Error displaying field: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        Console.WriteLine($"Field selection error: {ex}");
+    }
+}
+
+async Task OnFarmSelect(FarmViewModel farm)
+{
+    try
+    {
+        await _saveSpinner.ShowAsync();
+        _farm = farm;
+
+        var farmMap = await ApiCall.Get<FarmMapViewModel>(await ApiCall.GetHttpClient(), $"farms/GetFarmDetails/{_farm.Id}");
+
+        _showSchools = "hidden";
+        _showAddSchool = "hidden";
+        _showSchoolDetails = "";
+        _showFields = "hidden";
+        _showFieldEdit = "hidden";
+        _showFieldDetails = "hidden";
+
+        // Introduce a small delay to ensure UI state is updated
+        await Task.Delay(150);
+
+        if (farmMap.Latitude != 0 && _mapModule is not null)
+        {
+            // First clear the map completely
+            await _mapModule.InvokeVoidAsync("clearMap", _mapInstance).AsTask();
+            
+            // Center the map on the farm
+            await _mapModule.InvokeVoidAsync("setMapCenter", 
+                _mapInstance,
+                farmMap.Latitude, 
+                farmMap.Longitude
+            ).AsTask();
+
+            // Draw the farm boundary if available
+            if (farmMap.IsPolygon)
+            {
+                await _mapModule.InvokeVoidAsync("drawPolygon", 
+                    _mapInstance,
+                    farm.Id, 
+                    farmMap.FarmPolygon
+                ).AsTask();
+            }
+
+            // Draw each field individually - with a small delay between each
+            foreach (var field in farmMap.Fields)
+            {
+                // Get the latest crop for this field
+                var fieldCrops = await ApiCall.Get<IEnumerable<FieldCropViewModel>>(
+                    await ApiCall.GetHttpClient(), 
+                    $"fieldcrops/getfieldfieldcrops/{field.Id}"
+                );
+                
+                var currentCrop = fieldCrops.OrderByDescending(c => c.PlantedDate).FirstOrDefault();
+                
+                // Create crop data object if a crop exists
+                object cropDataObj = null;
+                if (currentCrop != null)
+                {
+                    cropDataObj = new
+                    {
+                        crop = currentCrop.Crop,
+                        plantedDate = currentCrop.PlantedDate,
+                        harvestDate = currentCrop.HarvestDate,
+                        size = currentCrop.Size,
+                        irrigation = currentCrop.Irrigation
+                    };
+                }
+                
+                // Draw the field with a small delay between each to prevent race conditions
+                await _mapModule.InvokeVoidAsync("drawPolygon", 
+                    _mapInstance,
+                    field.Id, 
+                    field.Coordinates, 
+                    true, 
+                    field.Name, 
+                    cropDataObj
+                ).AsTask();
+                
+                // Small delay between drawing fields
+                await Task.Delay(100);
+            }
+        }
+
+        await _saveSpinner.HideAsync();
+    }
+    catch (Exception ex)
+    {
+        await _saveSpinner.HideAsync();
+        _alert.Show($"Error displaying farm: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        Console.WriteLine($"Farm selection error: {ex}");
+    }
+}
 
     public void ProvinceChangeHandler(ChangeEventArgs<string, ProvinceViewModel> args)
     {

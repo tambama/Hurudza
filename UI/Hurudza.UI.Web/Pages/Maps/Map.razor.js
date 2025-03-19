@@ -12,89 +12,105 @@ export function addMapToElement(element) {
     });
 }
 
-export function drawPolygon(map, id, coordinates, isField = false, name = 'Farm', cropData = null){
-    let lineColor = isField ? '#ff0000' : '#40b7d5';
-    // Add a data source containing GeoJSON data.
-    map.addSource('hurudza-' + id, {
-        'type': 'geojson',
-        'data': {
-            'type': 'Feature',
-            'geometry': {
-                'type': 'Polygon',
-                'coordinates': coordinates
-            },
-            'properties': {
-                'name': name,
-                'cropData': cropData
+// Completely refactored drawPolygon function
+export async function drawPolygon(map, id, coordinates, isField = false, name = 'Farm', cropData = null) {
+    // Wait for map reset to complete
+    await resetMapForField(map);
+
+    // Define source and layer IDs
+    const sourceId = 'hurudza-' + id;
+    const outlineLayerId = 'outline-' + id;
+    const fillLayerId = 'fill-' + id;
+
+    try {
+        // Add the source
+        map.addSource(sourceId, {
+            'type': 'geojson',
+            'data': {
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'Polygon',
+                    'coordinates': coordinates
+                },
+                'properties': {
+                    'name': name,
+                    'cropData': cropData
+                }
             }
-        }
-    });
+        });
 
-    // Add a black outline around the polygon
-    map.addLayer({
-        'id': 'outline-' + id,
-        'type': 'line',
-        'source': 'hurudza-' + id,
-        'layout': {},
-        'paint': {
-            'line-color': lineColor,
-            'line-width': isField ? 1 : 3
-        }
-    });
+        // Set color based on field type
+        let lineColor = isField ? '#ff0000' : '#40b7d5';
 
-    // Add a new Layer to visualize the polygon
-    if (isField) {
+        // Add outline layer
         map.addLayer({
-            'id': 'fill-' + id,
-            'type': 'fill',
-            'source': 'hurudza-' + id, // reference the data source
+            'id': outlineLayerId,
+            'type': 'line',
+            'source': sourceId,
             'layout': {},
             'paint': {
-                'fill-color': cropData ? '#74c476' : '#0080ff', // Green for fields with crops, blue for empty fields
-                'fill-opacity': 0.2
+                'line-color': lineColor,
+                'line-width': isField ? 1 : 3
             }
         });
 
-        // When a click event occurs on a feature in the fields layer,
-        // open a popup at the location of the click, with description
-        // HTML from the click event's properties.
-        map.on('click', 'fill-' + id, (e) => {
-            const coordinates = e.lngLat;
-            const feature = e.features[0];
-            const name = feature.properties.name;
-            const cropData = feature.properties.cropData;
+        // Add fill layer for fields
+        if (isField) {
+            map.addLayer({
+                'id': fillLayerId,
+                'type': 'fill',
+                'source': sourceId,
+                'layout': {},
+                'paint': {
+                    'fill-color': cropData ? '#74c476' : '#0080ff',
+                    'fill-opacity': 0.2
+                }
+            });
 
-            let popupContent = `<div><h4>${name}</h4>`;
+            // Add click handler for fields
+            map.on('click', fillLayerId, (e) => {
+                const coordinates = e.lngLat;
+                const feature = e.features[0];
+                const name = feature.properties.name;
+                const cropData = feature.properties.cropData;
 
-            if (cropData && Object.keys(cropData).length > 0) {
-                popupContent += `
-                    <p><strong>Current Crop:</strong> ${cropData.crop}</p>
-                    <p><strong>Planted:</strong> ${cropData.plantedDate ? new Date(cropData.plantedDate).toLocaleDateString() : 'Not set'}</p>
-                    <p><strong>Expected Harvest:</strong> ${cropData.harvestDate ? new Date(cropData.harvestDate).toLocaleDateString() : 'Not set'}</p>
-                    <p><strong>Area Planted:</strong> ${cropData.size} ha</p>
-                    <p><strong>Irrigation:</strong> ${cropData.irrigation ? 'Yes' : 'No'}</p>
-                `;
-            } else {
-                popupContent += `<p>No crops currently planted</p>`;
-            }
+                let popupContent = `<div><h4>${name}</h4>`;
 
-            popupContent += `</div>`;
+                if (cropData && Object.keys(cropData).length > 0) {
+                    popupContent += `
+            <p><strong>Current Crop:</strong> ${cropData.crop}</p>
+            <p><strong>Planted:</strong> ${cropData.plantedDate ? new Date(cropData.plantedDate).toLocaleDateString() : 'Not set'}</p>
+            <p><strong>Expected Harvest:</strong> ${cropData.harvestDate ? new Date(cropData.harvestDate).toLocaleDateString() : 'Not set'}</p>
+            <p><strong>Area Planted:</strong> ${cropData.size} ha</p>
+            <p><strong>Irrigation:</strong> ${cropData.irrigation ? 'Yes' : 'No'}</p>
+          `;
+                } else {
+                    popupContent += `<p>No crops currently planted</p>`;
+                }
 
-            new mapboxgl.Popup()
-                .setLngLat(coordinates)
-                .setHTML(popupContent)
-                .addTo(map);
-        });
+                popupContent += `</div>`;
 
-        // Change the cursor to a pointer when
-        // the mouse is over the field layer.
-        map.on('mouseenter', 'fill-' + id, () => {
-            map.getCanvas().style.cursor = 'pointer';
-        });
+                new mapboxgl.Popup()
+                    .setLngLat(coordinates)
+                    .setHTML(popupContent)
+                    .addTo(map);
+            });
 
-        map.on('mouseleave', 'fill-' + id, () => {
-            map.getCanvas().style.cursor = '';
-        });
+            // Add mouse interaction handlers
+            map.on('mouseenter', fillLayerId, () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+
+            map.on('mouseleave', fillLayerId, () => {
+                map.getCanvas().style.cursor = '';
+            });
+        }
+
+        console.log(`Successfully drew polygon for ${id}`);
+        return true;
+    } catch (error) {
+        console.error(`Error drawing polygon for ${id}:`, error);
+        return false;
     }
 }
 
@@ -368,23 +384,14 @@ export function setMapCenter(map, latitude, longitude) {
     map.setZoom(14)
 }
 
-export function clearMap(map){
-    // Remove all layers
-    const features = map.queryRenderedFeatures();
-    let hurudzaFeatures = filterObjectsByName(features, 'hurudza');
-    let hurudzaLayers = getUniqueLayersById(hurudzaFeatures);
-    hurudzaLayers.forEach(feature => {
-        map.removeLayer(feature.layer.id);
-    })
-    
-    // Remove all sources
-    let sources = getUniqueSources(hurudzaFeatures);
-    sources.forEach(source => {
-        map.removeSource(source.source);
-    })
-    
-    map.setCenter([31.053028, -17.824858]);
-    map.setZoom(7);
+// Improved clearMap function
+export function clearMap(map) {
+    return resetMapForField(map).then(() => {
+        // Reset the map view
+        map.setCenter([31.053028, -17.824858]);
+        map.setZoom(7);
+        return true;
+    });
 }
 
 function filterObjectsByName(objects, startsWith) {
@@ -419,4 +426,91 @@ function getUniqueSources(items) {
         }
     });
     return Object.values(uniqueItems);
+}
+
+// This function safely checks if a source exists
+export function sourceExists(map, sourceId) {
+    try {
+        return !!map.getSource(sourceId);
+    } catch (e) {
+        console.warn(`Error checking if source ${sourceId} exists:`, e);
+        return false;
+    }
+}
+
+// This function safely checks if a layer exists
+export function layerExists(map, layerId) {
+    try {
+        return !!map.getLayer(layerId);
+    } catch (e) {
+        console.warn(`Error checking if layer ${layerId} exists:`, e);
+        return false;
+    }
+}
+
+// This function completely resets a map's sources and layers before drawing
+export function resetMapForField(map, fieldId) {
+    return new Promise((resolve) => {
+        try {
+            // 1. Force wait a moment to ensure all async operations have completed
+            setTimeout(() => {
+                try {
+                    // 2. Get a list of all sources and layers that need to be removed
+                    const hurudzaSources = Object.keys(map.getStyle().sources || {})
+                        .filter(id => id.startsWith('hurudza'));
+
+                    const hurudzaLayers = map.getStyle().layers
+                        .filter(layer => layer.source && hurudzaSources.includes(layer.source))
+                        .map(layer => layer.id);
+
+                    // 3. Remove all layers first (must be done before removing sources)
+                    hurudzaLayers.forEach(layerId => {
+                        if (layerExists(map, layerId)) {
+                            // Remove any event handlers
+                            try {
+                                map.off('click', layerId);
+                                map.off('mouseenter', layerId);
+                                map.off('mouseleave', layerId);
+                            } catch (e) {
+                                console.warn(`Error removing handlers for layer ${layerId}:`, e);
+                            }
+
+                            // Remove the layer
+                            try {
+                                map.removeLayer(layerId);
+                                console.log(`Removed layer: ${layerId}`);
+                            } catch (e) {
+                                console.warn(`Error removing layer ${layerId}:`, e);
+                            }
+                        }
+                    });
+
+                    // 4. Then remove all sources
+                    hurudzaSources.forEach(sourceId => {
+                        if (sourceExists(map, sourceId)) {
+                            try {
+                                map.removeSource(sourceId);
+                                console.log(`Removed source: ${sourceId}`);
+                            } catch (e) {
+                                console.warn(`Error removing source ${sourceId}:`, e);
+                            }
+                        }
+                    });
+
+                    // 5. Force the map to redraw
+                    map.triggerRepaint();
+
+                    // 6. Return success
+                    console.log(`Reset map for field: ${fieldId}`);
+                    resolve(true);
+                } catch (e) {
+                    console.error("Error in resetMapForField:", e);
+                    resolve(false);
+                }
+            }, 100); // Small delay to ensure map is ready
+        } catch (e) {
+            console.error("Fatal error in resetMapForField:", e);
+            resolve(false);
+        }
+    });
 }
