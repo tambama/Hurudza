@@ -1,0 +1,526 @@
+@page "/tillage-programs"
+@page "/farm/{farmId}/tillage-programs"
+@attribute [Authorize]
+
+@using Hurudza.Data.UI.Models.ViewModels.Tillage
+@inject IApiCall ApiCall
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<Toast @ref="Alert"/>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <div class="row">
+                    <div class="col-md-6 d-flex align-items-center">
+                        @if (string.IsNullOrEmpty(FarmId))
+                        {
+                            <h6 class="mb-0">Tillage Programs</h6>
+                        }
+                        else
+                        {
+                            <h6 class="mb-0">Tillage Programs for @_farmName</h6>
+                        }
+                    </div>
+                    <div class="col-md-6 text-end">
+                        @if (!string.IsNullOrEmpty(FarmId))
+                        {
+                            <a href="/farm/@FarmId" class="btn btn-sm btn-info me-2">
+                                <i class="fas fa-arrow-left me-1"></i> Back to Farm
+                            </a>
+                        }
+                        <button class="btn btn-sm btn-primary" @onclick="LoadData">
+                            <i class="fas fa-sync-alt me-1"></i> Refresh
+                        </button>
+                        <button class="btn btn-sm btn-success ms-2" @onclick="ShowAddProgramDialog">
+                            <i class="fas fa-plus me-1"></i> New Program
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body px-2 pt-0 pb-2">
+                @if (_loading)
+                {
+                    <div class="text-center py-5">
+                        <SfSpinner></SfSpinner>
+                        <p class="mt-3">Loading tillage programs...</p>
+                    </div>
+                }
+                else if (_tillagePrograms == null || !_tillagePrograms.Any())
+                {
+                    <div class="text-center py-5">
+                        <div class="alert alert-info">
+                            <p class="mb-0">No tillage programs found.</p>
+                        </div>
+                        <button class="btn btn-success mt-3" @onclick="ShowAddProgramDialog">Create New Tillage Program</button>
+                    </div>
+                }
+                else
+                {
+                    <SfGrid
+                        DataSource="@_tillagePrograms"
+                        @ref="Grid"
+                        AllowPaging="true" 
+                        AllowExcelExport="true"
+                        AllowSorting="true"
+                        AllowMultiSorting="true"
+                        EnableStickyHeader="true"
+                        AllowResizing="true"
+                        AllowFiltering="true"
+                        AllowSelection="true"
+                        Toolbar="@(new List<string>() { "ExcelExport", "Print", "Search" })"
+                        ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                        <GridPageSettings PageSize="10"></GridPageSettings>
+                        <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
+                        <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="TillageProgramViewModel"></GridEvents>
+                        <GridColumns>
+                            <GridColumn Field=@nameof(TillageProgramViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field=@nameof(TillageProgramViewModel.Name) HeaderText="Program Name" TextAlign="TextAlign.Left" Width="180" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                            @if (string.IsNullOrEmpty(FarmId))
+                            {
+                                <GridColumn Field=@nameof(TillageProgramViewModel.Farm) HeaderText="Farm" TextAlign="TextAlign.Left" Width="150" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                            }
+                            <GridColumn Field=@nameof(TillageProgramViewModel.DateRange) HeaderText="Date Range" TextAlign="TextAlign.Center" Width="200"></GridColumn>
+                            <GridColumn Field=@nameof(TillageProgramViewModel.TotalHectares) HeaderText="Total Hectares" TextAlign="TextAlign.Right" Width="120" Format="N2"></GridColumn>
+                            <GridColumn Field=@nameof(TillageProgramViewModel.TilledHectares) HeaderText="Tilled Hectares" TextAlign="TextAlign.Right" Width="120" Format="N2"></GridColumn>
+                            <GridColumn Field=@nameof(TillageProgramViewModel.Progress) HeaderText="Progress" TextAlign="TextAlign.Center" Width="180">
+                                <Template>
+                                    @{
+                                        var program = (context as TillageProgramViewModel);
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress w-100 me-2" style="height: 6px;">
+                                                <div class="progress-bar bg-gradient-success" role="progressbar" style="width: @(program.CompletionPercentage)%"></div>
+                                            </div>
+                                            <span class="text-sm font-weight-bold">@program.CompletionPercentage.ToString("N0")%</span>
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field=@nameof(TillageProgramViewModel.Status) HeaderText="Status" TextAlign="TextAlign.Center" Width="100">
+                                <Template>
+                                    @{
+                                        var program = (context as TillageProgramViewModel);
+                                        if (program.IsActive)
+                                        {
+                                            <span class="badge badge-sm bg-gradient-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-sm bg-gradient-secondary">Inactive</span>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText="Actions" TextAlign="TextAlign.Center" Width="150">
+                                <Template>
+                                    @{
+                                        var program = (context as TillageProgramViewModel);
+                                        <div class="d-flex justify-content-center">
+                                            <a href="javascript:;" @onclick="() => EditProgram(program)" class="btn btn-link text-secondary mb-0">
+                                                <i class="fas fa-edit text-xs"></i>
+                                            </a>
+                                            <a href="javascript:;" @onclick="() => ManageServices(program)" class="btn btn-link text-primary mb-0">
+                                                <i class="fas fa-tractor text-xs"></i>
+                                            </a>
+                                            <a href="javascript:;" @onclick="() => ConfirmDeleteProgram(program)" class="btn btn-link text-danger mb-0">
+                                                <i class="fas fa-trash text-xs"></i>
+                                            </a>
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                }
+            </div>
+        </div>
+        
+        @if (_tillageSummary != null)
+        {
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <h6 class="mb-0">Tillage Summary</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card mini-stats-wid">
+                                <div class="card-body">
+                                    <div class="d-flex">
+                                        <div class="flex-grow-1">
+                                            <p class="text-muted fw-medium mb-2">Total Planned</p>
+                                            <h4 class="mb-0">@_tillageSummary.TotalPlanned.ToString("N2") ha</h4>
+                                        </div>
+                                        <div class="mini-stat-icon avatar-sm align-self-center rounded-circle bg-success">
+                                            <span class="avatar-title bg-gradient-success text-white">
+                                                <i class="fas fa-map-marked-alt font-size-24"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mini-stats-wid">
+                                <div class="card-body">
+                                    <div class="d-flex">
+                                        <div class="flex-grow-1">
+                                            <p class="text-muted fw-medium mb-2">Total Tilled</p>
+                                            <h4 class="mb-0">@_tillageSummary.TotalTilled.ToString("N2") ha</h4>
+                                        </div>
+                                        <div class="mini-stat-icon avatar-sm align-self-center rounded-circle bg-info">
+                                            <span class="avatar-title bg-gradient-info text-white">
+                                                <i class="fas fa-tractor font-size-24"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mini-stats-wid">
+                                <div class="card-body">
+                                    <div class="d-flex">
+                                        <div class="flex-grow-1">
+                                            <p class="text-muted fw-medium mb-2">Services Completed</p>
+                                            <h4 class="mb-0">@_tillageSummary.CompletedServices of @_tillageSummary.TotalServices</h4>
+                                        </div>
+                                        <div class="mini-stat-icon avatar-sm align-self-center rounded-circle bg-warning">
+                                            <span class="avatar-title bg-gradient-warning text-white">
+                                                <i class="fas fa-tasks font-size-24"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Add/Edit Tillage Program Dialog -->
+<SfDialog @ref="ProgramDialog" IsModal="true" Width="500px" Height="auto" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>@(_isEditing ? "Edit Tillage Program" : "Add New Tillage Program")</Header>
+        <Content>
+            <EditForm Model="@_programModel" OnValidSubmit="@SaveTillageProgram">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                
+                <div class="form-group mb-3">
+                    <label>Program Name</label>
+                    <SfTextBox @bind-Value="@_programModel.Name" Placeholder="Enter program name" CssClass="e-input"></SfTextBox>
+                    <ValidationMessage For="@(() => _programModel.Name)" />
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label>Description</label>
+                    <SfTextBox Multiline="true" @bind-Value="@_programModel.Description" Placeholder="Enter program description" CssClass="e-input"></SfTextBox>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <SfDatePicker TValue="DateTime" @bind-Value="@_programModel.StartDate" Format="yyyy-MM-dd"></SfDatePicker>
+                            <ValidationMessage For="@(() => _programModel.StartDate)" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <SfDatePicker TValue="DateTime" @bind-Value="@_programModel.EndDate" Format="yyyy-MM-dd"></SfDatePicker>
+                            <ValidationMessage For="@(() => _programModel.EndDate)" />
+                        </div>
+                    </div>
+                </div>
+                
+                @if (string.IsNullOrEmpty(FarmId) && _isEditing == false)
+                {
+                    <div class="form-group mb-3">
+                        <label>Farm</label>
+                        <SfDropDownList TValue="string" TItem="FarmViewModel" @bind-Value="@_programModel.FarmId" DataSource="@_farms" Placeholder="Select Farm">
+                            <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                        </SfDropDownList>
+                        <ValidationMessage For="@(() => _programModel.FarmId)" />
+                    </div>
+                }
+                else
+                {
+                    <SfTextBox @bind-Value="@_programModel.FarmId" CssClass="d-none"></SfTextBox>
+                }
+                
+                <div class="form-group mb-3">
+                    <label>Total Hectares</label>
+                    <SfNumericTextBox TValue="float" @bind-Value="@_programModel.TotalHectares" Format="N2" Placeholder="Enter total hectares"></SfNumericTextBox>
+                    <ValidationMessage For="@(() => _programModel.TotalHectares)" />
+                </div>
+                
+                @if (_isEditing)
+                {
+                    <div class="form-group mb-3">
+                        <SfCheckBox @bind-Checked="@_programModel.IsActive" Label="Active"></SfCheckBox>
+                    </div>
+                }
+                
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="button" class="btn btn-secondary me-2" @onclick="CloseProgramDialog">Cancel</button>
+                    <button type="submit" class="btn btn-primary">@(_isEditing ? "Update" : "Save")</button>
+                </div>
+            </EditForm>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+<!-- Delete Confirmation Dialog -->
+<SfDialog @ref="DeleteDialog" IsModal="true" Width="400px" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>Delete Tillage Program</Header>
+        <Content>
+            <p>Are you sure you want to delete the tillage program "<strong>@(_selectedProgram?.Name)</strong>"?</p>
+            <p class="text-danger">This action cannot be undone.</p>
+            
+            <div class="d-flex justify-content-end mt-4">
+                <button type="button" class="btn btn-secondary me-2" @onclick="CancelDelete">Cancel</button>
+                <button type="button" class="btn btn-danger" @onclick="DeleteProgram">Delete</button>
+            </div>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+    [Parameter]
+    public string? FarmId { get; set; }
+    
+    // References
+    private Toast Alert;
+    private SfGrid<TillageProgramViewModel> Grid;
+    private SfDialog ProgramDialog;
+    private SfDialog DeleteDialog;
+    
+    // State
+    private bool _loading = true;
+    private bool _isEditing = false;
+    private string _farmName = string.Empty;
+    
+    // Data
+    private List<TillageProgramViewModel> _tillagePrograms;
+    private TillageProgramViewModel _programModel = new();
+    private TillageProgramViewModel _selectedProgram;
+    private TillageSummaryViewModel _tillageSummary;
+    private List<FarmViewModel> _farms;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        // Set a default date range for new programs
+        _programModel.StartDate = DateTime.Today;
+        _programModel.EndDate = DateTime.Today.AddMonths(6);
+        
+        await LoadData();
+    }
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(FarmId))
+        {
+            await LoadFarmDetails();
+        }
+    }
+    
+    private async Task LoadFarmDetails()
+    {
+        try
+        {
+            var farmResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<FarmViewModel>>(
+                await ApiCall.GetHttpClient(), "farms/getfarm", FarmId);
+                
+            if (farmResponse.Status == (int)HttpStatusCode.OK && farmResponse.Result != null)
+            {
+                _farmName = farmResponse.Result.Name;
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading farm details: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+    
+    private async Task LoadData()
+    {
+        _loading = true;
+        
+        try
+        {
+            // Load tillage programs
+            if (string.IsNullOrEmpty(FarmId))
+            {
+                _tillagePrograms = (await ApiCall.Get<IEnumerable<TillageProgramViewModel>>(
+                    await ApiCall.GetHttpClient(), "TillagePrograms/GetTillagePrograms")).ToList();
+                    
+                // Load farms for dropdown
+                _farms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(
+                    await ApiCall.GetHttpClient(), "Farms/getFarms")).ToList();
+                    
+                // Load overall tillage summary
+                _tillageSummary = await ApiCall.Get<TillageSummaryViewModel>(
+                    await ApiCall.GetHttpClient(), "TillagePrograms/GetTillageSummary");
+            }
+            else
+            {
+                _tillagePrograms = (await ApiCall.Get<IEnumerable<TillageProgramViewModel>>(
+                    await ApiCall.GetHttpClient(), $"TillagePrograms/GetFarmTillagePrograms/{FarmId}")).ToList();
+                    
+                // Set default farm ID for new programs
+                _programModel.FarmId = FarmId;
+                
+                // Load farm tillage summary
+                _tillageSummary = await ApiCall.Get<TillageSummaryViewModel>(
+                    await ApiCall.GetHttpClient(), $"TillagePrograms/GetFarmTillageSummary/{FarmId}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading data: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            
+            // Initialize empty lists to prevent null references
+            _tillagePrograms = new List<TillageProgramViewModel>();
+            if (_farms == null) _farms = new List<FarmViewModel>();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+    
+    private void ActionBeginHandler(ActionEventArgs<TillageProgramViewModel> args)
+    {
+        // Handle grid actions if needed
+    }
+    
+    private void RowSelectHandler(RowSelectEventArgs<TillageProgramViewModel> args)
+    {
+        _selectedProgram = args.Data;
+    }
+    
+    private void ShowAddProgramDialog()
+    {
+        _isEditing = false;
+        _programModel = new TillageProgramViewModel
+        {
+            StartDate = DateTime.Today,
+            EndDate = DateTime.Today.AddMonths(6),
+            IsActive = true
+        };
+        
+        if (!string.IsNullOrEmpty(FarmId))
+        {
+            _programModel.FarmId = FarmId;
+        }
+        
+        ProgramDialog.ShowAsync();
+    }
+    
+    private void EditProgram(TillageProgramViewModel program)
+    {
+        _isEditing = true;
+        _selectedProgram = program;
+        _programModel = new TillageProgramViewModel
+        {
+            Id = program.Id,
+            Name = program.Name,
+            Description = program.Description,
+            StartDate = program.StartDate,
+            EndDate = program.EndDate,
+            FarmId = program.FarmId,
+            TotalHectares = program.TotalHectares,
+            TilledHectares = program.TilledHectares,
+            IsActive = program.IsActive
+        };
+        
+        ProgramDialog.ShowAsync();
+    }
+    
+    private void ConfirmDeleteProgram(TillageProgramViewModel program)
+    {
+        _selectedProgram = program;
+        DeleteDialog.ShowAsync();
+    }
+    
+    private void ManageServices(TillageProgramViewModel program)
+    {
+        Navigation.NavigateTo($"/tillage-program/{program.Id}/services");
+    }
+    
+    private async Task SaveTillageProgram()
+    {
+        try
+        {
+            UI.Shared.Models.ApiResponse<TillageProgramViewModel> response;
+            
+            if (_isEditing)
+            {
+                response = await ApiCall.Update<UI.Shared.Models.ApiResponse<TillageProgramViewModel>, TillageProgramViewModel>(
+                    await ApiCall.GetHttpClient(), "TillagePrograms/UpdateTillageProgram", _programModel.Id, _programModel);
+            }
+            else
+            {
+                response = await ApiCall.Add<UI.Shared.Models.ApiResponse<TillageProgramViewModel>, TillageProgramViewModel>(
+                    await ApiCall.GetHttpClient(), "TillagePrograms/CreateTillageProgram", _programModel);
+            }
+            
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+                await LoadData();
+                await ProgramDialog.HideAsync();
+            }
+            else
+            {
+                Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error saving tillage program: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+    
+    private async Task DeleteProgram()
+    {
+        try
+        {
+            var response = await ApiCall.Remove<UI.Shared.Models.ApiResponse<TillageProgramViewModel>>(
+                await ApiCall.GetHttpClient(), "TillagePrograms/DeleteTillageProgram", _selectedProgram.Id);
+                
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show("Tillage program deleted successfully", showTitle: true, toastType: ToastType.Success);
+                await LoadData();
+                await DeleteDialog.HideAsync();
+            }
+            else
+            {
+                Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error deleting tillage program: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+    
+    private void CloseProgramDialog()
+    {
+        ProgramDialog.HideAsync();
+    }
+    
+    private void CancelDelete()
+    {
+        DeleteDialog.HideAsync();
+    }
+}

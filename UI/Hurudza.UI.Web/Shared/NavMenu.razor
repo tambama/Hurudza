@@ -61,6 +61,31 @@
                 </a>
             </li>
 
+            <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#tillageSection" class="nav-link @TillageActive" aria-controls="tillageSection" role="button" aria-expanded="false">
+                    <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center d-flex align-items-center justify-content-center me-2">
+                        <i class="ni ni-delivery-fast text-lg opacity-10" aria-hidden="true"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Tillage Program</span>
+                </a>
+                <div class="collapse" id="tillageSection">
+                    <ul class="nav ms-4 ps-3">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/tillage-dashboard" onclick="@ActivateTillage">
+                                <span class="sidenav-mini-icon"> D </span>
+                                <span class="sidenav-normal"> Dashboard </span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/tillage-programs" onclick="@ActivateTillage">
+                                <span class="sidenav-mini-icon"> P </span>
+                                <span class="sidenav-normal"> Programs </span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
             @* Admin Section *@
             @if (IsAdministrator())
             {
@@ -132,6 +157,7 @@
     private string StatsActive = "";
     private string FarmsActive = "";
     private string FieldsActive = "";
+    private string TillageActive = "";
     private string OwnershipActive = "";
     private string UsersActive = "";
     private string RolesActive = "";
@@ -207,6 +233,12 @@
         CropsActive = "active";
     }
 
+    private void ActivateTillage()
+    {
+        ResetAllMenus();
+        TillageActive = "active";
+    }
+
     private void ActivateOwnership()
     {
         ResetAllMenus();
@@ -235,5 +267,6 @@
         OwnershipActive = "";
         UsersActive = "";
         RolesActive = "";
+        TillageActive = "";
     }
 }

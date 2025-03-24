@@ -1148,13 +1148,33 @@
                 // First clear the map completely
                 await _mapModule.InvokeVoidAsync("clearMap", _mapInstance).AsTask();
                 
-                if (farmMap.Latitude != 0 && farmMap.Longitude != 0)
+                // Determine the proper zoom level based on farm properties
+                int zoomLevel = 14; // Default zoom level
+                
+                // If we have a farm boundary with meaningful coordinates, center on it
+                if (farmMap.IsPolygon && farmMap.FarmCoordinates.Count > 0)
                 {
-                    // Center the map on the farm
+                    // Calculate center of the farm polygon
+                    double avgLat = farmMap.FarmCoordinates.Average(c => c[1]);
+                    double avgLng = farmMap.FarmCoordinates.Average(c => c[0]);
+                    
+                    // Center map with appropriate zoom
+                    await _mapModule.InvokeVoidAsync("setMapCenter", 
+                        _mapInstance,
+                        avgLat, 
+                        avgLng,
+                        zoomLevel
+                    ).AsTask();
+                }
+                // Otherwise, fall back to farm coordinates
+                else if (farmMap.Latitude != 0 && farmMap.Longitude != 0)
+                {
+                    // Center the map on the farm coordinates
                     await _mapModule.InvokeVoidAsync("setMapCenter", 
                         _mapInstance,
                         farmMap.Latitude, 
-                        farmMap.Longitude
+                        farmMap.Longitude,
+                        zoomLevel
                     ).AsTask();
                 }
 

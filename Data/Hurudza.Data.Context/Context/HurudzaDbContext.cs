@@ -63,6 +63,10 @@ public class HurudzaDbContext :
     
     // Notifications
     public DbSet<SendGridTemplate>? SendGridTemplates { get; set; }
+    
+    // Tillage
+    public DbSet<TillageProgram> TillagePrograms { get; set; }
+    public DbSet<TillageService> TillageServices { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
@@ -308,6 +312,40 @@ public class HurudzaDbContext :
             b.HasOne(f => f.Farm).WithMany(f => f.Owners).HasForeignKey(f => f.FarmId).IsRequired(true)
                 .OnDelete(DeleteBehavior.NoAction);
             b.HasOne(f => f.Entity).WithMany(f => f.FarmOwners).HasForeignKey(f => f.EntityId).IsRequired(true)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+        
+        builder.Entity<TillageProgram>(b =>
+        {
+            b.Property(tp => tp.Id).ValueGeneratedOnAdd();
+    
+            b.HasOne(tp => tp.Farm)
+                .WithMany()
+                .HasForeignKey(tp => tp.FarmId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.NoAction);
+        
+            b.HasMany(tp => tp.TillageServices)
+                .WithOne(ts => ts.TillageProgram)
+                .HasForeignKey(ts => ts.TillageProgramId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<TillageService>(b =>
+        {
+            b.Property(ts => ts.Id).ValueGeneratedOnAdd();
+    
+            b.HasOne(ts => ts.RecipientFarm)
+                .WithMany()
+                .HasForeignKey(ts => ts.RecipientFarmId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.NoAction);
+        
+            b.HasOne(ts => ts.Field)
+                .WithMany()
+                .HasForeignKey(ts => ts.FieldId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.NoAction);
         });
     }

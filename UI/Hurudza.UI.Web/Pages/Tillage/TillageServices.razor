@@ -1,0 +1,529 @@
+@page "/tillage-program/{programId}/services"
+@attribute [Authorize]
+
+@using Hurudza.Data.UI.Models.ViewModels.Tillage
+@inject IApiCall ApiCall
+@inject NavigationManager Navigation
+
+<Toast @ref="Alert"/>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <div class="row">
+                    <div class="col-md-1 text-start">
+                        <a href="javascript:;" @onclick="GoBack">
+                            <i class="fas fa-arrow-left text-secondary text-sm" data-bs-toggle="tooltip"
+                               data-bs-placement="top" aria-hidden="true" aria-label="Go Back"
+                               data-bs-original-title="Go Back"></i><span class="sr-only">Go Back</span>
+                        </a>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-center">
+                        <h6 class="mb-0">Tillage Services for @_program.Name</h6>
+                    </div>
+                    <div class="col-md-5 text-end">
+                        <button class="btn btn-sm btn-primary" @onclick="LoadData">
+                            <i class="fas fa-sync-alt me-1"></i> Refresh
+                        </button>
+                        <button class="btn btn-sm btn-success ms-2" @onclick="ShowAddServiceDialog">
+                            <i class="fas fa-plus me-1"></i> Add Service
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body px-2 pt-0 pb-2">
+                @if (_loading)
+                {
+                    <div class="text-center py-5">
+                        <SfSpinner></SfSpinner>
+                        <p class="mt-3">Loading tillage services...</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="program-stats d-flex flex-wrap">
+                            <div class="me-4">
+                                <p class="text-muted mb-0">Total Hectares</p>
+                                <h4 class="mb-0">@_program.TotalHectares.ToString("N2") ha</h4>
+                            </div>
+                            <div class="me-4">
+                                <p class="text-muted mb-0">Tilled Hectares</p>
+                                <h4 class="mb-0">@_program.TilledHectares.ToString("N2") ha</h4>
+                            </div>
+                            <div class="me-4">
+                                <p class="text-muted mb-0">Remaining</p>
+                                <h4 class="mb-0">@_program.RemainingHectares.ToString("N2") ha</h4>
+                            </div>
+                            <div>
+                                <p class="text-muted mb-0">Progress</p>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress me-2" style="width: 100px; height: 6px;">
+                                        <div class="progress-bar bg-gradient-success" role="progressbar" style="width: @(_program.CompletionPercentage)%"></div>
+                                    </div>
+                                    <span>@_program.CompletionPercentage.ToString("N0")%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="date-range">
+                            <p class="text-muted mb-0">Date Range</p>
+                            <h6 class="mb-0">@_program.DateRange</h6>
+                        </div>
+                    </div>
+
+                    @if (_tillageServices == null || !_tillageServices.Any())
+                    {
+                        <div class="text-center py-5">
+                            <div class="alert alert-info">
+                                <p class="mb-0">No tillage services found for this program.</p>
+                            </div>
+                            <button class="btn btn-success mt-3" @onclick="ShowAddServiceDialog">Add Tillage Service</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <SfGrid
+                            DataSource="@_tillageServices"
+                            @ref="Grid"
+                            AllowPaging="true" 
+                            AllowExcelExport="true"
+                            AllowSorting="true"
+                            AllowMultiSorting="true"
+                            EnableStickyHeader="true"
+                            AllowResizing="true"
+                            AllowFiltering="true"
+                            AllowSelection="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "Print", "Search" })"
+                            ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                            <GridPageSettings PageSize="10"></GridPageSettings>
+                            <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
+                            <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="TillageServiceViewModel"></GridEvents>
+                            <GridColumns>
+                                <GridColumn Field=@nameof(TillageServiceViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                <GridColumn Field=@nameof(TillageServiceViewModel.RecipientFarm) HeaderText="Recipient Farm" TextAlign="TextAlign.Left" Width="180" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                                <GridColumn Field=@nameof(TillageServiceViewModel.ServiceDate) HeaderText="Service Date" TextAlign="TextAlign.Center" Width="120" Format="yyyy-MM-dd" Type="ColumnType.Date"></GridColumn>
+                                <GridColumn Field=@nameof(TillageServiceViewModel.TillageTypeName) HeaderText="Type" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                                <GridColumn Field=@nameof(TillageServiceViewModel.Hectares) HeaderText="Hectares" TextAlign="TextAlign.Right" Width="100" Format="N2"></GridColumn>
+                                <GridColumn Field=@nameof(TillageServiceViewModel.Field) HeaderText="Field" TextAlign="TextAlign.Left" Width="150" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                                <GridColumn Field=@nameof(TillageServiceViewModel.Status) HeaderText="Status" TextAlign="TextAlign.Center" Width="120">
+                                    <Template>
+                                        @{
+                                            var service = (context as TillageServiceViewModel);
+                                            if (service.IsCompleted)
+                                            {
+                                                <span class="badge badge-sm bg-gradient-success">Completed</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-sm bg-gradient-warning">Scheduled</span>
+                                            }
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field=@nameof(TillageServiceViewModel.ServiceCost) HeaderText="Cost" TextAlign="TextAlign.Right" Width="100" Format="C2"></GridColumn>
+                                <GridColumn HeaderText="Actions" TextAlign="TextAlign.Center" Width="150">
+                                    <Template>
+                                        @{
+                                            var service = (context as TillageServiceViewModel);
+                                            <div class="d-flex justify-content-center">
+                                                <a href="javascript:;" @onclick="() => EditService(service)" class="btn btn-link text-secondary mb-0">
+                                                    <i class="fas fa-edit text-xs"></i>
+                                                </a>
+                                                @if (!service.IsCompleted)
+                                                {
+                                                    <a href="javascript:;" @onclick="() => MarkCompleted(service)" class="btn btn-link text-success mb-0">
+                                                        <i class="fas fa-check text-xs"></i>
+                                                    </a>
+                                                }
+                                                <a href="javascript:;" @onclick="() => ConfirmDeleteService(service)" class="btn btn-link text-danger mb-0">
+                                                    <i class="fas fa-trash text-xs"></i>
+                                                </a>
+                                            </div>
+                                        }
+                                    </Template>
+                                </GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Tillage Service Dialog -->
+<SfDialog @ref="ServiceDialog" IsModal="true" Width="500px" Height="auto" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>@(_isEditing ? "Edit Tillage Service" : "Add Tillage Service")</Header>
+        <Content>
+            <EditForm Model="@_serviceModel" OnValidSubmit="@SaveTillageService">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                
+                <div class="form-group mb-3">
+                    <label>Recipient Farm</label>
+                    <SfDropDownList TValue="string" TItem="FarmViewModel" @bind-Value="@_serviceModel.RecipientFarmId" DataSource="@_farms" Placeholder="Select Farm">
+                        <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                    <ValidationMessage For="@(() => _serviceModel.RecipientFarmId)" />
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label>Service Date</label>
+                    <SfDatePicker TValue="DateTime" @bind-Value="@_serviceModel.ServiceDate" Format="yyyy-MM-dd"></SfDatePicker>
+                    <ValidationMessage For="@(() => _serviceModel.ServiceDate)" />
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Tillage Type</label>
+                            <SfDropDownList TValue="TillageType" TItem="TillageTypeModel" @bind-Value="@_serviceModel.TillageType" DataSource="@_tillageTypes" Placeholder="Select Type">
+                                <DropDownListFieldSettings Value="TillageType" Text="Name"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                            <ValidationMessage For="@(() => _serviceModel.TillageType)" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Hectares</label>
+                            <SfNumericTextBox TValue="float" @bind-Value="@_serviceModel.Hectares" Format="N2" Placeholder="Enter hectares"></SfNumericTextBox>
+                            <ValidationMessage For="@(() => _serviceModel.Hectares)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label>Field (Optional)</label>
+                    <SfDropDownList TValue="string" TItem="FieldViewModel" @bind-Value="@_serviceModel.FieldId" DataSource="@_fields" Placeholder="Select Field" AllowFiltering="true">
+                        <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                        <DropDownListEvents ValueChange="OnFieldChange"></DropDownListEvents>
+                    </SfDropDownList>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label>Service Cost (Optional)</label>
+                    <SfNumericTextBox TValue="decimal?" @bind-Value="@_serviceModel.ServiceCost" Format="C2" Placeholder="Enter cost"></SfNumericTextBox>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label>Notes (Optional)</label>
+                    <SfTextBox Multiline="true" @bind-Value="@_serviceModel.Notes" Placeholder="Enter notes" CssClass="e-input"></SfTextBox>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <SfCheckBox @bind-Checked="@_serviceModel.IsCompleted" Label="Mark as Completed"></SfCheckBox>
+                </div>
+                
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="button" class="btn btn-secondary me-2" @onclick="CloseServiceDialog">Cancel</button>
+                    <button type="submit" class="btn btn-primary">@(_isEditing ? "Update" : "Save")</button>
+                </div>
+            </EditForm>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+<!-- Delete Confirmation Dialog -->
+<SfDialog @ref="DeleteDialog" IsModal="true" Width="400px" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>Delete Tillage Service</Header>
+        <Content>
+            <p>Are you sure you want to delete this tillage service?</p>
+            <p class="text-danger">This action cannot be undone.</p>
+            
+            <div class="d-flex justify-content-end mt-4">
+                <button type="button" class="btn btn-secondary me-2" @onclick="CancelDelete">Cancel</button>
+                <button type="button" class="btn btn-danger" @onclick="DeleteService">Delete</button>
+            </div>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+<!-- Complete Service Confirmation Dialog -->
+<SfDialog @ref="CompleteDialog" IsModal="true" Width="400px" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>Complete Tillage Service</Header>
+        <Content>
+            <p>Are you sure you want to mark this tillage service as completed?</p>
+            <p>This will update the tilled hectares for the program.</p>
+            
+            <div class="d-flex justify-content-end mt-4">
+                <button type="button" class="btn btn-secondary me-2" @onclick="CancelComplete">Cancel</button>
+                <button type="button" class="btn btn-success" @onclick="CompleteService">Mark as Completed</button>
+            </div>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+    [Parameter]
+    public string ProgramId { get; set; }
+    
+    // References
+    private Toast Alert;
+    private SfGrid<TillageServiceViewModel> Grid;
+    private SfDialog ServiceDialog;
+    private SfDialog DeleteDialog;
+    private SfDialog CompleteDialog;
+    
+    // State
+    private bool _loading = true;
+    private bool _isEditing = false;
+    
+    // Data
+    private TillageProgramViewModel _program = new();
+    private List<TillageServiceViewModel> _tillageServices;
+    private TillageServiceViewModel _serviceModel = new();
+    private TillageServiceViewModel _selectedService;
+    private List<FarmViewModel> _farms;
+    private List<FieldViewModel> _fields = new();
+    private List<TillageTypeModel> _tillageTypes = Enum.GetValues<TillageType>().Select(x => new TillageTypeModel(x)).ToList();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        // Set defaults for new service
+        _serviceModel.ServiceDate = DateTime.Today;
+        _serviceModel.TillageProgramId = ProgramId;
+        
+        await LoadData();
+    }
+    
+    private async Task LoadData()
+    {
+        _loading = true;
+        
+        try
+        {
+            // Load tillage program details
+            var programResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<TillageProgramViewModel>>(
+                await ApiCall.GetHttpClient(), "TillagePrograms/GetTillageProgram", ProgramId);
+                
+            if (programResponse.Status == (int)HttpStatusCode.OK && programResponse.Result != null)
+            {
+                _program = programResponse.Result;
+                
+                // Load tillage services for this program
+                _tillageServices = (await ApiCall.Get<IEnumerable<TillageServiceViewModel>>(
+                    await ApiCall.GetHttpClient(), $"TillageServices/GetProgramTillageServices/{ProgramId}")).ToList();
+                    
+                // Load farms for dropdown
+                _farms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(
+                    await ApiCall.GetHttpClient(), "Farms/getFarms")).ToList();
+                    
+                // Load fields from program's farm
+                await LoadFieldsForFarm(_program.FarmId);
+            }
+            else
+            {
+                Alert.Show("Tillage program not found", showTitle: true, toastType: ToastType.Danger);
+                Navigation.NavigateTo("/tillage-programs");
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading data: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            
+            // Initialize empty lists to prevent null references
+            _tillageServices = new List<TillageServiceViewModel>();
+            if (_farms == null) _farms = new List<FarmViewModel>();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+    
+    private async Task LoadFieldsForFarm(string farmId)
+    {
+        try
+        {
+            _fields = (await ApiCall.Get<IEnumerable<FieldViewModel>>(
+                await ApiCall.GetHttpClient(), $"fields/getfarmfields/{farmId}")).ToList();
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading fields: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            _fields = new List<FieldViewModel>();
+        }
+    }
+    
+    private void ActionBeginHandler(ActionEventArgs<TillageServiceViewModel> args)
+    {
+        // Handle grid actions if needed
+    }
+    
+    private void RowSelectHandler(RowSelectEventArgs<TillageServiceViewModel> args)
+    {
+        _selectedService = args.Data;
+    }
+    
+    private void ShowAddServiceDialog()
+    {
+        _isEditing = false;
+        _serviceModel = new TillageServiceViewModel
+        {
+            ServiceDate = DateTime.Today,
+            TillageProgramId = ProgramId,
+            IsCompleted = false
+        };
+        
+        ServiceDialog.ShowAsync();
+    }
+    
+    private void EditService(TillageServiceViewModel service)
+    {
+        _isEditing = true;
+        _selectedService = service;
+        _serviceModel = new TillageServiceViewModel
+        {
+            Id = service.Id,
+            TillageProgramId = service.TillageProgramId,
+            RecipientFarmId = service.RecipientFarmId,
+            ServiceDate = service.ServiceDate,
+            Hectares = service.Hectares,
+            TillageType = service.TillageType,
+            FieldId = service.FieldId,
+            Notes = service.Notes,
+            IsCompleted = service.IsCompleted,
+            ServiceCost = service.ServiceCost
+        };
+        
+        ServiceDialog.ShowAsync();
+    }
+    
+    private void ConfirmDeleteService(TillageServiceViewModel service)
+    {
+        _selectedService = service;
+        DeleteDialog.ShowAsync();
+    }
+    
+    private void MarkCompleted(TillageServiceViewModel service)
+    {
+        _selectedService = service;
+        CompleteDialog.ShowAsync();
+    }
+    
+    private async Task SaveTillageService()
+    {
+        try
+        {
+            UI.Shared.Models.ApiResponse<TillageServiceViewModel> response;
+            
+            if (_isEditing)
+            {
+                response = await ApiCall.Update<UI.Shared.Models.ApiResponse<TillageServiceViewModel>, TillageServiceViewModel>(
+                    await ApiCall.GetHttpClient(), "TillageServices/UpdateTillageService", _serviceModel.Id, _serviceModel);
+            }
+            else
+            {
+                response = await ApiCall.Add<UI.Shared.Models.ApiResponse<TillageServiceViewModel>, TillageServiceViewModel>(
+                    await ApiCall.GetHttpClient(), "TillageServices/CreateTillageService", _serviceModel);
+            }
+            
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+                await LoadData();
+                await ServiceDialog.HideAsync();
+            }
+            else
+            {
+                Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error saving tillage service: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+    
+    private async Task DeleteService()
+    {
+        try
+        {
+            var response = await ApiCall.Remove<UI.Shared.Models.ApiResponse<TillageServiceViewModel>>(
+                await ApiCall.GetHttpClient(), "TillageServices/DeleteTillageService", _selectedService.Id);
+                
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show("Tillage service deleted successfully", showTitle: true, toastType: ToastType.Success);
+                await LoadData();
+                await DeleteDialog.HideAsync();
+            }
+            else
+            {
+                Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error deleting tillage service: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+    
+    private async Task CompleteService()
+    {
+        try
+        {
+            var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<TillageServiceViewModel>>(
+                await ApiCall.GetHttpClient(), $"TillageServices/CompleteTillageService/{_selectedService.Id}");
+                
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show("Tillage service marked as completed", showTitle: true, toastType: ToastType.Success);
+                await LoadData();
+                await CompleteDialog.HideAsync();
+            }
+            else
+            {
+                Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error completing tillage service: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+    
+    private void GoBack()
+    {
+        if (!string.IsNullOrEmpty(_program.FarmId))
+        {
+            Navigation.NavigateTo($"/farm/{_program.FarmId}/tillage-programs");
+        }
+        else
+        {
+            Navigation.NavigateTo("/tillage-programs");
+        }
+    }
+    
+    private void CloseServiceDialog()
+    {
+        ServiceDialog.HideAsync();
+    }
+    
+    private void CancelDelete()
+    {
+        DeleteDialog.HideAsync();
+    }
+    
+    private void CancelComplete()
+    {
+        CompleteDialog.HideAsync();
+    }
+    
+    private void OnFieldChange(ChangeEventArgs<string, FieldViewModel> args)
+    {
+        if (!string.IsNullOrEmpty(args.Value))
+        {
+            var selectedField = _fields.FirstOrDefault(f => f.Id == args.Value);
+            if (selectedField != null)
+            {
+                // Optionally auto-fill the hectares based on field size
+                // _serviceModel.Hectares = selectedField.Size;
+            }
+        }
+    }
+}
