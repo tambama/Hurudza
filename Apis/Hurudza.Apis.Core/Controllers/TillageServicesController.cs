@@ -197,12 +197,12 @@ public class TillageServicesController : Controller
                 .FirstOrDefaultAsync()
                 .ConfigureAwait(false);
 
-            return Ok(new ApiOkResponse(updatedService, "Tillage service marked as completed"));
+            return Ok(new ApiOkResponse(updatedService, "Tillage service updated successfully"));
         }
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            return Ok(new ApiResponse((int)HttpStatusCode.InternalServerError, $"Error completing tillage service: {ex.Message}"));
+            return Ok(new ApiResponse((int)HttpStatusCode.InternalServerError, $"Error updating tillage service: {ex.Message}"));
         }
     }
     
@@ -299,7 +299,7 @@ public class TillageServicesController : Controller
         return Ok(statistics);
     }
     
-    [HttpPut("{id}/complete", Name = nameof(CompleteTillageService))]
+    [HttpGet("{id}/complete", Name = nameof(CompleteTillageService))]
     public async Task<IActionResult> CompleteTillageService(string id)
     {
         // Run this in a transaction
@@ -341,4 +341,142 @@ public class TillageServicesController : Controller
             await _context.SaveChangesAsync().ConfigureAwait(false);
             await transaction.CommitAsync();
             
-            var updatedService = await _context
+            var updatedService = await _context.TillageServices
+                .Where(ts => ts.Id == id)
+                .ProjectTo<TillageServiceViewModel>(_configuration)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
+            return Ok(new ApiOkResponse(updatedService, "Tillage service marked as completed"));
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return Ok(new ApiResponse((int)HttpStatusCode.InternalServerError, $"Error completing tillage service: {ex.Message}"));
+        }
+    }
+    
+    [HttpGet("{programId}/summary", Name = nameof(GetProgramServicesSummary))]
+    public async Task<IActionResult> GetProgramServicesSummary(string programId)
+    {
+        try
+        {
+            // Check if program exists
+            var program = await _context.TillagePrograms
+                .FirstOrDefaultAsync(tp => tp.Id == programId)
+                .ConfigureAwait(false);
+                
+            if (program == null)
+            {
+                return Ok(new ApiResponse((int)HttpStatusCode.NotFound, "Tillage program not found"));
+            }
+            
+            // Get summary of services by type
+            var servicesByType = await _context.TillageServices
+                .Where(ts => ts.TillageProgramId == programId && !ts.Deleted)
+                .GroupBy(ts => ts.TillageType)
+                .Select(g => new
+                {
+                    TillageType = g.Key,
+                    TillageTypeName = g.Key.ToString(),
+                    TotalServices = g.Count(),
+                    CompletedServices = g.Count(ts => ts.IsCompleted),
+                    TotalHectares = g.Sum(ts => ts.Hectares),
+                    TotalRevenue = g.Sum(ts => ts.ServiceCost ?? 0)
+                })
+                .ToListAsync()
+                .ConfigureAwait(false);
+                
+            // Get summary of services by farm
+            var servicesByFarm = await _context.TillageServices
+                .Where(ts => ts.TillageProgramId == programId && !ts.Deleted)
+                .GroupBy(ts => ts.RecipientFarmId)
+                .Select(g => new
+                {
+                    FarmId = g.Key,
+                    FarmName = g.First().RecipientFarm.Name,
+                    TotalServices = g.Count(),
+                    CompletedServices = g.Count(ts => ts.IsCompleted),
+                    TotalHectares = g.Sum(ts => ts.Hectares),
+                    TotalRevenue = g.Sum(ts => ts.ServiceCost ?? 0)
+                })
+                .ToListAsync()
+                .ConfigureAwait(false);
+                
+            // Create aggregate summary
+            var summary = new
+            {
+                ProgramId = programId,
+                ProgramName = program.Name,
+                TotalServices = await _context.TillageServices
+                    .CountAsync(ts => ts.TillageProgramId == programId && !ts.Deleted),
+                CompletedServices = await _context.TillageServices
+                    .CountAsync(ts => ts.TillageProgramId == programId && !ts.Deleted && ts.IsCompleted),
+                TotalHectares = await _context.TillageServices
+                    .Where(ts => ts.TillageProgramId == programId && !ts.Deleted)
+                    .SumAsync(ts => ts.Hectares),
+                TotalRevenue = await _context.TillageServices
+                    .Where(ts => ts.TillageProgramId == programId && !ts.Deleted)
+                    .SumAsync(ts => ts.ServiceCost ?? 0),
+                ServicesByType = servicesByType,
+                ServicesByFarm = servicesByFarm
+            };
+            
+            return Ok(summary);
+        }
+        catch (Exception ex)
+        {
+            return Ok(new ApiResponse((int)HttpStatusCode.InternalServerError, $"Error getting program services summary: {ex.Message}"));
+        }
+    }
+    
+    [HttpGet("{farmId}/revenue", Name = nameof(GetFarmTillageRevenue))]
+    public async Task<IActionResult> GetFarmTillageRevenue(string farmId)
+    {
+        try
+        {
+            // Check if farm exists
+            var farm = await _context.Farms
+                .FirstOrDefaultAsync(f => f.Id == farmId)
+                .ConfigureAwait(false);
+                
+            if (farm == null)
+            {
+                return Ok(new ApiResponse((int)HttpStatusCode.NotFound, "Farm not found"));
+            }
+            
+            // Get revenue by month
+            var currentYear = DateTime.Now.Year;
+            var startDate = new DateTime(currentYear, 1, 1);
+            var endDate = new DateTime(currentYear, 12, 31);
+            
+            var revenueByMonth = await _context.TillageServices
+                .Where(ts => ts.RecipientFarmId == farmId && !ts.Deleted && 
+                       ts.ServiceDate >= startDate && ts.ServiceDate <= endDate)
+                .GroupBy(ts => ts.ServiceDate.Month)
+                .Select(g => new
+                {
+                    Month = g.Key,
+                    Revenue = g.Sum(ts => ts.ServiceCost ?? 0)
+                })
+                .ToListAsync()
+                .ConfigureAwait(false);
+                
+            // Fill in missing months
+            var completeMonthlyRevenue = Enumerable.Range(1, 12)
+                .Select(month => new
+                {
+                    Month = month,
+                    MonthName = new DateTime(currentYear, month, 1).ToString("MMMM"),
+                    Revenue = revenueByMonth.FirstOrDefault(r => r.Month == month)?.Revenue ?? 0
+                })
+                .ToList();
+                
+            return Ok(completeMonthlyRevenue);
+        }
+        catch (Exception ex)
+        {
+            return Ok(new ApiResponse((int)HttpStatusCode.InternalServerError, $"Error getting farm tillage revenue: {ex.Message}"));
+        }
+    }
+}

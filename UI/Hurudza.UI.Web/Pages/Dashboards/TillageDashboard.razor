@@ -121,7 +121,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row mb-4">
                         <div class="col-lg-8">
                             <div class="card z-index-2">
@@ -134,19 +134,19 @@
                                             <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
                                             <ChartAxes>
                                                 <ChartAxis Name="YAxis" OpposedPosition="true" Minimum="0"
-                                                    Maximum="@CalculateMaxYAxis()" Title="Percentage (%)">
+                                                           Maximum="@CalculateMaxYAxis()" Title="Percentage (%)">
                                                 </ChartAxis>
                                             </ChartAxes>
                                             <ChartSeriesCollection>
-                                                <ChartSeries DataSource="@_farmSummaries" Name="Planned Hectares" 
-                                                    XName="FarmName" YName="TotalPlanned" Type="ChartSeriesType.Column">
+                                                <ChartSeries DataSource="@_farmSummaries" Name="Planned Hectares"
+                                                             XName="FarmName" YName="TotalPlanned" Type="ChartSeriesType.Column">
                                                 </ChartSeries>
-                                                <ChartSeries DataSource="@_farmSummaries" Name="Tilled Hectares" 
-                                                    XName="FarmName" YName="TotalTilled" Type="ChartSeriesType.Column">
+                                                <ChartSeries DataSource="@_farmSummaries" Name="Tilled Hectares"
+                                                             XName="FarmName" YName="TotalTilled" Type="ChartSeriesType.Column">
                                                 </ChartSeries>
-                                                <ChartSeries DataSource="@_farmSummaries" Name="Completion %" 
-                                                    XName="FarmName" YName="CompletionPercentage" 
-                                                    Type="ChartSeriesType.Line" YAxisName="YAxis">
+                                                <ChartSeries DataSource="@_farmSummaries" Name="Completion %"
+                                                             XName="FarmName" YName="CompletionPercentage"
+                                                             Type="ChartSeriesType.Line" YAxisName="YAxis">
                                                 </ChartSeries>
                                             </ChartSeriesCollection>
                                             <ChartLegendSettings Visible="true" Position="LegendPosition.Bottom"></ChartLegendSettings>
@@ -165,20 +165,27 @@
                                     <div style="height: 300px;">
                                         <SfAccumulationChart>
                                             <AccumulationChartSeriesCollection>
-                                                <AccumulationChartSeries DataSource="@GetServicesData()" 
-                                                    XName="Status" YName="Count" 
-                                                    Name="Services" InnerRadius="40%">
-                                                    <AccumulationDataLabelSettings Visible="true" Name="Status" 
-                                                        Position="AccumulationLabelPosition.Inside" 
-                                                        Template="@ServicesLabelTemplate">
+                                                <AccumulationChartSeries DataSource="@GetServicesData()"
+                                                                         XName="Status" YName="Count"
+                                                                         Name="Services" InnerRadius="40%">
+                                                    <AccumulationDataLabelSettings Visible="true" Name="Status"
+                                                                                   Position="AccumulationLabelPosition.Inside">
+                                                        <Template>
+                                                            @{
+                                                                // Using a RenderFragment instead of a string
+                                                                <div class='chart-datalabel'>
+                                                                    ${point.x}: ${point.percentage}%
+                                                                </div>
+                                                            }
+                                                        </Template>
                                                     </AccumulationDataLabelSettings>
                                                 </AccumulationChartSeries>
                                             </AccumulationChartSeriesCollection>
-                                            <AccumulationChartLegendSettings Visible="true" 
-                                                Position="LegendPosition.Bottom">
+                                            <AccumulationChartLegendSettings Visible="true"
+                                                                             Position="LegendPosition.Bottom">
                                             </AccumulationChartLegendSettings>
-                                            <AccumulationChartTooltipSettings Enable="true" 
-                                                Format="${point.x}: <b>${point.y}</b> (${point.percentage}%)">
+                                            <AccumulationChartTooltipSettings Enable="true"
+                                                                              Format="${point.x}: <b>${point.y}</b> (${point.percentage}%)">
                                             </AccumulationChartTooltipSettings>
                                         </SfAccumulationChart>
                                     </div>
@@ -186,7 +193,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-12">
                             <div class="card h-100">
@@ -197,64 +204,64 @@
                                     <div class="table-responsive p-0">
                                         <table class="table align-items-center mb-0">
                                             <thead>
-                                                <tr>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Farm</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Total Planned</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Tilled</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Progress</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Services</th>
-                                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Revenue</th>
-                                                    <th class="text-secondary opacity-7"></th>
-                                                </tr>
+                                            <tr>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Farm</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Total Planned</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Tilled</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Progress</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Services</th>
+                                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Revenue</th>
+                                                <th class="text-secondary opacity-7"></th>
+                                            </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach (var farm in _farmSummaries)
-                                                {
-                                                    <tr>
-                                                        <td>
-                                                            <div class="d-flex px-2 py-1">
-                                                                <div>
-                                                                    <div class="icon icon-shape icon-sm shadow border-radius-md bg-gradient-primary text-center me-2 d-flex align-items-center justify-content-center">
-                                                                        <i class="fas fa-building opacity-10"></i>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="d-flex flex-column justify-content-center">
-                                                                    <h6 class="mb-0 text-sm">@farm.FarmName</h6>
+                                            @foreach (var farm in _farmSummaries)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div>
+                                                                <div class="icon icon-shape icon-sm shadow border-radius-md bg-gradient-primary text-center me-2 d-flex align-items-center justify-content-center">
+                                                                    <i class="fas fa-building opacity-10"></i>
                                                                 </div>
                                                             </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="text-sm font-weight-bold text-end mb-0">@farm.TotalPlanned.ToString("N2") ha</div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="text-sm font-weight-bold text-end mb-0">@farm.TotalTilled.ToString("N2") ha</div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <span class="me-2 text-sm font-weight-bold">@farm.CompletionPercentage.ToString("N0")%</span>
-                                                                <div>
-                                                                    <div class="progress">
-                                                                        <div class="progress-bar bg-gradient-success" role="progressbar" 
-                                                                             aria-valuenow="@farm.CompletionPercentage" aria-valuemin="0" 
-                                                                             aria-valuemax="100" style="width: @farm.CompletionPercentage%;">
-                                                                        </div>
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                <h6 class="mb-0 text-sm">@farm.FarmName</h6>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="text-sm font-weight-bold text-end mb-0">@farm.TotalPlanned.ToString("N2") ha</div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="text-sm font-weight-bold text-end mb-0">@farm.TotalTilled.ToString("N2") ha</div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="me-2 text-sm font-weight-bold">@farm.CompletionPercentage.ToString("N0")%</span>
+                                                            <div>
+                                                                <div class="progress">
+                                                                    <div class="progress-bar bg-gradient-success" role="progressbar"
+                                                                         aria-valuenow="@farm.CompletionPercentage" aria-valuemin="0"
+                                                                         aria-valuemax="100" style="width: @farm.CompletionPercentage%;">
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="text-sm font-weight-bold mb-0">@farm.CompletedServices / @farm.TotalServices</div>
-                                                        </td>
-                                                        <td class="align-middle text-center">
-                                                            <span class="text-sm font-weight-bold">@farm.TotalRevenue.ToString("C2")</span>
-                                                        </td>
-                                                        <td class="align-middle">
-                                                            <a href="/farm/@farm.FarmId/tillage-programs" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="View details">
-                                                                View
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                }
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="text-sm font-weight-bold mb-0">@farm.CompletedServices / @farm.TotalServices</div>
+                                                    </td>
+                                                    <td class="align-middle text-center">
+                                                        <span class="text-sm font-weight-bold">@farm.TotalRevenue.ToString("C2")</span>
+                                                    </td>
+                                                    <td class="align-middle">
+                                                        <a href="/farm/@farm.FarmId/tillage-programs" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="View details">
+                                                            View
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
                                             </tbody>
                                         </table>
                                     </div>
@@ -271,29 +278,30 @@
 @code {
     private Toast Alert;
     private bool _loading = true;
-    
+
     // Dashboard data
     private dynamic _stats;
     private List<TillageSummaryViewModel> _farmSummaries = new();
-    
-    public string ServicesLabelTemplate = "<div class='chart-datalabel'>${point.x}: ${point.percentage}%</div>";
-    
+
+    // REMOVED: This string template is causing the error because the Template property expects a RenderFragment, not a string
+    // public string ServicesLabelTemplate = "<div class='chart-datalabel'>${point.x}: ${point.percentage}%</div>";
+
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
     }
-    
+
     private async Task LoadData()
     {
         _loading = true;
         StateHasChanged();
-        
+
         try
         {
             // Load tillage statistics
             _stats = await ApiCall.Get<dynamic>(
                 await ApiCall.GetHttpClient(), "TillageServices/GetTillageStatistics");
-                
+
             // Load farm summaries
             _farmSummaries = await ApiCall.Get<List<TillageSummaryViewModel>>(
                 await ApiCall.GetHttpClient(), "TillagePrograms/GetTillageSummary");
@@ -308,35 +316,35 @@
             StateHasChanged();
         }
     }
-    
+
     private void GoToPrograms()
     {
         Navigation.NavigateTo("/tillage-programs");
     }
-    
+
     private float GetCompletionPercentage()
     {
         if (_stats == null || _stats.TotalPlannedHectares == 0)
             return 0;
-            
+
         return (float)(_stats.TotalTilledHectares / _stats.TotalPlannedHectares * 100);
     }
-    
+
     private List<object> GetServicesData()
     {
         if (_stats == null)
             return new List<object>();
-            
+
         int completed = (int)_stats.CompletedServices;
         int pending = (int)_stats.TotalServices - completed;
-        
+
         return new List<object>
         {
             new { Status = "Completed", Count = completed },
             new { Status = "Pending", Count = pending }
         };
     }
-    
+
     private float CalculateMaxYAxis()
     {
         // For the secondary Y-axis showing percentages
