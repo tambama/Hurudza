@@ -280,8 +280,8 @@
     private bool _loading = true;
 
     // Dashboard data
-    private dynamic _stats;
     private List<TillageSummaryViewModel> _farmSummaries = new();
+    private TillageStatisticsViewModel _stats = new TillageStatisticsViewModel();
 
     // REMOVED: This string template is causing the error because the Template property expects a RenderFragment, not a string
     // public string ServicesLabelTemplate = "<div class='chart-datalabel'>${point.x}: ${point.percentage}%</div>";
@@ -299,7 +299,7 @@
         try
         {
             // Load tillage statistics
-            _stats = await ApiCall.Get<dynamic>(
+            _stats = await ApiCall.Get<TillageStatisticsViewModel>(
                 await ApiCall.GetHttpClient(), "TillageServices/GetTillageStatistics");
 
             // Load farm summaries

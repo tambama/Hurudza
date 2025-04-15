@@ -198,7 +198,7 @@
                     <label>Field (Optional)</label>
                     <SfDropDownList TValue="string" TItem="FieldViewModel" @bind-Value="@_serviceModel.FieldId" DataSource="@_fields" Placeholder="Select Field" AllowFiltering="true">
                         <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
-                        <DropDownListEvents ValueChange="OnFieldChange"></DropDownListEvents>
+                        <DropDownListEvents TItem="FieldViewModel" TValue="string" ValueChange="@OnFieldChange"></DropDownListEvents>
                     </SfDropDownList>
                 </div>
                 
@@ -514,7 +514,7 @@
         CompleteDialog.HideAsync();
     }
     
-    private void OnFieldChange(ChangeEventArgs<string, FieldViewModel> args)
+    private void OnFieldChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, FieldViewModel> args)
     {
         if (!string.IsNullOrEmpty(args.Value))
         {
