@@ -201,6 +201,19 @@ export async function drawPolygon(map, id, coordinates, isField = false, name = 
  */
 export function loadFarms(map, farms) {
     try {
+        // Add debug to see if function is being called with data
+        console.log("loadFarms called with data:", farms);
+
+        if (!map) {
+            console.error("Map instance is not initialized");
+            return;
+        }
+
+        if (!farms || !farms.features || farms.features.length === 0) {
+            console.warn("No farm data provided for clusters");
+            return;
+        }
+
         // Clean up existing sources and layers
         if (sourceExists(map, 'farms')) {
             // Remove layers first
@@ -318,7 +331,7 @@ export function loadFarms(map, farms) {
             const props = e.features[0].properties;
             const name = props.name;
             const size = props.size || 'N/A';
-            const address = props.address || '';
+            // Don't display address anymore to match the schools list change
 
             // Ensure popup appears over the copy being clicked
             while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
@@ -335,7 +348,6 @@ export function loadFarms(map, farms) {
                 .setHTML(`
                     <div style="max-width: 250px; word-wrap: break-word;">
                         <h4 style="margin-bottom: 5px;">${name}</h4>
-                        <p style="margin-bottom: 5px; font-size: 12px;">${address}</p>
                         <p style="margin-bottom: 0; font-size: 12px;">Size: ${size} ha</p>
                     </div>
                 `)

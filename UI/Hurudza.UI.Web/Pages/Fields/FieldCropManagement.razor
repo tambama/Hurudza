@@ -317,7 +317,7 @@
     private async Task LoadData()
     {
         // Get field details
-        var fieldResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<FieldViewModel>>(await ApiCall.GetHttpClient(), "fields/getfield", Id);
+        var fieldResponse = await ApiCall.Get<ApiResponse<FieldViewModel>>(await ApiCall.GetHttpClient(), "fields/getfield", Id);
         if (fieldResponse.Status == (int)HttpStatusCode.OK)
         {
             _field = fieldResponse.Result;

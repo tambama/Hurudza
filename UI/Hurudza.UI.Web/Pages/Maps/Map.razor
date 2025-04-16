@@ -56,13 +56,13 @@
     .margin {
         margin: 10px;
     }
-    
+
     #map {
         width: 100%;
         height: 100%;
         min-height: 100vh;
     }
-    
+
     .sidebar-container {
         width: 40%;
         padding: 8px;
@@ -70,22 +70,22 @@
         overflow-y: auto;
         transition: all 0.3s ease;
         background-color: white;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-    
+
     /* Style fix for list items to prevent text truncation */
     .e-list-item .e-list-content {
         white-space: normal !important;
         word-wrap: break-word !important;
         overflow: visible !important;
     }
-    
+
     /* Ensure all list items have proper padding and spacing */
     .list-group-item {
         word-wrap: break-word;
         overflow-wrap: break-word;
     }
-    
+
     .sidebar-header {
         display: flex;
         flex-direction: row;
@@ -93,16 +93,16 @@
         align-items: center;
         margin-bottom: 10px;
     }
-    
+
     .search-box {
         margin-bottom: 10px;
     }
-    
+
     .list-container {
         max-height: calc(100vh - 100px);
         overflow-y: auto;
     }
-    
+
     .panel-hidden {
         display: none;
     }
@@ -122,7 +122,8 @@
             </button>
         </div>
         <div class="search-box input-group">
-            <input type="text" class="form-control" placeholder="Search schools..." @bind-value="_searchTerm" @bind-value:event="oninput" @onkeyup="FilterFarms">
+            <input type="text" class="form-control" placeholder="Search schools..." @bind-value="_searchTerm"
+                   @bind-value:event="oninput" @onkeyup="FilterFarms">
             @if (!string.IsNullOrEmpty(_searchTerm))
             {
                 <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch">
@@ -154,9 +155,6 @@
                                 FarmViewModel farm = (FarmViewModel)context;
                                 <div class="e-list-wrapper e-list-multi-line" @onclick="(e => OnFarmSelect(farm))">
                                     <div class="e-list-item-header text-truncate">@farm.Name</div>
-                                    <div class="e-list-content text-muted" style="white-space: normal; font-size: 12px;">
-                                        @(string.IsNullOrEmpty(farm.Address) ? "No address" : farm.Address)
-                                    </div>
                                 </div>
                             }
                         </Template>
@@ -165,7 +163,7 @@
             }
         </div>
     </div>
-    
+
     <!-- Farm Details Panel -->
     <div class="sidebar-container @_showSchoolDetails">
         <div class="card h-100">
@@ -198,9 +196,9 @@
                 <hr class="horizontal gray-light my-4">
                 <ul class="list-group">
                     <li class="list-group-item border-0 ps-0 pt-0 text-sm">
-                <strong class="text-dark">Address:</strong>
-                <div style="word-wrap: break-word;">@_farm.Address</div>
-            </li>
+                        <strong class="text-dark">Address:</strong>
+                        <div style="word-wrap: break-word;">@_farm.Address</div>
+                    </li>
                     <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Primary
                             Contact:</strong> &nbsp; @_farm.ContactPerson</li>
                     <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Mobile:</strong>
@@ -223,13 +221,15 @@
                                 <ul class="list-group">
                                     <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong
                                             class="text-dark">Province:</strong> &nbsp; @_farm.Province</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Region:</strong>
+                                    <li class="list-group-item border-0 ps-0 text-sm"><strong
+                                            class="text-dark">Region:</strong>
                                         &nbsp; @(_farm.Region?.ToString() ?? "Not specified")</li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">District:</strong>
                                         &nbsp; @_farm.District</li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Local
                                             Authority:</strong> &nbsp; @_farm.LocalAuthority</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Ward:</strong>
+                                    <li class="list-group-item border-0 ps-0 text-sm"><strong
+                                            class="text-dark">Ward:</strong>
                                         &nbsp; @_farm.Ward</li>
                                 </ul>
                             </ContentTemplate>
@@ -242,16 +242,20 @@
                             </HeaderTemplate>
                             <ContentTemplate>
                                 <ul class="list-group">
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Total Area:</strong> 
+                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Total
+                                            Area:</strong>
                                         &nbsp; @_farm.Size ha
                                     </li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Arable:</strong>
+                                    <li class="list-group-item border-0 ps-0 text-sm"><strong
+                                            class="text-dark">Arable:</strong>
                                         &nbsp; @_farm.Arable ha
                                     </li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Cleared:</strong>
+                                    <li class="list-group-item border-0 ps-0 text-sm"><strong
+                                            class="text-dark">Cleared:</strong>
                                         &nbsp; @_farm.Cleared ha
                                     </li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Terrain:</strong>
+                                    <li class="list-group-item border-0 ps-0 text-sm"><strong
+                                            class="text-dark">Terrain:</strong>
                                         &nbsp; @(_farm.Terrain?.ToString() ?? "Not specified")</li>
                                     <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Location:</strong>
                                         &nbsp; @_farm.Latitude, @_farm.Longitude</li>
@@ -269,15 +273,19 @@
                             </HeaderTemplate>
                             <ContentTemplate>
                                 <ul class="list-group">
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Water Source:</strong>
+                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Water
+                                            Source:</strong>
                                         &nbsp; @_farm.WaterSource</li>
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Water Availability:</strong>
+                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Water
+                                            Availability:</strong>
                                         &nbsp; @(_farm.WaterAvailability?.ToString() ?? "Not specified")</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Irrigation Systems:</strong>
+                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Irrigation
+                                            Systems:</strong>
                                         &nbsp; @_farm.IrrigationSystems</li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Buildings:</strong>
                                         &nbsp; @_farm.Buildings</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Road Access:</strong>
+                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Road
+                                            Access:</strong>
                                         &nbsp; @(_farm.RoadAccess?.ToString() ?? "Not specified")</li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Security:</strong>
                                         &nbsp; @_farm.SecurityMeasures</li>
@@ -292,11 +300,14 @@
                             </HeaderTemplate>
                             <ContentTemplate>
                                 <ul class="list-group">
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Past Crops:</strong>
+                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Past
+                                            Crops:</strong>
                                         &nbsp; @_farm.PastCrops</li>
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Land Management:</strong>
+                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Land
+                                            Management:</strong>
                                         &nbsp; @_farm.LandManagementPractice</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Irrigation Systems:</strong>
+                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Irrigation
+                                            Systems:</strong>
                                         &nbsp; @_farm.IrrigationSystems</li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Equipment:</strong>
                                         &nbsp; @_farm.Equipment</li>
@@ -308,10 +319,11 @@
             </div>
         </div>
         <div class="col-12 text-center mt-1">
-            <a class="btn bg-gradient-dark mb-0 text-end" href="javascript:;" @onclick="ShowFieldsList">Manage Fields</a>
+            <a class="btn bg-gradient-dark mb-0 text-end" href="javascript:;" @onclick="ShowFieldsList">Manage
+                Fields</a>
         </div>
     </div>
-    
+
     <!-- Fields List Panel -->
     <div class="sidebar-container @_showFields">
         <div class="card h-100">
@@ -344,7 +356,7 @@
             <div class="card-body p-3">
                 <h5 class="mb-0">@_farm.Name</h5>
                 <hr class="horizontal gray-light my-4">
-                
+
                 @if (_fields == null || !_fields.Any())
                 {
                     <div class="text-center py-4">
@@ -355,7 +367,7 @@
                 else
                 {
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" placeholder="Search fields..." 
+                        <input type="text" class="form-control" placeholder="Search fields..."
                                @bind-value="_fieldSearchTerm" @bind-value:event="oninput" @onkeyup="FilterFields">
                         @if (!string.IsNullOrEmpty(_fieldSearchTerm))
                         {
@@ -364,16 +376,18 @@
                             </button>
                         }
                     </div>
-                    
+
                     <SfListView DataSource="@_filteredFields" Height="calc(100vh - 240px)">
                         <ListViewFieldSettings TValue="FieldViewModel" Id="Id" Text="Name"></ListViewFieldSettings>
                         <ListViewTemplates TValue="FieldViewModel">
                             <Template>
                                 @{
                                     FieldViewModel field = (FieldViewModel)context;
-                                    <div class="e-list-wrapper e-list-multi-line" @onclick="(e => OnFieldSelect(field))">
+                                    <div class="e-list-wrapper e-list-multi-line"
+                                         @onclick="(e => OnFieldSelect(field))">
                                         <div class="e-list-item-header text-truncate">@field.Name</div>
-                                        <div class="e-list-content text-muted" style="white-space: normal; font-size: 12px;">
+                                        <div class="e-list-content text-muted"
+                                             style="white-space: normal; font-size: 12px;">
                                             <span>@field.SoilType.ToString() | @field.Size ha | @(field.Irrigation ? "Irrigated" : "Non-irrigated")</span>
                                         </div>
                                     </div>
@@ -385,7 +399,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Field Details Panel -->
     <div class="sidebar-container @_showFieldDetails">
         <div class="card h-100">
@@ -427,19 +441,19 @@
                         <strong class="text-dark">Irrigation:</strong> &nbsp; @(_field.Irrigation ? "Yes" : "No")
                     </li>
                 </ul>
-                
+
                 <div class="col-12 text-center mt-3 mb-3">
                     <a class="btn btn-sm btn-success me-2" href="/field/@_field.Id/crops">Manage Crops</a>
                     <button class="btn btn-sm btn-primary" @onclick="AddCoordinate">Add Coordinate</button>
                 </div>
-                
+
                 @if (!string.IsNullOrEmpty(_currentCrop))
                 {
                     <div class="alert alert-info">
                         <strong>Current Crop:</strong> @_currentCrop
                     </div>
                 }
-                
+
                 <SfAccordion>
                     <AccordionItems>
                         <AccordionItem Expanded="true">
@@ -453,19 +467,22 @@
                                 {
                                     <div class="text-center py-3">
                                         <p>No coordinates defined for this field.</p>
-                                        <button class="btn btn-sm btn-success" @onclick="AddCoordinate">Add Coordinate</button>
+                                        <button class="btn btn-sm btn-success" @onclick="AddCoordinate">Add Coordinate
+                                        </button>
                                     </div>
                                 }
                                 else
                                 {
                                     <div class="list-container" style="max-height: 200px; overflow-y: auto;">
                                         <SfListView DataSource="@_fieldLocations">
-                                            <ListViewFieldSettings TValue="FieldLocationViewModel" Id="Id" Text="Text"></ListViewFieldSettings>
+                                            <ListViewFieldSettings TValue="FieldLocationViewModel" Id="Id"
+                                                                   Text="Text"></ListViewFieldSettings>
                                             <ListViewTemplates TValue="FieldLocationViewModel">
                                                 <Template>
                                                     @{
                                                         FieldLocationViewModel coordinate = (FieldLocationViewModel)context;
-                                                        <div class="e-list-wrapper e-list-multi-line" @onclick="(e => OnCoordinateSelect(coordinate))">
+                                                        <div class="e-list-wrapper e-list-multi-line"
+                                                             @onclick="(e => OnCoordinateSelect(coordinate))">
                                                             <div class="e-list-item-header">
                                                                 @(string.IsNullOrEmpty(coordinate.Label) ? "Point" : coordinate.Label)
                                                             </div>
@@ -479,47 +496,55 @@
                                         </SfListView>
                                     </div>
                                 }
-                                
+
                                 @if (_showCoordinateForm)
                                 {
                                     <hr class="horizontal gray-light my-3">
                                     <h6 class="mb-3">@(_editingCoordinate ? "Edit Coordinate" : "Add Coordinate")</h6>
-                                    
+
                                     <EditForm Model="@_fieldLocation" OnValidSubmit="@SaveFieldLocation">
                                         <DataAnnotationsValidator/>
                                         <ValidationSummary/>
-                                        
-                                        <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(_fieldLocation.Id)"></SfTextBox>
-                                        
+
+                                        <SfTextBox ID="id" TValue="string" hidden="hidden"
+                                                   @bind-Value="@(_fieldLocation.Id)"></SfTextBox>
+
                                         <div class="form-group mb-3">
                                             <label>Label (Optional)</label>
-                                            <SfTextBox ID="label" TValue="string" @bind-Value="@(_fieldLocation.Label)" 
-                                                      Placeholder="Point Name (optional)"></SfTextBox>
+                                            <SfTextBox ID="label" TValue="string" @bind-Value="@(_fieldLocation.Label)"
+                                                       Placeholder="Point Name (optional)"></SfTextBox>
                                         </div>
-                                        
+
                                         <div class="form-group mb-3">
                                             <label>Latitude</label>
-                                            <SfNumericTextBox ID="latitude" TValue="double" @bind-Value="@(_fieldLocation.Latitude)"
-                                                             Decimals=7 Format="n7" Placeholder="e.g. -17.8248"></SfNumericTextBox>
+                                            <SfNumericTextBox ID="latitude" TValue="double"
+                                                              @bind-Value="@(_fieldLocation.Latitude)"
+                                                              Decimals=7 Format="n7"
+                                                              Placeholder="e.g. -17.8248"></SfNumericTextBox>
                                         </div>
-                                        
+
                                         <div class="form-group mb-3">
                                             <label>Longitude</label>
-                                            <SfNumericTextBox ID="longitude" TValue="double" @bind-Value="@(_fieldLocation.Longitude)"
-                                                             Decimals=7 Format="n7" Placeholder="e.g. 31.0530"></SfNumericTextBox>
+                                            <SfNumericTextBox ID="longitude" TValue="double"
+                                                              @bind-Value="@(_fieldLocation.Longitude)"
+                                                              Decimals=7 Format="n7"
+                                                              Placeholder="e.g. 31.0530"></SfNumericTextBox>
                                         </div>
-                                        
+
                                         <div class="form-group mb-3">
                                             <label>Altitude (meters)</label>
-                                            <SfNumericTextBox ID="altitude" TValue="double" @bind-Value="@(_fieldLocation.Altitude)"
-                                                             Decimals=2 Format="n2" Placeholder="e.g. 1200"></SfNumericTextBox>
+                                            <SfNumericTextBox ID="altitude" TValue="double"
+                                                              @bind-Value="@(_fieldLocation.Altitude)"
+                                                              Decimals=2 Format="n2"
+                                                              Placeholder="e.g. 1200"></SfNumericTextBox>
                                         </div>
-                                        
+
                                         <div class="form-group d-flex justify-content-between">
                                             <button type="submit" class="btn btn-success">
                                                 @(_editingCoordinate ? "Update" : "Add")
                                             </button>
-                                            <button type="button" class="btn btn-secondary" @onclick="CancelCoordinateEdit">
+                                            <button type="button" class="btn btn-secondary"
+                                                    @onclick="CancelCoordinateEdit">
                                                 Cancel
                                             </button>
                                         </div>
@@ -532,7 +557,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Add/Edit Farm Panel -->
     <div class="sidebar-container @_showAddSchool">
         <div class="sidebar-header">
@@ -550,73 +575,74 @@
                 <i class="fa fa-times"></i>
             </button>
         </div>
-        
+
         <div class="my-2">
             <EditForm Model="@_farm" OnValidSubmit="@SaveFarm">
                 <DataAnnotationsValidator/>
                 <ValidationSummary/>
-                
+
                 <!-- Form content with many fields, abbreviated for readability -->
                 <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(_farm.Id)"></SfTextBox>
-                
+
                 <div class="form-group mb-3">
                     <label>Name *</label>
-                    <SfTextBox ID="name" TValue="string" @bind-Value="@(_farm.Name)" 
+                    <SfTextBox ID="name" TValue="string" @bind-Value="@(_farm.Name)"
                                Placeholder="School name" ValidateOnInput="true"></SfTextBox>
                     <ValidationMessage For="() => _farm.Name"/>
                 </div>
-                
+
                 <div class="form-group mb-3">
                     <label>Address *</label>
                     <SfTextBox ID="address" TValue="string" @bind-Value="@(_farm.Address)"
                                Placeholder="Physical address" ValidateOnInput="true"></SfTextBox>
                     <ValidationMessage For="() => _farm.Address"/>
                 </div>
-                
+
                 <!-- Only showing a few key fields for brevity, the actual form has many more -->
                 <div class="form-group mb-3">
                     <label>Contact Person</label>
                     <SfTextBox ID="contactPerson" TValue="string" @bind-Value="@(_farm.ContactPerson)"
                                Placeholder="e.g. John Doe"></SfTextBox>
                 </div>
-                
+
                 <div class="form-group mb-3">
                     <label>Phone Number *</label>
                     <SfTextBox ID="phone" TValue="string" @bind-Value="@(_farm.PhoneNumber)"
                                Placeholder="e.g. 0771234567" ValidateOnInput="true"></SfTextBox>
                     <ValidationMessage For="() => _farm.PhoneNumber"/>
                 </div>
-                
+
                 <div class="form-group mb-3">
                     <label>Email *</label>
                     <SfTextBox ID="email" TValue="string" @bind-Value="@(_farm.Email)"
                                Placeholder="e.g. school@example.com" ValidateOnInput="true"></SfTextBox>
                     <ValidationMessage For="() => _farm.Email"/>
                 </div>
-                
+
                 <!-- Location fields -->
                 <div class="form-group mb-3">
                     <label>Latitude</label>
-                    <SfNumericTextBox ID="latitude" TValue="double" @bind-Value="@(_farm.Latitude)" 
-                                     Decimals=7 Format="n7" Placeholder="e.g. -17.8248"></SfNumericTextBox>
+                    <SfNumericTextBox ID="latitude" TValue="double" @bind-Value="@(_farm.Latitude)"
+                                      Decimals=7 Format="n7" Placeholder="e.g. -17.8248"></SfNumericTextBox>
                 </div>
-                
+
                 <div class="form-group mb-3">
                     <label>Longitude</label>
                     <SfNumericTextBox ID="longitude" TValue="double" @bind-Value="@(_farm.Longitude)"
-                                     Decimals=7 Format="n7" Placeholder="e.g. 31.0530"></SfNumericTextBox>
+                                      Decimals=7 Format="n7" Placeholder="e.g. 31.0530"></SfNumericTextBox>
                 </div>
-                
+
                 <!-- Other form fields would go here -->
-                
+
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-lg bg-gradient-success w-100 mb-3">Save</button>
-                    <button type="button" class="btn btn-lg bg-gradient-secondary w-100" @onclick="CancelEdit">Cancel</button>
+                    <button type="button" class="btn btn-lg bg-gradient-secondary w-100" @onclick="CancelEdit">Cancel
+                    </button>
                 </div>
             </EditForm>
         </div>
     </div>
-    
+
     <!-- Add/Edit Field Panel -->
     <div class="sidebar-container @_showFieldEdit">
         <div class="sidebar-header">
@@ -634,56 +660,59 @@
                 <i class="fa fa-times"></i>
             </button>
         </div>
-        
+
         <div class="my-2">
             <EditForm Model="@_fieldEdit" OnValidSubmit="@SaveField">
                 <DataAnnotationsValidator/>
                 <ValidationSummary/>
-                
+
                 <SfTextBox ID="fieldId" TValue="string" hidden="hidden" @bind-Value="@(_fieldEdit.Id)"></SfTextBox>
                 <SfTextBox ID="farmId" TValue="string" hidden="hidden" @bind-Value="@(_fieldEdit.FarmId)"></SfTextBox>
-                
+
                 <div class="form-group mb-3">
                     <label>Name *</label>
                     <SfTextBox ID="fieldName" TValue="string" @bind-Value="@(_fieldEdit.Name)"
                                Placeholder="Field name" ValidateOnInput="true"></SfTextBox>
                     <ValidationMessage For="() => _fieldEdit.Name"/>
                 </div>
-                
+
                 <div class="form-group mb-3">
                     <label>Description</label>
-                    <SfTextBox Multiline="true" ID="fieldDescription" TValue="string" @bind-Value="@(_fieldEdit.Description)"
+                    <SfTextBox Multiline="true" ID="fieldDescription" TValue="string"
+                               @bind-Value="@(_fieldEdit.Description)"
                                Placeholder="Field description"></SfTextBox>
                 </div>
-                
+
                 <div class="form-group mb-3">
                     <label>Size (Hectares) *</label>
                     <SfNumericTextBox ID="fieldSize" TValue="float" @bind-Value="@(_fieldEdit.Size)" Decimals=2
                                       Format="n2" Placeholder="e.g. 5.75"></SfNumericTextBox>
                     <ValidationMessage For="() => _fieldEdit.Size"/>
                 </div>
-                
+
                 <div class="form-group mb-3">
                     <label>Soil Type</label>
                     <SfDropDownList ID="soilType" TValue="SoilType" TItem="SoilTypeModel"
-                                   @bind-Value="@(_fieldEdit.SoilType)" PopupHeight="350px" PopupWidth="350px"
-                                   Placeholder="Select Soil Type" DataSource="@_soilTypes">
+                                    @bind-Value="@(_fieldEdit.SoilType)" PopupHeight="350px" PopupWidth="350px"
+                                    Placeholder="Select Soil Type" DataSource="@_soilTypes">
                         <DropDownListFieldSettings Value="SoilType" Text="Name"></DropDownListFieldSettings>
                     </SfDropDownList>
                 </div>
-                
+
                 <div class="form-group mb-3">
                     <SfCheckBox Label="Under Irrigation" @bind-Checked="@(_fieldEdit.Irrigation)"></SfCheckBox>
                 </div>
-                
+
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-lg bg-gradient-success w-100 mb-3">Save</button>
-                    <button type="button" class="btn btn-lg bg-gradient-secondary w-100" @onclick="BackToFields">Cancel</button>
+                    <button type="button" class="btn btn-lg bg-gradient-secondary w-100" @onclick="BackToFields">
+                        Cancel
+                    </button>
                 </div>
             </EditForm>
         </div>
     </div>
-    
+
     <!-- Main Map Container -->
     <div id="map" @ref="_mapElement" style="width:100%" class="min-height-vh-100"></div>
 
@@ -705,18 +734,18 @@
             <DialogButton Content="Cancel" IsPrimary="true" OnClick="@CancelDeleteCoordinate"/>
         </DialogButtons>
     </SfDialog>
-    
+
     <SfDialog Width="400px" ShowCloseIcon="true" IsModal="true" @bind-Visible="@_showUploadFieldsDialog">
         <DialogTemplates>
             <Header>Upload KML File</Header>
             <Content>
                 <p class="mb-3">Upload a KML file to import field boundaries.</p>
-                
+
                 <EditForm Model="_kml" OnValidSubmit="@SaveKmlFile">
                     <div class="form-group mb-3">
                         <label>Select KML File</label>
                         <InputFile OnChange="LoadKmlFiles" class="form-control" accept=".kml"/>
-                        
+
                         @if (_loadedKmlFile != null)
                         {
                             <div class="alert alert-info mt-2">
@@ -724,7 +753,7 @@
                             </div>
                         }
                     </div>
-                    
+
                     <div class="form-group">
                         @if (_loadingKml)
                         {
@@ -732,29 +761,34 @@
                             <p class="text-center mt-2">Processing...</p>
                         }
                     </div>
-                    
+
                     <div class="text-center mt-3">
-                        <button type="submit" class="btn btn-success" disabled="@(_loadedKmlFile == null || _loadingKml)">Upload</button>
-                        <button type="button" class="btn btn-secondary ms-2" @onclick="CloseKmlUploadDialog">Cancel</button>
+                        <button type="submit" class="btn btn-success"
+                                disabled="@(_loadedKmlFile == null || _loadingKml)">Upload
+                        </button>
+                        <button type="button" class="btn btn-secondary ms-2" @onclick="CloseKmlUploadDialog">Cancel
+                        </button>
                     </div>
                 </EditForm>
             </Content>
         </DialogTemplates>
     </SfDialog>
-    
-    <SfSpinner @ref="_spinnerRef" Size="40" Type="SpinnerType.Bootstrap" CssClass="global-spinner" Visible="false"></SfSpinner>
+
+    <SfSpinner @ref="_spinnerRef" Size="40" Type="SpinnerType.Bootstrap" CssClass="global-spinner"
+               Visible="false"></SfSpinner>
 </div>
 
 @code {
+
     // Map elements
     private ElementReference _mapElement;
     private IJSObjectReference? _mapModule;
     private IJSObjectReference? _mapInstance;
-    
+
     // UI references
     private Toast _alert;
     private SfSpinner _spinnerRef;
-    
+
     // Data models
     private List<FarmViewModel> _farms = new();
     private List<FarmViewModel> _filteredFarms = new();
@@ -767,7 +801,7 @@
     private FieldLocationViewModel _fieldLocation = new FieldLocationViewModel();
     private FileViewModel _kml = new();
     private string _currentCrop = string.Empty;
-    
+
     // UI state variables
     private bool _showDeleteCoordinateDialog = false;
     private bool _showUploadFieldsDialog = false;
@@ -778,7 +812,7 @@
     private string _searchTerm = string.Empty;
     private string _fieldSearchTerm = string.Empty;
     private IBrowserFile _loadedKmlFile;
-    
+
     // Panel visibility state
     private string _showSchools = "";
     private string _showAddSchool = "panel-hidden";
@@ -786,7 +820,7 @@
     private string _showFields = "panel-hidden";
     private string _showFieldEdit = "panel-hidden";
     private string _showFieldDetails = "panel-hidden";
-    
+
     // Reference data 
     private ObservableCollection<ProvinceViewModel> _provinces = new();
     private ObservableCollection<DistrictViewModel> _districts = new();
@@ -809,7 +843,7 @@
         try
         {
             await ShowSpinner();
-            
+
             UI.Shared.Models.ApiResponse<FarmViewModel> response;
             if (string.IsNullOrEmpty(_farm.Id))
             {
@@ -829,10 +863,10 @@
             else if (response.Status == (int)HttpStatusCode.OK)
             {
                 _alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
-                
+
                 // Refresh farm list and select the saved farm
                 await LoadFarms();
-                
+
                 if (response.Result != null)
                 {
                     _farm = response.Result;
@@ -854,18 +888,18 @@
             await HideSpinner();
         }
     }
-    
+
     private async Task SaveField()
     {
         try
         {
             await ShowSpinner();
-            
+
             // Make sure the field is assigned to the current farm
             _fieldEdit.FarmId = _farm.Id;
-            
+
             UI.Shared.Models.ApiResponse<FieldViewModel> response;
-            
+
             if (string.IsNullOrEmpty(_fieldEdit.Id))
             {
                 response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldViewModel>, CreateFieldViewModel>(
@@ -884,7 +918,7 @@
                     Irrigation = _fieldEdit.Irrigation,
                     FarmId = _fieldEdit.FarmId
                 };
-                
+
                 response = await ApiCall.Update<UI.Shared.Models.ApiResponse<FieldViewModel>, FieldViewModel>(
                     await ApiCall.GetHttpClient(), "fields/updatefield", updateField.Id, updateField);
             }
@@ -896,10 +930,10 @@
             else if (response.Status == (int)HttpStatusCode.OK)
             {
                 _alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
-                
+
                 // Refresh field list
                 await LoadFields(_farm.Id);
-                
+
                 // Select the field if it's a new one
                 if (string.IsNullOrEmpty(_fieldEdit.Id) && response.Result != null)
                 {
@@ -932,12 +966,12 @@
         try
         {
             await ShowSpinner();
-            
+
             // Assign field ID
             _fieldLocation.FieldId = _field.Id;
-            
+
             UI.Shared.Models.ApiResponse<FieldLocationViewModel> response;
-            
+
             if (string.IsNullOrEmpty(_fieldLocation.Id))
             {
                 // Create new coordinate
@@ -958,13 +992,13 @@
             else if (response.Status == (int)HttpStatusCode.OK)
             {
                 _alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
-                
+
                 // Refresh field locations
                 await LoadFieldLocations(_field.Id);
-                
+
                 // Refresh field boundaries on map
                 await UpdateFieldOnMap(_field);
-                
+
                 // Reset form
                 ResetCoordinateForm();
             }
@@ -990,7 +1024,7 @@
         {
             await ShowSpinner();
             _loadingKml = true;
-            
+
             if (_loadedKmlFile == null)
             {
                 _alert.Show("Please select a KML file first.", showTitle: true, toastType: ToastType.Warning);
@@ -1013,10 +1047,10 @@
             else if (response.Status == (int)HttpStatusCode.OK)
             {
                 _alert.Show("KML data imported successfully", showTitle: true, toastType: ToastType.Success);
-                
+
                 // Close the dialog
                 _showUploadFieldsDialog = false;
-                
+
                 // Refresh field list and map
                 await OnFarmSelect(_farm);
             }
@@ -1042,7 +1076,7 @@
         try
         {
             _loadingKml = true;
-            
+
             var file = e.File;
             if (file != null)
             {
@@ -1052,9 +1086,9 @@
                     _loadedKmlFile = null;
                     return;
                 }
-                
+
                 _loadedKmlFile = file;
-                
+
                 // You might want to validate KML file here
                 // For now we'll just show a success message
                 _alert.Show($"File selected: {file.Name}", showTitle: false);
@@ -1077,10 +1111,10 @@
         try
         {
             await ShowSpinner();
-            
+
             var response = await ApiCall.Remove<UI.Shared.Models.ApiResponse<string>>(
                 await ApiCall.GetHttpClient(), "fieldlocations/DeleteFieldLocation", _fieldLocation.Id);
-                
+
             if (response == null)
             {
                 _alert.Show("Failed to delete coordinate, please try again!", showTitle: true, toastType: ToastType.Danger);
@@ -1088,14 +1122,14 @@
             else if (response.Status == (int)HttpStatusCode.OK)
             {
                 _alert.Show("Coordinate deleted successfully", showTitle: true, toastType: ToastType.Success);
-                
+
                 // Remove from local list
                 _fieldLocations.Remove(_fieldLocations.First(l => l.Id == _fieldLocation.Id));
-                
+
                 // Reset selection
                 _fieldLocation = new FieldLocationViewModel();
                 _showDeleteCoordinateDialog = false;
-                
+
                 // Refresh field on map (redraws polygon with updated coordinates)
                 await UpdateFieldOnMap(_field);
             }
@@ -1147,21 +1181,21 @@
             {
                 // First clear the map completely
                 await _mapModule.InvokeVoidAsync("clearMap", _mapInstance).AsTask();
-                
+
                 // Determine the proper zoom level based on farm properties
                 int zoomLevel = 14; // Default zoom level
-                
+
                 // If we have a farm boundary with meaningful coordinates, center on it
                 if (farmMap.IsPolygon && farmMap.FarmCoordinates.Count > 0)
                 {
                     // Calculate center of the farm polygon
                     double avgLat = farmMap.FarmCoordinates.Average(c => c[1]);
                     double avgLng = farmMap.FarmCoordinates.Average(c => c[0]);
-                    
+
                     // Center map with appropriate zoom
-                    await _mapModule.InvokeVoidAsync("setMapCenter", 
+                    await _mapModule.InvokeVoidAsync("setMapCenter",
                         _mapInstance,
-                        avgLat, 
+                        avgLat,
                         avgLng,
                         zoomLevel
                     ).AsTask();
@@ -1170,9 +1204,9 @@
                 else if (farmMap.Latitude != 0 && farmMap.Longitude != 0)
                 {
                     // Center the map on the farm coordinates
-                    await _mapModule.InvokeVoidAsync("setMapCenter", 
+                    await _mapModule.InvokeVoidAsync("setMapCenter",
                         _mapInstance,
-                        farmMap.Latitude, 
+                        farmMap.Latitude,
                         farmMap.Longitude,
                         zoomLevel
                     ).AsTask();
@@ -1181,12 +1215,12 @@
                 // Draw the farm boundary if available
                 if (farmMap.IsPolygon)
                 {
-                    await _mapModule.InvokeVoidAsync("drawPolygon", 
+                    await _mapModule.InvokeVoidAsync("drawPolygon",
                         _mapInstance,
-                        farm.Id, 
+                        farm.Id,
                         farmMap.FarmPolygon,
                         false, // Not a field
-                        farm.Name, 
+                        farm.Name,
                         null, // No crop data for farm
                         true // Clear existing layers
                     ).AsTask();
@@ -1198,7 +1232,7 @@
                     await DrawFieldWithCropData(field);
                 }
             }
-            
+
             // Load fields for this farm
             await LoadFields(farm.Id);
         }
@@ -1220,14 +1254,14 @@
         {
             await ShowSpinner();
             _field = field;
-            
+
             // Load field locations
             await LoadFieldLocations(field.Id);
-            
+
             // Check for current crop data
             var fieldCrops = await ApiCall.Get<IEnumerable<FieldCropViewModel>>(
                 await ApiCall.GetHttpClient(), $"fieldcrops/getfieldfieldcrops/{field.Id}");
-            
+
             var currentCrop = fieldCrops?.OrderByDescending(c => c.PlantedDate).FirstOrDefault();
             if (currentCrop != null)
             {
@@ -1241,7 +1275,7 @@
             {
                 _currentCrop = string.Empty;
             }
-            
+
             // Update UI state
             _showSchools = "panel-hidden";
             _showAddSchool = "panel-hidden";
@@ -1249,11 +1283,11 @@
             _showFields = "panel-hidden";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "";
-            
+
             // Ensure UI state is updated before map operations
             StateHasChanged();
             await Task.Delay(150);
-            
+
             // Focus map on this field
             await UpdateFieldOnMap(field);
         }
@@ -1274,7 +1308,7 @@
         _fieldLocation = coordinate;
         _showDeleteCoordinateDialog = true;
     }
-    
+
     // Dropdown event handlers
     public void ProvinceChangeHandler(ChangeEventArgs<string, ProvinceViewModel> args)
     {
@@ -1343,7 +1377,7 @@
 
         StateHasChanged();
     }
-    
+
     // Search filtering
     void FilterFarms()
     {
@@ -1354,20 +1388,20 @@
         else
         {
             _filteredFarms = _farms
-                .Where(f => f.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) || 
+                .Where(f => f.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
                             (f.Address?.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ?? false))
                 .ToList();
         }
-        
+
         StateHasChanged();
     }
-    
+
     void ClearSearch()
     {
         _searchTerm = string.Empty;
         FilterFarms();
     }
-    
+
     void FilterFields()
     {
         if (string.IsNullOrWhiteSpace(_fieldSearchTerm))
@@ -1377,14 +1411,14 @@
         else
         {
             _filteredFields = _fields
-                .Where(f => f.Name.Contains(_fieldSearchTerm, StringComparison.OrdinalIgnoreCase) || 
-                           (f.Description?.Contains(_fieldSearchTerm, StringComparison.OrdinalIgnoreCase) ?? false))
+                .Where(f => f.Name.Contains(_fieldSearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                            (f.Description?.Contains(_fieldSearchTerm, StringComparison.OrdinalIgnoreCase) ?? false))
                 .ToList();
         }
-        
+
         StateHasChanged();
     }
-    
+
     void ClearFieldSearch()
     {
         _fieldSearchTerm = string.Empty;
@@ -1401,13 +1435,13 @@
         try
         {
             if (_mapModule == null) return;
-            
+
             // Get crop data for this field
             var fieldCrops = await ApiCall.Get<IEnumerable<FieldCropViewModel>>(
                 await ApiCall.GetHttpClient(), $"fieldcrops/getfieldfieldcrops/{field.Id}");
-            
+
             var currentCrop = fieldCrops?.OrderByDescending(c => c.PlantedDate).FirstOrDefault();
-            
+
             // Create crop data object if a crop exists
             object cropDataObj = null;
             if (currentCrop != null)
@@ -1421,14 +1455,14 @@
                     irrigation = currentCrop.Irrigation
                 };
             }
-            
+
             // Draw field with isField=true but clearExisting=false to maintain other layers
-            await _mapModule.InvokeVoidAsync("drawPolygon", 
+            await _mapModule.InvokeVoidAsync("drawPolygon",
                 _mapInstance,
-                field.Id, 
-                field.Coordinates, 
+                field.Id,
+                field.Coordinates,
                 true, // This is a field
-                field.Name, 
+                field.Name,
                 cropDataObj,
                 false // Don't clear existing layers (keep farm boundary)
             ).AsTask();
@@ -1445,33 +1479,33 @@
         try
         {
             if (_mapModule == null) return;
-            
+
             // This is similar to OnFieldSelect but focused on map operations
-            
+
             // First draw the farm boundary (to establish the context)
             var farmMap = await ApiCall.Get<FarmMapViewModel>(
                 await ApiCall.GetHttpClient(), $"farms/GetFarmDetails/{_farm.Id}");
-            
+
             // Clear the map and draw farm boundary
             if (farmMap.IsPolygon)
             {
-                await _mapModule.InvokeVoidAsync("drawPolygon", 
+                await _mapModule.InvokeVoidAsync("drawPolygon",
                     _mapInstance,
-                    _farm.Id, 
+                    _farm.Id,
                     farmMap.FarmPolygon,
                     false, // Not a field
-                    _farm.Name, 
+                    _farm.Name,
                     null, // No crop data
                     true // Clear existing layers before drawing
                 ).AsTask();
             }
-            
+
             // Get crop data for this field
             var fieldCrops = await ApiCall.Get<IEnumerable<FieldCropViewModel>>(
                 await ApiCall.GetHttpClient(), $"fieldcrops/getfieldfieldcrops/{field.Id}");
-            
+
             var currentCrop = fieldCrops?.OrderByDescending(c => c.PlantedDate).FirstOrDefault();
-            
+
             // Create crop data object if a crop exists
             object cropDataObj = null;
             if (currentCrop != null)
@@ -1485,24 +1519,24 @@
                     irrigation = currentCrop.Irrigation
                 };
             }
-            
+
             // Draw this field with highlight (above the farm boundary)
-            await _mapModule.InvokeVoidAsync("drawPolygon", 
+            await _mapModule.InvokeVoidAsync("drawPolygon",
                 _mapInstance,
-                field.Id, 
-                field.Coordinates, 
+                field.Id,
+                field.Coordinates,
                 true, // This is a field
-                field.Name, 
+                field.Name,
                 cropDataObj,
                 false // Don't clear farm boundary
             ).AsTask();
-            
+
             // Center map on field's average coordinates if available
             if (field.Locations.Any())
             {
                 double avgLat = field.Locations.Average(l => l.Latitude);
                 double avgLng = field.Locations.Average(l => l.Longitude);
-                
+
                 await _mapModule.InvokeVoidAsync("setMapCenter", _mapInstance, avgLat, avgLng, 16).AsTask();
             }
         }
@@ -1528,7 +1562,7 @@
             _showFields = "panel-hidden";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "panel-hidden";
-            
+
             // Reset farm model if adding new farm
             if (_farm != null && !string.IsNullOrEmpty(_farm.Id))
             {
@@ -1587,7 +1621,7 @@
         _showFieldEdit = "panel-hidden";
         _showFieldDetails = "panel-hidden";
     }
-    
+
     void CancelEdit()
     {
         if (!string.IsNullOrEmpty(_farm.Id))
@@ -1618,7 +1652,7 @@
         {
             FarmId = _farm.Id
         };
-        
+
         _showSchools = "panel-hidden";
         _showAddSchool = "panel-hidden";
         _showSchoolDetails = "panel-hidden";
@@ -1626,7 +1660,7 @@
         _showFieldEdit = "";
         _showFieldDetails = "panel-hidden";
     }
-    
+
     void EditCurrentField()
     {
         // Convert the current field to CreateFieldViewModel for editing
@@ -1640,7 +1674,7 @@
             Irrigation = _field.Irrigation,
             FarmId = _field.FarmId
         };
-        
+
         _showSchools = "panel-hidden";
         _showAddSchool = "panel-hidden";
         _showSchoolDetails = "panel-hidden";
@@ -1652,33 +1686,33 @@
     async Task BackToFields()
     {
         await ShowSpinner();
-        
+
         _showSchools = "panel-hidden";
         _showAddSchool = "panel-hidden";
         _showSchoolDetails = "panel-hidden";
         _showFields = "";
         _showFieldEdit = "panel-hidden";
         _showFieldDetails = "panel-hidden";
-        
+
         // Reset coordinate form
         ResetCoordinateForm();
-        
+
         // When going back to fields list, redraw the farm and all its fields
         if (_mapModule != null)
         {
             // Get farm details
             var farmMap = await ApiCall.Get<FarmMapViewModel>(
                 await ApiCall.GetHttpClient(), $"farms/GetFarmDetails/{_farm.Id}");
-            
+
             // Draw the farm boundary with clearExisting=true to clear the map first
             if (farmMap.IsPolygon)
             {
-                await _mapModule.InvokeVoidAsync("drawPolygon", 
+                await _mapModule.InvokeVoidAsync("drawPolygon",
                     _mapInstance,
-                    _farm.Id, 
+                    _farm.Id,
                     farmMap.FarmPolygon,
                     false, // Not a field
-                    _farm.Name, 
+                    _farm.Name,
                     null, // No crop data
                     true // Clear existing layers
                 ).AsTask();
@@ -1690,14 +1724,14 @@
                 await DrawFieldWithCropData(field);
             }
         }
-        
+
         await HideSpinner();
     }
 
     async Task ShowFieldsList()
     {
         await LoadFields(_farm.Id);
-        
+
         _showSchools = "panel-hidden";
         _showAddSchool = "panel-hidden";
         _showSchoolDetails = "panel-hidden";
@@ -1705,19 +1739,19 @@
         _showFieldEdit = "panel-hidden";
         _showFieldDetails = "panel-hidden";
     }
-    
+
     void ShowUploadFields()
     {
         _showUploadFieldsDialog = true;
         _loadedKmlFile = null;
     }
-    
+
     void CloseKmlUploadDialog()
     {
         _showUploadFieldsDialog = false;
         _loadedKmlFile = null;
     }
-    
+
     void AddCoordinate()
     {
         _fieldLocation = new FieldLocationViewModel
@@ -1727,19 +1761,19 @@
         _showCoordinateForm = true;
         _editingCoordinate = false;
     }
-    
+
     void CancelCoordinateEdit()
     {
         ResetCoordinateForm();
     }
-    
+
     void ResetCoordinateForm()
     {
         _fieldLocation = new FieldLocationViewModel();
         _showCoordinateForm = false;
         _editingCoordinate = false;
     }
-    
+
     void CancelDeleteCoordinate()
     {
         _showDeleteCoordinateDialog = false;
@@ -1756,15 +1790,20 @@
         {
             _loading = true;
             StateHasChanged();
-            
+        
+            // Get farms from API
             _farms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(
                 await ApiCall.GetHttpClient(), "Farms/getFarms/")).ToList();
-            
+        
+            // Store filtered farms
             _filteredFarms = _farms.ToList();
+        
+            // Log farm count for debugging
+            Logger.LogInformation($"Loaded {_farms.Count} schools, {_farms.Count(f => f.Latitude != 0 && f.Longitude != 0)} with valid coordinates");
         }
         catch (Exception ex)
         {
-            _alert.Show($"Error loading farms: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            _alert.Show($"Error loading schools: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
             Logger.LogError(ex, "Error loading farms");
             _farms = new List<FarmViewModel>();
             _filteredFarms = new List<FarmViewModel>();
@@ -1775,14 +1814,14 @@
             StateHasChanged();
         }
     }
-    
+
     private async Task LoadFields(string farmId)
     {
         try
         {
             _fields = (await ApiCall.Get<IEnumerable<FieldViewModel>>(
                 await ApiCall.GetHttpClient(), $"fields/getfarmfields/{farmId}")).ToList();
-            
+
             _filteredFields = _fields.ToList();
         }
         catch (Exception ex)
@@ -1793,7 +1832,7 @@
             _filteredFields = new List<FieldViewModel>();
         }
     }
-    
+
     private async Task LoadFieldLocations(string fieldId)
     {
         try
@@ -1808,27 +1847,27 @@
             _fieldLocations = new List<FieldLocationViewModel>();
         }
     }
-    
+
     private async Task LoadReferenceData()
     {
         try
         {
             _provinces = (await ApiCall.Get<ObservableCollection<ProvinceViewModel>>(
                 await ApiCall.GetHttpClient(), "provinces/getprovinces"));
-            
+
             _districts = (await ApiCall.Get<ObservableCollection<DistrictViewModel>>(
                 await ApiCall.GetHttpClient(), "districts/getdistricts"));
-            
+
             _allDistricts = new ObservableCollection<DistrictViewModel>(_districts);
-            
+
             _localAuthorities = (await ApiCall.Get<ObservableCollection<LocalAuthorityViewModel>>(
                 await ApiCall.GetHttpClient(), "localAuthorities/getLocalAuthorities"));
-            
+
             _allLocalAuthorities = new ObservableCollection<LocalAuthorityViewModel>(_localAuthorities);
-            
+
             _wards = (await ApiCall.Get<ObservableCollection<WardViewModel>>(
                 await ApiCall.GetHttpClient(), "wards/getWards"));
-            
+
             _allWards = new ObservableCollection<WardViewModel>(_wards);
         }
         catch (Exception ex)
@@ -1837,54 +1876,86 @@
             Logger.LogError(ex, "Error loading reference data");
         }
     }
-    
+
     private async Task LoadClusters()
     {
         try
         {
-            if (_mapModule != null && _farms.Count > 0)
+            if (_mapModule != null && _mapInstance != null)
             {
-                // Create the GeoJSON FeatureCollection
-                var featureCollection = new
+                // Make sure we have farm data
+                if (_farms == null || !_farms.Any())
                 {
-                    type = "FeatureCollection",
-                    crs = new
+                    Logger.LogInformation("No farms loaded yet, loading farms data for clusters");
+                    await LoadFarms();
+                }
+
+                // Check again after loading
+                if (_farms != null && _farms.Any())
+                {
+                    // Filter out farms with invalid coordinates (0,0 is often a default value)
+                    var validFarms = _farms.Where(f => f.Latitude != 0 && f.Longitude != 0).ToList();
+
+                    if (validFarms.Any())
                     {
-                        type = "name",
-                        properties = new
+                        Logger.LogInformation($"Creating map clusters with {validFarms.Count} schools");
+
+                        // Create the GeoJSON FeatureCollection
+                        var featureCollection = new
                         {
-                            name = "urn:ogc:def:crs:OGC:1.3:CRS84"
-                        }
-                    },
-                    features = _farms
-                        .Where(f => f.Latitude != 0 && f.Longitude != 0)
-                        .Select(f => new
-                        {
-                            type = "Feature",
-                            properties = new
+                            type = "FeatureCollection",
+                            crs = new
                             {
-                                id = f.Id,
-                                name = f.Name,
-                                size = f.Size,
-                                address = f.Address
+                                type = "name",
+                                properties = new
+                                {
+                                    name = "urn:ogc:def:crs:OGC:1.3:CRS84"
+                                }
                             },
-                            geometry = new
+                            features = validFarms.Select(f => new
                             {
-                                type = "Point",
-                                coordinates = new[] { f.Longitude, f.Latitude, f.Elevation }
-                            }
-                        }).ToArray()
-                };
-                
-                await _mapModule.InvokeVoidAsync("loadFarms", _mapInstance, featureCollection).AsTask();
+                                type = "Feature",
+                                properties = new
+                                {
+                                    id = f.Id,
+                                    name = f.Name,
+                                    size = f.Size
+                                    // Removed address property to maintain consistency
+                                },
+                                geometry = new
+                                {
+                                    type = "Point",
+                                    coordinates = new[] { f.Longitude, f.Latitude, f.Elevation }
+                                }
+                            }).ToArray()
+                        };
+
+                        // Load the clusters onto the map
+                        await _mapModule.InvokeVoidAsync("loadFarms", _mapInstance, featureCollection).AsTask();
+                    }
+                    else
+                    {
+                        Logger.LogWarning("No valid farm coordinates found for map clusters");
+                    }
+                }
+                else
+                {
+                    Logger.LogWarning("No farms data available for map clusters");
+                }
+            }
+            else
+            {
+                Logger.LogWarning("Map module or instance not initialized for loading clusters");
             }
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error loading clusters");
+            Logger.LogError(ex, "Error loading map clusters");
+            _alert.Show("Failed to load school locations on map", toastType: ToastType.Warning);
         }
     }
-    
+
+
     // Helper methods for Spinner
     private async Task ShowSpinner()
     {
@@ -1893,7 +1964,7 @@
             await _spinnerRef.ShowAsync();
         }
     }
-    
+
     private async Task HideSpinner()
     {
         if (_spinnerRef != null)
@@ -1911,13 +1982,13 @@
         try
         {
             await ShowSpinner();
-            
+
             // Load reference data
             await LoadReferenceData();
-            
+
             // Load farms data
             await LoadFarms();
-            
+
             // Signal loading complete
             _loading = false;
         }
@@ -1944,10 +2015,12 @@
 
                 if (_mapModule is not null)
                 {
+                    // Create and get map instance
                     _mapInstance = await _mapModule.InvokeAsync<IJSObjectReference>(
                         "addMapToElement", _mapElement);
-                    
-                    // Load farm clusters after map is initialized
+
+                    // Important: Load clusters immediately after map initialization
+                    // This ensures clusters are loaded on first render
                     await LoadClusters();
                 }
             }
@@ -1973,4 +2046,5 @@
     }
 
     #endregion
+
 }
