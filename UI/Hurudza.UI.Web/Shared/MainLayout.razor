@@ -1,43 +1,120 @@
 ﻿@inherits LayoutComponentBase
 @using Hurudza.UI.Web.Cookie.Providers
 @using Hurudza.UI.Web.Directives
-
+@inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
+@inject ILocalStorageService LocalStorageService
 
 <div class="g-sidenav-show bg-gray-100">
-    <NavMenu/>
-    <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
-        <NavBar/>
+    @if (!IsLoginPage)
+    {
+        <NavMenu/>
+    }
+    <main class="@(IsLoginPage ? "" : "main-content position-relative max-height-vh-100 h-100 border-radius-lg")">
+        @if (!IsLoginPage)
+        {
+            <NavBar/>
+        }
         
-        <div class="container-fluid py-4">
-            <AuthorizeView>
-                <Authorized>
-                    @Body
-                </Authorized>
-                <NotAuthorized>
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-body text-center">
-                                    <h3 class="text-danger">Access Denied</h3>
-                                    <p>You need to log in to access this page.</p>
-                                    <a href="authentication/login" class="btn btn-primary">Log In</a>
+        <div class="@(IsLoginPage ? "" : "container-fluid py-4")">
+            @if (IsLoginPage)
+            {
+                @Body
+            }
+            else
+            {
+                <AuthorizeView>
+                    <Authorized>
+                        @Body
+                    </Authorized>
+                    <NotAuthorized>
+                        @if (IsProcessingAuth)
+                        {
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <h3>Checking authentication...</h3>
+                                            <div class="spinner-border text-primary mt-3" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </NotAuthorized>
-            </AuthorizeView>
+                        }
+                        else
+                        {
+                            <RedirectToLogin />
+                        }
+                    </NotAuthorized>
+                </AuthorizeView>
+            }
         </div>
-
-        <!-- Demo of permissions in the layout -->
-        <PermissionDirective Permission="@Claims.UserManage">
-            <div class="position-fixed bottom-0 end-0 p-3 m-3 bg-gradient-success text-white rounded shadow-lg">
-                <div class="d-flex align-items-center">
-                    <i class="fa fa-shield-alt me-2"></i>
-                    <span>User Management Enabled</span>
-                </div>
-            </div>
-        </PermissionDirective>
     </main>
 </div>
+
+@code {
+    private bool IsProcessingAuth { get; set; } = true;
+    private bool IsLoginPage => Navigation.Uri.Contains("/authentication/login") || 
+                               Navigation.Uri.Contains("/register");
+    
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine($"MainLayout initialized, IsLoginPage: {IsLoginPage}");
+        
+        // If we're on the login page, skip authentication checks
+        if (IsLoginPage)
+        {
+            IsProcessingAuth = false;
+            return;
+        }
+        
+        var token = await LocalStorageService.GetItemAsync<string>("token");
+        
+        if (string.IsNullOrEmpty(token))
+        {
+            // If no token is present, redirect to login
+            Console.WriteLine("No token found in MainLayout");
+            
+            // Allow App.razor to handle the redirect
+            IsProcessingAuth = false;
+            return;
+        }
+        
+        // Token exists, check if user is authenticated
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (!authState.User.Identity.IsAuthenticated)
+        {
+            // We have a token but no authenticated user
+            Console.WriteLine("Token exists but user not authenticated in MainLayout");
+            
+            // Allow App.razor's OnNavigateAsync to handle authentication
+            IsProcessingAuth = true;
+            
+            // Short wait to allow OnNavigateAsync to complete its authentication attempt
+            await Task.Delay(500);
+            
+            // Check again
+            authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            if (!authState.User.Identity.IsAuthenticated)
+            {
+                // Still not authenticated, allow RedirectToLogin to handle it
+                Console.WriteLine("Still not authenticated after waiting");
+                IsProcessingAuth = false;
+            }
+            else
+            {
+                // Successfully authenticated
+                Console.WriteLine("Successfully authenticated after waiting");
+                IsProcessingAuth = false;
+            }
+        }
+        else
+        {
+            // Already authenticated
+            Console.WriteLine("User already authenticated in MainLayout");
+            IsProcessingAuth = false;
+        }
+    }
+}

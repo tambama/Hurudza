@@ -1,11 +1,42 @@
 ﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject NavigationManager Navigation
+@inject ILocalStorageService LocalStorageService
+
+<div class="text-center">
+    <div class="spinner-border text-primary mt-3" role="status">
+        <span class="visually-hidden">Redirecting to login...</span>
+    </div>
+    <p class="mt-2">Redirecting to login...</p>
+</div>
 
 @code {
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        Navigation.NavigateToLogin("authentication/login");
+        Console.WriteLine("RedirectToLogin component initialized");
+        
+        // Check if we're already on the login page to avoid redirect loops
+        if (Navigation.Uri.Contains("/authentication/login"))
+        {
+            Console.WriteLine("Already on login page, skipping redirect");
+            return;
+        }
+        
+        // Clear any existing token to ensure a fresh login
+        try 
+        {
+            await LocalStorageService.RemoveItemAsync("token");
+            Console.WriteLine("Token removed from storage");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error removing token: {ex.Message}");
+        }
+        
+        // Short delay to ensure UI updates before navigation
+        await Task.Delay(100);
+        
+        // Then navigate to login
+        Console.WriteLine("Navigating to login page");
+        Navigation.NavigateTo("authentication/login", forceLoad: false);
     }
-
 }

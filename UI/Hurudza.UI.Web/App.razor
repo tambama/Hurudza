@@ -2,6 +2,7 @@
 @inject IApiCall ApiCall
 @inject ILocalStorageService LocalStorageService;
 @inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
 
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly" OnNavigateAsync="@OnNavigateAsync">
@@ -30,35 +31,48 @@
 </CascadingAuthenticationState>
 
 @code{
+    // In App.razor, update the OnNavigateAsync method
+
+    // In App.razor, update the OnNavigateAsync method
+
     private async Task OnNavigateAsync(NavigationContext args)
     {
         try
         {
-            // 1. First check if we have a token in local storage
+            // Skip authentication check for login page and other public pages
+            if (args.Path.StartsWith("/authentication/login") ||
+                args.Path.StartsWith("/register") ||
+                args.Path.StartsWith("/public"))
+            {
+                Console.WriteLine($"Navigating to public page: {args.Path}, skipping auth check");
+                return;
+            }
+
+            // Check if we have a token in local storage
             var token = await LocalStorageService.GetItemAsync<string>("token");
 
             if (string.IsNullOrEmpty(token))
             {
-                // No token found, no need to attempt authentication
+                // No token found, redirect to login page
+                Console.WriteLine("No token found, redirecting to login page");
+
+                // Make sure we're not already on the login page to avoid redirect loops
+                if (!Navigation.Uri.Contains("/authentication/login"))
+                {
+                    Navigation.NavigateTo("authentication/login", forceLoad: false);
+                }
+
                 return;
             }
 
-            // 2. Check if user is already authenticated via AuthStateProvider
+            // Check if user is already authenticated via AuthStateProvider
             var authState = await (AuthStateProvider as CustomAuthStateProvider).GetAuthenticationStateAsync();
             var isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
 
             if (!isAuthenticated)
             {
-                // 3. We have a token but user isn't authenticated, so get the profile
-                var client = await ApiCall.GetHttpClient(); // This should attach the token
-
-                // Add logging to debug request headers (temporarily)
-                Console.WriteLine($"Authorization header present: {client.DefaultRequestHeaders.Contains("Authorization")}");
-                if (client.DefaultRequestHeaders.Contains("Authorization"))
-                {
-                    Console.WriteLine($"Auth header value: {client.DefaultRequestHeaders.GetValues("Authorization").FirstOrDefault()}");
-                }
-
+                // We have a token but user isn't authenticated, try to get the profile
+                var client = await ApiCall.GetHttpClient();
                 var response = await ApiCall.Get<ApiResponse<UserViewModel>>(client, "authentication/getloggedinprofile/");
 
                 if (response != null && response.Status == (int)HttpStatusCode.OK && response.Result != null)
@@ -69,17 +83,29 @@
                 }
                 else
                 {
-                    // Invalid or expired token, remove it
+                    // Invalid or expired token, remove it and redirect to login
                     Console.WriteLine("Failed to authenticate with stored token, removing it");
                     await LocalStorageService.RemoveItemAsync("token");
+
+                    // Make sure we're not already on the login page to avoid redirect loops
+                    if (!Navigation.Uri.Contains("/authentication/login"))
+                    {
+                        Navigation.NavigateTo("authentication/login", forceLoad: false);
+                    }
                 }
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error in authentication flow: {ex.Message}");
-            // Consider removing the token if it's causing errors
+            // Remove the token if it's causing errors and redirect to login
             await LocalStorageService.RemoveItemAsync("token");
+
+            // Make sure we're not already on the login page to avoid redirect loops
+            if (!Navigation.Uri.Contains("/authentication/login"))
+            {
+                Navigation.NavigateTo("authentication/login", forceLoad: false);
+            }
         }
     }
 
