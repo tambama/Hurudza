@@ -1,9 +1,10 @@
 ﻿@inherits LayoutComponentBase
-@using Hurudza.UI.Web.Cookie.Providers
-@using Hurudza.UI.Web.Directives
+@using Hurudza.UI.Web.Services
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 @inject ILocalStorageService LocalStorageService
+@inject IJSRuntime JSRuntime
+@inject SidebarToggleService SidebarToggleService
 
 <div class="g-sidenav-show bg-gray-100">
     @if (!IsLoginPage)
@@ -63,6 +64,12 @@
     {
         Console.WriteLine($"MainLayout initialized, IsLoginPage: {IsLoginPage}");
         
+        // Initialize JS sidebar functions if not on login page
+        if (!IsLoginPage)
+        {
+            await SidebarToggleService.InitializeJs();
+        }
+        
         // If we're on the login page, skip authentication checks
         if (IsLoginPage)
         {
@@ -115,6 +122,23 @@
             // Already authenticated
             Console.WriteLine("User already authenticated in MainLayout");
             IsProcessingAuth = false;
+        }
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !IsLoginPage)
+        {
+            // Initialize sidebar state on first render when not on login page
+            try
+            {
+                // Ensure custom JS is initialized
+                await SidebarToggleService.InitializeJs();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error initializing sidebar in MainLayout: {ex.Message}");
+            }
         }
     }
 }

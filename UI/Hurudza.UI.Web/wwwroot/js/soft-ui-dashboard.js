@@ -13,7 +13,7 @@
 // The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 "use strict";
-alert('what is your name?');
+
 (function() {
   var isWindows = navigator.platform.indexOf('Win') > -1 ? true : false;
 
@@ -340,7 +340,7 @@ function debounce(func, wait, immediate) {
   var timeout;
   return function() {
     var context = this,
-      args = arguments;
+        args = arguments;
     var later = function() {
       timeout = null;
       if (!immediate) func.apply(context, args);
@@ -396,7 +396,7 @@ if (iconSidenav) {
 }
 
 function toggleSidenav() {
-  alert('we are trying to toggle sidenav');
+  console.log('Toggling sidenav');
   if (body.classList.contains(className)) {
     body.classList.remove(className);
     setTimeout(function() {

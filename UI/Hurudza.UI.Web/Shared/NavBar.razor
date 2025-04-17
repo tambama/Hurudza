@@ -80,6 +80,14 @@
 
 @code
 {
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+        // Initialize JS functions when NavBar loads
+        await SidebarToggleService.InitializeJs();
+    }
+
     private async Task Logout()
     {
         await LocalStorageService.RemoveItemAsync("token"); 
@@ -92,5 +100,4 @@
     {
         await SidebarToggleService.ToggleSidebar();
     }
-
 }

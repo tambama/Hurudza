@@ -46,6 +46,13 @@
 <script src="_content/Hurudza.UI.Shared/assets/js/core/bootstrap.min.js"></script>
 <script src="_content/Hurudza.UI.Shared/assets/js/plugins/perfect-scrollbar.min.js"></script>
 <script src="_content/Hurudza.UI.Shared/assets/js/plugins/smooth-scrollbar.min.js"></script>
+
+<!-- Custom JS for app - Load before the UI dashboard script -->
+<script src="/js/app.js"></script>
+
+<!-- Control Center for Soft Dashboard -->
+<script src="_content/Hurudza.UI.Shared/js/soft-ui-dashboard.js"></script>
+
 <script>
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {
@@ -61,18 +68,15 @@
         }
         Scrollbar.init(document.querySelector('#farm-scrollbar'), options);
     }
+
+    // Initialize sidebar state
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     const body = document.getElementById("body");
+    //     if (body) {
+    //         body.classList.add("g-sidenav-hidden");
+    //     }
+    // });
 </script>
-<!-- Github buttons -->
-<script async defer src="https://buttons.github.io/buttons.js"></script>
-<!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
-<script src="_content/Hurudza.UI.Shared/js/soft-ui-dashboard.js"></script>
-<!-- Custom JS for app -->
-<script src="/js/app.js"></script>
-<script src="/Pages/Maps/Map.razor.js"></script>
-    <script>
-        const element = document.getElementById("body");
-        element.classList.add("g-sidenav-hidden");
-    </script>
 </body>
 
 </html>
