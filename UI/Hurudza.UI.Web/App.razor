@@ -32,21 +32,55 @@
 @code{
     private async Task OnNavigateAsync(NavigationContext args)
     {
-        var auth =  await LocalStorageService.GetItemAsync<string>("token");
-        var user = (await(AuthStateProvider as CustomAuthStateProvider)
-            .GetAuthenticationStateAsync()).User;
-        
-        if(user.Identity != null && !string.IsNullOrEmpty(auth) && !user.Identity.IsAuthenticated )
+        try
         {
-            var response = await ApiCall.Get<ApiResponse<UserViewModel>>(await ApiCall.GetHttpClient(), "authentication/getloggedinprofile/");
-            if (response != null && response.Status == (int)HttpStatusCode.OK)
+            // 1. First check if we have a token in local storage
+            var token = await LocalStorageService.GetItemAsync<string>("token");
+
+            if (string.IsNullOrEmpty(token))
             {
-                (AuthStateProvider as CustomAuthStateProvider)?.SetAuthInfo(response.Result);
+                // No token found, no need to attempt authentication
+                return;
             }
-            else
+
+            // 2. Check if user is already authenticated via AuthStateProvider
+            var authState = await (AuthStateProvider as CustomAuthStateProvider).GetAuthenticationStateAsync();
+            var isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+
+            if (!isAuthenticated)
             {
-                await LocalStorageService.RemoveItemAsync("token");
+                // 3. We have a token but user isn't authenticated, so get the profile
+                var client = await ApiCall.GetHttpClient(); // This should attach the token
+
+                // Add logging to debug request headers (temporarily)
+                Console.WriteLine($"Authorization header present: {client.DefaultRequestHeaders.Contains("Authorization")}");
+                if (client.DefaultRequestHeaders.Contains("Authorization"))
+                {
+                    Console.WriteLine($"Auth header value: {client.DefaultRequestHeaders.GetValues("Authorization").FirstOrDefault()}");
+                }
+
+                var response = await ApiCall.Get<ApiResponse<UserViewModel>>(client, "authentication/getloggedinprofile/");
+
+                if (response != null && response.Status == (int)HttpStatusCode.OK && response.Result != null)
+                {
+                    // Valid response with user profile, update auth state
+                    (AuthStateProvider as CustomAuthStateProvider)?.SetAuthInfo(response.Result);
+                    Console.WriteLine($"Successfully authenticated user: {response.Result.Fullname}");
+                }
+                else
+                {
+                    // Invalid or expired token, remove it
+                    Console.WriteLine("Failed to authenticate with stored token, removing it");
+                    await LocalStorageService.RemoveItemAsync("token");
+                }
             }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in authentication flow: {ex.Message}");
+            // Consider removing the token if it's causing errors
+            await LocalStorageService.RemoveItemAsync("token");
+        }
     }
+
 }

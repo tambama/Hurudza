@@ -1,8 +1,8 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Blazored.LocalStorage;
 using Hurudza.Common.Utils.Extensions;
 using Hurudza.UI.Shared.Api.Interfaces;
-using IdentityModel.Client;
 using Serilog;
 
 namespace Hurudza.UI.Web.Api;
@@ -21,14 +21,48 @@ public class ApiCall : IApiCall
 
     public async Task<HttpClient> GetHttpClient()
     {
-        var token = await _localStorageService.GetItemAsync<string>("token");
-        var client = _httpClientFactory.CreateClient("Api.Core");
-        if (!string.IsNullOrEmpty(token))
+        try
         {
-            client.SetBearerToken(token);
-        }
+            var token = await _localStorageService.GetItemAsync<string>("token");
+            var client = _httpClientFactory.CreateClient("Api.Core");
+        
+            if (!string.IsNullOrEmpty(token))
+            {
+                // Explicit header setting instead of relying on extension method
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            
+                // Log token validity for debugging (remove in production)
+                bool isValidJwt = IsValidJwtToken(token);
+                Log.Information($"Using token (valid: {isValidJwt})");
+            
+                if (!isValidJwt)
+                {
+                    Log.Warning("Token appears to be invalid, consider refreshing authentication");
+                }
+            }
+            else
+            {
+                Log.Information("No token found in local storage");
+            }
 
-        return await Task.FromResult(client);
+            return client;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error creating authenticated HTTP client");
+            // Return a basic client if authentication fails
+            return _httpClientFactory.CreateClient("Api.Core");
+        }
+    }
+
+    // Helper method to validate JWT token format (simple check)
+    private bool IsValidJwtToken(string token)
+    {
+        // Simple structure validation (doesn't check signature)
+        if (string.IsNullOrEmpty(token)) return false;
+    
+        var parts = token.Split('.');
+        return parts.Length == 3; // Header, payload, signature
     }
 
     #region ApiCalls
