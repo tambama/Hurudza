@@ -117,9 +117,14 @@
             <div>
                 <h3>Schools</h3>
             </div>
-            <button class="btn bg-white btn-icon-only" @onclick="ToggleSchools">
-                <i class="fa fa-plus"></i>
-            </button>
+            <div>
+                <button class="btn bg-white btn-icon-only me-2" @onclick="ToggleFiltersModal" title="Filter Schools">
+                    <i class="fa fa-filter"></i>
+                </button>
+                <button class="btn bg-white btn-icon-only" @onclick="ToggleSchools">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
         </div>
         <div class="search-box input-group">
             <input type="text" class="form-control" placeholder="Search schools..." @bind-value="_searchTerm"
@@ -773,6 +778,151 @@
             </Content>
         </DialogTemplates>
     </SfDialog>
+    
+    <!-- Filters Modal -->
+<SfDialog Width="500px" Height="600px" IsModal="true" ShowCloseIcon="true" @bind-Visible="@ShowFiltersModal">
+    <DialogTemplates>
+        <Header>Filter Schools</Header>
+        <Content>
+            <div class="container">
+                <EditForm Model="@_filterModel" OnValidSubmit="@ApplyFilters">
+                    <!-- Province Filter -->
+                    <div class="form-group mb-3">
+                        <label>Province</label>
+                        <SfDropDownList TValue="string" TItem="ProvinceViewModel"
+                                       @bind-Value="@_filterModel.ProvinceId" 
+                                       DataSource="@_provinces"
+                                       AllowFiltering="true"
+                                       Placeholder="Select Province"
+                                       FilterBarPlaceholder="Search province...">
+                            <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                            <DropDownListEvents TValue="string" TItem="ProvinceViewModel" ValueChange="ProvinceChangeHandler"></DropDownListEvents>
+                        </SfDropDownList>
+                    </div>
+
+                    <!-- Region Filter -->
+                    <div class="form-group mb-3">
+                        <label>Region</label>
+                        <SfDropDownList TValue="Region?" TItem="RegionModel"
+                                       @bind-Value="@_filterModel.Region" 
+                                       DataSource="@_regions"
+                                       AllowFiltering="true"
+                                       Placeholder="Select Region">
+                            <DropDownListFieldSettings Value="Region" Text="Name"></DropDownListFieldSettings>
+                        </SfDropDownList>
+                    </div>
+
+                    <!-- Conference Filter -->
+                    <div class="form-group mb-3">
+                        <label>Conference</label>
+                        <SfDropDownList TValue="Conference?" TItem="ConferenceModel"
+                                       @bind-Value="@_filterModel.Conference" 
+                                       DataSource="@_conferences"
+                                       AllowFiltering="true"
+                                       Placeholder="Select Conference">
+                            <DropDownListFieldSettings Value="Conference" Text="Name"></DropDownListFieldSettings>
+                        </SfDropDownList>
+                    </div>
+
+                    <!-- Farm Size Range -->
+                    <div class="form-group mb-3">
+                        <label>Farm Size (hectares)</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <SfNumericTextBox TValue="float?" @bind-Value="@_filterModel.MinSize"
+                                             Placeholder="Min Size" 
+                                             Min="0" 
+                                             Format="n1"
+                                             Step="1"
+                                             ShowSpinButton="false">
+                            </SfNumericTextBox>
+                            <span>to</span>
+                            <SfNumericTextBox TValue="float?" @bind-Value="@_filterModel.MaxSize"
+                                             Placeholder="Max Size" 
+                                             Min="0" 
+                                             Format="n1"
+                                             Step="1"
+                                             ShowSpinButton="false">
+                            </SfNumericTextBox>
+                        </div>
+                    </div>
+
+                    <!-- District Filter (dependent on Province) -->
+                    <div class="form-group mb-3">
+                        <label>District</label>
+                        <SfDropDownList TValue="string" TItem="DistrictViewModel"
+                                       @bind-Value="@_filterModel.DistrictId" 
+                                       DataSource="@_districts"
+                                       AllowFiltering="true"
+                                       Enabled="@(!string.IsNullOrEmpty(_filterModel.ProvinceId))"
+                                       Placeholder="@(string.IsNullOrEmpty(_filterModel.ProvinceId) ? "Select Province first" : "Select District")">
+                            <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                            <DropDownListEvents TValue="string" TItem="DistrictViewModel" ValueChange="DistrictChangeHandler"></DropDownListEvents>
+                        </SfDropDownList>
+                    </div>
+                    
+                    <!-- Local Authority Filter (dependent on District) -->
+                    <div class="form-group mb-3">
+                        <label>Local Authority</label>
+                        <SfDropDownList TValue="string" TItem="LocalAuthorityViewModel"
+                                       @bind-Value="@_filterModel.LocalAuthorityId" 
+                                       DataSource="@_localAuthorities"
+                                       AllowFiltering="true"
+                                       Enabled="@(!string.IsNullOrEmpty(_filterModel.DistrictId))"
+                                       Placeholder="@(string.IsNullOrEmpty(_filterModel.DistrictId) ? "Select District first" : "Select Local Authority")">
+                            <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                        </SfDropDownList>
+                    </div>
+
+                    <!-- Applied Filters Display -->
+                    @if (HasActiveFilters())
+                    {
+                        <div class="alert alert-info mt-4">
+                            <strong>Active Filters:</strong>
+                            <ul class="mb-0 mt-1">
+                                @if (!string.IsNullOrEmpty(_filterModel.ProvinceId))
+                                {
+                                    var province = _provinces.FirstOrDefault(p => p.Id == _filterModel.ProvinceId)?.Name ?? "Unknown";
+                                    <li>Province: @province</li>
+                                }
+                                @if (_filterModel.Region.HasValue)
+                                {
+                                    <li>Region: @_filterModel.Region.Value</li>
+                                }
+                                @if (_filterModel.Conference.HasValue)
+                                {
+                                    <li>Conference: @_filterModel.Conference.Value</li>
+                                }
+                                @if (_filterModel.MinSize.HasValue || _filterModel.MaxSize.HasValue)
+                                {
+                                    <li>Size: 
+                                        @(_filterModel.MinSize.HasValue ? _filterModel.MinSize.Value.ToString("N1") + " ha" : "0 ha") 
+                                        to 
+                                        @(_filterModel.MaxSize.HasValue ? _filterModel.MaxSize.Value.ToString("N1") + " ha" : "unlimited")
+                                    </li>
+                                }
+                                @if (!string.IsNullOrEmpty(_filterModel.DistrictId))
+                                {
+                                    var district = _districts.FirstOrDefault(d => d.Id == _filterModel.DistrictId)?.Name ?? "Unknown";
+                                    <li>District: @district</li>
+                                }
+                                @if (!string.IsNullOrEmpty(_filterModel.LocalAuthorityId))
+                                {
+                                    var localAuthority = _localAuthorities.FirstOrDefault(l => l.Id == _filterModel.LocalAuthorityId)?.Name ?? "Unknown";
+                                    <li>Local Authority: @localAuthority</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        <button type="button" class="btn btn-secondary" @onclick="ResetFilters">Reset Filters</button>
+                    </div>
+                </EditForm>
+            </div>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
 
     <SfSpinner @ref="_spinnerRef" Size="40" Type="SpinnerType.Bootstrap" CssClass="global-spinner"
                Visible="false"></SfSpinner>
@@ -801,6 +951,11 @@
     private FieldLocationViewModel _fieldLocation = new FieldLocationViewModel();
     private FileViewModel _kml = new();
     private string _currentCrop = string.Empty;
+    
+    // Filter-related properties
+    private bool ShowFiltersModal { get; set; } = false;
+    private FarmFilterModel _filterModel = new FarmFilterModel();
+    private List<FarmViewModel> _allFarms = new(); // Store all farms for filtering
 
     // UI state variables
     private bool _showDeleteCoordinateDialog = false;
@@ -1379,6 +1534,170 @@
     }
 
     // Search filtering
+    void ToggleFiltersModal()
+    {
+        ShowFiltersModal = !ShowFiltersModal;
+    }
+    
+    bool HasActiveFilters()
+    {
+        return !string.IsNullOrEmpty(_filterModel.ProvinceId) ||
+               _filterModel.Region.HasValue ||
+               _filterModel.Conference.HasValue ||
+               _filterModel.MinSize.HasValue ||
+               _filterModel.MaxSize.HasValue ||
+               !string.IsNullOrEmpty(_filterModel.DistrictId) ||
+               !string.IsNullOrEmpty(_filterModel.LocalAuthorityId);
+    }
+    
+    async Task ApplyFilters()
+    {
+        await ShowSpinner();
+        try {
+            // Start with all farms
+            _filteredFarms = _allFarms.ToList();
+
+            // Apply Province filter
+            if (!string.IsNullOrEmpty(_filterModel.ProvinceId))
+            {
+                _filteredFarms = _filteredFarms
+                    .Where(f => f.ProvinceId == _filterModel.ProvinceId)
+                    .ToList();
+            }
+
+            // Apply Region filter
+            if (_filterModel.Region.HasValue)
+            {
+                _filteredFarms = _filteredFarms
+                    .Where(f => f.Region == _filterModel.Region.Value)
+                    .ToList();
+            }
+
+            // Apply Conference filter
+            if (_filterModel.Conference.HasValue)
+            {
+                _filteredFarms = _filteredFarms
+                    .Where(f => f.Conference == _filterModel.Conference.Value)
+                    .ToList();
+            }
+
+            // Apply Size range filter
+            if (_filterModel.MinSize.HasValue)
+            {
+                _filteredFarms = _filteredFarms
+                    .Where(f => f.Size >= _filterModel.MinSize.Value)
+                    .ToList();
+            }
+
+            if (_filterModel.MaxSize.HasValue)
+            {
+                _filteredFarms = _filteredFarms
+                    .Where(f => f.Size <= _filterModel.MaxSize.Value)
+                    .ToList();
+            }
+
+            // Apply District filter
+            if (!string.IsNullOrEmpty(_filterModel.DistrictId))
+            {
+                _filteredFarms = _filteredFarms
+                    .Where(f => f.DistrictId == _filterModel.DistrictId)
+                    .ToList();
+            }
+
+            // Apply Local Authority filter
+            if (!string.IsNullOrEmpty(_filterModel.LocalAuthorityId))
+            {
+                _filteredFarms = _filteredFarms
+                    .Where(f => f.LocalAuthorityId == _filterModel.LocalAuthorityId)
+                    .ToList();
+            }
+
+            // Close the modal
+            ShowFiltersModal = false;
+
+            // Update map with filtered farms
+            if (_mapModule != null)
+            {
+                await _mapModule.InvokeVoidAsync("clearMap", _mapInstance).AsTask();
+                
+                // Create filtered GeoJSON for map
+                var validFarms = _filteredFarms.Where(f => f.Latitude != 0 && f.Longitude != 0).ToList();
+                if (validFarms.Any())
+                {
+                    var featureCollection = new
+                    {
+                        type = "FeatureCollection",
+                        crs = new
+                        {
+                            type = "name",
+                            properties = new
+                            {
+                                name = "urn:ogc:def:crs:OGC:1.3:CRS84"
+                            }
+                        },
+                        features = validFarms.Select(f => new
+                        {
+                            type = "Feature",
+                            properties = new
+                            {
+                                id = f.Id,
+                                name = f.Name,
+                                size = f.Size
+                            },
+                            geometry = new
+                            {
+                                type = "Point",
+                                coordinates = new[] { f.Longitude, f.Latitude, f.Elevation }
+                            }
+                        }).ToArray()
+                    };
+
+                    // Load the clusters onto the map
+                    await _mapModule.InvokeVoidAsync("loadFarms", _mapInstance, featureCollection).AsTask();
+                }
+            }
+
+            // Filter applied success message
+            _alert.Show($"Filtered to {_filteredFarms.Count} schools matching criteria", showTitle: true, toastType: ToastType.Success);
+        }
+        catch (Exception ex) {
+            _alert.Show($"Error applying filters: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            Logger.LogError(ex, "Error applying filters");
+        }
+        finally {
+            await HideSpinner();
+        }
+    }
+    
+    async Task ResetFilters()
+    {
+        await ShowSpinner();
+        try {
+            // Reset filter model
+            _filterModel = new FarmFilterModel();
+            
+            // Reset filtered farms to all farms
+            _filteredFarms = _allFarms.ToList();
+            
+            // Reset map
+            if (_mapModule != null)
+            {
+                await _mapModule.InvokeVoidAsync("clearMap", _mapInstance).AsTask();
+                await LoadClusters();
+            }
+            
+            ShowFiltersModal = false;
+            _alert.Show("Filters reset successfully", showTitle: true, toastType: ToastType.Info);
+        }
+        catch (Exception ex) {
+            _alert.Show($"Error resetting filters: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            Logger.LogError(ex, "Error resetting filters");
+        }
+        finally {
+            await HideSpinner();
+        }
+    }
+    
     void FilterFarms()
     {
         if (string.IsNullOrWhiteSpace(_searchTerm))
@@ -1784,6 +2103,7 @@
 
     #region Data Loading Helpers
 
+    // Modify the LoadFarms method to store all farms
     private async Task LoadFarms()
     {
         try
@@ -1795,6 +2115,9 @@
             _farms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(
                 await ApiCall.GetHttpClient(), "Farms/getFarms/")).ToList();
         
+            // Store all farms for filtering
+            _allFarms = _farms.ToList();
+            
             // Store filtered farms
             _filteredFarms = _farms.ToList();
         
@@ -1807,6 +2130,7 @@
             Logger.LogError(ex, "Error loading farms");
             _farms = new List<FarmViewModel>();
             _filteredFarms = new List<FarmViewModel>();
+            _allFarms = new List<FarmViewModel>();
         }
         finally
         {
