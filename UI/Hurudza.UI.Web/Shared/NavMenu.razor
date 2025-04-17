@@ -1,8 +1,6 @@
-﻿@using Microsoft.AspNetCore.Authorization
-@using System.Security.Claims
-@using Hurudza.Data.Data
-@using Hurudza.UI.Web.Cookie.Providers
-@inject AuthenticationStateProvider AuthStateProvider
+﻿@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+@inject ILocalStorageService LocalStorageService
 
 <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main">
     <div class="sidenav-header">
@@ -149,6 +147,13 @@
             </li>
         </ul>
     </div>
+    
+    <!-- Fixed Logout Button at bottom -->
+    <div class="sidenav-footer mx-3 bottom-0 start-0 end-0 my-3">
+        <a href="javascript:;" @onclick="Logout" class="btn bg-gradient-dark btn-sm w-100 mb-3">
+            <i class="fas fa-sign-out-alt me-2"></i> Logout
+        </a>
+    </div>
 </aside>
 
 @code
@@ -268,5 +273,13 @@
         UsersActive = "";
         RolesActive = "";
         TillageActive = "";
+    }
+    
+    private async Task Logout()
+    {
+        await LocalStorageService.RemoveItemAsync("token"); 
+        (_authProvider as CustomAuthStateProvider)?.ClearAuthInfo();
+
+        Navigation.NavigateTo("authentication/login");
     }
 }
