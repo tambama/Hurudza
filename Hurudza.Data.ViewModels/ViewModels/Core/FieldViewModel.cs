@@ -17,14 +17,16 @@ public class FieldViewModel : BaseViewModel
     public string? Farm { get; set; }
     public List<FieldLocationViewModel> Locations { get; set; } = new List<FieldLocationViewModel>();
 
-    public List<List<List<double>>> Coordinates { get
+    public List<List<List<double>>> Coordinates { get 
         {
-            Id = Id.Replace("-", string.Empty);
-            var locations = Locations.OrderBy(l => l.CreatedDate).Select(l => new List<double> { l.Longitude, l.Latitude }).ToList();
+            // Use a temporary variable instead of modifying the Id property
+            string tempId = Id?.Replace("-", string.Empty) ?? string.Empty;
+        
+            var locations = Locations.OrderBy(l => l.CreatedDate).Select(l => new List<double>() { l.Longitude, l.Latitude }).ToList();
 
-            if (locations != null || locations.Count == 0)
+            if (locations != null && locations.Count > 0)  // Fixed condition logic
             {
-                return new List<List<List<double>>> {  locations };
+                return new List<List<List<double>>> { locations };
             }
             else
             {
