@@ -55,5 +55,7 @@ builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped<IApiCall, ApiCall>();
 
+builder.Services.AddSingleton<SidebarToggleService>();
+
 builder.Services.AddSyncfusionBlazor();
 await builder.Build().RunAsync();

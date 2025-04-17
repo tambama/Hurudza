@@ -13,6 +13,7 @@
 // The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 "use strict";
+alert('what is your name?');
 (function() {
   var isWindows = navigator.platform.indexOf('Win') > -1 ? true : false;
 
@@ -395,6 +396,7 @@ if (iconSidenav) {
 }
 
 function toggleSidenav() {
+  alert('we are trying to toggle sidenav');
   if (body.classList.contains(className)) {
     body.classList.remove(className);
     setTimeout(function() {
