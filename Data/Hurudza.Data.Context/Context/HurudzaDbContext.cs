@@ -294,6 +294,11 @@ public class HurudzaDbContext :
                 .OnDelete(DeleteBehavior.NoAction);
         });
 
+        builder.Entity<FieldCrop>(b =>
+        {
+            b.Property(f => f.Id).ValueGeneratedOnAdd();
+        });
+
         builder.Entity<SendGridTemplate>(b =>
         {
             b.Property(t => t.Id)
