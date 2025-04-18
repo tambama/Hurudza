@@ -956,6 +956,7 @@
     private string _currentCrop = string.Empty;
 
     // Filter-related properties
+    private bool _isCurrentlyFiltering = false;
     private bool ShowFiltersModal { get; set; } = false;
     private FarmFilterModel _filterModel = new FarmFilterModel();
     private List<FarmViewModel> _allFarms = new(); // Store all farms for filtering
@@ -1359,7 +1360,7 @@
                 {
                     await DrawFieldWithCropData(field);
                 }
-                
+
                 // Always zoom in closely on the selected school
                 int zoomLevel = 14; // Higher zoom level for better detail
 
@@ -1555,6 +1556,10 @@
 
     async Task ApplyFilters()
     {
+        // Prevent multiple simultaneous filter operations
+        if (_isCurrentlyFiltering) return;
+
+        _isCurrentlyFiltering = true;
         await ShowSpinner();
         try
         {
@@ -1619,64 +1624,104 @@
             // Close the modal
             ShowFiltersModal = false;
 
-            // Update map with filtered farms
+            // Store the filtered farms in a local variable to ensure we don't lose reference
+            var currentFilteredFarms = _filteredFarms.ToList();
+
+            // Now handle map updates with better state tracking
             if (_mapModule != null)
             {
-                await _mapModule.InvokeVoidAsync("clearMap", _mapInstance).AsTask();
-
-                // Create filtered GeoJSON for map
-                var validFarms = _filteredFarms.Where(f => f.Latitude != 0 && f.Longitude != 0).ToList();
-                if (validFarms.Any())
+                try
                 {
-                    var featureCollection = new
+                    // First clear the map completely and wait for completion
+                    await _mapModule.InvokeVoidAsync("clearMap", _mapInstance).AsTask();
+
+                    await Task.Delay(100);
+
+                    // Create filtered GeoJSON for map
+                    var validFarms = currentFilteredFarms.Where(f => f.Latitude != 0 && f.Longitude != 0).ToList();
+
+                    Logger.LogInformation($"Preparing to show {validFarms.Count} filtered schools on map");
+
+                    if (validFarms.Any())
                     {
-                        type = "FeatureCollection",
-                        crs = new
+                        var featureCollection = new
                         {
-                            type = "name",
-                            properties = new
+                            type = "FeatureCollection",
+                            crs = new
                             {
-                                name = "urn:ogc:def:crs:OGC:1.3:CRS84"
-                            }
-                        },
-                        features = validFarms.Select(f => new
-                        {
-                            type = "Feature",
-                            properties = new
-                            {
-                                id = f.Id,
-                                name = f.Name,
-                                size = f.Size
+                                type = "name",
+                                properties = new
+                                {
+                                    name = "urn:ogc:def:crs:OGC:1.3:CRS84"
+                                }
                             },
-                            geometry = new
+                            features = validFarms.Select(f => new
                             {
-                                type = "Point",
-                                coordinates = new[] { f.Longitude, f.Latitude, f.Elevation }
-                            }
-                        }).ToArray()
-                    };
+                                type = "Feature",
+                                properties = new
+                                {
+                                    id = f.Id,
+                                    name = f.Name,
+                                    size = f.Size
+                                },
+                                geometry = new
+                                {
+                                    type = "Point",
+                                    coordinates = new[] { f.Longitude, f.Latitude, f.Elevation }
+                                }
+                            }).ToArray()
+                        };
 
-                    // Load the clusters onto the map
-                    await _mapModule.InvokeVoidAsync("loadFarms", _mapInstance, featureCollection).AsTask();
+                        // Load the clusters and WAIT for it to complete
+                        Logger.LogInformation("Loading clusters on map with filtered data...");
+                        await _mapModule.InvokeVoidAsync("loadFarms", _mapInstance, featureCollection).AsTask();
 
-                    // Adjust zoom to fit all filtered farms if there are multiple
-                    if (validFarms.Count > 1)
+                        // IMPORTANT: Add a short delay to ensure the map has time to complete cluster rendering
+                        await Task.Delay(100);
+
+                        // Now adjust the zoom AFTER clusters are loaded
+                        if (validFarms.Count > 1)
+                        {
+                            // Set zoom level based on number of farms
+                            int zoomLevel = validFarms.Count > 0 ? 7 :
+                                validFarms.Count > 10 ? 8 :
+                                validFarms.Count > 5 ? 9 : 10;
+
+                            double avgLat = validFarms.Average(f => f.Latitude);
+                            double avgLng = validFarms.Average(f => f.Longitude);
+
+                            Logger.LogInformation($"Setting map center to {avgLat}, {avgLng} with zoom {zoomLevel}");
+                            await _mapModule.InvokeVoidAsync("setMapCenter",
+                                _mapInstance,
+                                avgLat,
+                                avgLng,
+                                zoomLevel).AsTask();
+                        }
+                        else if (validFarms.Count == 1)
+                        {
+                            Logger.LogInformation($"Zooming to single farm at {validFarms[0].Latitude}, {validFarms[0].Longitude}");
+                            await _mapModule.InvokeVoidAsync("setMapCenter",
+                                _mapInstance,
+                                validFarms[0].Latitude,
+                                validFarms[0].Longitude,
+                                14).AsTask();
+                        }
+                    }
+                    else
                     {
-                        // Set zoom level based on number of farms (less zoom for more farms)
-                        int zoomLevel = validFarms.Count > 20 ? 7 :
-                            validFarms.Count > 10 ? 8 :
-                            validFarms.Count > 5 ? 9 : 10;
-
-                        // Use the center of Zimbabwe or calculate center point of all farms
-                        double avgLat = validFarms.Average(f => f.Latitude);
-                        double avgLng = validFarms.Average(f => f.Longitude);
-
+                        Logger.LogWarning("No valid farms to display after filtering");
+                        // Default view for Zimbabwe if no valid farms
                         await _mapModule.InvokeVoidAsync("setMapCenter",
                             _mapInstance,
-                            avgLat,
-                            avgLng,
-                            zoomLevel).AsTask();
+                            -17.824858,
+                            31.053028,
+                            7).AsTask();
                     }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex, "Error updating map after filtering");
+                    _alert.Show("Error updating map: " + ex.Message, showTitle: true, toastType: ToastType.Warning);
                 }
             }
 
@@ -1691,35 +1736,39 @@
         finally
         {
             await HideSpinner();
+            _isCurrentlyFiltering = false; // Reset the filter operation state
         }
     }
 
     async Task ResetFilters()
     {
         await ShowSpinner();
-        try {
+        try
+        {
             // Reset filter model
             _filterModel = new FarmFilterModel();
-        
+
             // Reset filtered farms to all farms
             _filteredFarms = _allFarms.ToList();
-        
+
             // Reset map
             if (_mapModule != null)
             {
                 await _mapModule.InvokeVoidAsync("clearMap", _mapInstance).AsTask();
-                // Explicitly call LoadClusters to refresh the map with all schools
+                await Task.Delay(100);
                 await LoadClusters();
             }
-        
+
             ShowFiltersModal = false;
             _alert.Show("Filters reset successfully", showTitle: true, toastType: ToastType.Info);
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             _alert.Show($"Error resetting filters: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
             Logger.LogError(ex, "Error resetting filters");
         }
-        finally {
+        finally
+        {
             await HideSpinner();
         }
     }
@@ -1942,8 +1991,7 @@
 
         if (_mapModule != null)
         {
-            await _mapModule.InvokeVoidAsync("clearMap", _mapInstance);
-            await LoadClusters();
+            await ResetFilters();
         }
     }
 
@@ -2129,6 +2177,7 @@
 
     #region Data Loading Helpers
 
+    // Ensure LoadFarms explicitly sets _allFarms
     private async Task LoadFarms()
     {
         try
@@ -2140,13 +2189,12 @@
             _farms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(
                 await ApiCall.GetHttpClient(), "Farms/getFarms/")).ToList();
 
-            // Store all farms for filtering
-            _allFarms = _farms.ToList();
+            // IMPORTANT: Store all farms for filtering - this must happen here
+            _allFarms = new List<FarmViewModel>(_farms); // Use new list to avoid reference issues
 
-            // Store filtered farms
-            _filteredFarms = _farms.ToList();
+            // Set filtered farms to all farms initially
+            _filteredFarms = new List<FarmViewModel>(_farms); // Use new list to avoid reference issues
 
-            // Log farm count for debugging
             Logger.LogInformation($"Loaded {_farms.Count} schools, {_farms.Count(f => f.Latitude != 0 && f.Longitude != 0)} with valid coordinates");
         }
         catch (Exception ex)
@@ -2285,7 +2333,7 @@
                         if (validFarms.Count > 1)
                         {
                             // Calculate appropriate zoom level: less zoom for more farms
-                            int zoomLevel = validFarms.Count > 50 ? 6 :
+                            int zoomLevel = validFarms.Count > 0 ? 7 :
                                 validFarms.Count > 25 ? 7 :
                                 validFarms.Count > 10 ? 8 : 9;
 
@@ -2381,6 +2429,9 @@
             // Load farms data
             await LoadFarms();
 
+            // Make sure _allFarms is populated here for filtering
+            _allFarms = _farms.ToList();
+
             // Signal loading complete
             _loading = false;
         }
@@ -2411,8 +2462,9 @@
                     _mapInstance = await _mapModule.InvokeAsync<IJSObjectReference>(
                         "addMapToElement", _mapElement);
 
-                    // Important: Load clusters immediately after map initialization
-                    // This ensures clusters are loaded on first render
+                    // Important: Only load clusters once after initialization
+                    // This ensures clusters are loaded on first render 
+                    // and not accidentally called during other operations
                     await LoadClusters();
                 }
             }
@@ -2438,5 +2490,4 @@
     }
 
     #endregion
-
 }

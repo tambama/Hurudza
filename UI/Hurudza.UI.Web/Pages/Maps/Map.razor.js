@@ -331,7 +331,6 @@ export function loadFarms(map, farms) {
             const props = e.features[0].properties;
             const name = props.name;
             const size = props.size || 'N/A';
-            // Don't display address anymore to match the schools list change
 
             // Ensure popup appears over the copy being clicked
             while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
@@ -371,9 +370,13 @@ export function loadFarms(map, farms) {
             map.getCanvas().style.cursor = '';
         });
 
+        // IMPORTANT: Signal successful load with console message
         console.log('Farms loaded successfully');
+
+        return true; // Return success value
     } catch (error) {
         console.error('Error loading farms:', error);
+        return false; // Return failure value
     }
 }
 
@@ -412,21 +415,20 @@ export function setMapStyle(map, style) {
     }
 }
 
-/**
- * Completely clears and resets the map
- * @param {Object} map - The Mapbox map instance
- * @returns {Promise<boolean>} Success indicator
- */
 export function clearMap(map) {
     try {
+        console.log('Clearing map...');
+
+        // Store the current camera position
+        const currentCenter = map.getCenter();
+        const currentZoom = map.getZoom();
+
         // Clear all custom layers and sources
         resetMapLayers(map)
             .then(() => {
-                // Reset view to default
-                map.setCenter([31.053028, -17.824858]);
-                map.setZoom(7);
-                console.log('Map cleared and reset to default view');
+                console.log('Map cleared successfully');
             });
+
         return true;
     } catch (error) {
         console.error('Error clearing map:', error);
