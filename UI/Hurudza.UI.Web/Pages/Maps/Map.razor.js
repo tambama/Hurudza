@@ -273,6 +273,7 @@ export function setupDrawingMode(map, draw, dotNetRef) {
             top: 130px; /* Position below fullscreen control */
             right: 10px;
             z-index: 999;
+            display: none; /* Initially hidden */
         `;
 
         // Add button to map container
@@ -325,6 +326,34 @@ export function setupDrawingMode(map, draw, dotNetRef) {
 
             // Check if we have a valid polygon
             if (e.features && e.features.length > 0) {
+                // Calculate the area of the polygon
+                const polygon = e.features[0];
+                if (polygon && polygon.geometry && polygon.geometry.coordinates &&
+                    polygon.geometry.coordinates.length > 0 && polygon.geometry.coordinates[0].length > 2) {
+
+                    const coordinates = polygon.geometry.coordinates[0];
+
+                    // Calculate area using Turf.js
+                    calculatePolygonAreaInHectares(coordinates)
+                        .then(areaInHectares => {
+                            // Round to 2 decimal places
+                            const roundedArea = Math.round(areaInHectares * 100) / 100;
+
+                            // Send the calculated area to .NET
+                            if (dotNetRef) {
+                                try {
+                                    dotNetRef.invokeMethodAsync('UpdateFieldSize', roundedArea);
+                                    console.log('Sent calculated area to .NET:', roundedArea, 'hectares');
+                                } catch (error) {
+                                    console.error('Error sending area to .NET:', error);
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error calculating area with Turf.js:', error);
+                        });
+                }
+
                 // Exit drawing mode
                 toggleDrawingMode(map, draw, dotNetRef, drawButton, true);
             }
@@ -339,10 +368,12 @@ export function setupDrawingMode(map, draw, dotNetRef) {
         });
 
         console.log('Drawing mode setup complete');
-        return true;
+
+        // Return the button so it can be referenced later
+        return { draw, drawButton };
     } catch (error) {
         console.error('Error setting up drawing mode:', error);
-        return false;
+        return null;
     }
 }
 
@@ -411,6 +442,152 @@ function toggleDrawingMode(map, draw, dotNetRef, drawButton, hasCompletedPolygon
     }
 }
 
+/**
+ * Calculates the area of a polygon in hectares using Turf.js
+ * @param {Array} coordinates - Array of [longitude, latitude] coordinates
+ * @returns {number} Area in hectares
+ */
+export function calculatePolygonAreaInHectares(coordinates) {
+    try {
+        if (!coordinates || coordinates.length < 3) {
+            console.warn('Not enough coordinates to calculate area');
+            return 0;
+        }
+
+        // Dynamically load Turf.js from CDN if not already loaded
+        return loadTurf().then(turf => {
+            // Create a polygon from the coordinates
+            const polygon = turf.polygon([[...coordinates, coordinates[0]]]);
+
+            // Calculate area in square meters
+            const areaInSquareMeters = turf.area(polygon);
+
+            // Convert to hectares (1 hectare = 10,000 square meters)
+            const hectares = areaInSquareMeters / 10000;
+
+            console.log(`Turf.js calculated area: ${hectares.toFixed(2)} hectares`);
+            return hectares;
+        }).catch(error => {
+            console.error('Error using Turf.js, falling back to approximate calculation:', error);
+
+            // Fallback to a simple calculation if Turf.js fails
+            // This is a very rough approximation for small areas
+            const latLngPoints = coordinates.map(coord => ({ lng: coord[0], lat: coord[1] }));
+            const approximateArea = calculateApproximateArea(latLngPoints);
+            console.log(`Fallback area calculation: ${approximateArea.toFixed(2)} hectares`);
+            return approximateArea;
+        });
+    } catch (error) {
+        console.error('Error calculating polygon area:', error);
+        return Promise.resolve(0);
+    }
+}
+
+/**
+ * Load Turf.js from CDN
+ * @returns {Promise} Promise that resolves with the turf object
+ */
+function loadTurf() {
+    return new Promise((resolve, reject) => {
+        // Check if Turf is already loaded
+        if (window.turf) {
+            resolve(window.turf);
+            return;
+        }
+
+        // Create script element
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js';
+        script.integrity = 'sha512-Wm2tQKurvPeBdx5ZPQjTvdGQS0OZNnSbzLNL1l35y5td2Xu8wt+a+/a4EoTFAcchZoVLqI8bhkYYTiPwP5xXw==';
+        script.crossOrigin = 'anonymous';
+
+        script.onload = () => {
+            if (window.turf) {
+                resolve(window.turf);
+            } else {
+                reject(new Error('Turf.js loaded but not available in window.turf'));
+            }
+        };
+
+        script.onerror = () => {
+            reject(new Error('Failed to load Turf.js'));
+        };
+
+        document.head.appendChild(script);
+    });
+}
+
+/**
+ * Fallback function to calculate approximate area in hectares
+ * @param {Array} latLngPoints - Array of {lat, lng} points
+ * @returns {number} Approximate area in hectares
+ */
+function calculateApproximateArea(latLngPoints) {
+    // Simple shoelace formula implementation
+    // Convert lat/lng to x/y using rough approximation
+    // This is not accurate for large areas or areas far from the equator
+
+    if (latLngPoints.length < 3) return 0;
+
+    // Average latitude to calculate conversion factors
+    const avgLat = latLngPoints.reduce((sum, point) => sum + point.lat, 0) / latLngPoints.length;
+    const latRad = avgLat * Math.PI / 180;
+
+    // Conversion factors - approximate
+    const metersPerDegLat = 111320; // meters per degree latitude
+    const metersPerDegLng = 111320 * Math.cos(latRad); // meters per degree longitude at this latitude
+
+    // Convert lat/lng to x/y meters
+    const xyPoints = latLngPoints.map(point => ({
+        x: point.lng * metersPerDegLng,
+        y: point.lat * metersPerDegLat
+    }));
+
+    // Apply shoelace formula
+    let area = 0;
+    for (let i = 0; i < xyPoints.length; i++) {
+        const j = (i + 1) % xyPoints.length;
+        area += xyPoints[i].x * xyPoints[j].y;
+        area -= xyPoints[j].x * xyPoints[i].y;
+    }
+
+    // Take absolute value and divide by 2
+    area = Math.abs(area) / 2;
+
+    // Convert square meters to hectares
+    return area / 10000;
+}
+
+export function toggleDrawButtonVisibility(visible) {
+    try {
+        const drawButton = document.getElementById('field-drawing-button');
+        if (drawButton) {
+            // Set visibility
+            drawButton.style.display = visible ? 'flex' : 'none';
+
+            // Add or remove pulsing animation class
+            if (visible) {
+                drawButton.classList.add('pulsing');
+
+                // Pulse for a few seconds to draw attention, then stop
+                setTimeout(() => {
+                    drawButton.classList.remove('pulsing');
+                }, 6000);
+            } else {
+                drawButton.classList.remove('pulsing');
+            }
+
+            console.log(`Draw button visibility set to: ${visible ? 'visible' : 'hidden'}`);
+        } else {
+            console.warn('Draw button not found');
+        }
+        return true;
+    } catch (error) {
+        console.error('Error toggling draw button visibility:', error);
+        return false;
+    }
+}
+
 // Helper to update the draw button state
 function updateDrawButtonState(drawButton) {
     if (!drawButton) return;
@@ -464,7 +641,6 @@ function resetCursor(map) {
 }
 
 // Get polygon coordinates - with added safety checks
-// Fix the function that gets coordinates from the drawn polygon
 function getDrawnPolygonCoordinates(draw) {
     try {
         if (!draw) {
@@ -497,10 +673,6 @@ function getDrawnPolygonCoordinates(draw) {
             console.log('No polygon features found');
             return null;
         }
-
-        // IMPORTANT: Flatten the nested coordinates array to a simple array of [lng, lat] points
-        // Before we were returning polygon.geometry.coordinates which is [[[lng, lat], [lng, lat], ...]]
-        // But we need to return [[lng, lat], [lng, lat], ...] for C# deserialization
 
         // Check if we have coordinates and they're in the expected structure
         if (polygon.geometry.coordinates &&

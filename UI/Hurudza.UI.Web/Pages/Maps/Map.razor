@@ -743,9 +743,18 @@
 
                 <div class="form-group mb-3">
                     <label>Size (Hectares) *</label>
-                    <SfNumericTextBox ID="fieldSize" TValue="float" @bind-Value="@(_fieldEdit.Size)" Decimals=2
-                                      Format="n2" Placeholder="e.g. 5.75"></SfNumericTextBox>
+                    <div class="d-flex align-items-center">
+                        <SfNumericTextBox ID="fieldSize" TValue="float" @bind-Value="@(_fieldEdit.Size)" Decimals=2
+                                          Format="n2" Placeholder="e.g. 5.75" CssClass="me-2"></SfNumericTextBox>
+                        @if (_drawnCoordinates != null && _drawnCoordinates.Count > 0)
+                        {
+                            <span class="badge bg-success">
+                            <i class="fa fa-calculator me-1"></i> Auto-calculated
+                        </span>
+                        }
+                    </div>
                     <ValidationMessage For="() => _fieldEdit.Size"/>
+                    <small class="text-muted">Draw the field boundary to auto-calculate the area</small>
                 </div>
 
                 <div class="form-group mb-3">
@@ -761,14 +770,20 @@
                     <SfCheckBox Label="Under Irrigation" @bind-Checked="@(_fieldEdit.Irrigation)"></SfCheckBox>
                 </div>
 
-                <!-- Add this section to display drawing instructions -->
-                <div class="alert alert-info mb-3">
+                <!-- Field boundary drawing instructions with Turf.js details -->
+                <div class="alert alert-dark text-white mb-3">
                     <div class="d-flex align-items-center">
-                        <i class="fa fa-draw-polygon me-2"></i>
+                        <i class="fa fa-draw-polygon me-2 text-white"></i>
                         <div>
                             <strong>Draw Field Boundary</strong>
-                            <p class="mb-0">Use the draw tool <i class="fa fa-draw-polygon"></i> in the top-right corner
+                            <p class="mb-0">Use the draw tool <i class="fa fa-draw-polygon text-white"></i> in the top-right corner
                                 of the map to draw the field boundary.</p>
+                            <div class="mt-1 small">
+                                <p class="mb-0"><i class="fa fa-info-circle me-1"></i> The field size will be
+                                    automatically calculated using Turf.js geospatial analysis.</p>
+                                <p class="mb-0"><i class="fa fa-check-circle me-1 text-success"></i> This provides
+                                    precise area measurements accounting for Earth's curvature.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1023,7 +1038,7 @@
     private IJSObjectReference? _drawControl;
 
     private IJSObjectReference? _mapInstance;
-    
+
     // Add a flag to track drawing mode
     private bool _isInDrawingMode = false;
 
@@ -1142,100 +1157,103 @@
     }
 
     private async Task SaveField()
+{
+    try
     {
-        try
+        await ShowSpinner();
+
+        // Make sure the field is assigned to the current farm
+        _fieldEdit.FarmId = _farm.Id;
+
+        UI.Shared.Models.ApiResponse<FieldViewModel> response;
+
+        if (string.IsNullOrEmpty(_fieldEdit.Id))
         {
-            await ShowSpinner();
-
-            // Make sure the field is assigned to the current farm
-            _fieldEdit.FarmId = _farm.Id;
-
-            UI.Shared.Models.ApiResponse<FieldViewModel> response;
-
-            if (string.IsNullOrEmpty(_fieldEdit.Id))
-            {
-                // New field - proceed with save
-                response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldViewModel>, CreateFieldViewModel>(
-                    await ApiCall.GetHttpClient(), "fields/createfield", _fieldEdit);
-                    
-                // If we have drawn coordinates and the save was successful, add them as locations
-                if (response?.Status == (int)HttpStatusCode.OK && response.Result != null && _drawnCoordinates != null && _drawnCoordinates.Count > 0)
-                {
-                    string fieldId = response.Result.Id;
-                    await SaveDrawnCoordinates(fieldId);
-                }
-            }
-            else
-            {
-                // Update existing field
-                // Convert CreateFieldViewModel to FieldViewModel for update
-                var updateField = new FieldViewModel
-                {
-                    Id = _fieldEdit.Id,
-                    Name = _fieldEdit.Name,
-                    Description = _fieldEdit.Description,
-                    Size = _fieldEdit.Size,
-                    SoilType = _fieldEdit.SoilType,
-                    Irrigation = _fieldEdit.Irrigation,
-                    FarmId = _fieldEdit.FarmId
-                };
-
-                response = await ApiCall.Update<UI.Shared.Models.ApiResponse<FieldViewModel>, FieldViewModel>(
-                    await ApiCall.GetHttpClient(), "fields/updatefield", updateField.Id, updateField);
-                    
-                // If coordinates were drawn, update them for the existing field
-                if (response?.Status == (int)HttpStatusCode.OK && _drawnCoordinates != null && _drawnCoordinates.Count > 0)
-                {
-                    await SaveDrawnCoordinates(_fieldEdit.Id);
-                }
-            }
-
-            if (response == null)
-            {
-                _alert.Show("Failed to save field, please try again!", showTitle: true, toastType: ToastType.Danger);
-            }
-            else if (response.Status == (int)HttpStatusCode.OK)
-            {
-                _alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
-
-                // Reset drawn coordinates
-                _drawnCoordinates = new List<List<double>>();
+            // New field - proceed with save
+            response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldViewModel>, CreateFieldViewModel>(
+                await ApiCall.GetHttpClient(), "fields/createfield", _fieldEdit);
                 
-                // Clear any drawings on the map
-                if (_drawControl != null)
-                {
-                    await _mapModule.InvokeVoidAsync("clearDrawnPolygons", _drawControl);
-                }
+            // If we have drawn coordinates and the save was successful, add them as locations
+            if (response?.Status == (int)HttpStatusCode.OK && response.Result != null && _drawnCoordinates != null && _drawnCoordinates.Count > 0)
+            {
+                string fieldId = response.Result.Id;
+                await SaveDrawnCoordinates(fieldId);
+            }
+        }
+        else
+        {
+            // Update existing field
+            // Convert CreateFieldViewModel to FieldViewModel for update
+            var updateField = new FieldViewModel
+            {
+                Id = _fieldEdit.Id,
+                Name = _fieldEdit.Name,
+                Description = _fieldEdit.Description,
+                Size = _fieldEdit.Size,
+                SoilType = _fieldEdit.SoilType,
+                Irrigation = _fieldEdit.Irrigation,
+                FarmId = _fieldEdit.FarmId
+            };
 
-                // Refresh field list
-                await LoadFields(_farm.Id);
+            response = await ApiCall.Update<UI.Shared.Models.ApiResponse<FieldViewModel>, FieldViewModel>(
+                await ApiCall.GetHttpClient(), "fields/updatefield", updateField.Id, updateField);
+                
+            // If coordinates were drawn, update them for the existing field
+            if (response?.Status == (int)HttpStatusCode.OK && _drawnCoordinates != null && _drawnCoordinates.Count > 0)
+            {
+                await SaveDrawnCoordinates(_fieldEdit.Id);
+            }
+        }
 
-                // Select the field if it's a new one
-                if (string.IsNullOrEmpty(_fieldEdit.Id) && response.Result != null)
-                {
-                    await OnFieldSelect(response.Result);
-                }
-                else
-                {
-                    // Go back to fields list
-                    await BackToFields();
-                }
+        if (response == null)
+        {
+            _alert.Show("Failed to save field, please try again!", showTitle: true, toastType: ToastType.Danger);
+        }
+        else if (response.Status == (int)HttpStatusCode.OK)
+        {
+            _alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+
+            // Reset drawn coordinates
+            _drawnCoordinates = new List<List<double>>();
+            
+            // Clear any drawings on the map
+            if (_drawControl != null)
+            {
+                await _mapModule.InvokeVoidAsync("clearDrawnPolygons", _drawControl);
+            }
+            
+            // Hide drawing button
+            await _mapModule.InvokeVoidAsync("toggleDrawButtonVisibility", false);
+
+            // Refresh field list
+            await LoadFields(_farm.Id);
+
+            // Select the field if it's a new one
+            if (string.IsNullOrEmpty(_fieldEdit.Id) && response.Result != null)
+            {
+                await OnFieldSelect(response.Result);
             }
             else
             {
-                _alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+                // Go back to fields list
+                await BackToFields();
             }
         }
-        catch (Exception ex)
+        else
         {
-            _alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
-            Logger.LogError(ex, "Error saving field");
-        }
-        finally
-        {
-            await HideSpinner();
+            _alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
         }
     }
+    catch (Exception ex)
+    {
+        _alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        Logger.LogError(ex, "Error saving field");
+    }
+    finally
+    {
+        await HideSpinner();
+    }
+}
 
     private async Task SaveFieldLocation()
     {
@@ -1310,13 +1328,13 @@
                         Latitude = coord[1],
                         Altitude = coord.Count > 2 ? coord[2] : 0
                     };
-                    
+
                     // Save each coordinate
                     await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldLocationViewModel>, FieldLocationViewModel>(
                         await ApiCall.GetHttpClient(), "fieldLocations/createfieldLocation", location);
                 }
             }
-            
+
             _alert.Show("Field boundary coordinates saved successfully!", toastType: ToastType.Success);
         }
         catch (Exception ex)
@@ -2126,14 +2144,14 @@
             Logger.LogError(ex, $"Error unhighlighting field {field.Id}");
         }
     }
-    
+
     [JSInvokable]
     public void SetDrawingMode(bool isDrawing)
     {
         _isInDrawingMode = isDrawing;
         StateHasChanged();
     }
-    
+
     [JSInvokable]
     public async Task OnPolygonDrawn(List<List<double>> coordinates)
     {
@@ -2141,31 +2159,31 @@
         {
             // Make sure we're not in drawing mode anymore
             _isInDrawingMode = false;
-        
+
             // Debug logging to check what we're receiving
             Logger.LogInformation($"Received coordinates: {coordinates?.Count ?? 0} points");
-        
+
             if (coordinates != null && coordinates.Count > 0)
             {
                 // Store the drawn coordinates
                 _drawnCoordinates = coordinates;
-            
+
                 // Log a few coordinates for debugging if we have them
-                if (coordinates.Count > 0) 
+                if (coordinates.Count > 0)
                 {
                     // Log first coordinate point
                     Logger.LogInformation($"First point: [{string.Join(", ", coordinates[0])}]");
-                
+
                     // Log last coordinate point if we have multiple
                     if (coordinates.Count > 1)
                     {
                         Logger.LogInformation($"Last point: [{string.Join(", ", coordinates[coordinates.Count - 1])}]");
                     }
                 }
-            
+
                 // Notify the user
                 _alert.Show($"Field boundary drawn successfully with {coordinates.Count} points!", toastType: ToastType.Success);
-            
+
                 // Force UI refresh
                 StateHasChanged();
             }
@@ -2181,7 +2199,7 @@
             _alert.Show("Error processing drawn boundary", toastType: ToastType.Danger);
         }
     }
-    
+
     private async Task InitializeDrawingControls()
     {
         if (_mapModule != null && _mapInstance != null)
@@ -2189,7 +2207,7 @@
             // Initialize drawing controls with custom JS file
             _drawControl = await _mapModule.InvokeAsync<IJSObjectReference>(
                 "initializeDrawControls", _mapInstance);
-                
+
             if (_drawControl != null)
             {
                 // Update JavaScript to handle drawing mode properly
@@ -2197,6 +2215,36 @@
             }
         }
     }
+    
+    // Method to handle field size updates from Turf.js calculations
+    [JSInvokable]
+    public void UpdateFieldSize(double areaInHectares)
+    {
+        try
+        {
+            // Round to 2 decimal places for better display
+            float roundedArea = (float)Math.Round(areaInHectares, 2);
+        
+            // Update the field size property with the calculated area
+            _fieldEdit.Size = roundedArea;
+        
+            // Show toast notification about the area calculation
+            _alert.Show($"Field size calculated using Turf.js: {roundedArea} hectares", 
+                title: "Area Calculation", 
+                toastType: ToastType.Success);
+        
+            // Force UI refresh
+            StateHasChanged();
+        
+            Logger.LogInformation($"Field size updated to {roundedArea} hectares using Turf.js");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error updating field size: {Message}", ex.Message);
+            _alert.Show("Error updating field size", toastType: ToastType.Danger);
+        }
+    }
+
 
     #endregion
 
@@ -2297,20 +2345,20 @@
         }
     }
 
-    void ShowEditField()
+    async Task ShowEditField()
     {
         _fieldEdit = new CreateFieldViewModel
         {
             FarmId = _farm.Id
         };
-        
+    
         // Reset drawn coordinates
         _drawnCoordinates = new List<List<double>>();
-        
+    
         // Clear any existing drawings
         if (_drawControl != null)
         {
-            _mapModule?.InvokeVoidAsync("clearDrawnPolygons", _drawControl);
+            await _mapModule.InvokeVoidAsync("clearDrawnPolygons", _drawControl);
         }
 
         _showSchools = "panel-hidden";
@@ -2319,9 +2367,12 @@
         _showFields = "panel-hidden";
         _showFieldEdit = "";
         _showFieldDetails = "panel-hidden";
+    
+        // Show drawing button when entering field edit mode
+        await _mapModule.InvokeVoidAsync("toggleDrawButtonVisibility", true);
     }
 
-    void EditCurrentField()
+    async void EditCurrentField()
     {
         // Convert the current field to CreateFieldViewModel for editing
         _fieldEdit = new CreateFieldViewModel
@@ -2334,14 +2385,14 @@
             Irrigation = _field.Irrigation,
             FarmId = _field.FarmId
         };
-        
+    
         // Reset drawn coordinates when editing
         _drawnCoordinates = new List<List<double>>();
-        
+    
         // Clear any existing drawings
         if (_drawControl != null)
         {
-            _mapModule?.InvokeVoidAsync("clearDrawnPolygons", _drawControl);
+            await _mapModule.InvokeVoidAsync("clearDrawnPolygons", _drawControl);
         }
 
         _showSchools = "panel-hidden";
@@ -2350,6 +2401,9 @@
         _showFields = "panel-hidden";
         _showFieldEdit = "";
         _showFieldDetails = "panel-hidden";
+    
+        // Show drawing button when entering field edit mode
+        await _mapModule.InvokeVoidAsync("toggleDrawButtonVisibility", true);
     }
 
     async Task BackToFields()
@@ -2363,6 +2417,9 @@
         _showFieldEdit = "panel-hidden";
         _showFieldDetails = "panel-hidden";
 
+        // Hide drawing button when leaving field edit mode
+        await _mapModule.InvokeVoidAsync("toggleDrawButtonVisibility", false);
+    
         // Reset coordinate form
         ResetCoordinateForm();
 
@@ -2396,6 +2453,7 @@
 
         await HideSpinner();
     }
+
 
     async Task ShowFieldsList()
     {
@@ -2740,14 +2798,14 @@
 
                     // Create a DotNetObjectReference for JS interop and store it for disposal
                     _dotNetRef = DotNetObjectReference.Create(this);
-                    
+
                     // Add filter button to map with .NET reference
                     await _mapModule.InvokeVoidAsync("addFilterButton", _mapInstance, _dotNetRef);
-                    
+
                     // Initialize drawing controls
                     _drawControl = await _mapModule.InvokeAsync<IJSObjectReference>(
                         "initializeDrawControls", _mapInstance);
-                        
+
                     // Set up the new drawing mode controls that fix the popup issue
                     if (_drawControl is not null)
                     {
@@ -2773,7 +2831,7 @@
         {
             await _drawControl.DisposeAsync();
         }
-        
+
         // Dispose the map instance
         if (_mapInstance is not null)
         {
