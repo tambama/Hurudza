@@ -4,6 +4,43 @@ import 'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.3.0/mapbox
 // Mapbox access token
 mapboxgl.accessToken = 'pk.eyJ1IjoicGVuaWVsdCIsImEiOiJjbGt3Y2gxM3YweWtrM3FwbW9jaWNkMWVyIn0.cDAgTWNXN-TVJROjgoWQiw';
 
+// Create a custom filter control class
+class FilterControl {
+    constructor(dotNetRef) {
+        this._dotNetRef = dotNetRef;
+    }
+
+    onAdd(map) {
+        this._map = map;
+        this._container = document.createElement('div');
+        this._container.className = 'mapboxgl-ctrl mapboxgl-ctrl-group filter-control-container';
+
+        const button = document.createElement('button');
+        button.className = 'mapboxgl-ctrl-icon custom-filter-ctrl';
+        button.type = 'button';
+        button.title = 'Filter Schools';
+
+        // Add filter icon (using Font Awesome styling)
+        button.innerHTML = '<i class="fa fa-filter"></i>';
+
+        // Add click handler
+        button.onclick = () => {
+            // Call the .NET method on the Blazor component
+            if (this._dotNetRef) {
+                this._dotNetRef.invokeMethodAsync('ToggleFilterModal');
+            }
+        };
+
+        this._container.appendChild(button);
+        return this._container;
+    }
+
+    onRemove() {
+        this._container.parentNode.removeChild(this._container);
+        this._map = undefined;
+    }
+}
+
 /**
  * Creates and returns a new Mapbox map instance
  * @param {HTMLElement} element - The DOM element to attach the map to
@@ -29,9 +66,6 @@ export function addMapToElement(element) {
             unit: 'metric'
         }), 'bottom-left');
 
-        // Add fullscreen control
-        map.addControl(new mapboxgl.FullscreenControl(), 'top-right');
-
         // Wait for map to load before returning
         map.on('load', () => {
             console.log('Map loaded successfully');
@@ -41,6 +75,72 @@ export function addMapToElement(element) {
     } catch (error) {
         console.error('Error initializing map:', error);
         throw error;
+    }
+}
+
+/**
+ * Add a filter button to the map
+ * @param {Object} map - The Mapbox map instance
+ * @param {Object} dotNetRef - Reference to .NET component
+ * @returns {boolean} Success indicator
+ */
+export function addFilterButton(map, dotNetRef) {
+    try {
+        // Create and add filter control
+        const filterControl = new FilterControl(dotNetRef);
+        map.addControl(filterControl, 'top-right');
+
+        // Add fullscreen control after filter control
+        map.addControl(new mapboxgl.FullscreenControl(), 'top-right');
+
+        // Add CSS for the filter button
+        addFilterButtonStyles();
+
+        console.log('Filter button added to map');
+        return true;
+    } catch (error) {
+        console.error('Error adding filter button:', error);
+        return false;
+    }
+}
+
+/**
+ * Add custom CSS styles for the filter button
+ */
+export function addFilterButtonStyles() {
+    try {
+        // Create style element if it doesn't exist
+        let style = document.getElementById('filter-button-styles');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'filter-button-styles';
+            style.textContent = `
+                .custom-filter-ctrl {
+                    width: 30px;
+                    height: 30px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: white;
+                }
+                .custom-filter-ctrl:hover {
+                    background-color: #f2f2f2;
+                }
+                .custom-filter-ctrl i {
+                    font-size: 14px;
+                }
+                .filter-control-container {
+                    margin-right: 5px;
+                }
+            `;
+            document.head.appendChild(style);
+            console.log('Filter button styles added');
+        }
+        return true;
+    } catch (error) {
+        console.error('Error adding filter button styles:', error);
+        return false;
     }
 }
 

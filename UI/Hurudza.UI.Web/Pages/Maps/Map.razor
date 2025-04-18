@@ -1,10 +1,7 @@
 ﻿@page "/"
 @implements IAsyncDisposable
 @using System.Collections.ObjectModel
-@using System.Diagnostics
 @using Microsoft.Extensions.Logging
-@using SharpKml.Engine
-@using System.Net.Http.Headers
 @attribute [Authorize]
 
 @inject IJSRuntime JS
@@ -932,11 +929,12 @@
 </div>
 
 @code {
-
     // Map elements
     private ElementReference _mapElement;
     private IJSObjectReference? _mapModule;
     private IJSObjectReference? _mapInstance;
+    // Private field to store the .NET object reference
+    private DotNetObjectReference<Map> _dotNetRef;
 
     // UI references
     private Toast _alert;
@@ -1541,6 +1539,14 @@
     void ToggleFiltersModal()
     {
         ShowFiltersModal = !ShowFiltersModal;
+    }
+    
+    // JavaScript-invokable method to toggle the filter modal
+    [JSInvokable]
+    public void ToggleFilterModal()
+    {
+        ShowFiltersModal = !ShowFiltersModal;
+        StateHasChanged();
     }
 
     bool HasActiveFilters()
@@ -2462,9 +2468,13 @@
                     _mapInstance = await _mapModule.InvokeAsync<IJSObjectReference>(
                         "addMapToElement", _mapElement);
 
+                    // Create a DotNetObjectReference for JS interop and store it for disposal
+                    _dotNetRef = DotNetObjectReference.Create(this);
+                    
+                    // Add filter button to map with .NET reference
+                    await _mapModule.InvokeVoidAsync("addFilterButton", _mapInstance, _dotNetRef);
+
                     // Important: Only load clusters once after initialization
-                    // This ensures clusters are loaded on first render 
-                    // and not accidentally called during other operations
                     await LoadClusters();
                 }
             }
@@ -2478,15 +2488,20 @@
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        // Dispose the map instance
         if (_mapInstance is not null)
         {
             await _mapInstance.DisposeAsync();
         }
 
+        // Dispose the map module
         if (_mapModule is not null)
         {
             await _mapModule.DisposeAsync();
         }
+
+        // Dispose the .NET object reference
+        _dotNetRef?.Dispose();
     }
 
     #endregion
