@@ -416,6 +416,7 @@
                         }
                     </div>
 
+                    <!-- Modified ListView with mouseover events -->
                     <SfListView DataSource="@_filteredFields" Height="calc(100vh - 240px)">
                         <ListViewFieldSettings TValue="FieldViewModel" Id="Id" Text="Name"></ListViewFieldSettings>
                         <ListViewTemplates TValue="FieldViewModel">
@@ -423,7 +424,9 @@
                                 @{
                                     FieldViewModel field = (FieldViewModel)context;
                                     <div class="e-list-wrapper e-list-multi-line"
-                                         @onclick="(e => OnFieldSelect(field))">
+                                         @onclick="(e => OnFieldSelect(field))"
+                                         @onmouseover="(e => HighlightField(field))"
+                                         @onmouseout="(e => UnhighlightField(field))">
                                         <div class="e-list-item-header text-truncate">@field.Name</div>
                                         <div class="e-list-content" style="white-space: normal; font-size: 13px; padding-top: 4px;">
                                             <div class="d-flex flex-wrap">
@@ -1991,9 +1994,42 @@
             Logger.LogError(ex, "Error updating field on map");
         }
     }
+    
+    // Field highlighting methods
+    private async Task HighlightField(FieldViewModel field)
+    {
+        try
+        {
+            if (_mapModule != null && _mapInstance != null)
+            {
+                // Call JavaScript function to highlight this field
+                await _mapModule.InvokeVoidAsync("highlightFieldOnMap", _mapInstance, field.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, $"Error highlighting field {field.Id}");
+        }
+    }
+
+    private async Task UnhighlightField(FieldViewModel field)
+    {
+        try
+        {
+            if (_mapModule != null && _mapInstance != null)
+            {
+                // Call JavaScript function to unhighlight this field
+                await _mapModule.InvokeVoidAsync("unhighlightFieldOnMap", _mapInstance, field.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, $"Error unhighlighting field {field.Id}");
+        }
+    }
 
     #endregion
-
+    
     #region Navigation Functions
 
     // Panel control methods

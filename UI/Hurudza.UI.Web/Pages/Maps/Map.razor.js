@@ -161,6 +161,7 @@ export async function drawPolygon(map, id, coordinates, isField = false, name = 
     const sourceId = `${prefix}source-${id}`;
     const outlineLayerId = `${prefix}outline-${id}`;
     const fillLayerId = `${prefix}fill-${id}`;
+    const hoverFillLayerId = `${prefix}hover-fill-${id}`;
 
     try {
         // If clearExisting flag is true, clear all layers before drawing
@@ -179,6 +180,10 @@ export async function drawPolygon(map, id, coordinates, isField = false, name = 
                 removeLayerSafely(map, fillLayerId);
             }
 
+            if (layerExists(map, hoverFillLayerId)) {
+                removeLayerSafely(map, hoverFillLayerId);
+            }
+
             // Then remove the source
             removeSourceSafely(map, sourceId);
         }
@@ -195,7 +200,8 @@ export async function drawPolygon(map, id, coordinates, isField = false, name = 
                 'properties': {
                     'name': name,
                     'cropData': cropData,
-                    'isField': isField
+                    'isField': isField,
+                    'id': id
                 }
             }
         });
@@ -218,7 +224,7 @@ export async function drawPolygon(map, id, coordinates, isField = false, name = 
             }
         });
 
-        // Add fill layer for all polygons
+        // Add invisible fill layer (for hit detection)
         map.addLayer({
             'id': fillLayerId,
             'type': 'fill',
@@ -226,7 +232,19 @@ export async function drawPolygon(map, id, coordinates, isField = false, name = 
             'layout': {},
             'paint': {
                 'fill-color': fillColor,
-                'fill-opacity': fillOpacity
+                'fill-opacity': 0 // Initially transparent
+            }
+        });
+
+        // Add hover fill layer (initially invisible)
+        map.addLayer({
+            'id': hoverFillLayerId,
+            'type': 'fill',
+            'source': sourceId,
+            'layout': {},
+            'paint': {
+                'fill-color': isField ? '#ff0000' : fillColor, // Red for fields on hover
+                'fill-opacity': 0 // Initially transparent
             }
         });
 
@@ -280,10 +298,28 @@ export async function drawPolygon(map, id, coordinates, isField = false, name = 
         // Add mouse interaction handlers for hover effects
         map.on('mouseenter', fillLayerId, () => {
             map.getCanvas().style.cursor = 'pointer';
+
+            // Only apply the fill effect for field layers, not farm boundaries
+            if (isField) {
+                map.setPaintProperty(hoverFillLayerId, 'fill-opacity', 0.3);
+
+                // Also change the outline to red for fields
+                map.setPaintProperty(outlineLayerId, 'line-color', '#ff0000');
+                map.setPaintProperty(outlineLayerId, 'line-width', 3); // Make it slightly thicker
+            }
         });
 
         map.on('mouseleave', fillLayerId, () => {
             map.getCanvas().style.cursor = '';
+
+            // Reset fill opacity
+            map.setPaintProperty(hoverFillLayerId, 'fill-opacity', 0);
+
+            // Reset outline color for fields
+            if (isField) {
+                map.setPaintProperty(outlineLayerId, 'line-color', outlineColor);
+                map.setPaintProperty(outlineLayerId, 'line-width', outlineWidth);
+            }
         });
 
         console.log(`Successfully drew ${isField ? 'field' : 'farm'} polygon for ${id}`);
@@ -670,5 +706,63 @@ function removeLayerSafely(map, layerId) {
         }
     } catch (e) {
         console.warn(`Error removing layer ${layerId}:`, e);
+    }
+}
+
+/**
+ * Highlights a specific field on the map
+ * @param {Object} map - The Mapbox map instance
+ * @param {string} fieldId - ID of the field to highlight
+ */
+export function highlightFieldOnMap(map, fieldId) {
+    try {
+        // The field layer IDs follow the pattern 'field-outline-{fieldId}' and 'field-hover-fill-{fieldId}'
+        const outlineLayerId = `field-outline-${fieldId}`;
+        const hoverFillLayerId = `field-hover-fill-${fieldId}`;
+
+        // Check if the layers exist to avoid errors
+        if (layerExists(map, outlineLayerId) && layerExists(map, hoverFillLayerId)) {
+            // Change the outline color to red and make it thicker
+            map.setPaintProperty(outlineLayerId, 'line-color', '#ff0000');
+            map.setPaintProperty(outlineLayerId, 'line-width', 3);
+
+            // Show the fill with opacity
+            map.setPaintProperty(hoverFillLayerId, 'fill-opacity', 0.3);
+
+            console.log(`Highlighted field ${fieldId}`);
+        } else {
+            console.warn(`Could not find layers for field ${fieldId}`);
+        }
+    } catch (error) {
+        console.error(`Error highlighting field ${fieldId}:`, error);
+    }
+}
+
+/**
+ * Removes highlight from a specific field on the map
+ * @param {Object} map - The Mapbox map instance
+ * @param {string} fieldId - ID of the field to unhighlight
+ */
+export function unhighlightFieldOnMap(map, fieldId) {
+    try {
+        // The field layer IDs follow the pattern 'field-outline-{fieldId}' and 'field-hover-fill-{fieldId}'
+        const outlineLayerId = `field-outline-${fieldId}`;
+        const hoverFillLayerId = `field-hover-fill-${fieldId}`;
+
+        // Check if the layers exist to avoid errors
+        if (layerExists(map, outlineLayerId) && layerExists(map, hoverFillLayerId)) {
+            // Reset the outline color to orange and width back to normal
+            map.setPaintProperty(outlineLayerId, 'line-color', '#ff5500');
+            map.setPaintProperty(outlineLayerId, 'line-width', 2);
+
+            // Hide the fill
+            map.setPaintProperty(hoverFillLayerId, 'fill-opacity', 0);
+
+            console.log(`Unhighlighted field ${fieldId}`);
+        } else {
+            console.warn(`Could not find layers for field ${fieldId}`);
+        }
+    } catch (error) {
+        console.error(`Error unhighlighting field ${fieldId}:`, error);
     }
 }
