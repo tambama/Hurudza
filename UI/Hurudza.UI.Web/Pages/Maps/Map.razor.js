@@ -4,42 +4,9 @@ import 'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.3.0/mapbox
 // Mapbox access token
 mapboxgl.accessToken = 'pk.eyJ1IjoicGVuaWVsdCIsImEiOiJjbGt3Y2gxM3YweWtrM3FwbW9jaWNkMWVyIn0.cDAgTWNXN-TVJROjgoWQiw';
 
-// Create a custom filter control class
-class FilterControl {
-    constructor(dotNetRef) {
-        this._dotNetRef = dotNetRef;
-    }
-
-    onAdd(map) {
-        this._map = map;
-        this._container = document.createElement('div');
-        this._container.className = 'mapboxgl-ctrl mapboxgl-ctrl-group filter-control-container';
-
-        const button = document.createElement('button');
-        button.className = 'mapboxgl-ctrl-icon custom-filter-ctrl';
-        button.type = 'button';
-        button.title = 'Filter Schools';
-
-        // Add filter icon (using Font Awesome styling)
-        button.innerHTML = '<i class="fa fa-filter"></i>';
-
-        // Add click handler
-        button.onclick = () => {
-            // Call the .NET method on the Blazor component
-            if (this._dotNetRef) {
-                this._dotNetRef.invokeMethodAsync('ToggleFilterModal');
-            }
-        };
-
-        this._container.appendChild(button);
-        return this._container;
-    }
-
-    onRemove() {
-        this._container.parentNode.removeChild(this._container);
-        this._map = undefined;
-    }
-}
+// Track drawing mode globally
+let isDrawingModeActive = false;
+let drawControl = null;
 
 /**
  * Creates and returns a new Mapbox map instance
@@ -75,6 +42,43 @@ export function addMapToElement(element) {
     } catch (error) {
         console.error('Error initializing map:', error);
         throw error;
+    }
+}
+
+// Create a custom filter control class
+class FilterControl {
+    constructor(dotNetRef) {
+        this._dotNetRef = dotNetRef;
+    }
+
+    onAdd(map) {
+        this._map = map;
+        this._container = document.createElement('div');
+        this._container.className = 'mapboxgl-ctrl mapboxgl-ctrl-group filter-control-container';
+
+        const button = document.createElement('button');
+        button.className = 'mapboxgl-ctrl-icon custom-filter-ctrl';
+        button.type = 'button';
+        button.title = 'Filter Schools';
+
+        // Add filter icon (using Font Awesome styling)
+        button.innerHTML = '<i class="fa fa-filter"></i>';
+
+        // Add click handler
+        button.onclick = () => {
+            // Call the .NET method on the Blazor component
+            if (this._dotNetRef) {
+                this._dotNetRef.invokeMethodAsync('ToggleFilterModal');
+            }
+        };
+
+        this._container.appendChild(button);
+        return this._container;
+    }
+
+    onRemove() {
+        this._container.parentNode.removeChild(this._container);
+        this._map = undefined;
     }
 }
 
@@ -140,6 +144,371 @@ export function addFilterButtonStyles() {
         return true;
     } catch (error) {
         console.error('Error adding filter button styles:', error);
+        return false;
+    }
+}
+
+// Initialize map draw controls
+export function initializeDrawControls(map) {
+    try {
+        // Check if MapboxDraw is available
+        if (typeof MapboxDraw === 'undefined') {
+            console.error('MapboxDraw plugin not available');
+            return null;
+        }
+
+        // Add event handler to intercept events while in drawing mode
+        map.on('click', function(e) {
+            // If we're in drawing mode (detected by presence of active class on button)
+            if (isDrawingModeActive) {
+                // Prevent propagation of the click event to other handlers
+                e.originalEvent.stopPropagation();
+
+                // Ensure we don't get popup on click while drawing
+                const popups = document.querySelectorAll('.mapboxgl-popup');
+                if (popups.length > 0) {
+                    popups.forEach(popup => popup.remove());
+                }
+            }
+        }, true); // Use capturing phase to intercept before other handlers
+
+        // Create a new MapboxDraw instance with polygon-only drawing tools
+        drawControl = new MapboxDraw({
+            displayControlsDefault: false,
+            controls: {
+                polygon: true,
+                trash: true
+            },
+            defaultMode: 'simple_select', // Start in selection mode, not drawing mode
+            styles: [
+                // Style for the polygon fill
+                {
+                    'id': 'gl-draw-polygon-fill',
+                    'type': 'fill',
+                    'filter': ['all', ['==', '$type', 'Polygon'], ['!=', 'mode', 'static']],
+                    'paint': {
+                        'fill-color': '#ff9966',
+                        'fill-outline-color': '#ff5500',
+                        'fill-opacity': 0.3
+                    }
+                },
+                // Style for the polygon outline
+                {
+                    'id': 'gl-draw-polygon-stroke',
+                    'type': 'line',
+                    'filter': ['all', ['==', '$type', 'Polygon'], ['!=', 'mode', 'static']],
+                    'layout': {
+                        'line-cap': 'round',
+                        'line-join': 'round'
+                    },
+                    'paint': {
+                        'line-color': '#ff5500',
+                        'line-width': 2
+                    }
+                },
+                // Style for the vertices
+                {
+                    'id': 'gl-draw-polygon-and-line-vertex-active',
+                    'type': 'circle',
+                    'filter': ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point']],
+                    'paint': {
+                        'circle-radius': 6,
+                        'circle-color': '#ff5500'
+                    }
+                }
+            ]
+        });
+
+        // Add draw controls to the map but hide the default UI - we'll use our custom button
+        // We still need to add it to have the functionality, but we don't need to show the default buttons
+        map.addControl(drawControl);
+
+        // Hide the default MapboxDraw controls
+        let style = document.getElementById('draw-controls-style');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'draw-controls-style';
+            style.textContent = `
+                /* Hide the default MapboxDraw controls */
+                .mapbox-gl-draw_ctrl-draw-btn {
+                    display: none !important;
+                }
+                .mapboxgl-ctrl-group.mapboxgl-ctrl-group--draw {
+                    display: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        console.log('Draw controls initialized successfully');
+        return drawControl;
+    } catch (error) {
+        console.error('Error initializing draw controls:', error);
+        return null;
+    }
+}
+
+// Setup drawing mode with event blocking
+export function setupDrawingMode(map, draw, dotNetRef) {
+    try {
+        // Create a new button element for drawing mode toggle
+        const drawButton = document.createElement('button');
+        drawButton.id = 'field-drawing-button';
+        drawButton.className = 'mapboxgl-ctrl-icon';
+        drawButton.type = 'button';
+        drawButton.title = 'Draw Field Boundary';
+        drawButton.innerHTML = '<i class="fa fa-draw-polygon"></i>';
+        drawButton.style.cssText = `
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            background: white;
+            border: none;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+            position: absolute;
+            top: 130px; /* Position below fullscreen control */
+            right: 10px;
+            z-index: 999;
+        `;
+
+        // Add button to map container
+        const mapContainer = map.getContainer();
+        mapContainer.appendChild(drawButton);
+
+        // Add hover and active styles
+        drawButton.addEventListener('mouseenter', () => {
+            if (!isDrawingModeActive) {
+                drawButton.style.background = '#f2f2f2';
+            }
+        });
+
+        drawButton.addEventListener('mouseleave', () => {
+            if (!isDrawingModeActive) {
+                drawButton.style.background = 'white';
+            }
+        });
+
+        // Add click handler to toggle drawing mode
+        drawButton.addEventListener('click', () => {
+            toggleDrawingMode(map, draw, dotNetRef, drawButton);
+        });
+
+        // Add event listener to block popup creation during drawing
+        map.on('click', (e) => {
+            if (isDrawingModeActive) {
+                // Prevent map click events from creating popups
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Also remove any popups that might have appeared
+                removeAllPopups();
+            }
+        });
+
+        // Listen for draw.create event to capture when a polygon is completed
+        map.on('draw.create', (e) => {
+            console.log('Polygon creation completed');
+
+            // Check if we have a valid polygon
+            if (e.features && e.features.length > 0) {
+                // Exit drawing mode
+                toggleDrawingMode(map, draw, dotNetRef, drawButton, true);
+            }
+        });
+
+        // Listen for escape key to cancel drawing
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isDrawingModeActive) {
+                // Cancel drawing mode
+                toggleDrawingMode(map, draw, dotNetRef, drawButton, false);
+            }
+        });
+
+        console.log('Drawing mode setup complete');
+        return true;
+    } catch (error) {
+        console.error('Error setting up drawing mode:', error);
+        return false;
+    }
+}
+
+// Helper function to toggle drawing mode
+function toggleDrawingMode(map, draw, dotNetRef, drawButton, hasCompletedPolygon = false) {
+    // If we completed a polygon, we're turning off drawing mode
+    if (hasCompletedPolygon) {
+        isDrawingModeActive = false;
+    } else {
+        // Otherwise toggle the state
+        isDrawingModeActive = !isDrawingModeActive;
+    }
+
+    // Update button UI
+    updateDrawButtonState(drawButton);
+
+    // Notify .NET about the state change
+    if (dotNetRef) {
+        try {
+            dotNetRef.invokeMethodAsync('SetDrawingMode', isDrawingModeActive);
+        } catch (error) {
+            console.warn('Error notifying .NET of drawing mode change:', error);
+        }
+    }
+
+    if (isDrawingModeActive) {
+        // Activate draw mode
+        removeAllPopups();
+
+        // Enable drawing mode
+        if (draw) {
+            try {
+                draw.changeMode('draw_polygon');
+            } catch (error) {
+                console.warn('Error changing to draw_polygon mode:', error);
+            }
+        }
+
+        // Set drawing cursor
+        setCrosshairCursor(map);
+    } else {
+        // Get coordinates if we have a completed polygon
+        if (hasCompletedPolygon && draw) {
+            try {
+                const coordinates = getDrawnPolygonCoordinates(draw);
+                if (coordinates && dotNetRef) {
+                    dotNetRef.invokeMethodAsync('OnPolygonDrawn', coordinates);
+                }
+            } catch (error) {
+                console.warn('Error getting polygon coordinates:', error);
+            }
+        }
+
+        // Reset cursor
+        resetCursor(map);
+
+        // Don't clear drawing if we just completed a polygon - the user might want to see what they drew
+        if (!hasCompletedPolygon && draw) {
+            try {
+                draw.deleteAll();
+            } catch (error) {
+                console.warn('Error clearing drawings:', error);
+            }
+        }
+    }
+}
+
+// Helper to update the draw button state
+function updateDrawButtonState(drawButton) {
+    if (!drawButton) return;
+
+    if (isDrawingModeActive) {
+        drawButton.style.background = '#ff5500';
+        drawButton.style.color = 'white';
+    } else {
+        drawButton.style.background = 'white';
+        drawButton.style.color = 'black';
+    }
+}
+
+// Remove all mapbox popups
+function removeAllPopups() {
+    setTimeout(() => {
+        const popups = document.querySelectorAll('.mapboxgl-popup');
+        popups.forEach(popup => popup.remove());
+    }, 0);
+}
+
+// Set crosshair cursor for drawing
+function setCrosshairCursor(map) {
+    if (!map) return;
+
+    try {
+        // Store original cursor
+        window._originalMapCursor = map.getCanvas().style.cursor;
+
+        // Set drawing cursor
+        map.getCanvas().style.cursor = 'crosshair';
+    } catch (error) {
+        console.warn('Error setting cursor:', error);
+    }
+}
+
+// Reset cursor to original
+function resetCursor(map) {
+    if (!map) return;
+
+    try {
+        // Restore original cursor
+        if (window._originalMapCursor) {
+            map.getCanvas().style.cursor = window._originalMapCursor;
+        } else {
+            map.getCanvas().style.cursor = '';
+        }
+    } catch (error) {
+        console.warn('Error resetting cursor:', error);
+    }
+}
+
+// Get polygon coordinates - with added safety checks
+function getDrawnPolygonCoordinates(draw) {
+    try {
+        if (!draw) {
+            console.warn('Draw control is null');
+            return null;
+        }
+
+        // Get all features safely
+        let features = [];
+        try {
+            const allFeatures = draw.getAll();
+            if (allFeatures && allFeatures.features) {
+                features = allFeatures.features;
+            }
+        } catch (error) {
+            console.warn('Error getting features:', error);
+            return null;
+        }
+
+        if (features.length === 0) {
+            console.log('No polygons have been drawn');
+            return null;
+        }
+
+        // Just get the first polygon if multiple exist
+        const polygon = features.find(feature =>
+            feature && feature.geometry && feature.geometry.type === 'Polygon');
+
+        if (!polygon) {
+            console.log('No polygon features found');
+            return null;
+        }
+
+        // Return the coordinates array (already in the right format for our API)
+        return polygon.geometry.coordinates;
+    } catch (error) {
+        console.error('Error getting polygon coordinates:', error);
+        return null;
+    }
+}
+
+// Clear any drawn polygons with safety checks
+export function clearDrawnPolygons(draw) {
+    try {
+        if (draw) {
+            try {
+                draw.deleteAll();
+                console.log('All drawn polygons cleared');
+            } catch (error) {
+                console.warn('Error clearing polygons:', error);
+            }
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error('Error in clearDrawnPolygons:', error);
         return false;
     }
 }
@@ -250,6 +619,9 @@ export async function drawPolygon(map, id, coordinates, isField = false, name = 
 
         // Add click handler for popup
         map.on('click', fillLayerId, (e) => {
+            // Only show popups when not in drawing mode
+            if (isDrawingModeActive) return;
+
             // Get the coordinates of the click point
             const coordinates = e.lngLat;
             const feature = e.features[0];
@@ -297,6 +669,8 @@ export async function drawPolygon(map, id, coordinates, isField = false, name = 
 
         // Add mouse interaction handlers for hover effects
         map.on('mouseenter', fillLayerId, () => {
+            if (isDrawingModeActive) return; // Skip hover effects while drawing
+
             map.getCanvas().style.cursor = 'pointer';
 
             // Only apply the fill effect for field layers, not farm boundaries
@@ -441,6 +815,9 @@ export function loadFarms(map, farms) {
 
         // Add click handler for clusters
         map.on('click', 'clusters', (e) => {
+            // Skip if in drawing mode
+            if (isDrawingModeActive) return;
+
             const features = map.queryRenderedFeatures(e.point, {
                 layers: ['clusters']
             });
@@ -463,6 +840,9 @@ export function loadFarms(map, farms) {
 
         // Add click handler for individual points
         map.on('click', 'unclustered-point', (e) => {
+            // Skip if in drawing mode
+            if (isDrawingModeActive) return;
+
             const coordinates = e.features[0].geometry.coordinates.slice();
             const props = e.features[0].properties;
             const name = props.name;
@@ -491,19 +871,27 @@ export function loadFarms(map, farms) {
 
         // Add hover effects
         map.on('mouseenter', 'clusters', () => {
-            map.getCanvas().style.cursor = 'pointer';
+            if (!isDrawingModeActive) {
+                map.getCanvas().style.cursor = 'pointer';
+            }
         });
 
         map.on('mouseenter', 'unclustered-point', () => {
-            map.getCanvas().style.cursor = 'pointer';
+            if (!isDrawingModeActive) {
+                map.getCanvas().style.cursor = 'pointer';
+            }
         });
 
         map.on('mouseleave', 'clusters', () => {
-            map.getCanvas().style.cursor = '';
+            if (!isDrawingModeActive) {
+                map.getCanvas().style.cursor = '';
+            }
         });
 
         map.on('mouseleave', 'unclustered-point', () => {
-            map.getCanvas().style.cursor = '';
+            if (!isDrawingModeActive) {
+                map.getCanvas().style.cursor = '';
+            }
         });
 
         // IMPORTANT: Signal successful load with console message
@@ -716,6 +1104,9 @@ function removeLayerSafely(map, layerId) {
  */
 export function highlightFieldOnMap(map, fieldId) {
     try {
+        // Skip highlighting if in drawing mode
+        if (isDrawingModeActive) return;
+
         // The field layer IDs follow the pattern 'field-outline-{fieldId}' and 'field-hover-fill-{fieldId}'
         const outlineLayerId = `field-outline-${fieldId}`;
         const hoverFillLayerId = `field-hover-fill-${fieldId}`;
@@ -745,6 +1136,9 @@ export function highlightFieldOnMap(map, fieldId) {
  */
 export function unhighlightFieldOnMap(map, fieldId) {
     try {
+        // Skip unhighlighting if in drawing mode
+        if (isDrawingModeActive) return;
+
         // The field layer IDs follow the pattern 'field-outline-{fieldId}' and 'field-hover-fill-{fieldId}'
         const outlineLayerId = `field-outline-${fieldId}`;
         const hoverFillLayerId = `field-hover-fill-${fieldId}`;

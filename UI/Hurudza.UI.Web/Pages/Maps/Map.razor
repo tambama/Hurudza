@@ -11,7 +11,10 @@
 
 <HeadContent>
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet"/>
+    <!-- Add MapboxDraw CSS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.3.0/mapbox-gl-draw.css" rel="stylesheet"/>
 </HeadContent>
+
 
 <style>
     .e-listview .e-list-item {
@@ -173,7 +176,8 @@
                                 FarmViewModel farm = (FarmViewModel)context;
                                 <div class="e-list-wrapper e-list-multi-line" @onclick="(e => OnFarmSelect(farm))">
                                     <div class="e-list-item-header text-truncate">@farm.Name</div>
-                                    <div class="e-list-content" style="white-space: normal; font-size: 13px; padding-top: 4px;">
+                                    <div class="e-list-content"
+                                         style="white-space: normal; font-size: 13px; padding-top: 4px;">
                                         <div class="d-flex flex-wrap">
                                             @if (farm.Size > 0)
                                             {
@@ -190,11 +194,11 @@
                                         </div>
                                         @if (!string.IsNullOrEmpty(farm.Address))
                                         {
-                                            <div class="text-muted mt-1 small">@(farm.Address.Length > 50 ? farm.Address.Substring(0, 50) + "..." : farm.Address)</div>
+                                            <div
+                                                class="text-muted mt-1 small">@(farm.Address.Length > 50 ? farm.Address.Substring(0, 50) + "..." : farm.Address)</div>
                                         }
                                     </div>
-                                </div>
-                            }
+                                </div>}
                         </Template>
                     </ListViewTemplates>
                 </SfListView>
@@ -258,16 +262,16 @@
                             <ContentTemplate>
                                 <ul class="list-group">
                                     <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong
-                                                                                               class="text-dark">Province:</strong> &nbsp; @_farm.Province</li>
+                                            class="text-dark">Province:</strong> &nbsp; @_farm.Province</li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                                                                          class="text-dark">Region:</strong>
+                                            class="text-dark">Region:</strong>
                                         &nbsp; @(_farm.Region?.ToString() ?? "Not specified")</li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">District:</strong>
                                         &nbsp; @_farm.District</li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Local
-                                        Authority:</strong> &nbsp; @_farm.LocalAuthority</li>
+                                            Authority:</strong> &nbsp; @_farm.LocalAuthority</li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                                                                          class="text-dark">Ward:</strong>
+                                            class="text-dark">Ward:</strong>
                                         &nbsp; @_farm.Ward</li>
                                 </ul>
                             </ContentTemplate>
@@ -285,15 +289,15 @@
                                         &nbsp; @_farm.Size ha
                                     </li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                                                                          class="text-dark">Arable:</strong>
+                                            class="text-dark">Arable:</strong>
                                         &nbsp; @_farm.Arable ha
                                     </li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                                                                          class="text-dark">Cleared:</strong>
+                                            class="text-dark">Cleared:</strong>
                                         &nbsp; @_farm.Cleared ha
                                     </li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                                                                          class="text-dark">Terrain:</strong>
+                                            class="text-dark">Terrain:</strong>
                                         &nbsp; @(_farm.Terrain?.ToString() ?? "Not specified")</li>
                                     <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Location:</strong>
                                         &nbsp; @_farm.Latitude, @_farm.Longitude</li>
@@ -428,21 +432,24 @@
                                          @onmouseover="(e => HighlightField(field))"
                                          @onmouseout="(e => UnhighlightField(field))">
                                         <div class="e-list-item-header text-truncate">@field.Name</div>
-                                        <div class="e-list-content" style="white-space: normal; font-size: 13px; padding-top: 4px;">
+                                        <div class="e-list-content"
+                                             style="white-space: normal; font-size: 13px; padding-top: 4px;">
                                             <div class="d-flex flex-wrap">
-                                                <span class="me-2 mb-1 badge bg-light text-dark">@field.SoilType.ToString()</span>
+                                                <span
+                                                    class="me-2 mb-1 badge bg-light text-dark">@field.SoilType.ToString()</span>
                                                 <span class="me-2 mb-1 badge bg-light text-dark">@field.Size ha</span>
-                                                <span class="mb-1 badge @(field.Irrigation ? "bg-success" : "bg-secondary")">
+                                                <span
+                                                    class="mb-1 badge @(field.Irrigation ? "bg-success" : "bg-secondary")">
                                                     @(field.Irrigation ? "Irrigated" : "Non-irrigated")
                                                 </span>
                                             </div>
                                             @if (!string.IsNullOrEmpty(field.Description))
                                             {
-                                                <div class="text-muted mt-1 small">@(field.Description.Length > 50 ? field.Description.Substring(0, 50) + "..." : field.Description)</div>
+                                                <div
+                                                    class="text-muted mt-1 small">@(field.Description.Length > 50 ? field.Description.Substring(0, 50) + "..." : field.Description)</div>
                                             }
                                         </div>
-                                    </div>
-                                }
+                                    </div>}
                             </Template>
                         </ListViewTemplates>
                     </SfListView>
@@ -754,6 +761,37 @@
                     <SfCheckBox Label="Under Irrigation" @bind-Checked="@(_fieldEdit.Irrigation)"></SfCheckBox>
                 </div>
 
+                <!-- Add this section to display drawing instructions -->
+                <div class="alert alert-info mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fa fa-draw-polygon me-2"></i>
+                        <div>
+                            <strong>Draw Field Boundary</strong>
+                            <p class="mb-0">Use the draw tool <i class="fa fa-draw-polygon"></i> in the top-right corner
+                                of the map to draw the field boundary.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add a section to show coordinates status -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Field Boundary:</span>
+                        @if (_drawnCoordinates != null && _drawnCoordinates.Count > 0)
+                        {
+                            <span class="badge bg-success">
+                            <i class="fa fa-check me-1"></i> Drawn (@_drawnCoordinates.Count points)
+                        </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">
+                            <i class="fa fa-exclamation-triangle me-1"></i> Not Drawn
+                        </span>
+                        }
+                    </div>
+                </div>
+
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-lg bg-gradient-success w-100 mb-3">Save</button>
                     <button type="button" class="btn btn-lg bg-gradient-secondary w-100" @onclick="BackToFields">
@@ -978,10 +1016,17 @@
 </div>
 
 @code {
+
     // Map elements
     private ElementReference _mapElement;
     private IJSObjectReference? _mapModule;
+    private IJSObjectReference? _drawControl;
+
     private IJSObjectReference? _mapInstance;
+    
+    // Add a flag to track drawing mode
+    private bool _isInDrawingMode = false;
+
     // Private field to store the .NET object reference
     private DotNetObjectReference<Map> _dotNetRef;
 
@@ -1007,6 +1052,7 @@
     private bool ShowFiltersModal { get; set; } = false;
     private FarmFilterModel _filterModel = new FarmFilterModel();
     private List<FarmViewModel> _allFarms = new(); // Store all farms for filtering
+    private List<List<double>> _drawnCoordinates = new List<List<double>>();
 
     // UI state variables
     private bool _showDeleteCoordinateDialog = false;
@@ -1108,11 +1154,20 @@
 
             if (string.IsNullOrEmpty(_fieldEdit.Id))
             {
+                // New field - proceed with save
                 response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldViewModel>, CreateFieldViewModel>(
                     await ApiCall.GetHttpClient(), "fields/createfield", _fieldEdit);
+                    
+                // If we have drawn coordinates and the save was successful, add them as locations
+                if (response?.Status == (int)HttpStatusCode.OK && response.Result != null && _drawnCoordinates != null && _drawnCoordinates.Count > 0)
+                {
+                    string fieldId = response.Result.Id;
+                    await SaveDrawnCoordinates(fieldId);
+                }
             }
             else
             {
+                // Update existing field
                 // Convert CreateFieldViewModel to FieldViewModel for update
                 var updateField = new FieldViewModel
                 {
@@ -1127,6 +1182,12 @@
 
                 response = await ApiCall.Update<UI.Shared.Models.ApiResponse<FieldViewModel>, FieldViewModel>(
                     await ApiCall.GetHttpClient(), "fields/updatefield", updateField.Id, updateField);
+                    
+                // If coordinates were drawn, update them for the existing field
+                if (response?.Status == (int)HttpStatusCode.OK && _drawnCoordinates != null && _drawnCoordinates.Count > 0)
+                {
+                    await SaveDrawnCoordinates(_fieldEdit.Id);
+                }
             }
 
             if (response == null)
@@ -1136,6 +1197,15 @@
             else if (response.Status == (int)HttpStatusCode.OK)
             {
                 _alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+
+                // Reset drawn coordinates
+                _drawnCoordinates = new List<List<double>>();
+                
+                // Clear any drawings on the map
+                if (_drawControl != null)
+                {
+                    await _mapModule.InvokeVoidAsync("clearDrawnPolygons", _drawControl);
+                }
 
                 // Refresh field list
                 await LoadFields(_farm.Id);
@@ -1221,6 +1291,38 @@
         finally
         {
             await HideSpinner();
+        }
+    }
+
+    private async Task SaveDrawnCoordinates(string fieldId)
+    {
+        try
+        {
+            // Convert drawn coordinates to field locations
+            foreach (var coord in _drawnCoordinates)
+            {
+                if (coord.Count >= 2)
+                {
+                    var location = new FieldLocationViewModel
+                    {
+                        FieldId = fieldId,
+                        Longitude = coord[0],
+                        Latitude = coord[1],
+                        Altitude = coord.Count > 2 ? coord[2] : 0
+                    };
+                    
+                    // Save each coordinate
+                    await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldLocationViewModel>, FieldLocationViewModel>(
+                        await ApiCall.GetHttpClient(), "fieldLocations/createfieldLocation", location);
+                }
+            }
+            
+            _alert.Show("Field boundary coordinates saved successfully!", toastType: ToastType.Success);
+        }
+        catch (Exception ex)
+        {
+            _alert.Show($"Error saving field boundary: {ex.Message}", toastType: ToastType.Warning);
+            Logger.LogError(ex, "Error saving field coordinates");
         }
     }
 
@@ -1589,7 +1691,7 @@
     {
         ShowFiltersModal = !ShowFiltersModal;
     }
-    
+
     // JavaScript-invokable method to toggle the filter modal
     [JSInvokable]
     public void ToggleFilterModal()
@@ -1878,7 +1980,6 @@
 
     #region Map Operations
 
-    // Helper method to draw a field with its crop data on the map
     private async Task DrawFieldWithCropData(FieldViewModel field)
     {
         try
@@ -1922,7 +2023,6 @@
         }
     }
 
-    // Updates a single field on the map (used when viewing field details)
     private async Task UpdateFieldOnMap(FieldViewModel field)
     {
         try
@@ -1994,8 +2094,7 @@
             Logger.LogError(ex, "Error updating field on map");
         }
     }
-    
-    // Field highlighting methods
+
     private async Task HighlightField(FieldViewModel field)
     {
         try
@@ -2027,9 +2126,59 @@
             Logger.LogError(ex, $"Error unhighlighting field {field.Id}");
         }
     }
+    
+    [JSInvokable]
+    public void SetDrawingMode(bool isDrawing)
+    {
+        _isInDrawingMode = isDrawing;
+        StateHasChanged();
+    }
+    
+    [JSInvokable]
+    public async Task OnPolygonDrawn(List<List<double>> coordinates)
+    {
+        try
+        {
+            // Make sure we're not in drawing mode anymore
+            _isInDrawingMode = false;
+            
+            if (coordinates != null && coordinates.Count > 0)
+            {
+                // Store the drawn coordinates
+                _drawnCoordinates = coordinates;
+                
+                // Notify the user
+                _alert.Show("Field boundary drawn successfully!", toastType: ToastType.Success);
+                
+                // Force UI refresh
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error processing drawn polygon");
+            _alert.Show("Error processing drawn boundary", toastType: ToastType.Danger);
+        }
+    }
+    
+    private async Task InitializeDrawingControls()
+    {
+        if (_mapModule != null && _mapInstance != null)
+        {
+            // Initialize drawing controls with custom JS file
+            _drawControl = await _mapModule.InvokeAsync<IJSObjectReference>(
+                "initializeDrawControls", _mapInstance);
+                
+            if (_drawControl != null)
+            {
+                // Update JavaScript to handle drawing mode properly
+                await _mapModule.InvokeVoidAsync("setupDrawingMode", _mapInstance, _drawControl, _dotNetRef);
+            }
+        }
+    }
 
     #endregion
-    
+
     #region Navigation Functions
 
     // Panel control methods
@@ -2133,6 +2282,15 @@
         {
             FarmId = _farm.Id
         };
+        
+        // Reset drawn coordinates
+        _drawnCoordinates = new List<List<double>>();
+        
+        // Clear any existing drawings
+        if (_drawControl != null)
+        {
+            _mapModule?.InvokeVoidAsync("clearDrawnPolygons", _drawControl);
+        }
 
         _showSchools = "panel-hidden";
         _showAddSchool = "panel-hidden";
@@ -2155,6 +2313,15 @@
             Irrigation = _field.Irrigation,
             FarmId = _field.FarmId
         };
+        
+        // Reset drawn coordinates when editing
+        _drawnCoordinates = new List<List<double>>();
+        
+        // Clear any existing drawings
+        if (_drawControl != null)
+        {
+            _mapModule?.InvokeVoidAsync("clearDrawnPolygons", _drawControl);
+        }
 
         _showSchools = "panel-hidden";
         _showAddSchool = "panel-hidden";
@@ -2555,6 +2722,16 @@
                     
                     // Add filter button to map with .NET reference
                     await _mapModule.InvokeVoidAsync("addFilterButton", _mapInstance, _dotNetRef);
+                    
+                    // Initialize drawing controls
+                    _drawControl = await _mapModule.InvokeAsync<IJSObjectReference>(
+                        "initializeDrawControls", _mapInstance);
+                        
+                    // Set up the new drawing mode controls that fix the popup issue
+                    if (_drawControl is not null)
+                    {
+                        await _mapModule.InvokeVoidAsync("setupDrawingMode", _mapInstance, _drawControl, _dotNetRef);
+                    }
 
                     // Important: Only load clusters once after initialization
                     await LoadClusters();
@@ -2570,6 +2747,12 @@
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        // Dispose the drawing control
+        if (_drawControl is not null)
+        {
+            await _drawControl.DisposeAsync();
+        }
+        
         // Dispose the map instance
         if (_mapInstance is not null)
         {
@@ -2587,4 +2770,5 @@
     }
 
     #endregion
+
 }
