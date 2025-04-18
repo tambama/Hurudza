@@ -2141,22 +2141,43 @@
         {
             // Make sure we're not in drawing mode anymore
             _isInDrawingMode = false;
-            
+        
+            // Debug logging to check what we're receiving
+            Logger.LogInformation($"Received coordinates: {coordinates?.Count ?? 0} points");
+        
             if (coordinates != null && coordinates.Count > 0)
             {
                 // Store the drawn coordinates
                 _drawnCoordinates = coordinates;
+            
+                // Log a few coordinates for debugging if we have them
+                if (coordinates.Count > 0) 
+                {
+                    // Log first coordinate point
+                    Logger.LogInformation($"First point: [{string.Join(", ", coordinates[0])}]");
                 
+                    // Log last coordinate point if we have multiple
+                    if (coordinates.Count > 1)
+                    {
+                        Logger.LogInformation($"Last point: [{string.Join(", ", coordinates[coordinates.Count - 1])}]");
+                    }
+                }
+            
                 // Notify the user
-                _alert.Show("Field boundary drawn successfully!", toastType: ToastType.Success);
-                
+                _alert.Show($"Field boundary drawn successfully with {coordinates.Count} points!", toastType: ToastType.Success);
+            
                 // Force UI refresh
                 StateHasChanged();
+            }
+            else
+            {
+                Logger.LogWarning("Received empty or null coordinates array");
+                _alert.Show("No valid coordinates received for field boundary", toastType: ToastType.Warning);
             }
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error processing drawn polygon");
+            Logger.LogError(ex, "Error processing drawn polygon: {Message}", ex.Message);
             _alert.Show("Error processing drawn boundary", toastType: ToastType.Danger);
         }
     }

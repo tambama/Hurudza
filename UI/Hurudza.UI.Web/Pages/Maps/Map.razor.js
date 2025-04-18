@@ -300,11 +300,21 @@ export function setupDrawingMode(map, draw, dotNetRef) {
         // Add event listener to block popup creation during drawing
         map.on('click', (e) => {
             if (isDrawingModeActive) {
-                // Prevent map click events from creating popups
-                e.preventDefault();
-                e.stopPropagation();
+                // For Mapbox events, we use originalEvent to access the DOM event
+                if (e.originalEvent) {
+                    e.originalEvent.preventDefault();
+                    e.originalEvent.stopPropagation();
+                }
 
-                // Also remove any popups that might have appeared
+                // Set a flag to tell other handlers to ignore this click
+                window._ignoreMapClicks = true;
+
+                // Schedule removal of the flag
+                setTimeout(() => {
+                    window._ignoreMapClicks = false;
+                }, 100);
+
+                // Remove any popups that might have appeared
                 removeAllPopups();
             }
         });
@@ -379,6 +389,7 @@ function toggleDrawingMode(map, draw, dotNetRef, drawButton, hasCompletedPolygon
             try {
                 const coordinates = getDrawnPolygonCoordinates(draw);
                 if (coordinates && dotNetRef) {
+                    console.log('Sending coordinates to .NET:', coordinates);
                     dotNetRef.invokeMethodAsync('OnPolygonDrawn', coordinates);
                 }
             } catch (error) {
@@ -453,6 +464,7 @@ function resetCursor(map) {
 }
 
 // Get polygon coordinates - with added safety checks
+// Fix the function that gets coordinates from the drawn polygon
 function getDrawnPolygonCoordinates(draw) {
     try {
         if (!draw) {
@@ -486,8 +498,22 @@ function getDrawnPolygonCoordinates(draw) {
             return null;
         }
 
-        // Return the coordinates array (already in the right format for our API)
-        return polygon.geometry.coordinates;
+        // IMPORTANT: Flatten the nested coordinates array to a simple array of [lng, lat] points
+        // Before we were returning polygon.geometry.coordinates which is [[[lng, lat], [lng, lat], ...]]
+        // But we need to return [[lng, lat], [lng, lat], ...] for C# deserialization
+
+        // Check if we have coordinates and they're in the expected structure
+        if (polygon.geometry.coordinates &&
+            Array.isArray(polygon.geometry.coordinates) &&
+            polygon.geometry.coordinates.length > 0 &&
+            Array.isArray(polygon.geometry.coordinates[0])) {
+
+            // Return the first (and usually only) ring of coordinates
+            return polygon.geometry.coordinates[0];
+        }
+
+        console.warn('Unexpected coordinates structure:', polygon.geometry.coordinates);
+        return null;
     } catch (error) {
         console.error('Error getting polygon coordinates:', error);
         return null;
