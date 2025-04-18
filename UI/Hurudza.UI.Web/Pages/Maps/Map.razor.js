@@ -256,7 +256,7 @@ export function setupDrawingMode(map, draw, dotNetRef) {
         drawButton.id = 'field-drawing-button';
         drawButton.className = 'mapboxgl-ctrl-icon';
         drawButton.type = 'button';
-        drawButton.title = 'Draw Field Boundary';
+        drawButton.title = 'Draw/Edit Field Boundary';
         drawButton.innerHTML = '<i class="fa fa-draw-polygon"></i>';
         drawButton.style.cssText = `
             width: 30px;
@@ -326,36 +326,21 @@ export function setupDrawingMode(map, draw, dotNetRef) {
 
             // Check if we have a valid polygon
             if (e.features && e.features.length > 0) {
-                // Calculate the area of the polygon
+                // Get the polygon
                 const polygon = e.features[0];
-                if (polygon && polygon.geometry && polygon.geometry.coordinates &&
-                    polygon.geometry.coordinates.length > 0 && polygon.geometry.coordinates[0].length > 2) {
+                processDrawnPolygon(polygon, dotNetRef);
+            }
+        });
 
-                    const coordinates = polygon.geometry.coordinates[0];
+        // Add event listener for polygon modifications
+        map.on('draw.update', (e) => {
+            console.log('Existing polygon was modified');
 
-                    // Calculate area using Turf.js
-                    calculatePolygonAreaInHectares(coordinates)
-                        .then(areaInHectares => {
-                            // Round to 2 decimal places
-                            const roundedArea = Math.round(areaInHectares * 100) / 100;
-
-                            // Send the calculated area to .NET
-                            if (dotNetRef) {
-                                try {
-                                    dotNetRef.invokeMethodAsync('UpdateFieldSize', roundedArea);
-                                    console.log('Sent calculated area to .NET:', roundedArea, 'hectares');
-                                } catch (error) {
-                                    console.error('Error sending area to .NET:', error);
-                                }
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error calculating area with Turf.js:', error);
-                        });
-                }
-
-                // Exit drawing mode
-                toggleDrawingMode(map, draw, dotNetRef, drawButton, true);
+            // Check if we have valid modified features
+            if (e.features && e.features.length > 0) {
+                // Get the modified polygon
+                const polygon = e.features[0];
+                processDrawnPolygon(polygon, dotNetRef);
             }
         });
 
@@ -367,7 +352,7 @@ export function setupDrawingMode(map, draw, dotNetRef) {
             }
         });
 
-        console.log('Drawing mode setup complete');
+        console.log('Drawing mode setup complete with edit support');
 
         // Return the button so it can be referenced later
         return { draw, drawButton };
@@ -403,40 +388,35 @@ function toggleDrawingMode(map, draw, dotNetRef, drawButton, hasCompletedPolygon
         // Activate draw mode
         removeAllPopups();
 
-        // Enable drawing mode
-        if (draw) {
-            try {
-                draw.changeMode('draw_polygon');
-            } catch (error) {
-                console.warn('Error changing to draw_polygon mode:', error);
-            }
+        // Check if there's already a polygon in the draw control
+        const features = draw.getAll().features;
+        const hasExistingPolygon = features.some(f => f.geometry.type === 'Polygon');
+
+        // Enable appropriate drawing mode based on whether we're editing or creating
+        if (hasExistingPolygon) {
+            // If there's an existing polygon, go into direct_select mode for the first polygon
+            const polygonId = features.find(f => f.geometry.type === 'Polygon').id;
+            draw.changeMode('direct_select', { featureId: polygonId });
+            console.log('Entering edit mode for existing polygon');
+        } else {
+            // If no polygon exists, go into drawing mode
+            draw.changeMode('draw_polygon');
+            console.log('Entering draw mode for new polygon');
         }
 
         // Set drawing cursor
         setCrosshairCursor(map);
     } else {
-        // Get coordinates if we have a completed polygon
-        if (hasCompletedPolygon && draw) {
-            try {
-                const coordinates = getDrawnPolygonCoordinates(draw);
-                if (coordinates && dotNetRef) {
-                    console.log('Sending coordinates to .NET:', coordinates);
-                    dotNetRef.invokeMethodAsync('OnPolygonDrawn', coordinates);
-                }
-            } catch (error) {
-                console.warn('Error getting polygon coordinates:', error);
-            }
-        }
-
         // Reset cursor
         resetCursor(map);
 
         // Don't clear drawing if we just completed a polygon - the user might want to see what they drew
         if (!hasCompletedPolygon && draw) {
             try {
-                draw.deleteAll();
+                // Return to simple_select mode but don't delete the polygon
+                draw.changeMode('simple_select');
             } catch (error) {
-                console.warn('Error clearing drawings:', error);
+                console.warn('Error changing draw mode:', error);
             }
         }
     }
@@ -689,6 +669,148 @@ function getDrawnPolygonCoordinates(draw) {
     } catch (error) {
         console.error('Error getting polygon coordinates:', error);
         return null;
+    }
+}
+
+/**
+ * Loads an existing polygon into the MapboxDraw editor for modification
+ * @param {Object} map - The Mapbox map instance
+ * @param {Object} draw - The MapboxDraw control instance
+ * @param {Array} coordinates - Array of [lng, lat, alt] coordinate arrays
+ * @returns {boolean} Success indicator
+ */
+export function loadExistingPolygonForEditing(map, draw, coordinates) {
+    try {
+        if (!map || !draw) {
+            console.error("Map or drawing tool not initialized");
+            return false;
+        }
+
+        if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 3) {
+            console.warn("Not enough coordinates to create a valid polygon");
+            return false;
+        }
+
+        console.log(`Loading existing polygon with ${coordinates.length} points for editing`);
+
+        // First, ensure any existing drawings are cleared
+        draw.deleteAll();
+
+        // Create a GeoJSON feature for the polygon
+        const polygonFeature = {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+                type: 'Polygon',
+                // For a polygon, coordinates need to be in the format of [[[lng1, lat1], [lng2, lat2], ...]]
+                // The first and last points should be the same to close the polygon
+                coordinates: [
+                    // Make sure we close the polygon by adding the first point at the end if needed
+                    coordinates.length > 0 &&
+                    coordinates[0][0] !== coordinates[coordinates.length - 1][0] &&
+                    coordinates[0][1] !== coordinates[coordinates.length - 1][1]
+                        ? [...coordinates, [...coordinates[0]]]
+                        : coordinates
+                ]
+            }
+        };
+
+        // Add the feature to the drawing tool
+        const ids = draw.add(polygonFeature);
+        console.log(`Added polygon to drawing tool with ID: ${ids[0]}`);
+
+        // Select the polygon for editing
+        draw.changeMode('direct_select', { featureId: ids[0] });
+
+        // Emit event to ensure field size is updated
+        calculatePolygonAreaFromDrawing(map, draw)
+            .then(area => {
+                console.log(`Calculated area for loaded polygon: ${area.toFixed(2)} hectares`);
+            })
+            .catch(error => {
+                console.warn("Error calculating area:", error);
+            });
+
+        return true;
+    } catch (error) {
+        console.error("Error loading polygon for editing:", error);
+        return false;
+    }
+}
+
+/**
+ * Calculates the area of the currently drawn polygon in the drawing tool
+ * @param {Object} map - The Mapbox map instance
+ * @param {Object} draw - The MapboxDraw control instance
+ * @returns {Promise<number>} Area in hectares
+ */
+export async function calculatePolygonAreaFromDrawing(map, draw) {
+    try {
+        // Get all features from the drawing tool
+        const allFeatures = draw.getAll();
+        if (!allFeatures || !allFeatures.features || allFeatures.features.length === 0) {
+            console.log("No polygons found in drawing tool");
+            return 0;
+        }
+
+        // Find the first polygon feature
+        const polygon = allFeatures.features.find(feature =>
+            feature && feature.geometry && feature.geometry.type === 'Polygon');
+
+        if (!polygon) {
+            console.log("No polygon features found");
+            return 0;
+        }
+
+        // Calculate the area using Turf.js
+        return await loadTurf().then(turf => {
+            const turfPolygon = turf.polygon(polygon.geometry.coordinates);
+            const areaInSquareMeters = turf.area(turfPolygon);
+            const hectares = areaInSquareMeters / 10000;
+            return hectares;
+        });
+    } catch (error) {
+        console.error("Error calculating polygon area from drawing:", error);
+        return 0;
+    }
+}
+
+// Helper function to process a drawn or edited polygon
+function processDrawnPolygon(polygon, dotNetRef) {
+    if (polygon && polygon.geometry && polygon.geometry.coordinates &&
+        polygon.geometry.coordinates.length > 0 && polygon.geometry.coordinates[0].length > 2) {
+
+        const coordinates = polygon.geometry.coordinates[0];
+
+        // Calculate area using Turf.js
+        calculatePolygonAreaInHectares(coordinates)
+            .then(areaInHectares => {
+                // Round to 2 decimal places
+                const roundedArea = Math.round(areaInHectares * 100) / 100;
+
+                // Send the calculated area to .NET
+                if (dotNetRef) {
+                    try {
+                        dotNetRef.invokeMethodAsync('UpdateFieldSize', roundedArea);
+                        console.log('Sent calculated area to .NET:', roundedArea, 'hectares');
+                    } catch (error) {
+                        console.error('Error sending area to .NET:', error);
+                    }
+                }
+
+                // Send coordinates to .NET
+                if (dotNetRef) {
+                    try {
+                        dotNetRef.invokeMethodAsync('OnPolygonDrawn', coordinates);
+                        console.log('Sent coordinates to .NET:', coordinates.length, 'points');
+                    } catch (error) {
+                        console.error('Error sending coordinates to .NET:', error);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error calculating area with Turf.js:', error);
+            });
     }
 }
 
