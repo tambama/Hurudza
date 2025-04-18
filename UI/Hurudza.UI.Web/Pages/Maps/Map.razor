@@ -17,6 +17,9 @@
     .e-listview .e-list-item {
         color: black;
         background-color: white;
+        min-height: 62px !important;
+        height: auto !important;
+        padding: 12px 16px !important;
     }
 
     .e-listview .e-list-item.e-focused {
@@ -71,16 +74,29 @@
     }
 
     /* Style fix for list items to prevent text truncation */
-    .e-list-item .e-list-content {
+    .e-listview .e-list-item .e-list-content {
         white-space: normal !important;
         word-wrap: break-word !important;
         overflow: visible !important;
+        line-height: 1.4 !important;
     }
 
     /* Ensure all list items have proper padding and spacing */
     .list-group-item {
         word-wrap: break-word;
         overflow-wrap: break-word;
+    }
+
+    /* Make headers more prominent */
+    .e-listview .e-list-item .e-list-item-header {
+        font-weight: 500 !important;
+        margin-bottom: 4px !important;
+        font-size: 14px !important;
+    }
+
+    /* Ensure proper spacing between items */
+    .e-listview .e-list-item + .e-list-item {
+        margin-top: 4px !important;
     }
 
     .sidebar-header {
@@ -157,6 +173,26 @@
                                 FarmViewModel farm = (FarmViewModel)context;
                                 <div class="e-list-wrapper e-list-multi-line" @onclick="(e => OnFarmSelect(farm))">
                                     <div class="e-list-item-header text-truncate">@farm.Name</div>
+                                    <div class="e-list-content" style="white-space: normal; font-size: 13px; padding-top: 4px;">
+                                        <div class="d-flex flex-wrap">
+                                            @if (farm.Size > 0)
+                                            {
+                                                <span class="me-2 mb-1 badge bg-light text-dark">@farm.Size ha</span>
+                                            }
+                                            @if (farm.Conference.HasValue)
+                                            {
+                                                <span class="me-2 mb-1 badge bg-info text-white">@farm.Conference</span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(farm.Province))
+                                            {
+                                                <span class="mb-1 badge bg-secondary text-white">@farm.Province</span>
+                                            }
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(farm.Address))
+                                        {
+                                            <div class="text-muted mt-1 small">@(farm.Address.Length > 50 ? farm.Address.Substring(0, 50) + "..." : farm.Address)</div>
+                                        }
+                                    </div>
                                 </div>
                             }
                         </Template>
@@ -222,16 +258,16 @@
                             <ContentTemplate>
                                 <ul class="list-group">
                                     <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong
-                                            class="text-dark">Province:</strong> &nbsp; @_farm.Province</li>
+                                                                                               class="text-dark">Province:</strong> &nbsp; @_farm.Province</li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                            class="text-dark">Region:</strong>
+                                                                                          class="text-dark">Region:</strong>
                                         &nbsp; @(_farm.Region?.ToString() ?? "Not specified")</li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">District:</strong>
                                         &nbsp; @_farm.District</li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Local
-                                            Authority:</strong> &nbsp; @_farm.LocalAuthority</li>
+                                        Authority:</strong> &nbsp; @_farm.LocalAuthority</li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                            class="text-dark">Ward:</strong>
+                                                                                          class="text-dark">Ward:</strong>
                                         &nbsp; @_farm.Ward</li>
                                 </ul>
                             </ContentTemplate>
@@ -249,15 +285,15 @@
                                         &nbsp; @_farm.Size ha
                                     </li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                            class="text-dark">Arable:</strong>
+                                                                                          class="text-dark">Arable:</strong>
                                         &nbsp; @_farm.Arable ha
                                     </li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                            class="text-dark">Cleared:</strong>
+                                                                                          class="text-dark">Cleared:</strong>
                                         &nbsp; @_farm.Cleared ha
                                     </li>
                                     <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                            class="text-dark">Terrain:</strong>
+                                                                                          class="text-dark">Terrain:</strong>
                                         &nbsp; @(_farm.Terrain?.ToString() ?? "Not specified")</li>
                                     <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Location:</strong>
                                         &nbsp; @_farm.Latitude, @_farm.Longitude</li>
@@ -318,11 +354,12 @@
                         </AccordionItem>
                     </AccordionItems>
                 </SfAccordion>
+                <hr class="horizontal gray-light my-2">
+                <div class="col-12 text-center mt-1">
+                    <a class="btn bg-gradient-dark mb-0 text-end" href="javascript:;" @onclick="ShowFieldsList">Manage
+                        Fields</a>
+                </div>
             </div>
-        </div>
-        <div class="col-12 text-center mt-1">
-            <a class="btn bg-gradient-dark mb-0 text-end" href="javascript:;" @onclick="ShowFieldsList">Manage
-                Fields</a>
         </div>
     </div>
 
@@ -388,9 +425,18 @@
                                     <div class="e-list-wrapper e-list-multi-line"
                                          @onclick="(e => OnFieldSelect(field))">
                                         <div class="e-list-item-header text-truncate">@field.Name</div>
-                                        <div class="e-list-content text-muted"
-                                             style="white-space: normal; font-size: 12px;">
-                                            <span>@field.SoilType.ToString() | @field.Size ha | @(field.Irrigation ? "Irrigated" : "Non-irrigated")</span>
+                                        <div class="e-list-content" style="white-space: normal; font-size: 13px; padding-top: 4px;">
+                                            <div class="d-flex flex-wrap">
+                                                <span class="me-2 mb-1 badge bg-light text-dark">@field.SoilType.ToString()</span>
+                                                <span class="me-2 mb-1 badge bg-light text-dark">@field.Size ha</span>
+                                                <span class="mb-1 badge @(field.Irrigation ? "bg-success" : "bg-secondary")">
+                                                    @(field.Irrigation ? "Irrigated" : "Non-irrigated")
+                                                </span>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(field.Description))
+                                            {
+                                                <div class="text-muted mt-1 small">@(field.Description.Length > 50 ? field.Description.Substring(0, 50) + "..." : field.Description)</div>
+                                            }
                                         </div>
                                     </div>
                                 }
