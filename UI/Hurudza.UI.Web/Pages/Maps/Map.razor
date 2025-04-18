@@ -15,7 +15,6 @@
     <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.3.0/mapbox-gl-draw.css" rel="stylesheet"/>
 </HeadContent>
 
-
 <style>
     .e-listview .e-list-item {
         color: black;
@@ -1037,8 +1036,10 @@
     private ElementReference _mapElement;
     private IJSObjectReference? _mapModule;
     private IJSObjectReference? _drawControl;
+    private IJSObjectReference? _deleteControl;
 
     private IJSObjectReference? _mapInstance;
+    private const string DELETE_BUTTON_ID = "simple-delete-button";
 
     // Add a flag to track drawing mode
     private bool _isInDrawingMode = false;
@@ -2268,6 +2269,36 @@
         }
     }
 
+    [JSInvokable]
+    public Task OnDrawingDeleted()
+    {
+        try
+        {
+            Logger.LogInformation("OnDrawingDeleted invoked from JavaScript");
+
+            // Reset the drawn coordinates
+            _drawnCoordinates = new List<List<double>>();
+
+            // Reset the field size if in edit mode
+            if (!string.IsNullOrEmpty(_fieldEdit.Id) || _showFieldEdit != "panel-hidden")
+            {
+                _fieldEdit.Size = 0;
+            }
+
+            // Show notification
+            _alert.Show("Field boundary drawing deleted", toastType: ToastType.Info);
+
+            // Force UI refresh
+            StateHasChanged();
+            return Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error handling drawing deletion");
+            return Task.CompletedTask;
+        }
+    }
+
     private async Task InitializeDrawingControls()
     {
         if (_mapModule != null && _mapInstance != null)
@@ -2310,6 +2341,41 @@
         {
             Logger.LogError(ex, "Error updating field size: {Message}", ex.Message);
             _alert.Show("Error updating field size", toastType: ToastType.Danger);
+        }
+    }
+
+    async Task ClearCurrentDrawing()
+    {
+        try
+        {
+            if (_drawControl != null)
+            {
+                if (_deleteControl != null)
+                {
+                    await _mapModule.InvokeVoidAsync("clearDrawnPolygons", _drawControl, _deleteControl);
+                }
+                else
+                {
+                    await _mapModule.InvokeVoidAsync("clearDrawnPolygons", _drawControl);
+                }
+
+                // Reset the drawn coordinates
+                _drawnCoordinates = new List<List<double>>();
+
+                // Update the field size to zero since drawing is cleared
+                _fieldEdit.Size = 0;
+
+                // Show notification
+                _alert.Show("Field boundary drawing cleared", toastType: ToastType.Info);
+
+                // Force UI refresh
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error clearing current drawing");
+            _alert.Show("Failed to clear drawing: " + ex.Message, toastType: ToastType.Danger);
         }
     }
 
@@ -2417,6 +2483,7 @@
         try
         {
             await ShowSpinner();
+            Logger.LogInformation("Showing new field form");
 
             // Initialize a new field with farm ID
             _fieldEdit = new CreateFieldViewModel
@@ -2430,7 +2497,7 @@
             // Clear any existing drawings
             if (_drawControl != null)
             {
-                await _mapModule.InvokeVoidAsync("clearDrawnPolygons", _drawControl);
+                await _mapModule.InvokeVoidAsync("clearAllDrawings", _drawControl, DELETE_BUTTON_ID);
             }
 
             _showSchools = "panel-hidden";
@@ -2444,11 +2511,11 @@
             await _mapModule.InvokeVoidAsync("toggleDrawButtonVisibility", true);
 
             // For new fields, log that we're in creation mode
-            Logger.LogInformation("Creating new field - drawing mode ready");
+            Logger.LogInformation("Ready to create new field");
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error in ShowEditField");
+            Logger.LogError(ex, "Error in ShowEditField: {Message}", ex.Message);
             _alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
         }
         finally
@@ -2457,11 +2524,12 @@
         }
     }
 
-    async void EditCurrentField()
+    async Task EditCurrentField()
     {
         try
         {
             await ShowSpinner();
+            Logger.LogInformation("Editing field: {FieldId}", _field.Id);
 
             // Convert the current field to CreateFieldViewModel for editing
             _fieldEdit = new CreateFieldViewModel
@@ -2475,6 +2543,12 @@
                 FarmId = _field.FarmId
             };
 
+            // Clear any existing drawings
+            if (_drawControl != null)
+            {
+                await _mapModule.InvokeVoidAsync("clearAllDrawings", _drawControl, DELETE_BUTTON_ID);
+            }
+
             // Load existing coordinates for editing
             if (_field.Locations != null && _field.Locations.Any())
             {
@@ -2485,47 +2559,38 @@
                     .ToList();
 
                 // Log the coordinates being loaded for editing
-                Logger.LogInformation($"Loaded {_drawnCoordinates.Count} coordinates for field editing");
+                Logger.LogInformation($"Loading {_drawnCoordinates.Count} coordinates for field editing");
 
-                // Make these coordinates available to the drawing tool
-                if (_mapModule != null && _drawControl != null)
+                // Add the existing polygon to the drawing tool
+                if (_mapModule != null && _drawControl != null && _drawnCoordinates.Count > 0)
                 {
-                    // First clear any existing drawings
-                    await _mapModule.InvokeVoidAsync("clearDrawnPolygons", _drawControl);
-
-                    // Then add the existing polygon to the drawing tool
-                    await _mapModule.InvokeVoidAsync("loadExistingPolygonForEditing",
+                    await _mapModule.InvokeVoidAsync("loadPolygonForEditing",
                         _mapInstance,
                         _drawControl,
-                        _drawnCoordinates);
-                }
-            }
-            else
-            {
-                // Reset drawn coordinates when creating a new field
-                _drawnCoordinates = new List<List<double>>();
-
-                // Clear any existing drawings
-                if (_drawControl != null)
-                {
-                    await _mapModule.InvokeVoidAsync("clearDrawnPolygons", _drawControl);
+                        _drawnCoordinates,
+                        DELETE_BUTTON_ID);
                 }
             }
 
+            // Update UI state to show the edit form
             _showSchools = "panel-hidden";
             _showAddSchool = "panel-hidden";
             _showSchoolDetails = "panel-hidden";
             _showFields = "panel-hidden";
-            _showFieldEdit = "";
+            _showFieldEdit = ""; // Show the edit form
             _showFieldDetails = "panel-hidden";
 
             // Show drawing button when entering field edit mode
             await _mapModule.InvokeVoidAsync("toggleDrawButtonVisibility", true);
+
+            // Force UI refresh
+            StateHasChanged();
+            Logger.LogInformation("Field edit form displayed");
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error preparing field for editing");
-            _alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            Logger.LogError(ex, "Error in EditCurrentField: {Message}", ex.Message);
+            _alert.Show($"Error preparing field for editing: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
         }
         finally
         {
@@ -2533,52 +2598,119 @@
         }
     }
 
+    async Task CancelFieldEdit()
+    {
+        try
+        {
+            Logger.LogInformation("Canceling field edit");
+
+            // Clear any drawings
+            if (_drawControl != null)
+            {
+                await _mapModule.InvokeVoidAsync("clearAllDrawings", _drawControl, DELETE_BUTTON_ID);
+            }
+
+            // Make sure drawing mode is off
+            if (_isInDrawingMode && _mapModule != null)
+            {
+                await _mapModule.InvokeAsync<bool>("toggleDrawingMode", _mapInstance, _drawControl, _dotNetRef, false);
+                _isInDrawingMode = false;
+            }
+
+            // Hide drawing button
+            await _mapModule.InvokeVoidAsync("toggleDrawButtonVisibility", false);
+
+            // Reset coordinates
+            _drawnCoordinates = new List<List<double>>();
+
+            // Go back to fields list
+            await BackToFields();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error canceling field edit: {Message}", ex.Message);
+            _alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+    
     async Task BackToFields()
     {
         await ShowSpinner();
 
-        _showSchools = "panel-hidden";
-        _showAddSchool = "panel-hidden";
-        _showSchoolDetails = "panel-hidden";
-        _showFields = "";
-        _showFieldEdit = "panel-hidden";
-        _showFieldDetails = "panel-hidden";
-
-        // Hide drawing button when leaving field edit mode
-        await _mapModule.InvokeVoidAsync("toggleDrawButtonVisibility", false);
-
-        // Reset coordinate form
-        ResetCoordinateForm();
-
-        // When going back to fields list, redraw the farm and all its fields
-        if (_mapModule != null)
+        try
         {
-            // Get farm details
-            var farmMap = await ApiCall.Get<FarmMapViewModel>(
-                await ApiCall.GetHttpClient(), $"farms/GetFarmDetails/{_farm.Id}");
+            Logger.LogInformation("Navigating back to fields list");
 
-            // Draw the farm boundary with clearExisting=true to clear the map first
-            if (farmMap.IsPolygon)
+            // Disable drawing mode when going back
+            if (_mapModule != null && _drawControl != null)
             {
-                await _mapModule.InvokeVoidAsync("drawPolygon",
-                    _mapInstance,
-                    _farm.Id,
-                    farmMap.FarmPolygon,
-                    false, // Not a field
-                    _farm.Name,
-                    null, // No crop data
-                    true // Clear existing layers
-                ).AsTask();
+                // Clear any existing drawings
+                await _mapModule.InvokeVoidAsync("clearAllDrawings", _drawControl, DELETE_BUTTON_ID);
+
+                // Make sure drawing mode is off
+                if (_isInDrawingMode)
+                {
+                    await _mapModule.InvokeAsync<bool>("toggleDrawingMode", _mapInstance, _drawControl, _dotNetRef, false);
+                    _isInDrawingMode = false;
+                }
             }
 
-            // Draw all fields inside the farm boundary
-            foreach (var field in farmMap.Fields)
+            // Hide drawing button when leaving field edit mode
+            await _mapModule.InvokeVoidAsync("toggleDrawButtonVisibility", false);
+
+            // Update UI state
+            _showSchools = "panel-hidden";
+            _showAddSchool = "panel-hidden";
+            _showSchoolDetails = "panel-hidden";
+            _showFields = "";
+            _showFieldEdit = "panel-hidden";
+            _showFieldDetails = "panel-hidden";
+
+            // Reset coordinate form
+            ResetCoordinateForm();
+
+            // Clear drawn coordinates
+            _drawnCoordinates = new List<List<double>>();
+
+            // When going back to fields list, redraw the farm and all its fields
+            if (_mapModule != null)
             {
-                await DrawFieldWithCropData(field);
+                // Get farm details
+                var farmMap = await ApiCall.Get<FarmMapViewModel>(
+                    await ApiCall.GetHttpClient(), $"farms/GetFarmDetails/{_farm.Id}");
+
+                // Draw the farm boundary with clearExisting=true to clear the map first
+                if (farmMap.IsPolygon)
+                {
+                    await _mapModule.InvokeVoidAsync("drawPolygon",
+                        _mapInstance,
+                        _farm.Id,
+                        farmMap.FarmPolygon,
+                        false, // Not a field
+                        _farm.Name,
+                        null, // No crop data
+                        true // Clear existing layers
+                    ).AsTask();
+                }
+
+                // Draw all fields inside the farm boundary
+                foreach (var field in farmMap.Fields)
+                {
+                    await DrawFieldWithCropData(field);
+                }
             }
+
+            Logger.LogInformation("Fields view displayed");
         }
-
-        await HideSpinner();
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error returning to fields view: {Message}", ex.Message);
+            _alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            await HideSpinner();
+        }
     }
 
     async Task ShowFieldsList()
@@ -2912,6 +3044,8 @@
         {
             try
             {
+                Logger.LogInformation("Initializing map...");
+
                 // Initialize the map
                 _mapModule = await JS.InvokeAsync<IJSObjectReference>("import",
                     "./Pages/Maps/Map.razor.js");
@@ -2932,10 +3066,15 @@
                     _drawControl = await _mapModule.InvokeAsync<IJSObjectReference>(
                         "initializeDrawControls", _mapInstance);
 
-                    // Set up the new drawing mode controls that fix the popup issue
+                    // Set up the simplified drawing controls
                     if (_drawControl is not null)
                     {
-                        await _mapModule.InvokeVoidAsync("setupDrawingMode", _mapInstance, _drawControl, _dotNetRef);
+                        // Call setup function - now returns simple success/message object
+                        var setup = await _mapModule.InvokeAsync<SetupResult>(
+                            "setupSimpleDrawingControls", _mapInstance, _drawControl, _dotNetRef);
+
+                        Logger.LogInformation("Drawing controls setup: {success}, {message}",
+                            setup.Success, setup.Message);
                     }
 
                     // Important: Only load clusters once after initialization
@@ -2945,13 +3084,19 @@
             catch (Exception ex)
             {
                 _alert.Show($"Error initializing map: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
-                Logger.LogError(ex, "Error in OnAfterRenderAsync");
+                Logger.LogError(ex, "Error in OnAfterRenderAsync: {Message}", ex.Message);
             }
         }
     }
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        // Dispose the delete control
+        if (_deleteControl is not null)
+        {
+            await _deleteControl.DisposeAsync();
+        }
+
         // Dispose the drawing control
         if (_drawControl is not null)
         {
@@ -2975,5 +3120,11 @@
     }
 
     #endregion
+
+    private class SetupResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+    }
 
 }

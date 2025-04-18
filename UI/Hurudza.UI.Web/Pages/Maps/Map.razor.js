@@ -295,8 +295,11 @@ export function setupDrawingMode(map, draw, dotNetRef) {
 
         // Add click handler to toggle drawing mode
         drawButton.addEventListener('click', () => {
-            toggleDrawingMode(map, draw, dotNetRef, drawButton);
+            toggleDrawingMode(map, draw, dotNetRef);
         });
+
+        // Add delete control
+        const deleteControl = addDeleteDrawingControl(map, draw, dotNetRef);
 
         // Add event listener to block popup creation during drawing
         map.on('click', (e) => {
@@ -329,6 +332,9 @@ export function setupDrawingMode(map, draw, dotNetRef) {
                 // Get the polygon
                 const polygon = e.features[0];
                 processDrawnPolygon(polygon, dotNetRef);
+
+                // Update delete control visibility
+                updateDeleteControlVisibility(map, draw, deleteControl);
             }
         });
 
@@ -344,18 +350,24 @@ export function setupDrawingMode(map, draw, dotNetRef) {
             }
         });
 
+        // Listen for delete events to update the delete control visibility
+        map.on('draw.delete', (e) => {
+            console.log('Polygon was deleted');
+            updateDeleteControlVisibility(map, draw, deleteControl);
+        });
+
         // Listen for escape key to cancel drawing
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && isDrawingModeActive) {
                 // Cancel drawing mode
-                toggleDrawingMode(map, draw, dotNetRef, drawButton, false);
+                toggleDrawingMode(map, draw, dotNetRef, false);
             }
         });
 
-        console.log('Drawing mode setup complete with edit support');
+        console.log('Drawing mode setup complete with edit and delete support');
 
-        // Return the button so it can be referenced later
-        return { draw, drawButton };
+        // Return the controls so they can be referenced later
+        return { draw, drawButton, deleteControl };
     } catch (error) {
         console.error('Error setting up drawing mode:', error);
         return null;
@@ -536,6 +548,165 @@ function calculateApproximateArea(latLngPoints) {
 
     // Convert square meters to hectares
     return area / 10000;
+}
+
+/**
+ * Creates and adds a custom delete control to the map
+ * @param {Object} map - The Mapbox map instance
+ * @param {Object} draw - The MapboxDraw control instance
+ * @param {Object} dotNetRef - Reference to .NET component
+ * @returns {Object} The created delete control
+ */
+export function addDeleteDrawingControl(map, draw, dotNetRef) {
+    try {
+        // Create a custom delete control class
+        class DeleteDrawingControl {
+            constructor(draw, dotNetRef) {
+                this._draw = draw;
+                this._dotNetRef = dotNetRef;
+            }
+
+            onAdd(map) {
+                this._map = map;
+                this._container = document.createElement('div');
+                this._container.className = 'mapboxgl-ctrl mapboxgl-ctrl-group delete-control-container';
+                this._container.id = 'delete-drawing-control';
+
+                const button = document.createElement('button');
+                button.className = 'mapboxgl-ctrl-icon custom-delete-ctrl';
+                button.id = 'delete-drawing-button';
+                button.type = 'button';
+                button.title = 'Delete Field Boundary';
+
+                // Add delete/trash icon (using Font Awesome styling)
+                button.innerHTML = '<i class="fa fa-trash-alt"></i>';
+
+                // Initially hidden until a polygon exists
+                this._container.style.display = 'none';
+
+                // Add click handler
+                button.onclick = () => {
+                    // First check if there's anything to delete
+                    const features = this._draw.getAll().features;
+                    const hasPolygon = features.some(f => f.geometry && f.geometry.type === 'Polygon');
+
+                    if (hasPolygon) {
+                        // Clear all drawings
+                        this._draw.deleteAll();
+
+                        // Notify .NET component
+                        if (this._dotNetRef) {
+                            try {
+                                this._dotNetRef.invokeMethodAsync('OnDrawingDeleted');
+                            } catch (error) {
+                                console.warn('Error notifying .NET of drawing deletion:', error);
+                            }
+                        }
+
+                        // Hide the delete button again
+                        this._container.style.display = 'none';
+
+                        console.log('Drawing deleted by map control');
+                    }
+                };
+
+                this._container.appendChild(button);
+                return this._container;
+            }
+
+            onRemove() {
+                this._container.parentNode.removeChild(this._container);
+                this._map = undefined;
+            }
+
+            // Method to update visibility based on polygon existence
+            updateVisibility(hasPolygon) {
+                if (this._container) {
+                    this._container.style.display = hasPolygon ? 'block' : 'none';
+                }
+            }
+        }
+
+        // Create and add delete control
+        const deleteControl = new DeleteDrawingControl(draw, dotNetRef);
+        map.addControl(deleteControl, 'top-right');
+
+        // Add CSS for the delete button
+        addDeleteButtonStyles();
+
+        console.log('Delete drawing control added to map');
+        return deleteControl;
+    } catch (error) {
+        console.error('Error adding delete drawing control:', error);
+        return null;
+    }
+}
+
+/**
+ * Add custom CSS styles for the delete button
+ */
+export function addDeleteButtonStyles() {
+    try {
+        let style = document.getElementById('delete-button-styles');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'delete-button-styles';
+            style.textContent = `
+                .custom-delete-ctrl {
+                    width: 30px;
+                    height: 30px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: white;
+                    color: #d63031;
+                }
+                .custom-delete-ctrl:hover {
+                    background-color: #f2f2f2;
+                }
+                .custom-delete-ctrl i {
+                    font-size: 14px;
+                }
+                .delete-control-container {
+                    margin-right: 5px;
+                    position: absolute;
+                    top: 170px; /* Position below draw button */
+                    right: 10px;
+                    z-index: 999;
+                }
+            `;
+            document.head.appendChild(style);
+            console.log('Delete button styles added');
+        }
+        return true;
+    } catch (error) {
+        console.error('Error adding delete button styles:', error);
+        return false;
+    }
+}
+
+/**
+ * Updates the delete control visibility based on polygon presence
+ * @param {Object} map - The Mapbox map instance
+ * @param {Object} draw - The MapboxDraw control instance
+ * @param {Object} deleteControl - The delete control instance
+ */
+export function updateDeleteControlVisibility(map, draw, deleteControl) {
+    try {
+        if (!deleteControl) return;
+
+        // Check if there's a polygon in the draw control
+        const features = draw.getAll().features;
+        const hasPolygon = features.some(f => f.geometry && f.geometry.type === 'Polygon');
+
+        // Update delete control visibility
+        deleteControl.updateVisibility(hasPolygon);
+
+        console.log(`Delete control visibility updated: ${hasPolygon ? 'visible' : 'hidden'}`);
+    } catch (error) {
+        console.error('Error updating delete control visibility:', error);
+    }
 }
 
 export function toggleDrawButtonVisibility(visible) {
@@ -815,20 +986,48 @@ function processDrawnPolygon(polygon, dotNetRef) {
 }
 
 // Clear any drawn polygons with safety checks
-export function clearDrawnPolygons(draw) {
+export function clearDrawnPolygons(draw, deleteControl = null) {
     try {
-        if (draw) {
-            try {
-                draw.deleteAll();
-                console.log('All drawn polygons cleared');
-            } catch (error) {
-                console.warn('Error clearing polygons:', error);
-            }
-            return true;
+        if (!draw) {
+            console.warn('Draw control is null or undefined');
+            return false;
         }
-        return false;
+
+        // Get the current drawing mode before clearing
+        let currentMode = 'simple_select';
+        try {
+            currentMode = draw.getMode();
+        } catch (e) {
+            console.warn('Unable to get current drawing mode:', e);
+        }
+
+        // Delete all features
+        try {
+            draw.deleteAll();
+            console.log('All drawn polygons cleared successfully');
+
+            // Update delete control visibility if provided
+            if (deleteControl) {
+                deleteControl.updateVisibility(false);
+            }
+        } catch (error) {
+            console.warn('Error clearing polygons:', error);
+            return false;
+        }
+
+        // If we were in draw_polygon mode, we need to re-enter that mode to allow drawing again
+        if (currentMode === 'draw_polygon' && isDrawingModeActive) {
+            try {
+                draw.changeMode('draw_polygon');
+                console.log('Re-entered drawing mode after clearing');
+            } catch (e) {
+                console.warn('Error re-entering drawing mode:', e);
+            }
+        }
+
+        return true;
     } catch (error) {
-        console.error('Error in clearDrawnPolygons:', error);
+        console.error('Fatal error in clearDrawnPolygons:', error);
         return false;
     }
 }
@@ -1478,5 +1677,333 @@ export function unhighlightFieldOnMap(map, fieldId) {
         }
     } catch (error) {
         console.error(`Error unhighlighting field ${fieldId}:`, error);
+    }
+}
+
+/**
+ * Creates a simple delete button directly attached to the map DOM
+ * @param {Object} map - The Mapbox map instance
+ * @param {Object} draw - The MapboxDraw control instance
+ * @param {Object} dotNetRef - Reference to .NET component
+ * @returns {HTMLElement} The delete button element
+ */
+export function createSimpleDeleteButton(map, draw, dotNetRef) {
+    console.log("Creating simple delete button...");
+
+    // Create the button element
+    const deleteButton = document.createElement('button');
+    deleteButton.id = 'simple-delete-button';
+    deleteButton.innerHTML = '<i class="fa fa-trash-alt"></i>';
+    deleteButton.title = 'Delete Field Boundary';
+
+    // Apply direct styles
+    deleteButton.style.position = 'absolute';
+    deleteButton.style.top = '170px';
+    deleteButton.style.right = '10px';
+    deleteButton.style.zIndex = '999';
+    deleteButton.style.width = '30px';
+    deleteButton.style.height = '30px';
+    deleteButton.style.backgroundColor = 'white';
+    deleteButton.style.border = 'none';
+    deleteButton.style.borderRadius = '4px';
+    deleteButton.style.boxShadow = '0 0 0 2px rgba(0,0,0,0.1)';
+    deleteButton.style.cursor = 'pointer';
+    deleteButton.style.display = 'flex';
+    deleteButton.style.alignItems = 'center';
+    deleteButton.style.justifyContent = 'center';
+    deleteButton.style.color = '#d63031';
+    deleteButton.style.transition = 'background-color 0.2s';
+    // Initially hidden
+    deleteButton.style.display = 'none';
+
+    // Add hover effect
+    deleteButton.addEventListener('mouseenter', () => {
+        deleteButton.style.backgroundColor = '#f8d7da';
+    });
+
+    deleteButton.addEventListener('mouseleave', () => {
+        deleteButton.style.backgroundColor = 'white';
+    });
+
+    // Add click handler
+    deleteButton.addEventListener('click', () => {
+        console.log("Delete button clicked!");
+
+        // Check if there's anything to delete
+        try {
+            const features = draw.getAll().features;
+            const hasPolygon = features.some(f => f.geometry && f.geometry.type === 'Polygon');
+
+            console.log(`Has polygon to delete: ${hasPolygon}`);
+
+            if (hasPolygon) {
+                // Clear all drawings
+                draw.deleteAll();
+
+                // Hide the delete button
+                deleteButton.style.display = 'none';
+
+                // Notify .NET component
+                if (dotNetRef) {
+                    try {
+                        dotNetRef.invokeMethodAsync('OnDrawingDeleted');
+                        console.log('Notified .NET of drawing deletion');
+                    } catch (error) {
+                        console.warn('Error notifying .NET of drawing deletion:', error);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error in delete button click handler:", error);
+        }
+    });
+
+    // Add to map container
+    const mapContainer = map.getContainer();
+    mapContainer.appendChild(deleteButton);
+
+    console.log("Delete button created and added to DOM");
+
+    return deleteButton;
+}
+
+/**
+ * Shows the delete button
+ * @param {string} deleteButtonId - ID of the delete button element
+ */
+export function showDeleteButton(deleteButtonId) {
+    updateDeleteButtonVisibility(deleteButtonId, true);
+}
+
+/**
+ * Hides the delete button
+ * @param {string} deleteButtonId - ID of the delete button element
+ */
+export function hideDeleteButton(deleteButtonId) {
+    updateDeleteButtonVisibility(deleteButtonId, false);
+}
+
+/**
+ * Checks if a polygon exists in the draw control and updates delete button
+ * @param {Object} draw - The MapboxDraw control instance
+ * @param {string} deleteButtonId - ID of the delete button element
+ */
+export function checkForPolygonAndUpdateDeleteButton(draw, deleteButtonId) {
+    try {
+        if (!draw) {
+            console.warn("Draw control is null");
+            return;
+        }
+
+        // Get all features from the draw control
+        const allFeatures = draw.getAll();
+
+        // Check if features exist and contains any polygons
+        const hasPolygon = allFeatures &&
+            allFeatures.features &&
+            allFeatures.features.length > 0 &&
+            allFeatures.features.some(f => f.geometry && f.geometry.type === 'Polygon');
+
+        console.log(`Polygon check result: ${hasPolygon ? 'found' : 'not found'}`);
+
+        // Update button visibility based on polygon existence
+        updateDeleteButtonVisibility(deleteButtonId, hasPolygon);
+    } catch (error) {
+        console.error("Error checking for polygon:", error);
+    }
+}
+
+/**
+ * Clears all drawn polygons and hides the delete button
+ * @param {Object} draw - The MapboxDraw control instance
+ * @param {string} deleteButtonId - ID of the delete button element
+ * @returns {boolean} Success indicator
+ */
+export function clearAllDrawings(draw, deleteButtonId) {
+    try {
+        if (draw) {
+            draw.deleteAll();
+            console.log("All drawings cleared");
+        }
+
+        // Hide delete button
+        hideDeleteButton(deleteButtonId);
+
+        return true;
+    } catch (error) {
+        console.error("Error clearing drawings:", error);
+        return false;
+    }
+}
+
+/**
+ * Setup function that creates the drawing and delete controls
+ */
+export function setupSimpleDrawingControls(map, draw, dotNetRef) {
+    console.log("Setting up simple drawing controls...");
+
+    try {
+        // Create drawing button (same as before)
+        const drawButton = document.createElement('button');
+        drawButton.id = 'field-drawing-button';
+        drawButton.innerHTML = '<i class="fa fa-draw-polygon"></i>';
+        drawButton.title = 'Draw/Edit Field Boundary';
+
+        // Apply direct styles
+        drawButton.style.position = 'absolute';
+        drawButton.style.top = '130px';
+        drawButton.style.right = '10px';
+        drawButton.style.zIndex = '999';
+        drawButton.style.width = '30px';
+        drawButton.style.height = '30px';
+        drawButton.style.backgroundColor = 'white';
+        drawButton.style.border = 'none';
+        drawButton.style.borderRadius = '4px';
+        drawButton.style.boxShadow = '0 0 0 2px rgba(0,0,0,0.1)';
+        drawButton.style.cursor = 'pointer';
+        drawButton.style.display = 'flex';
+        drawButton.style.alignItems = 'center';
+        drawButton.style.justifyContent = 'center';
+        drawButton.style.transition = 'background-color 0.2s';
+        // Initially hidden
+        drawButton.style.display = 'none';
+
+        // Add hover effect
+        drawButton.addEventListener('mouseenter', () => {
+            if (!isDrawingModeActive) {
+                drawButton.style.backgroundColor = '#f2f2f2';
+            }
+        });
+
+        drawButton.addEventListener('mouseleave', () => {
+            if (!isDrawingModeActive) {
+                drawButton.style.backgroundColor = 'white';
+            }
+        });
+
+        // Add click handler
+        drawButton.addEventListener('click', () => {
+            toggleDrawingMode(map, draw, dotNetRef);
+        });
+
+        // Add to map container
+        const mapContainer = map.getContainer();
+        mapContainer.appendChild(drawButton);
+
+        // Create delete button
+        const deleteButton = createSimpleDeleteButton(map, draw, dotNetRef);
+
+        // Set up event listeners for polygon creation/deletion
+        map.on('draw.create', (e) => {
+            console.log("Draw create event fired");
+
+            // Check for valid polygon and show delete button
+            if (e.features && e.features.length > 0) {
+                const polygon = e.features[0];
+                processDrawnPolygon(polygon, dotNetRef);
+
+                // Show delete button
+                showDeleteButton(deleteButton);
+            }
+        });
+
+        map.on('draw.delete', () => {
+            console.log("Draw delete event fired");
+            hideDeleteButton(deleteButton);
+        });
+
+        map.on('draw.update', (e) => {
+            console.log("Draw update event fired");
+
+            if (e.features && e.features.length > 0) {
+                const polygon = e.features[0];
+                processDrawnPolygon(polygon, dotNetRef);
+            }
+        });
+
+        // Return references to the buttons
+        console.log("Drawing controls setup complete");
+        return { drawButton, deleteButton };
+    } catch (error) {
+        console.error("Error setting up drawing controls:", error);
+        return null;
+    }
+}
+
+/**
+ * Load existing polygon and show delete button
+ * @param {Object} map - The Mapbox map instance
+ * @param {Object} draw - The MapboxDraw control instance
+ * @param {Array} coordinates - The polygon coordinates
+ * @param {string} deleteButtonId - ID of the delete button element
+ * @returns {boolean} Success indicator
+ */
+export function loadPolygonForEditing(map, draw, coordinates, deleteButtonId) {
+    try {
+        console.log("Loading polygon for editing...");
+
+        if (!map || !draw) {
+            console.error("Map or drawing tool not initialized");
+            return false;
+        }
+
+        if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 3) {
+            console.warn("Not enough coordinates to create a valid polygon");
+            return false;
+        }
+
+        // Clear any existing drawings
+        draw.deleteAll();
+
+        // Create polygon GeoJSON
+        const polygonFeature = {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+                type: 'Polygon',
+                coordinates: [
+                    // Make sure polygon is closed
+                    coordinates.length > 0 &&
+                    coordinates[0][0] !== coordinates[coordinates.length - 1][0] &&
+                    coordinates[0][1] !== coordinates[coordinates.length - 1][1]
+                        ? [...coordinates, [...coordinates[0]]]
+                        : coordinates
+                ]
+            }
+        };
+
+        // Add polygon to draw control
+        const ids = draw.add(polygonFeature);
+        console.log(`Added polygon with ID: ${ids[0]}`);
+
+        // Select for editing
+        draw.changeMode('direct_select', { featureId: ids[0] });
+
+        // Show delete button
+        showDeleteButton(deleteButtonId);
+
+        return true;
+    } catch (error) {
+        console.error("Error loading polygon:", error);
+        return false;
+    }
+}
+
+/**
+ * Updates the delete button visibility based on string ID
+ * @param {string} deleteButtonId - The ID of the delete button element
+ * @param {boolean} visible - Whether to show or hide the button
+ */
+export function updateDeleteButtonVisibility(deleteButtonId, visible) {
+    try {
+        const deleteButton = document.getElementById(deleteButtonId);
+        if (deleteButton) {
+            deleteButton.style.display = visible ? 'flex' : 'none';
+            console.log(`Delete button (${deleteButtonId}) visibility set to: ${visible ? 'visible' : 'hidden'}`);
+        } else {
+            console.warn(`Delete button with ID '${deleteButtonId}' not found`);
+        }
+    } catch (error) {
+        console.error("Error updating delete button visibility:", error);
     }
 }
