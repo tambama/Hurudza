@@ -38,9 +38,9 @@
                                 <div class="form-group">
                                     <label class="form-control-label">Filter by Farm</label>
                                     <SfDropDownList @bind-Value="selectedFarmId" DataSource="@farms" TValue="string" TItem="FarmListViewModel"
-                                                  Placeholder="Select a farm" AllowFiltering="true"
-                                                  @bind-Value:event="ValueChange">
-                                        <DropDownListEvents TValue="string" ValueChange="LoadAssignmentsForFarm"></DropDownListEvents>
+                                                    Placeholder="Select a farm" AllowFiltering="true"
+                                                    @bind-Value:event="ValueChange">
+                                        <DropDownListEvents TValue="string" TItem="FarmListViewModel" ValueChange="LoadAssignmentsForFarm"></DropDownListEvents>
                                         <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
                                     </SfDropDownList>
                                 </div>
@@ -49,9 +49,9 @@
                                 <div class="form-group">
                                     <label class="form-control-label">Filter by Role</label>
                                     <SfDropDownList @bind-Value="selectedRole" DataSource="@availableRoles" TValue="string" TItem="RoleViewModel"
-                                                  Placeholder="Select a role"
-                                                  @bind-Value:event="ValueChange">
-                                        <DropDownListEvents TValue="string" ValueChange="ApplyFilters"></DropDownListEvents>
+                                                    Placeholder="Select a role"
+                                                    @bind-Value:event="ValueChange">
+                                        <DropDownListEvents TValue="string" TItem="RoleViewModel" ValueChange="ApplyFilters"></DropDownListEvents>
                                         <DropDownListFieldSettings Text="Description" Value="Name"></DropDownListFieldSettings>
                                     </SfDropDownList>
                                 </div>

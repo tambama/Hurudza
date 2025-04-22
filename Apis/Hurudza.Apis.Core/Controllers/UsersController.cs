@@ -112,8 +112,8 @@ public class UsersController : ControllerBase
         return Ok(new ApiOkResponse(user));
     }
 
-    [HttpGet("{farmId}", Name = nameof(GetFarmUsers))]
-    public async Task<IActionResult> GetFarmUsers(string farmId)
+    [HttpGet("{farmId}", Name = nameof(GetUsersByFarm))]
+    public async Task<IActionResult> GetUsersByFarm(string farmId)
     {
         var userProfiles = await _context.UserProfiles
             .Where(p => p.FarmId == farmId && p.IsActive)

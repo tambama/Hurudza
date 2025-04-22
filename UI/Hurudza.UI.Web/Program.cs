@@ -9,6 +9,7 @@ using Hurudza.UI.Web.Cookie.Providers;
 using Microsoft.AspNetCore.Components.Authorization;
 using Syncfusion.Blazor;
 using Hurudza.UI.Shared.Api.Interfaces;
+using Hurudza.UI.Web.Api.Interfaces;
 using Hurudza.UI.Web.Services;
 using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall;
 
@@ -20,43 +21,79 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient {BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)});
 
+// Authentication & Authorization
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<CookieHandler>();
 builder.Services.AddSingleton<JwtTokenService>();
 
+// HTTP Clients
 builder.Services.AddHttpClient("Api.Core", options => {
         options.BaseAddress = new Uri("https://localhost:7148/api/");
     })
     .AddHttpMessageHandler<CookieHandler>();
 
+// Authorization Policies
 builder.Services.AddOptions();
 builder.Services.AddAuthorizationCore(options => {
-    // Add custom policies based on permissions
+    // Farm management policies
+    options.AddPolicy("CanViewFarms", policy => 
+        policy.RequireClaim("Permission", "Farm.View"));
+        
     options.AddPolicy("CanManageFarms", policy => 
         policy.RequireClaim("Permission", "Farm.Manage"));
     
-    options.AddPolicy("CanManageUsers", policy => 
-        policy.RequireClaim("Permission", "User.Manage"));
-    
+    // Field management policies
+    options.AddPolicy("CanViewFields", policy => 
+        policy.RequireClaim("Permission", "Field.View"));
+        
     options.AddPolicy("CanManageFields", policy => 
         policy.RequireClaim("Permission", "Field.Manage"));
     
-    options.AddPolicy("CanViewOnly", policy => 
-        policy.RequireAssertion(context => 
-            context.User.HasClaim(c => c.Type == "Permission" && 
-                                     (c.Value == "Farm.View" || 
-                                      c.Value == "User.View" || 
-                                      c.Value == "Field.View"))));
+    // Crop management policies
+    options.AddPolicy("CanViewCrops", policy => 
+        policy.RequireClaim("Permission", "Crop.View"));
+        
+    options.AddPolicy("CanManageCrops", policy => 
+        policy.RequireClaim("Permission", "Crop.Manage"));
     
+    // User management policies
+    options.AddPolicy("CanViewUsers", policy => 
+        policy.RequireClaim("Permission", "User.View"));
+        
+    options.AddPolicy("CanManageUsers", policy => 
+        policy.RequireClaim("Permission", "User.Manage"));
+    
+    // Role-based policies
     options.AddPolicy("IsSystemAdmin", policy => 
-        policy.RequireClaim(ClaimTypes.Role, "SystemAdministrator"));
+        policy.RequireRole("SystemAdministrator"));
+        
+    options.AddPolicy("IsAdministrator", policy => 
+        policy.RequireAssertion(context => 
+            context.User.IsInRole("SystemAdministrator") || 
+            context.User.IsInRole("Administrator") ||
+            context.User.IsInRole("FarmAdministrator")));
+            
+    options.AddPolicy("IsFarmManager", policy => 
+        policy.RequireAssertion(context => 
+            context.User.IsInRole("SystemAdministrator") || 
+            context.User.IsInRole("Administrator") ||
+            context.User.IsInRole("FarmAdministrator") ||
+            context.User.IsInRole("FarmManager")));
 });
 
+// Local Storage for JWT tokens
 builder.Services.AddBlazoredLocalStorage();
 
+// API Services
 builder.Services.AddScoped<IApiCall, ApiCall>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
+// App Services
 builder.Services.AddSingleton<SidebarToggleService>();
+builder.Services.AddScoped<UserAssignmentService>();
+builder.Services.AddScoped<FarmAccessService>();
 
+// Syncfusion Blazor Components
 builder.Services.AddSyncfusionBlazor();
+
 await builder.Build().RunAsync();

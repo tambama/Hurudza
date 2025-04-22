@@ -4,12 +4,16 @@ using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using Hurudza.Apis.Base.Infrastructure.Filters;
 using Hurudza.Apis.Base.Services;
+using Hurudza.Apis.Core.Configuration;
 using Hurudza.Common.Services.Interfaces;
 using Hurudza.Common.Services.Services;
 using Hurudza.Common.Sms.Services;
 using Hurudza.Data.Context.Context;
 using Hurudza.Data.Context.Seed;
 using Hurudza.Data.Models.Models;
+using Hurudza.Data.Services;
+using Hurudza.Data.Services.Interfaces;
+using Hurudza.Data.Services.Services;
 using Hurudza.Data.UI.Models.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -32,7 +36,6 @@ try
         .ReadFrom.Configuration(ctx.Configuration));
 
     // Add services to the container.
-
     builder.Services.AddControllers();
 
     var assembly = Assembly.Load("Hurudza.Apis.Base");
@@ -88,6 +91,17 @@ try
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"] ?? string.Empty))
             };
         });
+
+    // Configure authorization policies
+    builder.Services.ConfigurePermissionPolicies();
+
+    // Register application services
+    builder.Services.AddScoped<IFarmUserManagerService, FarmUserManagerService>();
+    builder.Services.AddScoped<IFarmUserAssignmentService, FarmUserAssignmentService>();
+    builder.Services.AddSingleton<RoleInitializerService>();
+
+    // Add hosted service for role initialization
+    builder.Services.AddHostedService<RoleInitializerHostedService>();
 
     builder.Services.AddControllers(options =>
         {
@@ -188,7 +202,7 @@ try
             c.DisplayOperationId();
             foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions.OrderByDescending(_ => _.ApiVersion))
             {
-                c.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", $"Dohwe {description.GroupName}");
+                c.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", $"Hurudza {description.GroupName}");
             }
         });
     }
@@ -214,12 +228,18 @@ finally
 
 static async Task InitializeDatabase(WebApplication app, HurudzaDbContext dbContext)
 {
+    // Create a scope to resolve scoped services
     using var serviceScope = app.Services.CreateScope();
     var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleInitializer = serviceScope.ServiceProvider.GetRequiredService<RoleInitializerService>();
 
     dbContext.Database.Migrate();
 
+    // Initialize roles and permissions
+    await roleInitializer.InitializeRolesAndPermissions();
+
+    // Seed initial data
     SeedClaimsData.SeedClaims(dbContext);
     SeedRoleData.SeedRoles(dbContext, roleManager);
     SeedSendGridData.SeedSendGridTemplates(dbContext);

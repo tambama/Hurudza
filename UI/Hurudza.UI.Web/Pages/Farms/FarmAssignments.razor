@@ -32,15 +32,15 @@
                             <SfDropDownList @bind-Value="selectedFarmId" DataSource="@farms" TValue="string" TItem="FarmListViewModel"
                                             Placeholder="Select Farm" AllowFiltering="true"
                                             @bind-Value:event="ValueChange">
-                                <DropDownListEvents TValue="string" ValueChange="OnFarmChange"></DropDownListEvents>
+                                <DropDownListEvents TValue="string" TItem="FarmListViewModel" ValueChange="OnFarmChange"></DropDownListEvents>
                                 <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
                             </SfDropDownList>
                         </div>
                         <div class="me-3" style="min-width: 250px;">
-                            <SfDropDownList @bind-Value="selectedRoleFilter" DataSource="@roleFilterOptions" TValue="string"
-                                            Placeholder="Filter by Role" AllowFiltering="true"
-                                            @bind-Value:event="ValueChange">
-                                <DropDownListEvents TValue="string" ValueChange="ApplyFilters"></DropDownListEvents>
+                            <SfDropDownList @bind-Value="selectedRoleFilter" DataSource="@roleFilterOptions" TValue="string" TItem="string"
+                                             Placeholder="Filter by Role" AllowFiltering="true"
+                                             @bind-Value:event="ValueChange">
+                                <DropDownListEvents TValue="string" TItem="string" ValueChange="ApplyFilters"></DropDownListEvents>
                             </SfDropDownList>
                         </div>
                         <div>
