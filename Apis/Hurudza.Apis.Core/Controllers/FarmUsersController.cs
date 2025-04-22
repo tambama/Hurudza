@@ -55,16 +55,25 @@ public class FarmUsersController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"GetFarmUsers called for farmId: {farmId}");
+            
             // Verify the user has access to this farm
             var userId = User.FindFirstValue(ClaimTypes.PrimarySid) ?? User.FindFirstValue("UserId");
             if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User not authenticated in GetFarmUsers");
                 return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized, "User not authenticated"));
+            }
 
             // Check access to farm (unless System Administrator)
             if (!User.IsInRole(ApiRoles.SystemAdministrator) && !await UserHasAccessToFarm(userId, farmId))
+            {
+                _logger.LogWarning($"User {userId} does not have access to farm {farmId}");
                 return Forbid();
+            }
 
             var farmUsers = await _farmUserManagerService.GetFarmUsersAsync(farmId);
+            _logger.LogInformation($"Retrieved {farmUsers.Count} users for farm {farmId}");
             return Ok(new ApiOkResponse(farmUsers));
         }
         catch (NotFoundException ex)
@@ -89,16 +98,25 @@ public class FarmUsersController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"GetFarmUserSummary called for farmId: {farmId}");
+            
             // Verify the user has access to this farm
             var userId = User.FindFirstValue(ClaimTypes.PrimarySid) ?? User.FindFirstValue("UserId");
             if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User not authenticated in GetFarmUserSummary");
                 return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized, "User not authenticated"));
+            }
 
             // Check access to farm (unless System Administrator)
             if (!User.IsInRole(ApiRoles.SystemAdministrator) && !await UserHasAccessToFarm(userId, farmId))
+            {
+                _logger.LogWarning($"User {userId} does not have access to farm {farmId}");
                 return Forbid();
+            }
 
             var summary = await _farmUserManagerService.GetFarmUserSummaryAsync(farmId);
+            _logger.LogInformation($"Retrieved summary for farm {farmId}");
             return Ok(new ApiOkResponse(summary));
         }
         catch (NotFoundException ex)
@@ -122,6 +140,8 @@ public class FarmUsersController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"GetUserFarmProfiles called for userId: {userId}");
+            
             // If no userId is provided, use the current user
             if (string.IsNullOrEmpty(userId))
                 userId = User.FindFirstValue(ClaimTypes.PrimarySid) ?? User.FindFirstValue("UserId");
@@ -129,9 +149,13 @@ public class FarmUsersController : ControllerBase
             // Only System Administrators or the user themselves can see their profiles
             if (userId != User.FindFirstValue(ClaimTypes.PrimarySid) && 
                 !User.IsInRole(ApiRoles.SystemAdministrator))
+            {
+                _logger.LogWarning($"User {User.FindFirstValue(ClaimTypes.PrimarySid)} attempted to access profiles for user {userId}");
                 return Forbid();
+            }
 
             var profiles = await _farmUserManagerService.GetUserFarmProfilesAsync(userId);
+            _logger.LogInformation($"Retrieved {profiles.Count} profiles for user {userId}");
             return Ok(new ApiOkResponse(profiles));
         }
         catch (NotFoundException ex)
@@ -148,31 +172,35 @@ public class FarmUsersController : ControllerBase
     }
 
     /// <summary>
-    /// Gets detailed access information for a specific user
+    /// Gets all available farm roles for assignment
     /// </summary>
-    [HttpGet(Name = nameof(GetUserFarmAccess))]
+    [HttpGet(Name = nameof(GetAvailableFarmRoles))]
     [Authorize(Policy = "CanManageUsers")]
-    public async Task<IActionResult> GetUserFarmAccess([FromQuery] string userId)
+    public async Task<IActionResult> GetAvailableFarmRoles()
     {
         try
         {
-            // If no userId is provided, use the current user
-            if (string.IsNullOrEmpty(userId))
-                userId = User.FindFirstValue(ClaimTypes.PrimarySid) ?? User.FindFirstValue("UserId");
+            _logger.LogInformation("GetAvailableFarmRoles called");
+            
+            // Get farm roles (roles with RoleClass == Farm)
+            var roles = await _context.Roles
+                .Where(r => User.IsInRole(ApiRoles.SystemAdministrator) || r.Name != ApiRoles.SystemAdministrator)
+                .Where(r => r.RoleClass == Hurudza.Data.Enums.Enums.RoleClass.Farm)
+                .Select(r => new RoleViewModel { 
+                    Id = r.Id, 
+                    Name = r.Name, 
+                    Description = r.Description 
+                })
+                .ToListAsync();
 
-            var userAccess = await _farmUserManagerService.GetUserFarmAccessAsync(userId);
-            return Ok(new ApiOkResponse(userAccess));
-        }
-        catch (NotFoundException ex)
-        {
-            _logger.LogWarning(ex, "Not found error in GetUserFarmAccess");
-            return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, ex.Message));
+            _logger.LogInformation($"Retrieved {roles.Count} available farm roles");
+            return Ok(new ApiOkResponse(roles));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in GetUserFarmAccess");
+            _logger.LogError(ex, "Error in GetAvailableFarmRoles");
             return StatusCode(StatusCodes.Status500InternalServerError, 
-                new ApiResponse((int)HttpStatusCode.InternalServerError, $"Error retrieving user farm access: {ex.Message}"));
+                new ApiResponse((int)HttpStatusCode.InternalServerError, $"Error retrieving available roles: {ex.Message}"));
         }
     }
 
@@ -185,25 +213,37 @@ public class FarmUsersController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"AssignUserToFarm called for user {model.UserId} to farm {model.FarmId} with role {model.Role}");
+            
             if (model == null)
                 return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, "Invalid request data"));
 
             // Verify the user has access to this farm if they're not a System Administrator
             var currentUserId = User.FindFirstValue(ClaimTypes.PrimarySid) ?? User.FindFirstValue("UserId");
             if (!User.IsInRole(ApiRoles.SystemAdministrator) && !await UserHasAccessToFarm(currentUserId, model.FarmId))
+            {
+                _logger.LogWarning($"User {currentUserId} does not have access to farm {model.FarmId}");
                 return Forbid();
+            }
 
             // Only System Administrators can assign System Administrator role
             if (model.Role == ApiRoles.SystemAdministrator && !User.IsInRole(ApiRoles.SystemAdministrator))
+            {
+                _logger.LogWarning($"User {currentUserId} attempted to assign SystemAdministrator role");
                 return BadRequest(new ApiResponse((int)HttpStatusCode.Forbidden, "Only System Administrators can assign System Administrator role"));
+            }
 
             // Make sure the role is allowed for farm assignments
             if (!IsValidFarmRole(model.Role))
+            {
+                _logger.LogWarning($"Invalid farm role: {model.Role}");
                 return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, $"Role '{model.Role}' is not valid for farm assignments"));
+            }
 
             var profile = await _farmUserManagerService.AssignUserToFarmAsync(
                 model.UserId, model.FarmId, model.Role);
 
+            _logger.LogInformation($"Successfully assigned user {model.UserId} to farm {model.FarmId} with role {model.Role}");
             return Ok(new ApiOkResponse(profile, "User assigned to farm successfully"));
         }
         catch (NotFoundException ex)
@@ -228,30 +268,45 @@ public class FarmUsersController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"UpdateUserFarmRole called for profile {model.ProfileId}");
+            
             if (model == null)
                 return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, "Invalid request data"));
 
             // Get the profile to find the farm ID
             var profile = await _context.UserProfiles.FindAsync(model.ProfileId);
             if (profile == null)
+            {
+                _logger.LogWarning($"Profile {model.ProfileId} not found");
                 return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, "Profile not found"));
+            }
 
             // Verify the user has access to this farm if they're not a System Administrator
             var currentUserId = User.FindFirstValue(ClaimTypes.PrimarySid) ?? User.FindFirstValue("UserId");
             if (!User.IsInRole(ApiRoles.SystemAdministrator) && !await UserHasAccessToFarm(currentUserId, profile.FarmId))
+            {
+                _logger.LogWarning($"User {currentUserId} does not have access to farm {profile.FarmId}");
                 return Forbid();
+            }
 
             // Only System Administrators can assign System Administrator role
             if (model.Role == ApiRoles.SystemAdministrator && !User.IsInRole(ApiRoles.SystemAdministrator))
+            {
+                _logger.LogWarning($"User {currentUserId} attempted to assign SystemAdministrator role");
                 return BadRequest(new ApiResponse((int)HttpStatusCode.Forbidden, "Only System Administrators can assign System Administrator role"));
+            }
 
             // Make sure the role is allowed for farm assignments
             if (!IsValidFarmRole(model.Role))
+            {
+                _logger.LogWarning($"Invalid farm role: {model.Role}");
                 return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, $"Role '{model.Role}' is not valid for farm assignments"));
+            }
 
             var updatedProfile = await _farmUserManagerService.UpdateUserFarmRoleAsync(
                 model.ProfileId, model.Role, model.IsActive);
 
+            _logger.LogInformation($"Successfully updated profile {model.ProfileId} to role {model.Role}, active: {model.IsActive}");
             return Ok(new ApiOkResponse(updatedProfile, "User farm role updated successfully"));
         }
         catch (NotFoundException ex)
@@ -276,18 +331,27 @@ public class FarmUsersController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"UpdateUserFarmStatus called for profile {profileId}, status: {isActive}");
+            
             // Get the profile to find the farm ID
             var profile = await _context.UserProfiles.FindAsync(profileId);
             if (profile == null)
+            {
+                _logger.LogWarning($"Profile {profileId} not found");
                 return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, "Profile not found"));
+            }
 
             // Verify the user has access to this farm if they're not a System Administrator
             var currentUserId = User.FindFirstValue(ClaimTypes.PrimarySid) ?? User.FindFirstValue("UserId");
             if (!User.IsInRole(ApiRoles.SystemAdministrator) && !await UserHasAccessToFarm(currentUserId, profile.FarmId))
+            {
+                _logger.LogWarning($"User {currentUserId} does not have access to farm {profile.FarmId}");
                 return Forbid();
+            }
 
             var updatedProfile = await _farmUserManagerService.UpdateUserFarmStatusAsync(profileId, isActive);
 
+            _logger.LogInformation($"Successfully updated profile {profileId} active status to {isActive}");
             return Ok(new ApiOkResponse(updatedProfile, $"User farm status {(isActive ? "activated" : "deactivated")} successfully"));
         }
         catch (NotFoundException ex)
@@ -312,20 +376,29 @@ public class FarmUsersController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"RemoveUserFromFarm called for user {userId} from farm {farmId}");
+            
             // Verify the user has access to this farm if they're not a System Administrator
             var currentUserId = User.FindFirstValue(ClaimTypes.PrimarySid) ?? User.FindFirstValue("UserId");
             if (!User.IsInRole(ApiRoles.SystemAdministrator) && !await UserHasAccessToFarm(currentUserId, farmId))
+            {
+                _logger.LogWarning($"User {currentUserId} does not have access to farm {farmId}");
                 return Forbid();
+            }
 
             // Administrator cannot remove SystemAdministrator
             if (!User.IsInRole(ApiRoles.SystemAdministrator))
             {
                 var userToRemove = await _userManager.FindByIdAsync(userId);
                 if (userToRemove != null && await _userManager.IsInRoleAsync(userToRemove, ApiRoles.SystemAdministrator))
+                {
+                    _logger.LogWarning($"User {currentUserId} attempted to remove a system administrator");
                     return Ok(new ApiResponse((int)HttpStatusCode.Forbidden, "Cannot remove System Administrator"));
+                }
             }
 
             await _farmUserManagerService.RemoveUserFromFarmAsync(userId, farmId);
+            _logger.LogInformation($"Successfully removed user {userId} from farm {farmId}");
             return Ok(new ApiOkResponse(null, "User removed from farm successfully"));
         }
         catch (NotFoundException ex)
@@ -349,18 +422,24 @@ public class FarmUsersController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"GetAccessibleFarms called for userId: {userId}");
+            
             // If no userId provided, use the current user
             if (string.IsNullOrEmpty(userId))
                 userId = User.FindFirstValue(ClaimTypes.PrimarySid) ?? User.FindFirstValue("UserId");
 
             if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User not authenticated in GetAccessibleFarms");
                 return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized, "User not authenticated"));
+            }
 
             // Only allow viewing other users' accessible farms if you're an admin
             if (userId != (User.FindFirstValue(ClaimTypes.PrimarySid) ?? User.FindFirstValue("UserId")) && 
                 !User.IsInRole(ApiRoles.SystemAdministrator) && 
                 !User.IsInRole(ApiRoles.Administrator))
             {
+                _logger.LogWarning($"User {User.FindFirstValue(ClaimTypes.PrimarySid)} attempted to access farms for user {userId}");
                 return Forbid();
             }
 
@@ -369,9 +448,10 @@ public class FarmUsersController : ControllerBase
             // Get farm details for these IDs
             var farms = await _context.Farms
                 .Where(f => farmIds.Contains(f.Id) && f.IsActive && !f.Deleted)
-                .Select(f => new { f.Id, f.Name })
+                .Select(f => new FarmListViewModel { Id = f.Id, Name = f.Name })
                 .ToListAsync();
 
+            _logger.LogInformation($"Retrieved {farms.Count} accessible farms for user {userId}");
             return Ok(new ApiOkResponse(farms));
         }
         catch (NotFoundException ex)
@@ -388,33 +468,7 @@ public class FarmUsersController : ControllerBase
     }
 
     /// <summary>
-    /// Gets all roles that can be assigned to farm users
-    /// </summary>
-    [HttpGet(Name = nameof(GetAvailableFarmRoles))]
-    [Authorize(Policy = "CanManageUsers")]
-    public async Task<IActionResult> GetAvailableFarmRoles()
-    {
-        try
-        {
-            // Get all roles except SystemAdministrator (unless the current user is a System Administrator)
-            var roles = await _context.Roles
-                .Where(r => User.IsInRole(ApiRoles.SystemAdministrator) || r.Name != ApiRoles.SystemAdministrator)
-                .Where(r => r.RoleClass == Hurudza.Data.Enums.Enums.RoleClass.Farm)
-                .Select(r => new { r.Id, r.Name, r.Description })
-                .ToListAsync();
-
-            return Ok(new ApiOkResponse(roles));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error in GetAvailableFarmRoles");
-            return StatusCode(StatusCodes.Status500InternalServerError, 
-                new ApiResponse((int)HttpStatusCode.InternalServerError, $"Error retrieving available roles: {ex.Message}"));
-        }
-    }
-
-    /// <summary>
-    /// Gets system-wide statistics about user assignments
+    /// Gets statistics about user assignments across all farms
     /// </summary>
     [HttpGet(Name = nameof(GetUserAssignmentStatistics))]
     [Authorize(Roles = "SystemAdministrator")]
@@ -422,7 +476,10 @@ public class FarmUsersController : ControllerBase
     {
         try
         {
+            _logger.LogInformation("GetUserAssignmentStatistics called");
+            
             var statistics = await _farmUserManagerService.GetSystemUserAssignmentStatisticsAsync();
+            _logger.LogInformation($"Retrieved statistics for {statistics.Count} farms");
             return Ok(new ApiOkResponse(statistics));
         }
         catch (Exception ex)

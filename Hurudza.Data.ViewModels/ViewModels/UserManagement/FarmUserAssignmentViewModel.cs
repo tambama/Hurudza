@@ -28,21 +28,21 @@ namespace Hurudza.Data.UI.Models.ViewModels.UserManagement
         /// <summary>
         /// Optional username for display purposes
         /// </summary>
-        public string Username { get; set; }
+        public string? Username { get; set; }
 
         /// <summary>
         /// Optional full name for display purposes
         /// </summary>
-        public string Fullname { get; set; }
+        public string? Fullname { get; set; }
 
         /// <summary>
         /// Optional email for display purposes
         /// </summary>
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         /// <summary>
         /// Optional farm name for display purposes
         /// </summary>
-        public string FarmName { get; set; }
+        public string? FarmName { get; set; }
     }
 }

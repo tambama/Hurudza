@@ -38,9 +38,8 @@
                                 <div class="form-group">
                                     <label class="form-control-label">Filter by Farm</label>
                                     <SfDropDownList @bind-Value="selectedFarmId" DataSource="@farms" TValue="string" TItem="FarmListViewModel"
-                                                    Placeholder="Select a farm" AllowFiltering="true"
-                                                    @bind-Value:event="ValueChange">
-                                        <DropDownListEvents TValue="string" TItem="FarmListViewModel" ValueChange="LoadAssignmentsForFarm"></DropDownListEvents>
+                                                    Placeholder="Select a farm" AllowFiltering="true">
+                                        <DropDownListEvents TValue="string" TItem="FarmListViewModel" ValueChange="OnFarmChange"></DropDownListEvents>
                                         <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
                                     </SfDropDownList>
                                 </div>
@@ -49,9 +48,8 @@
                                 <div class="form-group">
                                     <label class="form-control-label">Filter by Role</label>
                                     <SfDropDownList @bind-Value="selectedRole" DataSource="@availableRoles" TValue="string" TItem="RoleViewModel"
-                                                    Placeholder="Select a role"
-                                                    @bind-Value:event="ValueChange">
-                                        <DropDownListEvents TValue="string" TItem="RoleViewModel" ValueChange="ApplyFilters"></DropDownListEvents>
+                                                    Placeholder="Select a role">
+                                        <DropDownListEvents TValue="string" TItem="RoleViewModel" ValueChange="OnRoleChange"></DropDownListEvents>
                                         <DropDownListFieldSettings Text="Description" Value="Name"></DropDownListFieldSettings>
                                     </SfDropDownList>
                                 </div>
@@ -61,7 +59,7 @@
                                     <label class="form-control-label">Search</label>
                                     <div class="input-group">
                                         <input type="text" class="form-control" placeholder="Search by name or email..." 
-                                               @bind="searchText" @bind:event="oninput">
+                                               @bind="searchText" @bind:event="oninput" @onkeyup="ApplyFilters">
                                         <button class="btn btn-outline-primary" type="button" @onclick="ApplyFilters">
                                             <i class="fas fa-search"></i>
                                         </button>
@@ -418,6 +416,11 @@
             if (farmsResponse?.Result != null)
             {
                 farms = farmsResponse.Result;
+                Console.WriteLine($"Loaded {farms.Count} farms");
+            }
+            else
+            {
+                Console.WriteLine("Failed to load farms or no farms returned");
             }
             
             // Load roles
@@ -430,6 +433,7 @@
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"Error in LoadInitialData: {ex.Message}");
             Alert?.Show($"Error loading data: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
             isLoading = false;
         }
@@ -437,12 +441,57 @@
     
     private async Task LoadAvailableRoles()
     {
-        availableRoles = await UserAssignmentService.GetAvailableFarmRolesAsync();
+        try
+        {
+            var response = await ApiCall.Get<ApiResponse<List<RoleViewModel>>>(
+                await ApiCall.GetHttpClient(), "roles/getroles");
+                
+            if (response?.Result != null)
+            {
+                // Filter to include only farm-specific roles
+                availableRoles = response.Result.Where(r => 
+                    r.Name == "FarmManager" || 
+                    r.Name == "FarmAdministrator" || 
+                    r.Name == "FieldOfficer" || 
+                    r.Name == "FarmOperator" || 
+                    r.Name == "Viewer").ToList();
+                    
+                Console.WriteLine($"Loaded {availableRoles.Count} roles");
+            }
+            else
+            {
+                Console.WriteLine("Failed to load roles or no roles returned");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in LoadAvailableRoles: {ex.Message}");
+            Alert?.Show($"Error loading roles: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
     }
     
     private async Task LoadUserStatistics()
     {
-        userStats = await UserAssignmentService.GetUserAssignmentStatisticsAsync();
+        try
+        {
+            var response = await ApiCall.Get<ApiResponse<List<FarmUserSummaryViewModel>>>(
+                await ApiCall.GetHttpClient(), "farmusers/getuserassignmentstatistics");
+                
+            if (response?.Result != null)
+            {
+                userStats = response.Result;
+                Console.WriteLine($"Loaded statistics for {userStats.Count} farms");
+            }
+            else
+            {
+                Console.WriteLine("Failed to load user statistics or no statistics returned");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in LoadUserStatistics: {ex.Message}");
+            // Don't show alert for this as it's not critical
+        }
     }
     
     private async Task LoadAssignmentsForFarm(string farmId)
@@ -456,20 +505,68 @@
             selectedFarmId = farmId;
             
             // Load users for this farm
-            currentFarmUsers = await UserAssignmentService.GetFarmUsersAsync(farmId);
+            var response = await ApiCall.Get<ApiResponse<List<FarmUserViewModel>>>(
+                await ApiCall.GetHttpClient(), $"farmusers/getfarmusers?farmId={farmId}");
+                
+            if (response?.Result != null)
+            {
+                currentFarmUsers = response.Result;
+                Console.WriteLine($"Loaded {currentFarmUsers.Count} users for farm {farmId}");
+            }
+            else
+            {
+                currentFarmUsers = new List<FarmUserViewModel>();
+                Console.WriteLine($"No users found for farm {farmId}");
+            }
             
             // Apply any existing filters
             ApplyFilters();
             
             // Load available users for this farm
-            availableUsers = await UserAssignmentService.GetAvailableUsersForFarmAsync(farmId);
+            await LoadAvailableUsersForFarm(farmId);
             
             isLoading = false;
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"Error in LoadAssignmentsForFarm: {ex.Message}");
             Alert?.Show($"Error loading farm users: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
             isLoading = false;
+        }
+    }
+    
+    private async Task LoadAvailableUsersForFarm(string farmId)
+    {
+        try
+        {
+            // Get all users
+            var allUsersResponse = await ApiCall.Get<ApiResponse<List<UserViewModel>>>(
+                await ApiCall.GetHttpClient(), "users/getusers");
+                
+            if (allUsersResponse?.Result != null)
+            {
+                var allUsers = allUsersResponse.Result;
+                
+                // Get users already on this farm
+                var existingUserIds = currentFarmUsers.Select(u => u.UserId).ToList();
+                
+                // Filter out users already assigned to this farm
+                availableUsers = allUsers
+                    .Where(u => !existingUserIds.Contains(u.Id))
+                    .ToList();
+                    
+                Console.WriteLine($"Loaded {availableUsers.Count} available users for farm {farmId}");
+            }
+            else
+            {
+                availableUsers = new List<UserViewModel>();
+                Console.WriteLine("Failed to load available users or no users returned");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in LoadAvailableUsersForFarm: {ex.Message}");
+            Alert?.Show($"Error loading available users: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
         }
     }
     
@@ -487,11 +584,29 @@
         if (!string.IsNullOrEmpty(searchText))
         {
             filteredUsers = filteredUsers.Where(u => 
-                u.Fullname.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                u.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                u.PhoneNumber.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                (u.Fullname?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (u.Email?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (u.PhoneNumber?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
             ).ToList();
         }
+        
+        Console.WriteLine($"Filtered to {filteredUsers.Count} users");
+    }
+    
+    private async void OnFarmChange(ChangeEventArgs<string, FarmListViewModel> args)
+    {
+        if (!string.IsNullOrEmpty(args.Value))
+        {
+            await LoadAssignmentsForFarm(args.Value);
+            StateHasChanged();
+        }
+    }
+    
+    private void OnRoleChange(ChangeEventArgs<string, RoleViewModel> args)
+    {
+        selectedRole = args.Value;
+        ApplyFilters();
+        StateHasChanged();
     }
     
     private void ShowNewAssignmentModal()
@@ -561,6 +676,7 @@
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"Error in CreateAssignment: {ex.Message}");
             Alert?.Show($"Error creating assignment: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
         }
         finally
@@ -594,6 +710,7 @@
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"Error in UpdateAssignment: {ex.Message}");
             Alert?.Show($"Error updating assignment: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
         }
         finally
@@ -627,6 +744,7 @@
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"Error in RemoveAssignment: {ex.Message}");
             Alert?.Show($"Error removing assignment: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
         }
         finally
@@ -665,13 +783,5 @@
             return "Field Officer";
             
         return role;
-    }
-    
-    private void LoadAssignmentsForFarm(ChangeEventArgs<string, FarmListViewModel> args)
-    {
-        if (!string.IsNullOrEmpty(args.Value))
-        {
-            LoadAssignmentsForFarm(args.Value);
-        }
     }
 }

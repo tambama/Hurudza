@@ -38,6 +38,7 @@ namespace Hurudza.UI.Web.Services
                 bool canAccess = await _farmAccessService.CanAccessFarm(farmId);
                 if (!canAccess)
                 {
+                    Console.WriteLine($"User does not have access to farm {farmId}");
                     return new List<FarmUserViewModel>();
                 }
 
@@ -46,7 +47,12 @@ namespace Hurudza.UI.Web.Services
 
                 if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
                 {
+                    Console.WriteLine($"Successfully retrieved {response.Result.Count} users for farm {farmId}");
                     return response.Result;
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to get farm users. Status: {response?.Status}, Message: {response?.Title}");
                 }
 
                 return new List<FarmUserViewModel>();
@@ -54,6 +60,7 @@ namespace Hurudza.UI.Web.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting farm users: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return new List<FarmUserViewModel>();
             }
         }
@@ -71,21 +78,28 @@ namespace Hurudza.UI.Web.Services
 
                 if (allUsersResponse?.Status != (int)HttpStatusCode.OK || allUsersResponse.Result == null)
                 {
+                    Console.WriteLine($"Failed to get users. Status: {allUsersResponse?.Status}, Message: {allUsersResponse?.Title}");
                     return new List<UserViewModel>();
                 }
+
+                Console.WriteLine($"Successfully retrieved {allUsersResponse.Result.Count} total users");
 
                 // Get users already on this farm
                 var farmUsers = await GetFarmUsersAsync(farmId);
                 var existingUserIds = farmUsers.Select(u => u.UserId).ToList();
 
                 // Filter out users already assigned to this farm
-                return allUsersResponse.Result
+                var availableUsers = allUsersResponse.Result
                     .Where(u => !existingUserIds.Contains(u.Id))
                     .ToList();
+
+                Console.WriteLine($"Filtered to {availableUsers.Count} available users for farm {farmId}");
+                return availableUsers;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting available users: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return new List<UserViewModel>();
             }
         }
@@ -97,12 +111,40 @@ namespace Hurudza.UI.Web.Services
         {
             try
             {
+                // Try to get farm roles first
                 var response = await _apiCall.Get<ApiResponse<List<RoleViewModel>>>(
                     await _apiCall.GetHttpClient(), "farmusers/getavailablefarmroles");
 
                 if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
                 {
+                    Console.WriteLine($"Successfully retrieved {response.Result.Count} farm roles from specific endpoint");
                     return response.Result;
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to get farm roles from specific endpoint. Status: {response?.Status}, Message: {response?.Title}");
+                    
+                    // Fallback to getting all roles and filtering for farm roles
+                    var allRolesResponse = await _apiCall.Get<ApiResponse<List<RoleViewModel>>>(
+                        await _apiCall.GetHttpClient(), "roles/getroles");
+                        
+                    if (allRolesResponse?.Status == (int)HttpStatusCode.OK && allRolesResponse.Result != null)
+                    {
+                        // Filter to farm-specific roles
+                        var farmRoles = allRolesResponse.Result.Where(r => 
+                            r.Name == "FarmManager" || 
+                            r.Name == "FarmAdministrator" || 
+                            r.Name == "FieldOfficer" || 
+                            r.Name == "FarmOperator" || 
+                            r.Name == "Viewer").ToList();
+                            
+                        Console.WriteLine($"Successfully retrieved {farmRoles.Count} farm roles from filtered all roles");
+                        return farmRoles;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Failed to get any roles. Status: {allRolesResponse?.Status}, Message: {allRolesResponse?.Title}");
+                    }
                 }
 
                 return new List<RoleViewModel>();
@@ -110,12 +152,13 @@ namespace Hurudza.UI.Web.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting available roles: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return new List<RoleViewModel>();
             }
         }
 
         /// <summary>
-        /// Gets all farms a user has access to
+        /// Gets all farm profiles for a user
         /// </summary>
         public async Task<List<UserFarmProfileViewModel>> GetUserFarmProfilesAsync(string userId = null)
         {
@@ -127,7 +170,12 @@ namespace Hurudza.UI.Web.Services
 
                 if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
                 {
+                    Console.WriteLine($"Successfully retrieved {response.Result.Count} farm profiles for user");
                     return response.Result;
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to get user farm profiles. Status: {response?.Status}, Message: {response?.Title}");
                 }
 
                 return new List<UserFarmProfileViewModel>();
@@ -135,6 +183,7 @@ namespace Hurudza.UI.Web.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting user farm profiles: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return new List<UserFarmProfileViewModel>();
             }
         }
@@ -146,10 +195,13 @@ namespace Hurudza.UI.Web.Services
         {
             try
             {
+                Console.WriteLine($"Attempting to assign user {userId} to farm {farmId} with role {role}");
+                
                 // Check if user has permission to manage users for this farm
                 bool canManage = await _farmAccessService.CanManageFarm(farmId);
                 if (!canManage)
                 {
+                    Console.WriteLine($"User does not have permission to manage users for farm {farmId}");
                     return (false, "You don't have permission to manage users for this farm");
                 }
 
@@ -165,14 +217,19 @@ namespace Hurudza.UI.Web.Services
 
                 if (response?.Status == (int)HttpStatusCode.OK)
                 {
+                    Console.WriteLine($"Successfully assigned user to farm. Response: {response.Title}");
                     return (true, response.Title ?? "User assigned to farm successfully");
                 }
-
-                return (false, response?.Title ?? "Failed to assign user to farm");
+                else
+                {
+                    Console.WriteLine($"Failed to assign user to farm. Status: {response?.Status}, Message: {response?.Title}");
+                    return (false, response?.Title ?? "Failed to assign user to farm");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error assigning user to farm: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return (false, $"Error: {ex.Message}");
             }
         }
@@ -190,6 +247,7 @@ namespace Hurudza.UI.Web.Services
                 
                 if (profile == null)
                 {
+                    Console.WriteLine($"Profile {profileId} not found");
                     return (false, "Profile not found");
                 }
                 
@@ -197,6 +255,7 @@ namespace Hurudza.UI.Web.Services
                 bool canManage = await _farmAccessService.CanManageFarm(profile.FarmId);
                 if (!canManage)
                 {
+                    Console.WriteLine($"User does not have permission to manage users for farm {profile.FarmId}");
                     return (false, "You don't have permission to manage users for this farm");
                 }
 
@@ -212,14 +271,19 @@ namespace Hurudza.UI.Web.Services
 
                 if (response?.Status == (int)HttpStatusCode.OK)
                 {
+                    Console.WriteLine($"Successfully updated user farm role. Response: {response.Title}");
                     return (true, response.Title ?? "User role updated successfully");
                 }
-
-                return (false, response?.Title ?? "Failed to update user role");
+                else
+                {
+                    Console.WriteLine($"Failed to update user farm role. Status: {response?.Status}, Message: {response?.Title}");
+                    return (false, response?.Title ?? "Failed to update user role");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error updating user farm role: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return (false, $"Error: {ex.Message}");
             }
         }
@@ -235,6 +299,7 @@ namespace Hurudza.UI.Web.Services
                 bool canManage = await _farmAccessService.CanManageFarm(farmId);
                 if (!canManage)
                 {
+                    Console.WriteLine($"User does not have permission to manage users for farm {farmId}");
                     return (false, "You don't have permission to manage users for this farm");
                 }
 
@@ -244,14 +309,19 @@ namespace Hurudza.UI.Web.Services
 
                 if (response?.Status == (int)HttpStatusCode.OK)
                 {
+                    Console.WriteLine($"Successfully removed user from farm. Response: {response.Title}");
                     return (true, response.Title ?? "User removed from farm successfully");
                 }
-
-                return (false, response?.Title ?? "Failed to remove user from farm");
+                else
+                {
+                    Console.WriteLine($"Failed to remove user from farm. Status: {response?.Status}, Message: {response?.Title}");
+                    return (false, response?.Title ?? "Failed to remove user from farm");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error removing user from farm: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return (false, $"Error: {ex.Message}");
             }
         }
@@ -268,7 +338,12 @@ namespace Hurudza.UI.Web.Services
 
                 if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
                 {
+                    Console.WriteLine($"Successfully retrieved {response.Result.Count} accessible farms");
                     return response.Result;
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to get accessible farms. Status: {response?.Status}, Message: {response?.Title}");
                 }
 
                 return new List<FarmListViewModel>();
@@ -276,6 +351,7 @@ namespace Hurudza.UI.Web.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting accessible farms: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return new List<FarmListViewModel>();
             }
         }
@@ -293,6 +369,7 @@ namespace Hurudza.UI.Web.Services
                 
                 if (!isAdmin)
                 {
+                    Console.WriteLine("User is not a system administrator, skipping statistics retrieval");
                     return new List<FarmUserSummaryViewModel>();
                 }
                 
@@ -301,7 +378,12 @@ namespace Hurudza.UI.Web.Services
 
                 if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
                 {
+                    Console.WriteLine($"Successfully retrieved assignment statistics for {response.Result.Count} farms");
                     return response.Result;
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to get user assignment statistics. Status: {response?.Status}, Message: {response?.Title}");
                 }
 
                 return new List<FarmUserSummaryViewModel>();
@@ -309,6 +391,7 @@ namespace Hurudza.UI.Web.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting user assignment statistics: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return new List<FarmUserSummaryViewModel>();
             }
         }
