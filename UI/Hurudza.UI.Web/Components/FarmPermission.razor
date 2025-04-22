@@ -1,0 +1,89 @@
+@namespace Hurudza.UI.Web.Components
+@using Hurudza.UI.Web.Services
+@inherits ComponentBase
+
+@if (ShouldRender)
+{
+    @ChildContent
+}
+else if (ElseContent != null)
+{
+    @ElseContent
+}
+
+@code {
+    [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; }
+    [Inject] private FarmAccessService FarmAccessService { get; set; }
+    
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public RenderFragment ElseContent { get; set; }
+    
+    [Parameter] public string Permission { get; set; }
+    [Parameter] public string[] AnyPermission { get; set; }
+    [Parameter] public string[] AllPermissions { get; set; }
+    
+    [Parameter] public string FarmId { get; set; }
+    [Parameter] public bool RequireManage { get; set; }
+
+    private bool ShouldRender { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckPermissions();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await CheckPermissions();
+    }
+
+    private async Task CheckPermissions()
+    {
+        // Start with false
+        ShouldRender = false;
+        
+        // First check farm access if FarmId is specified
+        if (!string.IsNullOrEmpty(FarmId))
+        {
+            var canAccess = await FarmAccessService.CanAccessFarm(FarmId);
+            if (!canAccess)
+                return;
+                
+            // If manage is required, check that too
+            if (RequireManage)
+            {
+                var canManage = await FarmAccessService.CanManageFarm(FarmId);
+                if (!canManage)
+                    return;
+            }
+        }
+        
+        // Check permissions
+        if (!string.IsNullOrEmpty(Permission))
+        {
+            ShouldRender = await FarmAccessService.HasPermission(Permission);
+        }
+        else if (AnyPermission != null && AnyPermission.Length > 0)
+        {
+            ShouldRender = await FarmAccessService.HasAnyPermission(AnyPermission);
+        }
+        else if (AllPermissions != null && AllPermissions.Length > 0)
+        {
+            // For all permissions, we need to check each one individually
+            ShouldRender = true;
+            foreach (var permission in AllPermissions)
+            {
+                if (!await FarmAccessService.HasPermission(permission))
+                {
+                    ShouldRender = false;
+                    break;
+                }
+            }
+        }
+        else if (!string.IsNullOrEmpty(FarmId))
+        {
+            // If only FarmId is specified (no permissions), we already checked access above
+            ShouldRender = true;
+        }
+    }
+}

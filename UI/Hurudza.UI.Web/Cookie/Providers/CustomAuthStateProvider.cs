@@ -1,22 +1,24 @@
-// Enhancements for CustomAuthStateProvider.cs
-
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Hurudza.Data.UI.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Components.Authorization;
 using Blazored.LocalStorage;
+using Hurudza.UI.Web.Api.Interfaces;
+using Hurudza.UI.Web.Models;
 
 namespace Hurudza.UI.Web.Cookie.Providers;
 
 public class CustomAuthStateProvider : AuthenticationStateProvider
 {
     private readonly ILocalStorageService _localStorage;
+    private readonly IApiCall _apiCall;
     private ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
     private ClaimsPrincipal _claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity());
     
-    public CustomAuthStateProvider(ILocalStorageService localStorage)
+    public CustomAuthStateProvider(ILocalStorageService localStorage, IApiCall apiCall)
     {
         _localStorage = localStorage;
+        _apiCall = apiCall;
     }
     
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -95,14 +97,12 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             var activeProfile = userProfile.Profiles?.FirstOrDefault(p => p.LoggedIn);
             if (activeProfile != null && !string.IsNullOrEmpty(activeProfile.FarmId))
             {
-                if (!claims.Any(c => c.Type == "FarmId"))
-                {
-                    claims.Add(new Claim("FarmId", activeProfile.FarmId));
-                }
+                claims.Add(new Claim("FarmId", activeProfile.FarmId));
+                claims.Add(new Claim("FarmName", activeProfile.Farm));
             }
             
             // Add permissions from user profile if not already added from token
-            if (!claims.Any(c => c.Type == "Permission") && userProfile.Permissions != null)
+            if (userProfile.Permissions != null && userProfile.Permissions.Any())
             {
                 foreach (var permission in userProfile.Permissions)
                 {
@@ -131,6 +131,41 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         _claimsPrincipal = _anonymous;
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         Console.WriteLine("Authentication state cleared");
+    }
+    
+    public async Task RefreshAuthState()
+    {
+        try
+        {
+            // Get current user ID from claims
+            var userId = _claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) ?? 
+                        _claimsPrincipal.FindFirstValue("UserId");
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("Cannot refresh auth state: No user ID found in claims");
+                return;
+            }
+            
+            // Call API to get current profile
+            var client = await _apiCall.GetHttpClient();
+            var response = await _apiCall.Get<ApiResponse<UserViewModel>>(client, $"authentication/getloggedinprofile");
+            
+            if (response?.Result != null)
+            {
+                // Update auth state with refreshed profile
+                SetAuthInfo(response.Result);
+                Console.WriteLine("Auth state refreshed successfully");
+            }
+            else
+            {
+                Console.WriteLine("Failed to refresh auth state: API response was null or invalid");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error refreshing auth state: {ex.Message}");
+        }
     }
     
     // Helper to create claims identity from token
@@ -192,36 +227,31 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
                 var jwtToken = tokenHandler.ReadJwtToken(token);
                 
                 // Process role claims
-                var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
-                if (roleClaim != null)
+                var roleClaims = jwtToken.Claims.Where(c => c.Type == ClaimTypes.Role);
+                foreach (var roleClaim in roleClaims)
                 {
-                    claims.Add(new Claim(ClaimTypes.Role, roleClaim.Value));
-                    Console.WriteLine($"Added role from token: {roleClaim.Value}");
+                    if (!claims.Any(c => c.Type == ClaimTypes.Role && c.Value == roleClaim.Value))
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, roleClaim.Value));
+                        Console.WriteLine($"Added role from token: {roleClaim.Value}");
+                    }
                 }
                 
                 // Process FarmId claim
                 var farmIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "FarmId");
-                if (farmIdClaim != null)
+                if (farmIdClaim != null && !claims.Any(c => c.Type == "FarmId"))
                 {
                     claims.Add(new Claim("FarmId", farmIdClaim.Value));
+                    Console.WriteLine($"Added FarmId from token: {farmIdClaim.Value}");
                 }
                 
                 // Process permission claims
                 foreach (var permissionClaim in jwtToken.Claims.Where(c => c.Type == "Permission"))
                 {
-                    claims.Add(new Claim("Permission", permissionClaim.Value));
-                    Console.WriteLine($"Added permission from token: {permissionClaim.Value}");
-                }
-                
-                // Add other important claims
-                foreach (var claim in jwtToken.Claims.Where(c => 
-                    c.Type == ClaimTypes.PrimarySid || 
-                    c.Type == "sub" ||
-                    c.Type == ClaimTypes.NameIdentifier))
-                {
-                    if (!claims.Any(c => c.Type == claim.Type))
+                    if (!claims.Any(c => c.Type == "Permission" && c.Value == permissionClaim.Value))
                     {
-                        claims.Add(new Claim(claim.Type, claim.Value));
+                        claims.Add(new Claim("Permission", permissionClaim.Value));
+                        Console.WriteLine($"Added permission from token: {permissionClaim.Value}");
                     }
                 }
             }
@@ -264,6 +294,11 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         return _claimsPrincipal.FindFirstValue("FarmId") ?? string.Empty;
     }
     
+    public string GetCurrentFarmName()
+    {
+        return _claimsPrincipal.FindFirstValue("FarmName") ?? string.Empty;
+    }
+    
     public string GetUserRole()
     {
         return _claimsPrincipal.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
@@ -272,7 +307,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     public string GetUserId()
     {
         return _claimsPrincipal.FindFirstValue("UserId") ?? 
-               _claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) ??
+               _claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) ?? 
                _claimsPrincipal.FindFirstValue(ClaimTypes.PrimarySid) ?? string.Empty;
     }
 }

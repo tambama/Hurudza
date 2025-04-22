@@ -4,6 +4,7 @@ using Blazored.LocalStorage;
 using Hurudza.Common.Utils.Extensions;
 using Hurudza.UI.Shared.Api.Interfaces;
 using Serilog;
+using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall;
 
 namespace Hurudza.UI.Web.Api;
 

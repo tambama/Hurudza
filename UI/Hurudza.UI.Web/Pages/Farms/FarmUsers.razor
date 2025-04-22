@@ -1,6 +1,7 @@
 @page "/farms/{FarmId}/users"
 @using Hurudza.Data.UI.Models.ViewModels.UserManagement
 @using System.Net
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
 @attribute [Authorize(Roles = "SystemAdministrator,Administrator")]
 
 @inject IApiCall ApiCall

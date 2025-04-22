@@ -1,4 +1,4 @@
-namespace Hurudza.UI.Shared.Api.Interfaces;
+namespace Hurudza.UI.Web.Api.Interfaces;
 
 public interface IApiCall
 {

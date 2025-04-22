@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Syncfusion.Blazor;
 using Hurudza.UI.Shared.Api.Interfaces;
 using Hurudza.UI.Web.Services;
+using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall;
 
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MzE2NTc3NUAzMjM1MmUzMDJlMzBuZVptV2VlNXVBdnB0di9RcVJ0NUZRT1EwWDdQZHZBcWJXWEdHWkZDTXZZPQ==");
 

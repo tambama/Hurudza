@@ -3,6 +3,7 @@ using Hurudza.Data.UI.Models.ViewModels.UserManagement;
 using Hurudza.UI.Shared.Api.Interfaces;
 using Hurudza.UI.Web.Api.Interfaces;
 using Hurudza.UI.Web.Models;
+using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall;
 
 namespace Hurudza.UI.Web.Api;
 
