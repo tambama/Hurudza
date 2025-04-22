@@ -1,4 +1,5 @@
 @namespace Hurudza.UI.Web.Components
+@using Hurudza.Common.Utils.Extensions
 @using Hurudza.UI.Web.Services
 @inherits ComponentBase
 
@@ -18,12 +19,20 @@ else if (ElseContent != null)
     [Parameter] public RenderFragment ChildContent { get; set; }
     [Parameter] public RenderFragment ElseContent { get; set; }
     
+    // Permission parameters
     [Parameter] public string Permission { get; set; }
     [Parameter] public string[] AnyPermission { get; set; }
     [Parameter] public string[] AllPermissions { get; set; }
     
+    // Farm-specific parameters
     [Parameter] public string FarmId { get; set; }
     [Parameter] public bool RequireManage { get; set; }
+    [Parameter] public bool RequireFieldManagement { get; set; }
+    [Parameter] public bool RequireCropManagement { get; set; }
+    
+    // Role-specific shortcuts
+    [Parameter] public bool RequireAdmin { get; set; }
+    [Parameter] public bool RequireSystemAdmin { get; set; }
 
     private bool ShouldRender { get; set; }
 
@@ -42,23 +51,69 @@ else if (ElseContent != null)
         // Start with false
         ShouldRender = false;
         
-        // First check farm access if FarmId is specified
+        // Get auth state
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        
+        // If not authenticated, deny access immediately
+        if (!user.Identity.IsAuthenticated)
+            return;
+            
+        // System admin check takes precedence
+        if (RequireSystemAdmin)
+        {
+            ShouldRender = user.IsSystemAdmin();
+            return;
+        }
+        
+        // Admin check if specified
+        if (RequireAdmin && !user.IsAdministrator())
+        {
+            return;
+        }
+        
+        // Farm access checks
         if (!string.IsNullOrEmpty(FarmId))
         {
+            // First check basic access to farm
             var canAccess = await FarmAccessService.CanAccessFarm(FarmId);
             if (!canAccess)
                 return;
                 
-            // If manage is required, check that too
+            // Specific farm management right checks
             if (RequireManage)
             {
                 var canManage = await FarmAccessService.CanManageFarm(FarmId);
                 if (!canManage)
                     return;
             }
+            
+            if (RequireFieldManagement)
+            {
+                var canManageFields = await FarmAccessService.CanManageFields(FarmId);
+                if (!canManageFields)
+                    return;
+            }
+            
+            if (RequireCropManagement)
+            {
+                var canManageCrops = await FarmAccessService.CanManageCrops(FarmId);
+                if (!canManageCrops)
+                    return;
+            }
         }
         
-        // Check permissions
+        // If we've passed all the farm and role checks, and no specific permissions are required,
+        // then we can allow access
+        if (string.IsNullOrEmpty(Permission) && 
+            (AnyPermission == null || AnyPermission.Length == 0) &&
+            (AllPermissions == null || AllPermissions.Length == 0))
+        {
+            ShouldRender = true;
+            return;
+        }
+        
+        // Check specific permissions
         if (!string.IsNullOrEmpty(Permission))
         {
             ShouldRender = await FarmAccessService.HasPermission(Permission);
@@ -69,21 +124,7 @@ else if (ElseContent != null)
         }
         else if (AllPermissions != null && AllPermissions.Length > 0)
         {
-            // For all permissions, we need to check each one individually
-            ShouldRender = true;
-            foreach (var permission in AllPermissions)
-            {
-                if (!await FarmAccessService.HasPermission(permission))
-                {
-                    ShouldRender = false;
-                    break;
-                }
-            }
-        }
-        else if (!string.IsNullOrEmpty(FarmId))
-        {
-            // If only FarmId is specified (no permissions), we already checked access above
-            ShouldRender = true;
+            ShouldRender = await FarmAccessService.HasAllPermissions(AllPermissions);
         }
     }
 }

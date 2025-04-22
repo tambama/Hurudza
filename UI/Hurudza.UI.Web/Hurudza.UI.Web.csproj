@@ -37,6 +37,7 @@
 	  <ProjectReference Include="..\Hurudza.UI.Shared\Hurudza.UI.Shared.csproj" />
 	</ItemGroup>
 	<ItemGroup>
+	  <Folder Include="Helpers\" />
 	  <Folder Include="Pages\Examples\" />
 	</ItemGroup>
 </Project>

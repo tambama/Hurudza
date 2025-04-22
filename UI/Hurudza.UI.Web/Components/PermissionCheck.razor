@@ -1,45 +1,118 @@
 @namespace Hurudza.UI.Web.Components
+@using Hurudza.Common.Utils.Extensions
 @using Hurudza.UI.Web.Cookie.Providers
+@using Hurudza.UI.Web.Services
 @inject AuthenticationStateProvider AuthProvider
+@inject FarmAccessService FarmAccessService
 
 @if (_hasPermission)
 {
     @ChildContent
 }
+else if (ElseContent != null)
+{
+    @ElseContent
+}
 
 @code {
     [Parameter]
     public RenderFragment ChildContent { get; set; }
-
+    
+    [Parameter]
+    public RenderFragment ElseContent { get; set; }
+    
     [Parameter]
     public string Permission { get; set; }
-
+    
     [Parameter]
     public string[] AnyPermission { get; set; }
-
+    
     [Parameter]
     public string[] AllPermissions { get; set; }
-
+    
+    [Parameter]
+    public string FarmId { get; set; }
+    
+    [Parameter]
+    public bool RequireManage { get; set; }
+    
+    [Parameter]
+    public bool RequireAdmin { get; set; }
+    
+    [Parameter]
+    public bool RequireSystemAdmin { get; set; }
+    
     private bool _hasPermission = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        var authProvider = AuthProvider as CustomAuthStateProvider;
+        await CheckPermissions();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await CheckPermissions();
+    }
+
+    private async Task CheckPermissions()
+    {
+        // Start with false
+        _hasPermission = false;
         
-        if (authProvider != null)
+        // Get the user from authentication state
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        
+        // System admin check takes precedence if specified
+        if (RequireSystemAdmin)
         {
-            if (!string.IsNullOrEmpty(Permission))
+            _hasPermission = user.IsSystemAdmin();
+            return;
+        }
+        
+        // Admin check if specified
+        if (RequireAdmin && !user.IsAdministrator())
+        {
+            return;
+        }
+        
+        // First check farm access if FarmId is specified
+        if (!string.IsNullOrEmpty(FarmId))
+        {
+            var canAccess = await FarmAccessService.CanAccessFarm(FarmId);
+            if (!canAccess)
+                return;
+                
+            // If manage is required, check that too
+            if (RequireManage)
             {
-                _hasPermission = authProvider.UserHasPermission(Permission);
+                var canManage = await FarmAccessService.CanManageFarm(FarmId);
+                if (!canManage)
+                    return;
             }
-            else if (AnyPermission != null && AnyPermission.Length > 0)
-            {
-                _hasPermission = authProvider.UserHasAnyPermission(AnyPermission);
-            }
-            else if (AllPermissions != null && AllPermissions.Length > 0)
-            {
-                _hasPermission = authProvider.UserHasAllPermissions(AllPermissions);
-            }
+        }
+        
+        // If we've made it this far with admin/manage checks, and no specific permission is required,
+        // then we can render the content
+        if (string.IsNullOrEmpty(Permission) && (AnyPermission == null || AnyPermission.Length == 0) &&
+            (AllPermissions == null || AllPermissions.Length == 0))
+        {
+            _hasPermission = true;
+            return;
+        }
+        
+        // Check permissions
+        if (!string.IsNullOrEmpty(Permission))
+        {
+            _hasPermission = await FarmAccessService.HasPermission(Permission);
+        }
+        else if (AnyPermission != null && AnyPermission.Length > 0)
+        {
+            _hasPermission = await FarmAccessService.HasAnyPermission(AnyPermission);
+        }
+        else if (AllPermissions != null && AllPermissions.Length > 0)
+        {
+            _hasPermission = await FarmAccessService.HasAllPermissions(AllPermissions);
         }
     }
 }
