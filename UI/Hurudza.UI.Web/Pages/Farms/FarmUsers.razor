@@ -1,0 +1,441 @@
+@page "/farms/{FarmId}/users"
+@using Hurudza.Data.UI.Models.ViewModels.UserManagement
+@using System.Net
+@attribute [Authorize(Roles = "SystemAdministrator,Administrator")]
+
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+
+<Toast @ref="Alert" />
+
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header pb-0">
+                <div class="d-flex flex-row justify-content-between">
+                    <div>
+                        <h5 class="mb-0">@FarmName Users</h5>
+                    </div>
+                    <a href="#" @onclick="@NavigateBack" @onclick:preventDefault>
+                        <i class="fas fa-arrow-left me-2"></i> Back to Farm
+                    </a>
+                </div>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+                <div class="table-responsive p-0">
+                    <!-- Farm Users Grid -->
+                    <SfGrid @ref="Grid" DataSource="@farmUsers" AllowPaging="true" AllowSorting="true"
+                            Toolbar="@(new List<string>() { "Add" })">
+                        <GridEvents TValue="FarmUserViewModel" OnToolbarClick="ToolbarClickHandler" OnActionBegin="ActionBeginHandler" OnActionComplete="ActionCompleteHandler" />
+                        <GridPageSettings PageSize="10"></GridPageSettings>
+                        <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog">
+                            <Template>
+                                @{
+                                    var user = (context as FarmUserViewModel);
+                                    <div class="form">
+                                        <div class="form-row">
+                                            @if (DialogEditMode == "Add")
+                                            {
+                                                <div class="form-group col-md-12 mb-3">
+                                                    <label>Select User</label>
+                                                    <SfDropDownList @bind-Value="newAssignment.UserId" DataSource="@availableUsers" TValue="string" TItem="UserViewModel">
+                                                        <DropDownListFieldSettings Text="Fullname" Value="Id"></DropDownListFieldSettings>
+                                                    </SfDropDownList>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="form-group col-md-12 mb-3">
+                                                    <label>User</label>
+                                                    <input type="text" class="form-control" readonly value="@user.Fullname" />
+                                                </div>
+                                            }
+                                            <div class="form-group col-md-12 mb-3">
+                                                <label>Role</label>
+                                                <SfDropDownList @bind-Value="@(DialogEditMode == "Add" ? newAssignment.Role : user.Role)" DataSource="@availableRoles" TValue="string" TItem="RoleViewModel">
+                                                    <DropDownListFieldSettings Text="Description" Value="Name"></DropDownListFieldSettings>
+                                                </SfDropDownList>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </Template>
+                        </GridEditSettings>
+                        <GridColumns>
+                            <GridColumn Field=@nameof(FarmUserViewModel.Fullname) HeaderText="Name" Width="150"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserViewModel.Email) HeaderText="Email" Width="200"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserViewModel.PhoneNumber) HeaderText="Phone" Width="150"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserViewModel.Role) HeaderText="Role" Width="120"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserViewModel.AssignedDate) HeaderText="Assigned Date" Format="d" Width="120"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserViewModel.IsActive) HeaderText="Status" Width="120">
+                                <Template>
+                                    @{
+                                        var user = (context as FarmUserViewModel);
+                                        if (user.IsActive)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText="Actions" Width="120">
+                                <Template>
+                                    @{
+                                        var user = (context as FarmUserViewModel);
+                                        <div class="d-flex">
+                                            <button class="btn btn-sm btn-primary me-2" @onclick="() => EditUser(user)">
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" @onclick="() => RemoveUser(user)">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit User Dialog -->
+<SfDialog @bind-Visible="@isDialogVisible" Width="500px" IsModal="true" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>@DialogTitle</Header>
+        <Content>
+            <EditForm Model="@(DialogEditMode == "Add" ? newAssignment : editUserProfile)" OnValidSubmit="HandleSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                @if (DialogEditMode == "Add")
+                {
+                    <div class="form-group mb-3">
+                        <label>Select User</label>
+                        <SfDropDownList @bind-Value="newAssignment.UserId" DataSource="@availableUsers" TValue="string" TItem="UserViewModel" Placeholder="Select a user">
+                            <DropDownListFieldSettings Text="Fullname" Value="Id"></DropDownListFieldSettings>
+                        </SfDropDownList>
+                    </div>
+                }
+                else if (DialogEditMode == "Edit")
+                {
+                    <div class="form-group mb-3">
+                        <label>User</label>
+                        <input type="text" class="form-control" readonly value="@selectedUser.Fullname" />
+                    </div>
+                }
+
+                <div class="form-group mb-3">
+                    <label>Role</label>
+                    <SfDropDownList @bind-Value="@(DialogEditMode == "Add" ? newAssignment.Role : editUserProfile.Role)" 
+                                   DataSource="@availableRoles" TValue="string" TItem="RoleViewModel" Placeholder="Select a role">
+                        <DropDownListFieldSettings Text="Description" Value="Name"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+
+                @if (DialogEditMode == "Edit")
+                {
+                    <div class="form-check mb-3">
+                        <SfCheckBox @bind-Checked="editUserProfile.IsActive" Label="Active"></SfCheckBox>
+                    </div>
+                }
+
+                <div class="form-group mt-4 d-flex justify-content-end">
+                    <button type="button" class="btn btn-secondary me-2" @onclick="CloseDialog">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </EditForm>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+<!-- Confirm Remove Dialog -->
+<SfDialog @bind-Visible="@isConfirmDialogVisible" Width="400px" IsModal="true" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>Confirm Removal</Header>
+        <Content>
+            @if (selectedUser != null)
+            {
+                <p>Are you sure you want to remove <strong>@selectedUser.Fullname</strong> from this farm?</p>
+                
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    This action will revoke all farm access for this user.
+                </div>
+                
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="button" class="btn btn-secondary me-2" @onclick="() => isConfirmDialogVisible = false">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmRemoveUser">Remove</button>
+                </div>
+            }
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+    [Parameter]
+    public string FarmId { get; set; }
+    
+    private string FarmName { get; set; } = "Farm";
+    private List<FarmUserViewModel> farmUsers = new();
+    private List<UserViewModel> availableUsers = new();
+    private List<RoleViewModel> availableRoles = new();
+    private FarmUserViewModel selectedUser;
+    private SfGrid<FarmUserViewModel> Grid;
+    private Toast Alert;
+    
+    // Dialog state
+    private bool isDialogVisible = false;
+    private bool isConfirmDialogVisible = false;
+    private string DialogTitle = "Add User";
+    private string DialogEditMode = "Add";
+    
+    // Form models
+    private AssignFarmUserViewModel newAssignment = new() { FarmId = "" };
+    private UpdateFarmUserViewModel editUserProfile = new() { ProfileId = "" };
+    
+    private bool isSystemAdmin = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Determine if current user is system admin for permissions
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            isSystemAdmin = authState.User.IsInRole("SystemAdministrator");
+            
+            // Load farm details
+            var farm = await ApiCall.Get<ApiResponse<FarmViewModel>>(
+                await ApiCall.GetHttpClient(), $"farms/getfarm/{FarmId}");
+                
+            if (farm?.Result != null)
+            {
+                FarmName = farm.Result.Name;
+            }
+            
+            // Initialize the farm ID for new assignments
+            newAssignment.FarmId = FarmId;
+            
+            await LoadFarmUsers();
+            await LoadAvailableUsers();
+            await LoadAvailableRoles();
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error initializing: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+    
+    private async Task LoadFarmUsers()
+    {
+        try
+        {
+            var response = await ApiCall.Get<ApiResponse<List<FarmUserViewModel>>>(
+                await ApiCall.GetHttpClient(), $"farmusers/getfarmusers?farmId={FarmId}");
+                
+            if (response?.Result != null)
+            {
+                farmUsers = response.Result;
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading farm users: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+    
+    private async Task LoadAvailableUsers()
+    {
+        try
+        {
+            var response = await ApiCall.Get<ApiResponse<List<UserViewModel>>>(
+                await ApiCall.GetHttpClient(), "users/getusers");
+                
+            if (response?.Result != null)
+            {
+                availableUsers = response.Result;
+                
+                // Filter out users already assigned to this farm
+                var existingUserIds = farmUsers.Select(u => u.UserId).ToList();
+                availableUsers = availableUsers.Where(u => !existingUserIds.Contains(u.Id)).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading available users: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+    
+    private async Task LoadAvailableRoles()
+    {
+        try
+        {
+            var response = await ApiCall.Get<ApiResponse<List<RoleViewModel>>>(
+                await ApiCall.GetHttpClient(), "farmusers/getavailablefarmroles");
+                
+            if (response?.Result != null)
+            {
+                availableRoles = response.Result;
+                
+                // If not system admin, filter out system admin role
+                if (!isSystemAdmin)
+                {
+                    availableRoles = availableRoles
+                        .Where(r => r.Name != "SystemAdministrator")
+                        .ToList();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading available roles: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+    
+    private void ToolbarClickHandler(ClickEventArgs args)
+    {
+        if (args.Item.Id == "grid_add")
+        {
+            ShowAddDialog();
+        }
+    }
+    
+    private async Task ActionBeginHandler(ActionEventArgs<FarmUserViewModel> args)
+    {
+        // Custom dialog handling - cancel the default grid dialog
+        if (args.RequestType == Syncfusion.Blazor.Grids.Action.Add ||
+            args.RequestType == Syncfusion.Blazor.Grids.Action.BeginEdit)
+        {
+            args.Cancel = true;
+        }
+    }
+    
+    private async Task ActionCompleteHandler(ActionEventArgs<FarmUserViewModel> args)
+    {
+        // Handle grid refresh after operations
+        if (args.RequestType == Syncfusion.Blazor.Grids.Action.Refresh)
+        {
+            await LoadFarmUsers();
+        }
+    }
+    
+    private void ShowAddDialog()
+    {
+        DialogTitle = "Add User to Farm";
+        DialogEditMode = "Add";
+        newAssignment = new AssignFarmUserViewModel { FarmId = FarmId };
+        isDialogVisible = true;
+    }
+    
+    private void EditUser(FarmUserViewModel user)
+    {
+        DialogTitle = $"Edit User: {user.Fullname}";
+        DialogEditMode = "Edit";
+        selectedUser = user;
+        
+        editUserProfile = new UpdateFarmUserViewModel
+        {
+            ProfileId = user.ProfileId,
+            Role = user.Role,
+            IsActive = user.IsActive
+        };
+        
+        isDialogVisible = true;
+    }
+    
+    private void RemoveUser(FarmUserViewModel user)
+    {
+        selectedUser = user;
+        isConfirmDialogVisible = true;
+    }
+    
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            if (DialogEditMode == "Add")
+            {
+                var response = await ApiCall.Add<ApiResponse<UserProfileViewModel>, AssignFarmUserViewModel>(
+                    await ApiCall.GetHttpClient(), "farmusers/assignusertofarm", newAssignment);
+                    
+                if (response?.Status == (int)HttpStatusCode.OK)
+                {
+                    Alert.Show("User successfully assigned to farm", showTitle: true, toastType: ToastType.Success);
+                    await LoadFarmUsers();
+                    await LoadAvailableUsers();
+                    CloseDialog();
+                }
+                else
+                {
+                    Alert.Show(response?.Title ?? "Error assigning user to farm", showTitle: true, toastType: ToastType.Danger);
+                }
+            }
+            else if (DialogEditMode == "Edit")
+            {
+                var response = await ApiCall.Update<ApiResponse<UserProfileViewModel>, UpdateFarmUserViewModel>(
+                    await ApiCall.GetHttpClient(), "farmusers/updateuserfarmrole", editUserProfile.ProfileId, editUserProfile);
+                    
+                if (response?.Status == (int)HttpStatusCode.OK)
+                {
+                    Alert.Show("User role successfully updated", showTitle: true, toastType: ToastType.Success);
+                    await LoadFarmUsers();
+                    CloseDialog();
+                }
+                else
+                {
+                    Alert.Show(response?.Title ?? "Error updating user role", showTitle: true, toastType: ToastType.Danger);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+    
+    private async Task ConfirmRemoveUser()
+    {
+        try
+        {
+            if (selectedUser != null)
+            {
+                var response = await ApiCall.Remove<ApiResponse<object>>(
+                    await ApiCall.GetHttpClient(), "farmusers/removeuserfromfarm", 
+                    $"{selectedUser.UserId}?farmId={FarmId}");
+                    
+                if (response?.Status == (int)HttpStatusCode.OK)
+                {
+                    Alert.Show("User successfully removed from farm", showTitle: true, toastType: ToastType.Success);
+                    await LoadFarmUsers();
+                    await LoadAvailableUsers();
+                    isConfirmDialogVisible = false;
+                }
+                else
+                {
+                    Alert.Show(response?.Title ?? "Error removing user from farm", showTitle: true, toastType: ToastType.Danger);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+    
+    private void CloseDialog()
+    {
+        isDialogVisible = false;
+    }
+    
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo($"/farms/{FarmId}");
+    }
+}

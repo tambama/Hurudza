@@ -29,6 +29,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Hurudza.Common.Sms\Hurudza.Common.Sms.csproj" />
     <ProjectReference Include="..\..\Data\Hurudza.Data.Context\Hurudza.Data.Context.csproj" />
+    <ProjectReference Include="..\..\Data\Hurudza.Data.Services\Hurudza.Data.Services.csproj" />
     <ProjectReference Include="..\Hurudza.Apis.Base\Hurudza.Apis.Base.csproj" />
   </ItemGroup>
 </Project>

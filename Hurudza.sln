@@ -45,6 +45,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hurudza.UI.Web", "UI\Hurudz
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hurudza.Data.Data", "Data\Hurudza.Data.Data\Hurudza.Data.Data.csproj", "{F78A4C5D-734D-44AA-99C3-98C8A847F267}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hurudza.Data.Services", "Data\Hurudza.Data.Services\Hurudza.Data.Services.csproj", "{B3FB66EE-6018-40A3-A36E-75CAFCC0E326}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -120,6 +122,10 @@ Global
 		{F78A4C5D-734D-44AA-99C3-98C8A847F267}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F78A4C5D-734D-44AA-99C3-98C8A847F267}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F78A4C5D-734D-44AA-99C3-98C8A847F267}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3FB66EE-6018-40A3-A36E-75CAFCC0E326}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3FB66EE-6018-40A3-A36E-75CAFCC0E326}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3FB66EE-6018-40A3-A36E-75CAFCC0E326}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3FB66EE-6018-40A3-A36E-75CAFCC0E326}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -142,6 +148,7 @@ Global
 		{7383510F-16D2-40A5-B1DA-A09002366D94} = {1A529191-5E5E-4DC0-972B-2489F166EB06}
 		{4609382C-9449-43D0-A272-E9C37539E7F1} = {9D65A920-14A0-476B-898E-F5B4B5D55F67}
 		{F78A4C5D-734D-44AA-99C3-98C8A847F267} = {EC72E0C2-093B-4582-8AB7-DF15A582E320}
+		{B3FB66EE-6018-40A3-A36E-75CAFCC0E326} = {EC72E0C2-093B-4582-8AB7-DF15A582E320}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CDD0E96A-A3AF-4AC3-A387-676C2955EEA6}

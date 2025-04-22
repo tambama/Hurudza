@@ -1,0 +1,199 @@
+@using Hurudza.Data.UI.Models.ViewModels.UserManagement
+@using System.Net
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorageService
+
+<div class="farm-profiles-container">
+    @if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (farmProfiles.Count == 0)
+    {
+        <div class="alert alert-info mb-0">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-info-circle me-2"></i>
+                <span>You don't have any assigned farms yet.</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="profiles-list">
+            @foreach (var profile in farmProfiles)
+            {
+                <div class="farm-profile-item @(profile.LoggedIn ? "active" : "")" @onclick="() => SwitchProfile(profile)">
+                    <div class="profile-info">
+                        <div class="farm-name">@profile.Farm</div>
+                        <div class="role-badge">
+                            <span class="badge @GetRoleBadgeClass(profile.Role)">@profile.Role</span>
+                        </div>
+                    </div>
+                    @if (profile.LoggedIn)
+                    {
+                        <div class="active-indicator">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<UserProfileViewModel> farmProfiles = new();
+    private bool isLoading = true;
+    private UserViewModel currentUser;
+    private CustomAuthStateProvider authProvider => AuthStateProvider as CustomAuthStateProvider;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUserProfiles();
+    }
+
+    private async Task LoadUserProfiles()
+    {
+        try
+        {
+            isLoading = true;
+
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.PrimarySid)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var response = await ApiCall.Get<ApiResponse<List<UserProfileViewModel>>>(
+                    await ApiCall.GetHttpClient(), $"farmusers/getuserfarmprofiles?userId={userId}");
+
+                if (response != null && response.Status == (int)HttpStatusCode.OK && response.Result != null)
+                {
+                    farmProfiles = response.Result;
+                }
+
+                // Also get the current user
+                var userResponse = await ApiCall.Get<ApiResponse<UserViewModel>>(
+                    await ApiCall.GetHttpClient(), $"users/getuser/{userId}");
+
+                if (userResponse != null && userResponse.Status == (int)HttpStatusCode.OK && userResponse.Result != null)
+                {
+                    currentUser = userResponse.Result;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading farm profiles: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SwitchProfile(UserProfileViewModel profile)
+    {
+        // Don't switch if already logged in to this profile
+        if (profile.LoggedIn)
+            return;
+
+        try
+        {
+            var response = await ApiCall.Add<ApiResponse<UserViewModel>, UserProfileViewModel>(
+                await ApiCall.GetHttpClient(), "authentication/switchprofile", profile);
+
+            if (response != null && response.Status == (int)HttpStatusCode.OK && response.Result != null)
+            {
+                // Update token
+                if (!string.IsNullOrEmpty(response.Result.Token))
+                {
+                    await LocalStorageService.SetItemAsync("token", response.Result.Token);
+                    
+                    // Update auth state provider
+                    if (authProvider != null)
+                    {
+                        await authProvider.RefreshAuthState();
+                    }
+                    
+                    // Reload page to refresh auth state
+                    NavigationManager.NavigateTo("/", true);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error switching profile: {ex.Message}");
+        }
+    }
+
+    private string GetRoleBadgeClass(string role)
+    {
+        return role.ToLower() switch
+        {
+            "systemadministrator" => "bg-danger",
+            "administrator" => "bg-warning",
+            "farmmanager" => "bg-success",
+            "fieldofficer" => "bg-info",
+            "viewer" => "bg-secondary",
+            _ => "bg-primary"
+        };
+    }
+}
+
+<style>
+    .farm-profiles-container {
+        width: 100%;
+        padding: 10px 0;
+    }
+
+    .profiles-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .farm-profile-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 15px;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .farm-profile-item:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .farm-profile-item.active {
+        background-color: rgba(255, 255, 255, 0.3);
+        border-left: 3px solid #5e72e4;
+    }
+
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .farm-name {
+        font-weight: 500;
+        color: #fff;
+    }
+
+    .role-badge {
+        font-size: 0.75rem;
+    }
+
+    .active-indicator {
+        color: #2dce89;
+    }
+</style>
