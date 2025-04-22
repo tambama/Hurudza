@@ -1,0 +1,233 @@
+@namespace Hurudza.UI.Web.Components
+@using Hurudza.Data.UI.Models.ViewModels.UserManagement
+@using Hurudza.UI.Web.Cookie.Providers
+@using Hurudza.UI.Web.Services
+@using System.Net
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorageService
+@inject IJSRuntime JSRuntime
+
+<div class="nav-item dropdown pe-2 d-flex align-items-center">
+    <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+        <div class="avatar avatar-sm position-relative">
+            <img src="_content/Hurudza.UI.Shared/img/team-2.jpg" alt="profile_image" class="rounded-circle">
+            @if (userProfiles?.Count > 0)
+            {
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
+                    @userProfiles.Count
+                </span>
+            }
+        </div>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
+        @if (isLoading)
+        {
+            <li class="mb-2 text-center">
+                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </li>
+        }
+        else if (currentUser != null)
+        {
+            <li class="mb-2">
+                <div class="d-flex py-1">
+                    <div class="my-auto">
+                        <img src="_content/Hurudza.UI.Shared/img/team-2.jpg" class="avatar avatar-sm me-3">
+                    </div>
+                    <div class="d-flex flex-column justify-content-center">
+                        <h6 class="text-sm font-weight-normal mb-1">
+                            <span class="font-weight-bold">@currentUser.Fullname</span>
+                        </h6>
+                        <p class="text-xs text-secondary mb-0">
+                            <i class="fa fa-envelope me-1"></i>
+                            @currentUser.Email
+                        </p>
+                        <p class="text-xs text-secondary mb-0">
+                            <i class="fa fa-user-shield me-1"></i>
+                            @currentUser.Role
+                        </p>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            @if (userProfiles != null && userProfiles.Count > 0)
+            {
+                <li class="mb-2">
+                    <h6 class="dropdown-header text-dark font-weight-bolder d-flex align-items-center px-0">
+                        <i class="fa fa-building me-1"></i> Farm Profiles
+                    </h6>
+                </li>
+                
+                @foreach (var profile in userProfiles)
+                {
+                    <li>
+                        <a class="dropdown-item py-1 px-3 @(profile.LoggedIn ? "active" : "")" href="javascript:;" @onclick="() => SwitchProfile(profile)">
+                            <div class="d-flex align-items-center">
+                                <div class="@(profile.LoggedIn ? "text-primary" : "text-muted")">
+                                    @profile.Farm
+                                </div>
+                                <div class="ms-auto">
+                                    <span class="badge bg-@GetRoleBadgeColor(profile.Role)">@FormatRoleName(profile.Role)</span>
+                                    @if (profile.LoggedIn)
+                                    {
+                                        <i class="fa fa-check-circle text-success ms-1"></i>
+                                    }
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                }
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+            }
+            <li>
+                <a class="dropdown-item border-radius-md text-danger" href="javascript:;" @onclick="Logout">
+                    <div class="d-flex align-items-center">
+                        <i class="fa fa-sign-out-alt me-2"></i>
+                        <span>Logout</span>
+                    </div>
+                </a>
+            </li>
+        }
+        else
+        {
+            <li class="mb-2">
+                <a class="dropdown-item border-radius-md" href="/authentication/login">
+                    <div class="d-flex align-items-center">
+                        <i class="fa fa-sign-in-alt me-2"></i>
+                        <span>Sign In</span>
+                    </div>
+                </a>
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    private UserViewModel currentUser;
+    private List<UserProfileViewModel> userProfiles = new();
+    private bool isLoading = true;
+    private CustomAuthStateProvider authProvider => AuthStateProvider as CustomAuthStateProvider;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUserData();
+    }
+
+    private async Task LoadUserData()
+    {
+        try
+        {
+            isLoading = true;
+
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            if (authState.User.Identity.IsAuthenticated)
+            {
+                var response = await ApiCall.Get<ApiResponse<UserViewModel>>(
+                    await ApiCall.GetHttpClient(), "authentication/getloggedinprofile");
+
+                if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
+                {
+                    currentUser = response.Result;
+                    userProfiles = response.Result.Profiles ?? new List<UserProfileViewModel>();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading user data: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SwitchProfile(UserProfileViewModel profile)
+    {
+        // Don't switch if already logged in to this profile
+        if (profile.LoggedIn)
+            return;
+
+        try
+        {
+            var response = await ApiCall.Add<ApiResponse<UserViewModel>, UserProfileViewModel>(
+                await ApiCall.GetHttpClient(), "authentication/switchprofile", profile);
+
+            if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
+            {
+                // Update token
+                if (!string.IsNullOrEmpty(response.Result.Token))
+                {
+                    await LocalStorageService.SetItemAsync("token", response.Result.Token);
+                    
+                    // Update auth state provider
+                    if (authProvider != null)
+                    {
+                        authProvider.SetAuthInfo(response.Result);
+                        
+                        // Refresh the UI
+                        await LoadUserData();
+                        
+                        // Refresh the current page to apply new permissions
+                        NavigationManager.NavigateTo(NavigationManager.Uri, true);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error switching profile: {ex.Message}");
+        }
+    }
+
+    private async Task Logout()
+    {
+        await LocalStorageService.RemoveItemAsync("token"); 
+        authProvider?.ClearAuthInfo();
+
+        NavigationManager.NavigateTo("authentication/login");
+    }
+    
+    private string GetRoleBadgeColor(string role)
+    {
+        return role switch
+        {
+            "SystemAdministrator" => "danger",
+            "Administrator" => "warning",
+            "FarmManager" => "success",
+            "FarmAdministrator" => "info",
+            "FieldOfficer" => "primary",
+            "Viewer" => "secondary",
+            _ => "secondary"
+        };
+    }
+    
+    private string FormatRoleName(string role)
+    {
+        if (string.IsNullOrEmpty(role))
+            return string.Empty;
+            
+        // Transform camelCase or PascalCase to readable format
+        if (role == "SystemAdministrator")
+            return "SysAdmin";
+            
+        if (role == "Administrator")
+            return "Admin";
+            
+        if (role == "FarmManager")
+            return "Manager";
+            
+        if (role == "FieldOfficer")
+            return "Officer";
+            
+        return role;
+    }
+}

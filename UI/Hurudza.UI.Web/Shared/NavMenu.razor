@@ -14,24 +14,6 @@
     </div>
     <hr class="horizontal dark mt-0">
     
-    <!-- Farm Profile Switcher -->
-    @if (_user != null && _user.Identity.IsAuthenticated)
-    {
-        <div class="user-profile-section p-3">
-            <div class="user-info mb-2">
-                <h6 class="text-white mb-0">@(_user.Identity.Name)</h6>
-                <small class="text-muted">@GetUserRole()</small>
-            </div>
-            
-            <div class="farm-switcher mb-3">
-                <small class="text-muted d-block mb-1">Your Farm Profiles</small>
-                <UserFarmProfiles />
-            </div>
-            
-            <hr class="horizontal dark mt-2 mb-2">
-        </div>
-    }
-    
     <div class="collapse navbar-collapse  w-auto h-auto" id="sidenav-collapse-main">
         <ul class="navbar-nav">
             <li class="nav-item">
@@ -147,13 +129,6 @@
             </li>
         </ul>
     </div>
-    
-    <!-- Fixed Logout Button at bottom -->
-    <div class="sidenav-footer mx-3 bottom-0 start-0 end-0 my-3">
-        <a href="javascript:;" @onclick="Logout" class="btn bg-gradient-dark btn-sm w-100 mb-3">
-            <i class="fas fa-sign-out-alt me-2"></i> Logout
-        </a>
-    </div>
 </aside>
 
 @code
@@ -207,25 +182,6 @@
         Console.WriteLine($"NavMenu - IsAdministrator check: isSystemAdmin={isSystemAdmin}, isAdmin={isAdmin}, hasRoleClaim={hasRoleClaim}");
 
         return isSystemAdmin || isAdmin || hasRoleClaim;
-    }
-
-    private string GetUserRole()
-    {
-        if (_user == null || !_user.Identity.IsAuthenticated)
-            return string.Empty;
-
-        if (_user.IsInRole(ApiRoles.SystemAdministrator))
-            return "System Administrator";
-        if (_user.IsInRole(ApiRoles.Administrator))
-            return "Administrator";
-        if (_user.IsInRole("FarmManager"))
-            return "Farm Manager";
-        if (_user.IsInRole("FieldOfficer"))
-            return "Field Officer";
-        if (_user.IsInRole("Viewer"))
-            return "Viewer";
-
-        return string.Empty;
     }
 
     private void ActivateDashboard()
@@ -300,13 +256,5 @@
         RolesActive = "";
         TillageActive = "";
         FarmAssignmentsActive = "";
-    }
-    
-    private async Task Logout()
-    {
-        await LocalStorageService.RemoveItemAsync("token"); 
-        (_authProvider as CustomAuthStateProvider)?.ClearAuthInfo();
-
-        Navigation.NavigateTo("authentication/login");
     }
 }
