@@ -66,15 +66,15 @@
                     <SfGrid @ref="Grid" DataSource="@filteredAssignments" AllowPaging="true" AllowSorting="true">
                         <GridPageSettings PageSize="10"></GridPageSettings>
                         <GridColumns>
-                            <GridColumn Field=@nameof(UserFarmAssignmentViewModel.Fullname) HeaderText="User" Width="200"></GridColumn>
-                            <GridColumn Field=@nameof(UserFarmAssignmentViewModel.Email) HeaderText="Email" Width="200"></GridColumn>
-                            <GridColumn Field=@nameof(UserFarmAssignmentViewModel.FarmName) HeaderText="Farm" Width="200"></GridColumn>
-                            <GridColumn Field=@nameof(UserFarmAssignmentViewModel.Role) HeaderText="Role" Width="150"></GridColumn>
-                            <GridColumn Field=@nameof(UserFarmAssignmentViewModel.AssignedDate) HeaderText="Assigned Date" Format="d" Width="120"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserAssignmentViewModel.Fullname) HeaderText="User" Width="200"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserAssignmentViewModel.Email) HeaderText="Email" Width="200"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserAssignmentViewModel.FarmName) HeaderText="Farm" Width="200"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserAssignmentViewModel.Role) HeaderText="Role" Width="150"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserAssignmentViewModel.AssignedDate) HeaderText="Assigned Date" Format="d" Width="120"></GridColumn>
                             <GridColumn HeaderText="Actions" Width="150">
                                 <Template>
                                     @{
-                                        var assignment = (context as UserFarmAssignmentViewModel);
+                                        var assignment = (context as FarmUserAssignmentViewModel);
                                         <div class="d-flex justify-content-around">
                                             <button class="btn btn-sm btn-info" @onclick="() => EditAssignment(assignment)">
                                                 <i class="fas fa-edit"></i>
@@ -208,12 +208,12 @@
 </SfDialog>
 
 @code {
-    private SfGrid<UserFarmAssignmentViewModel> Grid;
+    private SfGrid<FarmUserAssignmentViewModel> Grid;
     private Toast Alert;
     
     // Data sources
-    private List<UserFarmAssignmentViewModel> assignments = new();
-    private List<UserFarmAssignmentViewModel> filteredAssignments = new();
+    private List<FarmUserAssignmentViewModel> assignments = new();
+    private List<FarmUserAssignmentViewModel> filteredAssignments = new();
     private List<FarmListViewModel> farms = new();
     private List<UserViewModel> availableUsers = new();
     private List<RoleViewModel> availableRoles = new();
@@ -224,7 +224,7 @@
     private bool isDeleteConfirmationVisible = false;
     
     // Selected item
-    private UserFarmAssignmentViewModel selectedAssignment;
+    private FarmUserAssignmentViewModel selectedAssignment;
     
     // Form models
     private AssignFarmUserViewModel newAssignment = new AssignFarmUserViewModel();
