@@ -54,9 +54,20 @@
                                             }
                                             <div class="form-group col-md-12 mb-3">
                                                 <label>Role</label>
-                                                <SfDropDownList @bind-Value="@(DialogEditMode == "Add" ? newAssignment.Role : user.Role)" DataSource="@availableRoles" TValue="string" TItem="RoleViewModel">
-                                                    <DropDownListFieldSettings Text="Description" Value="Name"></DropDownListFieldSettings>
-                                                </SfDropDownList>
+                                                <!-- Instead of using a conditional in the binding, render different components based on the condition -->
+
+                                                @if (DialogEditMode == "Add")
+                                                {
+                                                    <SfDropDownList @bind-Value="newAssignment.Role" DataSource="@availableRoles" TValue="string" TItem="RoleViewModel">
+                                                        <DropDownListFieldSettings Text="Description" Value="Name"></DropDownListFieldSettings>
+                                                    </SfDropDownList>
+                                                }
+                                                else
+                                                {
+                                                    <SfDropDownList @bind-Value="user.Role" DataSource="@availableRoles" TValue="string" TItem="RoleViewModel">
+                                                        <DropDownListFieldSettings Text="Description" Value="Name"></DropDownListFieldSettings>
+                                                    </SfDropDownList>
+                                                }
                                             </div>
                                         </div>
                                     </div>
@@ -135,10 +146,18 @@
 
                 <div class="form-group mb-3">
                     <label>Role</label>
-                    <SfDropDownList @bind-Value="@(DialogEditMode == "Add" ? newAssignment.Role : editUserProfile.Role)" 
-                                   DataSource="@availableRoles" TValue="string" TItem="RoleViewModel" Placeholder="Select a role">
-                        <DropDownListFieldSettings Text="Description" Value="Name"></DropDownListFieldSettings>
-                    </SfDropDownList>
+                    @if (DialogEditMode == "Add")
+                    {
+                        <SfDropDownList @bind-Value="newAssignment.Role" DataSource="@availableRoles" TValue="string" TItem="RoleViewModel" Placeholder="Select a role">
+                            <DropDownListFieldSettings Text="Description" Value="Name"></DropDownListFieldSettings>
+                        </SfDropDownList>
+                    }
+                    else
+                    {
+                        <SfDropDownList @bind-Value="editUserProfile.Role" DataSource="@availableRoles" TValue="string" TItem="RoleViewModel" Placeholder="Select a role">
+                            <DropDownListFieldSettings Text="Description" Value="Name"></DropDownListFieldSettings>
+                        </SfDropDownList>
+                    }
                 </div>
 
                 @if (DialogEditMode == "Edit")
@@ -199,8 +218,8 @@
     private string DialogEditMode = "Add";
     
     // Form models
-    private AssignFarmUserViewModel newAssignment = new() { FarmId = "" };
-    private UpdateFarmUserViewModel editUserProfile = new() { ProfileId = "" };
+    private AssignFarmUserViewModel newAssignment = new() { FarmId = "", UserId = "", Role = ""};
+    private UpdateFarmUserViewModel editUserProfile = new() { ProfileId = "", Role = ""};
     
     private bool isSystemAdmin = false;
     
@@ -331,7 +350,7 @@
     {
         DialogTitle = "Add User to Farm";
         DialogEditMode = "Add";
-        newAssignment = new AssignFarmUserViewModel { FarmId = FarmId };
+        newAssignment = new AssignFarmUserViewModel { FarmId = FarmId, UserId = "", Role = ""};
         isDialogVisible = true;
     }
     

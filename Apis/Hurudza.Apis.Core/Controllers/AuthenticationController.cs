@@ -33,10 +33,10 @@ namespace Hurudza.Apis.Core.Controllers
         private readonly IConfiguration _configuration;
         private readonly automapper.IConfigurationProvider _configurationProvider;
 
-        public AuthenticationController(HurudzaDbContext context, 
-            UserManager<ApplicationUser> userManager, 
-            RoleManager<ApplicationRole> roleManager, 
-            IConfiguration configuration, 
+        public AuthenticationController(HurudzaDbContext context,
+            UserManager<ApplicationUser> userManager,
+            RoleManager<ApplicationRole> roleManager,
+            IConfiguration configuration,
             automapper.IConfigurationProvider configurationProvider)
         {
             _context = context;
@@ -50,7 +50,7 @@ namespace Hurudza.Apis.Core.Controllers
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
             var user = await _userManager.FindByNameAsync(model.Username);
-            
+
             if (user == null)
                 return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized,
                     "Enter correct username / password"));
@@ -59,10 +59,10 @@ namespace Hurudza.Apis.Core.Controllers
             {
                 if (!await _userManager.CheckPasswordAsync(user, model.Password))
                     return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized,
-                        "Enter correct username / password")); 
+                        "Enter correct username / password"));
             }
 
-            if(!user.IsActive)
+            if (!user.IsActive)
                 return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized,
                     "User is not active. Contact admin to activate account"));
 
@@ -86,17 +86,18 @@ namespace Hurudza.Apis.Core.Controllers
             {
                 // Check if user is a System Administrator
                 var userRole = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
-                
+
                 if (userRole == "SystemAdministrator")
                 {
                     // System administrators don't need a specific farm profile
-                    profiles.Add(new UserProfileViewModel { 
-                        Farm = "System Administration", 
-                        Fullname = user.Fullname, 
-                        Role = userRole, 
-                        LoggedIn = true 
+                    profiles.Add(new UserProfileViewModel
+                    {
+                        Farm = "System Administration",
+                        Fullname = user.Fullname,
+                        Role = userRole,
+                        LoggedIn = true
                     });
-                    
+
                     role = userRole;
                 }
                 else
@@ -129,7 +130,7 @@ namespace Hurudza.Apis.Core.Controllers
 
             return Ok(new ApiOkResponse(login));
         }
-        
+
         [HttpPost(Name = nameof(SwitchProfile))]
         public async Task<IActionResult> SwitchProfile([FromBody] UserProfileViewModel model)
         {
@@ -137,16 +138,16 @@ namespace Hurudza.Apis.Core.Controllers
             if (user == null)
                 return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized, "User not found"));
 
-            if(!user.IsActive)
+            if (!user.IsActive)
                 return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized, "User is not active"));
 
             // Verify the profile exists and belongs to this user
-            var profile = await _context.UserProfiles
+            var userProfile = await _context.UserProfiles
                 .Include(p => p.Farm)
                 .Where(p => p.UserId == user.Id && p.FarmId == model.FarmId && p.Farm.IsActive && !p.Farm.Deleted)
                 .FirstOrDefaultAsync();
-                
-            if (profile == null)
+
+            if (userProfile == null)
                 return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized, "Profile not found"));
 
             // Get all profiles and mark the selected one as active
@@ -161,8 +162,19 @@ namespace Hurudza.Apis.Core.Controllers
                 p.LoggedIn = p.FarmId == model.FarmId;
             }
 
+            // Create a UserProfileViewModel from the userProfile entity to pass to GenerateJwtToken
+            var activeProfileViewModel = new UserProfileViewModel
+            {
+                Id = userProfile.Id,
+                UserId = userProfile.UserId,
+                FarmId = userProfile.FarmId,
+                Farm = userProfile.Farm?.Name ?? "Unknown Farm",
+                Role = userProfile.Role,
+                LoggedIn = true
+            };
+
             // Generate token with the new active profile
-            var token = await GenerateJwtToken(user, profile);
+            var token = await GenerateJwtToken(user, activeProfileViewModel);
 
             var login = new UserViewModel
             {
@@ -174,9 +186,9 @@ namespace Hurudza.Apis.Core.Controllers
                 Email = user.Email,
                 Token = token,
                 Profiles = profiles,
-                Role = profile.Role,
-                FarmId = profile.FarmId,
-                Farm = profile.Farm.Name
+                Role = userProfile.Role,
+                FarmId = userProfile.FarmId,
+                Farm = userProfile.Farm.Name
             };
 
             // Add user permissions
@@ -184,17 +196,17 @@ namespace Hurudza.Apis.Core.Controllers
 
             return Ok(new ApiOkResponse(login));
         }
-        
+
         [HttpGet(Name = nameof(GetUserProfile))]
         public async Task<IActionResult> GetUserProfile(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            
+
             if (user == null)
                 return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized,
                     "User was not found"));
 
-            if(!user.IsActive)
+            if (!user.IsActive)
                 return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized,
                     "User is not active. Contact admin to activate account"));
 
@@ -217,7 +229,7 @@ namespace Hurudza.Apis.Core.Controllers
                     activeProfile = profiles[0];
                     activeProfile.LoggedIn = true;
                 }
-                
+
                 role = activeProfile.Role;
                 farmId = activeProfile.FarmId;
                 farmName = activeProfile.Farm;
@@ -226,17 +238,18 @@ namespace Hurudza.Apis.Core.Controllers
             {
                 // Check if user is a System Administrator
                 var userRole = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
-                
+
                 if (userRole == "SystemAdministrator")
                 {
                     // System administrators don't need a specific farm profile
-                    profiles.Add(new UserProfileViewModel { 
-                        Farm = "System Administration", 
-                        Fullname = user.Fullname, 
-                        Role = userRole, 
-                        LoggedIn = true 
+                    profiles.Add(new UserProfileViewModel
+                    {
+                        Farm = "System Administration",
+                        Fullname = user.Fullname,
+                        Role = userRole,
+                        LoggedIn = true
                     });
-                    
+
                     role = userRole;
                 }
                 else
@@ -248,8 +261,8 @@ namespace Hurudza.Apis.Core.Controllers
             }
 
             // Generate token with roles and claims
-            var activeProfile = profiles.FirstOrDefault(p => p.LoggedIn);
-            var token = await GenerateJwtToken(user, activeProfile);
+            var currentActiveProfile = profiles.FirstOrDefault(p => p.LoggedIn);
+            var token = await GenerateJwtToken(user, currentActiveProfile);
 
             var login = new UserViewModel
             {
@@ -271,17 +284,17 @@ namespace Hurudza.Apis.Core.Controllers
 
             return Ok(new ApiOkResponse(login));
         }
-        
+
         [HttpGet(Name = nameof(GetLoggedInProfile))]
         public async Task<IActionResult> GetLoggedInProfile()
         {
             var user = await _userManager.FindByIdAsync(User.FindFirstValue(ClaimTypes.PrimarySid) ?? string.Empty);
-            
+
             if (user == null)
                 return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized,
                     "User was not found"));
 
-            if(!user.IsActive)
+            if (!user.IsActive)
                 return Unauthorized(new ApiResponse((int)HttpStatusCode.Unauthorized,
                     "User is not active. Contact admin to activate account"));
 
@@ -290,14 +303,14 @@ namespace Hurudza.Apis.Core.Controllers
                 .Where(p => p.UserId == user.Id && p.Farm.IsActive && !p.Farm.Deleted)
                 .ProjectTo<UserProfileViewModel>(_configurationProvider)
                 .ToListAsync();
-            
+
             var role = string.Empty;
             var farmId = string.Empty;
             var farmName = string.Empty;
 
             // Get current active farm from claims
             var currentFarmId = User.FindFirstValue("FarmId");
-            
+
             if (profiles.Count > 0)
             {
                 // If we have a farm ID in claims, find and set that profile as active
@@ -311,7 +324,7 @@ namespace Hurudza.Apis.Core.Controllers
                         {
                             profile.LoggedIn = profile.FarmId == currentFarmId;
                         }
-                        
+
                         role = matchingProfile.Role;
                         farmId = matchingProfile.FarmId;
                         farmName = matchingProfile.Farm;
@@ -338,17 +351,18 @@ namespace Hurudza.Apis.Core.Controllers
             {
                 // Check if user is a System Administrator
                 var userRole = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
-                
+
                 if (userRole == "SystemAdministrator")
                 {
                     // System administrators don't need a specific farm profile
-                    profiles.Add(new UserProfileViewModel { 
-                        Farm = "System Administration", 
-                        Fullname = user.Fullname, 
-                        Role = userRole, 
-                        LoggedIn = true 
+                    profiles.Add(new UserProfileViewModel
+                    {
+                        Farm = "System Administration",
+                        Fullname = user.Fullname,
+                        Role = userRole,
+                        LoggedIn = true
                     });
-                    
+
                     role = userRole;
                 }
                 else
@@ -394,7 +408,7 @@ namespace Hurudza.Apis.Core.Controllers
             var role = await _roleManager.FindByNameAsync(model.Role ?? string.Empty);
             if (role == null)
                 return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, "Role does not exist!"));
-            
+
             ApplicationUser user = new ApplicationUser()
             {
                 Email = model.Email,
@@ -404,15 +418,18 @@ namespace Hurudza.Apis.Core.Controllers
                 Surname = model.Surname,
                 PhoneNumber = model.PhoneNumber
             };
-            
+
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse((int)HttpStatusCode.InternalServerError, "User creation failed! Please check user details and try again."));
-            
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ApiResponse((int)HttpStatusCode.InternalServerError,
+                        "User creation failed! Please check user details and try again."));
+
             var addedRole = await _userManager.AddToRoleAsync(user, role.Name);
             if (!addedRole.Succeeded)
             {
-                return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, "Registered user but failed to assign role. Contact Admin"));
+                return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest,
+                    "Registered user but failed to assign role. Contact Admin"));
             }
 
             // If farm ID is provided and role isn't SystemAdministrator, create a farm profile
@@ -427,7 +444,7 @@ namespace Hurudza.Apis.Core.Controllers
                         FarmId = model.FarmId,
                         Role = role.Name
                     };
-                    
+
                     await _context.UserProfiles.AddAsync(userProfile);
                     await _context.SaveChangesAsync();
                 }
@@ -463,7 +480,7 @@ namespace Hurudza.Apis.Core.Controllers
         {
             string roleName;
             string farmId = string.Empty;
-            
+
             if (activeProfile != null)
             {
                 roleName = activeProfile.Role;
@@ -474,7 +491,7 @@ namespace Hurudza.Apis.Core.Controllers
                 // If no active profile, use the first role (usually for SystemAdministrator)
                 roleName = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "";
             }
-            
+
             var authClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.PrimarySid, user.Id),
@@ -516,10 +533,10 @@ namespace Hurudza.Apis.Core.Controllers
         private async Task<List<ClaimViewModel>> GetUserPermissions(ApplicationUser user)
         {
             var permissions = new List<ClaimViewModel>();
-            
+
             // Get all roles assigned to the user
             var roles = await _userManager.GetRolesAsync(user);
-            
+
             // Get all claims for each role
             foreach (var roleName in roles)
             {
@@ -537,7 +554,7 @@ namespace Hurudza.Apis.Core.Controllers
                     }
                 }
             }
-            
+
             // Add direct user claims
             var userClaims = await _userManager.GetClaimsAsync(user);
             foreach (var claim in userClaims)
@@ -548,7 +565,7 @@ namespace Hurudza.Apis.Core.Controllers
                     ClaimValue = claim.Value
                 });
             }
-            
+
             // Remove duplicates
             return permissions.GroupBy(p => p.ClaimValue)
                 .Select(g => g.First())

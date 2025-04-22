@@ -36,4 +36,7 @@
 	  <ProjectReference Include="..\..\Hurudza.Data.ViewModels\Hurudza.Data.UI.Models.csproj" />
 	  <ProjectReference Include="..\Hurudza.UI.Shared\Hurudza.UI.Shared.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Pages\Examples\" />
+	</ItemGroup>
 </Project>

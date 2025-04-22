@@ -2,6 +2,7 @@
 @using Hurudza.Data.UI.Models.ViewModels.UserManagement
 @using Hurudza.Data.UI.Models.ViewModels.Core
 @using System.Net
+@using Hurudza.UI.Web.Services
 @using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
 @attribute [Authorize(Roles = "SystemAdministrator")]
 
@@ -393,7 +394,11 @@
     
     // Form models
     private FarmUserAssignmentViewModel newAssignment = new FarmUserAssignmentViewModel();
-    private UpdateFarmUserViewModel editAssignmentModel = new UpdateFarmUserViewModel();
+    private UpdateFarmUserViewModel editAssignmentModel = new UpdateFarmUserViewModel
+    {
+        ProfileId = "",
+        Role = ""
+    };
 
     protected override async Task OnInitializedAsync()
     {

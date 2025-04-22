@@ -1,6 +1,4 @@
 @page "/farm-assignments"
-@using Hurudza.Data.UI.Models.ViewModels.UserManagement
-@using System.Net
 @using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
 @attribute [Authorize(Roles = "SystemAdministrator")]
 
@@ -32,16 +30,16 @@
                     <div class="d-flex align-items-center">
                         <div class="me-3" style="min-width: 250px;">
                             <SfDropDownList @bind-Value="selectedFarmId" DataSource="@farms" TValue="string" TItem="FarmListViewModel"
-                                           Placeholder="Select Farm" AllowFiltering="true"
-                                           @bind-Value:event="ValueChange">
+                                            Placeholder="Select Farm" AllowFiltering="true"
+                                            @bind-Value:event="ValueChange">
                                 <DropDownListEvents TValue="string" ValueChange="OnFarmChange"></DropDownListEvents>
                                 <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
                             </SfDropDownList>
                         </div>
                         <div class="me-3" style="min-width: 250px;">
                             <SfDropDownList @bind-Value="selectedRoleFilter" DataSource="@roleFilterOptions" TValue="string"
-                                           Placeholder="Filter by Role" AllowFiltering="true"
-                                           @bind-Value:event="ValueChange">
+                                            Placeholder="Filter by Role" AllowFiltering="true"
+                                            @bind-Value:event="ValueChange">
                                 <DropDownListEvents TValue="string" ValueChange="ApplyFilters"></DropDownListEvents>
                             </SfDropDownList>
                         </div>
@@ -66,23 +64,23 @@
                     <SfGrid @ref="Grid" DataSource="@filteredAssignments" AllowPaging="true" AllowSorting="true">
                         <GridPageSettings PageSize="10"></GridPageSettings>
                         <GridColumns>
-                            <GridColumn Field=@nameof(FarmUserAssignmentViewModel.Fullname) HeaderText="User" Width="200"></GridColumn>
-                            <GridColumn Field=@nameof(FarmUserAssignmentViewModel.Email) HeaderText="Email" Width="200"></GridColumn>
-                            <GridColumn Field=@nameof(FarmUserAssignmentViewModel.FarmName) HeaderText="Farm" Width="200"></GridColumn>
-                            <GridColumn Field=@nameof(FarmUserAssignmentViewModel.Role) HeaderText="Role" Width="150"></GridColumn>
-                            <GridColumn Field=@nameof(FarmUserAssignmentViewModel.AssignedDate) HeaderText="Assigned Date" Format="d" Width="120"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserViewModel.Fullname) HeaderText="User" Width="200"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserViewModel.Email) HeaderText="Email" Width="200"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserViewModel.FarmName) HeaderText="Farm" Width="200"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserViewModel.Role) HeaderText="Role" Width="150"></GridColumn>
+                            <GridColumn Field=@nameof(FarmUserViewModel.AssignedDate) HeaderText="Assigned Date" Format="d" Width="120"></GridColumn>
                             <GridColumn HeaderText="Actions" Width="150">
                                 <Template>
                                     @{
-                                        var assignment = (context as FarmUserAssignmentViewModel);
-                                        <div class="d-flex justify-content-around">
-                                            <button class="btn btn-sm btn-info" @onclick="() => EditAssignment(assignment)">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-danger" @onclick="() => ConfirmDeleteAssignment(assignment)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
+                                    var assignment = (context as FarmUserViewModel);
+                                    <div class="d-flex justify-content-around">
+                                        <button class="btn btn-sm btn-info" @onclick="() => EditAssignment(assignment)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" @onclick="() => ConfirmDeleteAssignment(assignment)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
                                     }
                                 </Template>
                             </GridColumn>
@@ -143,39 +141,39 @@
         <Content>
             @if (selectedAssignment != null)
             {
-                <EditForm Model="@editAssignmentModel" OnValidSubmit="UpdateAssignment">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
+            <EditForm Model="@editAssignmentModel" OnValidSubmit="UpdateAssignment">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
 
-                    <div class="form-group mb-3">
-                        <label>User</label>
-                        <input type="text" class="form-control" value="@selectedAssignment.Fullname" readonly />
-                    </div>
+                <div class="form-group mb-3">
+                    <label>User</label>
+                    <input type="text" class="form-control" value="@selectedAssignment.Fullname" readonly />
+                </div>
 
-                    <div class="form-group mb-3">
-                        <label>Farm</label>
-                        <input type="text" class="form-control" value="@selectedAssignment.FarmName" readonly />
-                    </div>
+                <div class="form-group mb-3">
+                    <label>Farm</label>
+                    <input type="text" class="form-control" value="@selectedAssignment.FarmName" readonly />
+                </div>
 
-                    <div class="form-group mb-3">
-                        <label>Role</label>
-                        <SfDropDownList @bind-Value="editAssignmentModel.Role" DataSource="@availableRoles" TValue="string" TItem="RoleViewModel" Placeholder="Select a role">
-                            <DropDownListFieldSettings Text="Description" Value="Name"></DropDownListFieldSettings>
-                        </SfDropDownList>
-                        <ValidationMessage For="() => editAssignmentModel.Role" />
-                    </div>
+                <div class="form-group mb-3">
+                    <label>Role</label>
+                    <SfDropDownList @bind-Value="editAssignmentModel.Role" DataSource="@availableRoles" TValue="string" TItem="RoleViewModel" Placeholder="Select a role">
+                        <DropDownListFieldSettings Text="Description" Value="Name"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                    <ValidationMessage For="() => editAssignmentModel.Role" />
+                </div>
 
-                    <div class="form-group mb-3">
-                        <div class="form-check">
-                            <SfCheckBox @bind-Checked="editAssignmentModel.IsActive" Label="Active" ></SfCheckBox>
-                        </div>
+                <div class="form-group mb-3">
+                    <div class="form-check">
+                        <SfCheckBox @bind-Checked="editAssignmentModel.IsActive" Label="Active" ></SfCheckBox>
                     </div>
+                </div>
 
-                    <div class="form-group d-flex justify-content-end mt-4">
-                        <button type="button" class="btn btn-secondary me-2" @onclick="CloseEditAssignmentModal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Update Assignment</button>
-                    </div>
-                </EditForm>
+                <div class="form-group d-flex justify-content-end mt-4">
+                    <button type="button" class="btn btn-secondary me-2" @onclick="CloseEditAssignmentModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Assignment</button>
+                </div>
+            </EditForm>
             }
         </Content>
     </DialogTemplates>
@@ -188,326 +186,343 @@
         <Content>
             @if (selectedAssignment != null)
             {
-                <div>
-                    <p>Are you sure you want to delete this assignment?</p>
-                    <div class="alert alert-danger">
-                        <p><strong>User:</strong> @selectedAssignment.Fullname</p>
-                        <p><strong>Farm:</strong> @selectedAssignment.FarmName</p>
-                        <p><strong>Role:</strong> @selectedAssignment.Role</p>
-                    </div>
-                    <p>This action cannot be undone.</p>
-                    
-                    <div class="d-flex justify-content-end mt-4">
-                        <button type="button" class="btn btn-secondary me-2" @onclick="CloseDeleteConfirmation">Cancel</button>
-                        <button type="button" class="btn btn-danger" @onclick="DeleteAssignment">Delete</button>
-                    </div>
+            <div>
+                <p>Are you sure you want to delete this assignment?</p>
+                <div class="alert alert-danger">
+                    <p><strong>User:</strong> @selectedAssignment.Fullname</p>
+                    <p><strong>Farm:</strong> @selectedAssignment.FarmName</p>
+                    <p><strong>Role:</strong> @selectedAssignment.Role</p>
                 </div>
+                <p>This action cannot be undone.</p>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="button" class="btn btn-secondary me-2" @onclick="CloseDeleteConfirmation">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteAssignment">Delete</button>
+                </div>
+            </div>
             }
         </Content>
     </DialogTemplates>
 </SfDialog>
 
 @code {
-    private SfGrid<FarmUserAssignmentViewModel> Grid;
-    private Toast Alert;
-    
-    // Data sources
-    private List<FarmUserAssignmentViewModel> assignments = new();
-    private List<FarmUserAssignmentViewModel> filteredAssignments = new();
-    private List<FarmListViewModel> farms = new();
-    private List<UserViewModel> availableUsers = new();
-    private List<RoleViewModel> availableRoles = new();
-    
-    // Modal visibility
-    private bool isNewAssignmentModalVisible = false;
-    private bool isEditAssignmentModalVisible = false;
-    private bool isDeleteConfirmationVisible = false;
-    
-    // Selected item
-    private FarmUserAssignmentViewModel selectedAssignment;
-    
-    // Form models
-    private AssignFarmUserViewModel newAssignment = new AssignFarmUserViewModel();
-    private UpdateFarmUserViewModel editAssignmentModel = new UpdateFarmUserViewModel();
-    
-    // Filter state
-    private string selectedFarmId = "";
-    private string selectedRoleFilter = "";
-    private string searchText = "";
-    
-    // Role filter options
-    private List<string> roleFilterOptions = new List<string>
-    {
-        "",
-        "SystemAdministrator",
-        "Administrator",
-        "FarmManager",
-        "FieldOfficer",
-        "Viewer"
-    };
+private SfGrid<FarmUserViewModel> Grid;
+private Toast Alert;
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadData();
-    }
+// Data sources
+private List<FarmUserViewModel> assignments = new();
+private List<FarmUserViewModel> filteredAssignments = new();
+private List<FarmListViewModel> farms = new();
+private List<UserViewModel> availableUsers = new();
+private List<RoleViewModel> availableRoles = new();
 
-    private async Task LoadData()
-    {
-        try
-        {
-            // Load farms
-            var farmsResponse = await ApiCall.Get<ApiResponse<List<FarmListViewModel>>>(
-                await ApiCall.GetHttpClient(), "farms/getfarmlist");
-                
-            if (farmsResponse?.Result != null)
-            {
-                farms = farmsResponse.Result;
-            }
-            
-            // Load users
-            var usersResponse = await ApiCall.Get<ApiResponse<List<UserViewModel>>>(
-                await ApiCall.GetHttpClient(), "users/getusers");
-                
-            if (usersResponse?.Result != null)
-            {
-                availableUsers = usersResponse.Result;
-            }
-            
-            // Load roles
-            var rolesResponse = await ApiCall.Get<ApiResponse<List<RoleViewModel>>>(
-                await ApiCall.GetHttpClient(), "farmusers/getavailablefarmroles");
-                
-            if (rolesResponse?.Result != null)
-            {
-                availableRoles = rolesResponse.Result;
-            }
-            
-            // Load all assignments
-            await LoadAssignments();
-        }
-        catch (Exception ex)
-        {
-            Alert.Show($"Error loading data: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
-        }
-    }
-    
-    private async Task LoadAssignments()
-    {
-        try
-        {
-            var allAssignments = new List<UserFarmAssignmentViewModel>();
-            
-            // For each farm, get its users
-            foreach (var farm in farms)
-            {
-                var response = await ApiCall.Get<ApiResponse<List<UserFarmAssignmentViewModel>>>(
-                    await ApiCall.GetHttpClient(), $"farmusers/getfarmusers?farmId={farm.Id}");
-                    
-                if (response?.Result != null)
-                {
-                    allAssignments.AddRange(response.Result);
-                }
-            }
-            
-            assignments = allAssignments;
-            ApplyFilters();
-        }
-        catch (Exception ex)
-        {
-            Alert.Show($"Error loading assignments: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
-        }
-    }
-    
-    private void OnFarmChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, FarmListViewModel> args)
-    {
-        selectedFarmId = args.Value;
-        ApplyFilters();
-    }
-    
-    private void ApplyFilters()
-    {
-        filteredAssignments = assignments;
-        
-        // Apply farm filter
-        if (!string.IsNullOrEmpty(selectedFarmId))
-        {
-            filteredAssignments = filteredAssignments.Where(a => a.FarmId == selectedFarmId).ToList();
-        }
-        
-        // Apply role filter
-        if (!string.IsNullOrEmpty(selectedRoleFilter))
-        {
-            filteredAssignments = filteredAssignments.Where(a => a.Role == selectedRoleFilter).ToList();
-        }
-        
-        // Apply search text
-        if (!string.IsNullOrEmpty(searchText))
-        {
-            filteredAssignments = filteredAssignments.Where(a => 
-                a.Fullname.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                a.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                a.FarmName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-            ).ToList();
-        }
-    }
-    
-    private void ClearFilters()
-    {
-        selectedFarmId = "";
-        selectedRoleFilter = "";
-        searchText = "";
-        filteredAssignments = assignments;
-    }
-    
-    private void ShowNewAssignmentModal()
-    {
-        newAssignment = new AssignFarmUserViewModel();
-        isNewAssignmentModalVisible = true;
-    }
-    
-    private void CloseNewAssignmentModal()
-    {
-        isNewAssignmentModalVisible = false;
-    }
-    
-    private void EditAssignment(UserFarmAssignmentViewModel assignment)
-    {
-        selectedAssignment = assignment;
-        editAssignmentModel = new UpdateFarmUserViewModel
-        {
-            ProfileId = assignment.ProfileId,
-            Role = assignment.Role,
-            IsActive = assignment.IsActive
-        };
-        isEditAssignmentModalVisible = true;
-    }
-    
-    private void CloseEditAssignmentModal()
-    {
-        isEditAssignmentModalVisible = false;
-    }
-    
-    private void ConfirmDeleteAssignment(UserFarmAssignmentViewModel assignment)
-    {
-        selectedAssignment = assignment;
-        isDeleteConfirmationVisible = true;
-    }
-    
-    private void CloseDeleteConfirmation()
-    {
-        isDeleteConfirmationVisible = false;
-    }
-    
-    private async Task CreateAssignment()
-    {
-        try
-        {
-            var response = await ApiCall.Add<ApiResponse<UserProfileViewModel>, AssignFarmUserViewModel>(
-                await ApiCall.GetHttpClient(), "farmusers/assignusertofarm", newAssignment);
-                
-            if (response?.Status == (int)HttpStatusCode.OK)
-            {
-                Alert.Show("User successfully assigned to farm", showTitle: true, toastType: ToastType.Success);
-                isNewAssignmentModalVisible = false;
-                await LoadAssignments();
-            }
-            else
-            {
-                Alert.Show(response?.Title ?? "Error assigning user to farm", showTitle: true, toastType: ToastType.Danger);
-            }
-        }
-        catch (Exception ex)
-        {
-            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
-        }
-    }
-    
-    private async Task UpdateAssignment()
-    {
-        try
-        {
-            var response = await ApiCall.Update<ApiResponse<UserProfileViewModel>, UpdateFarmUserViewModel>(
-                await ApiCall.GetHttpClient(), "farmusers/updateuserfarmrole", editAssignmentModel.ProfileId, editAssignmentModel);
-                
-            if (response?.Status == (int)HttpStatusCode.OK)
-            {
-                Alert.Show("Assignment successfully updated", showTitle: true, toastType: ToastType.Success);
-                isEditAssignmentModalVisible = false;
-                await LoadAssignments();
-            }
-            else
-            {
-                Alert.Show(response?.Title ?? "Error updating assignment", showTitle: true, toastType: ToastType.Danger);
-            }
-        }
-        catch (Exception ex)
-        {
-            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
-        }
-    }
-    
-    private async Task DeleteAssignment()
-    {
-        try
-        {
-            var response = await ApiCall.Remove<ApiResponse<object>>(
-                await ApiCall.GetHttpClient(), "farmusers/removeuserfromfarm", 
-                $"{selectedAssignment.UserId}?farmId={selectedAssignment.FarmId}");
-                
-            if (response?.Status == (int)HttpStatusCode.OK)
-            {
-                Alert.Show("Assignment successfully deleted", showTitle: true, toastType: ToastType.Success);
-                isDeleteConfirmationVisible = false;
-                await LoadAssignments();
-            }
-            else
-            {
-                Alert.Show(response?.Title ?? "Error deleting assignment", showTitle: true, toastType: ToastType.Danger);
-            }
-        }
-        catch (Exception ex)
-        {
-            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
-        }
-    }
+// Modal visibility
+private bool isNewAssignmentModalVisible = false;
+private bool isEditAssignmentModalVisible = false;
+private bool isDeleteConfirmationVisible = false;
+
+// Selected item
+private FarmUserViewModel selectedAssignment;
+
+// Form models - Initialize with required properties
+private AssignFarmUserViewModel newAssignment = new AssignFarmUserViewModel
+{
+UserId = "",
+FarmId = "",
+Role = ""
+};
+
+private UpdateFarmUserViewModel editAssignmentModel = new UpdateFarmUserViewModel
+{
+ProfileId = "",
+Role = ""
+};
+
+// Filter state
+private string selectedFarmId = "";
+private string selectedRoleFilter = "";
+private string searchText = "";
+
+// Role filter options
+private List<string> roleFilterOptions = new List<string>
+{
+"",
+"SystemAdministrator",
+"Administrator",
+"FarmManager",
+"FieldOfficer",
+"Viewer"
+};
+
+protected override async Task OnInitializedAsync()
+{
+await LoadData();
 }
+
+private async Task LoadData()
+{
+try
+{
+// Load farms
+var farmsResponse = await ApiCall.Get<ApiResponse<List<FarmListViewModel>>>(
+await ApiCall.GetHttpClient(), "farms/getfarmlist");
+
+if (farmsResponse?.Result != null)
+{
+farms = farmsResponse.Result;
+}
+
+// Load users
+var usersResponse = await ApiCall.Get<ApiResponse<List<UserViewModel>>>(
+await ApiCall.GetHttpClient(), "users/getusers");
+
+if (usersResponse?.Result != null)
+{
+availableUsers = usersResponse.Result;
+}
+
+// Load roles
+var rolesResponse = await ApiCall.Get<ApiResponse<List<RoleViewModel>>>(
+await ApiCall.GetHttpClient(), "farmusers/getavailablefarmroles");
+
+if (rolesResponse?.Result != null)
+{
+availableRoles = rolesResponse.Result;
+}
+
+// Load all assignments
+await LoadAssignments();
+}
+catch (Exception ex)
+{
+Alert?.Show($"Error loading data: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+}
+}
+
+private async Task LoadAssignments()
+{
+try
+{
+var allAssignments = new List<FarmUserViewModel>();
+
+// For each farm, get its users
+foreach (var farm in farms)
+{
+var response = await ApiCall.Get<ApiResponse<List<FarmUserViewModel>>>(
+await ApiCall.GetHttpClient(), $"farmusers/getfarmusers?farmId={farm.Id}");
+
+if (response?.Result != null)
+{
+allAssignments.AddRange(response.Result);
+}
+}
+
+assignments = allAssignments;
+ApplyFilters();
+}
+catch (Exception ex)
+{
+Alert?.Show($"Error loading assignments: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+}
+}
+
+private void OnFarmChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, FarmListViewModel> args)
+{
+selectedFarmId = args.Value;
+ApplyFilters();
+}
+
+private void ApplyFilters()
+{
+filteredAssignments = assignments;
+
+// Apply farm filter
+if (!string.IsNullOrEmpty(selectedFarmId))
+{
+filteredAssignments = filteredAssignments.Where(a => a.FarmId == selectedFarmId).ToList();
+}
+
+// Apply role filter
+if (!string.IsNullOrEmpty(selectedRoleFilter))
+{
+filteredAssignments = filteredAssignments.Where(a => a.Role == selectedRoleFilter).ToList();
+}
+
+// Apply search text
+if (!string.IsNullOrEmpty(searchText))
+{
+filteredAssignments = filteredAssignments.Where(a =>
+a.Fullname.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+a.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+a.FarmName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+).ToList();
+}
+}
+
+private void ClearFilters()
+{
+selectedFarmId = "";
+selectedRoleFilter = "";
+searchText = "";
+filteredAssignments = assignments;
+}
+
+private void ShowNewAssignmentModal()
+{
+newAssignment = new AssignFarmUserViewModel
+{
+UserId = "",
+FarmId = selectedFarmId ?? "",
+Role = ""
+};
+isNewAssignmentModalVisible = true;
+}
+
+private void CloseNewAssignmentModal()
+{
+isNewAssignmentModalVisible = false;
+}
+
+private void EditAssignment(FarmUserViewModel assignment)
+{
+selectedAssignment = assignment;
+editAssignmentModel = new UpdateFarmUserViewModel
+{
+ProfileId = assignment.ProfileId,
+Role = assignment.Role,
+IsActive = assignment.IsActive
+};
+isEditAssignmentModalVisible = true;
+}
+
+private void CloseEditAssignmentModal()
+{
+isEditAssignmentModalVisible = false;
+}
+
+private void ConfirmDeleteAssignment(FarmUserViewModel assignment)
+{
+selectedAssignment = assignment;
+isDeleteConfirmationVisible = true;
+}
+
+private void CloseDeleteConfirmation()
+{
+isDeleteConfirmationVisible = false;
+}
+
+private async Task CreateAssignment()
+{
+try
+{
+var response = await ApiCall.Add<ApiResponse<UserProfileViewModel>, AssignFarmUserViewModel>(
+await ApiCall.GetHttpClient(), "farmusers/assignusertofarm", newAssignment);
+
+if (response?.Status == (int)HttpStatusCode.OK)
+{
+Alert?.Show("User successfully assigned to farm", showTitle: true, toastType: ToastType.Success);
+isNewAssignmentModalVisible = false;
+await LoadAssignments();
+}
+else
+{
+Alert?.Show(response?.Title ?? "Error assigning user to farm", showTitle: true, toastType: ToastType.Danger);
+}
+}
+catch (Exception ex)
+{
+Alert?.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+}
+}
+
+private async Task UpdateAssignment()
+{
+try
+{
+var response = await ApiCall.Update<ApiResponse<UserProfileViewModel>, UpdateFarmUserViewModel>(
+await ApiCall.GetHttpClient(), "farmusers/updateuserfarmrole", editAssignmentModel.ProfileId, editAssignmentModel);
+
+if (response?.Status == (int)HttpStatusCode.OK)
+{
+Alert?.Show("Assignment successfully updated", showTitle: true, toastType: ToastType.Success);
+isEditAssignmentModalVisible = false;
+await LoadAssignments();
+}
+else
+{
+Alert?.Show(response?.Title ?? "Error updating assignment", showTitle: true, toastType: ToastType.Danger);
+}
+}
+catch (Exception ex)
+{
+Alert?.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+}
+}
+
+private async Task DeleteAssignment()
+{
+try
+{
+var response = await ApiCall.Remove<ApiResponse<object>>(
+await ApiCall.GetHttpClient(), "farmusers/removeuserfromfarm",
+$"{selectedAssignment.UserId}?farmId={selectedAssignment.FarmId}");
+
+if (response?.Status == (int)HttpStatusCode.OK)
+{
+Alert?.Show("Assignment successfully deleted", showTitle: true, toastType: ToastType.Success);
+isDeleteConfirmationVisible = false;
+await LoadAssignments();
+}
+else
+{
+Alert?.Show(response?.Title ?? "Error deleting assignment", showTitle: true, toastType: ToastType.Danger);
+}
+}
+catch (Exception ex)
+{
+Alert?.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+}
+}
+}
+
+/* Replace the ::deep selector usage with standard CSS selectors */
 
 <style>
     /* Custom styling for inactive assignments */
-    ::deep .inactive-row {
+    .inactive-row {
         opacity: 0.6;
         background-color: #f8f9fa;
     }
     
     /* Role badge styling */
-    ::deep .role-badge {
+    .role-badge {
         padding: 0.25rem 0.5rem;
         border-radius: 0.25rem;
         font-size: 0.75rem;
         font-weight: 600;
     }
     
-    ::deep .role-SystemAdministrator {
+    .role-SystemAdministrator {
         background-color: #dc3545;
         color: white;
     }
     
-    ::deep .role-Administrator {
+    .role-Administrator {
         background-color: #fd7e14;
         color: white;
     }
     
-    ::deep .role-FarmManager {
+    .role-FarmManager {
         background-color: #20c997;
         color: white;
     }
     
-    ::deep .role-FieldOfficer {
+    .role-FieldOfficer {
         background-color: #0dcaf0;
         color: white;
     }
     
-    ::deep .role-Viewer {
+    .role-Viewer {
         background-color: #6c757d;
         color: white;
     }
