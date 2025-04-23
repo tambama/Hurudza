@@ -49,9 +49,9 @@ public class FarmUsersController : ControllerBase
     /// <summary>
     /// Gets all users assigned to a specific farm
     /// </summary>
-    [HttpGet(Name = nameof(GetFarmUsers))]
+    [HttpGet("{farmId}", Name = nameof(GetFarmUsers))]
     [Authorize(Policy = "CanViewUsers")]
-    public async Task<IActionResult> GetFarmUsers([FromQuery] string farmId)
+    public async Task<IActionResult> GetFarmUsers(string farmId)
     {
         try
         {
@@ -92,9 +92,9 @@ public class FarmUsersController : ControllerBase
     /// <summary>
     /// Gets summary statistics about users assigned to a farm
     /// </summary>
-    [HttpGet(Name = nameof(GetFarmUserSummary))]
+    [HttpGet("{farmId}", Name = nameof(GetFarmUserSummary))]
     [Authorize(Policy = "CanViewUsers")]
-    public async Task<IActionResult> GetFarmUserSummary([FromQuery] string farmId)
+    public async Task<IActionResult> GetFarmUserSummary(string farmId)
     {
         try
         {
@@ -135,8 +135,8 @@ public class FarmUsersController : ControllerBase
     /// <summary>
     /// Gets all farm assignments for a specific user
     /// </summary>
-    [HttpGet(Name = nameof(GetUserFarmProfiles))]
-    public async Task<IActionResult> GetUserFarmProfiles([FromQuery] string userId)
+    [HttpGet("{userId}", Name = nameof(GetUserFarmProfiles))]
+    public async Task<IActionResult> GetUserFarmProfiles(string userId)
     {
         try
         {
@@ -370,7 +370,7 @@ public class FarmUsersController : ControllerBase
     /// <summary>
     /// Removes a user from a farm
     /// </summary>
-    [HttpDelete(Name = nameof(RemoveUserFromFarm))]
+    [HttpDelete("{userId}", Name = nameof(RemoveUserFromFarm))]
     [Authorize(Policy = "CanManageUsers")]
     public async Task<IActionResult> RemoveUserFromFarm(string userId, [FromQuery] string farmId)
     {
@@ -417,8 +417,8 @@ public class FarmUsersController : ControllerBase
     /// <summary>
     /// Gets all farms that a user can access
     /// </summary>
-    [HttpGet(Name = nameof(GetAccessibleFarms))]
-    public async Task<IActionResult> GetAccessibleFarms([FromQuery] string userId = null)
+    [HttpGet("{userId}", Name = nameof(GetAccessibleFarms))]
+    public async Task<IActionResult> GetAccessibleFarms(string userId = null)
     {
         try
         {

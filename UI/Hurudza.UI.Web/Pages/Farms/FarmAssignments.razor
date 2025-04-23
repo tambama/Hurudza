@@ -319,7 +319,7 @@
             foreach (var farm in farms)
             {
                 var response = await ApiCall.Get<ApiResponse<List<FarmUserViewModel>>>(
-                    await ApiCall.GetHttpClient(), $"farmusers/getfarmusers?farmId={farm.Id}");
+                    await ApiCall.GetHttpClient(), $"farmusers/getfarmusers/{farm.Id}");
 
                 if (response?.Result != null)
                 {
@@ -493,7 +493,6 @@
             Alert?.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
         }
     }
-
 }
 
 <style>

@@ -149,6 +149,11 @@ public class HurudzaDbContext :
                 .IsRequired();
         });
 
+        builder.Entity<UserProfile>(b =>
+        {
+            b.Property(p => p.Id).ValueGeneratedOnAdd();
+        });
+
         builder.Entity<IdentityClaim>(b =>
         {
             b.Property(p => p.Id)
