@@ -5,6 +5,7 @@
 @using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
 @attribute [Authorize]
 
+@inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JS
 @inject IApiCall ApiCall
 @inject ILogger<Map> Logger
@@ -1976,6 +1977,7 @@
         }
     }
 
+    // Update the ResetFilters method in Map.razor
     async Task ResetFilters()
     {
         await ShowSpinner();
@@ -1984,7 +1986,7 @@
             // Reset filter model
             _filterModel = new FarmFilterModel();
 
-            // Reset filtered farms to all farms
+            // Reset filtered farms to all farms (which are only the ones the user has access to)
             _filteredFarms = _allFarms.ToList();
 
             // Reset map
@@ -2633,7 +2635,7 @@
             _alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
         }
     }
-    
+
     async Task BackToFields()
     {
         await ShowSpinner();
@@ -2770,7 +2772,6 @@
 
     #region Data Loading Helpers
 
-    // Ensure LoadFarms explicitly sets _allFarms
     private async Task LoadFarms()
     {
         try
@@ -2778,9 +2779,21 @@
             _loading = true;
             StateHasChanged();
 
-            // Get farms from API
-            _farms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(
-                await ApiCall.GetHttpClient(), "Farms/getFarms/")).ToList();
+            // Use our new endpoint that automatically handles permissions
+            var response = await ApiCall.Get<ApiResponse<List<FarmViewModel>>>(
+                await ApiCall.GetHttpClient(), "farmusers/getaccessiblefarmdetails");
+
+            if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
+            {
+                _farms = response.Result;
+                Logger.LogInformation($"Loaded {_farms.Count} accessible schools for current user");
+            }
+            else
+            {
+                _farms = new List<FarmViewModel>();
+                Logger.LogWarning("Failed to get accessible farms for user");
+                _alert.Show("Failed to load schools you have access to", showTitle: true, toastType: ToastType.Warning);
+            }
 
             // IMPORTANT: Store all farms for filtering - this must happen here
             _allFarms = new List<FarmViewModel>(_farms); // Use new list to avoid reference issues
@@ -2888,7 +2901,7 @@
 
                     if (validFarms.Any())
                     {
-                        Logger.LogInformation($"Creating map clusters with {validFarms.Count} schools");
+                        Logger.LogInformation($"Creating map clusters with {validFarms.Count} accessible schools");
 
                         // Create the GeoJSON FeatureCollection
                         var featureCollection = new
@@ -2926,7 +2939,7 @@
                         if (validFarms.Count > 1)
                         {
                             // Calculate appropriate zoom level: less zoom for more farms
-                            int zoomLevel = validFarms.Count > 0 ? 7 :
+                            int zoomLevel = validFarms.Count > 50 ? 6 :
                                 validFarms.Count > 25 ? 7 :
                                 validFarms.Count > 10 ? 8 : 9;
 
