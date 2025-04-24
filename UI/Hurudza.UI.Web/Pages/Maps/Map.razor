@@ -123,12 +123,32 @@
     .panel-hidden {
         display: none;
     }
+    
+    /* Field list styles */
+    .field-list {
+        margin-top: 1rem;
+        border-top: 1px solid #e9ecef;
+        padding-top: 1rem;
+    }
+    
+    .field-item {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        padding: 0.75rem;
+        transition: all 0.2s ease;
+    }
+    
+    .field-item:hover {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
 </style>
 
 <Toast @ref="_alert"/>
 
 <div style="height:100%;width:100%;display:flex;flex-direction:row">
-    <!-- Farms List Panel -->
+    <!-- Schools List Panel -->
     <div class="sidebar-container @_showSchools">
         <div class="sidebar-header">
             <div>
@@ -207,7 +227,7 @@
         </div>
     </div>
 
-    <!-- Farm Details Panel -->
+    <!-- School Details Panel with Integrated Fields List -->
     <div class="sidebar-container @_showSchoolDetails">
         <div class="card h-100">
             <div class="card-header pb-0 p-3">
@@ -220,7 +240,7 @@
                         </a>
                     </div>
                     <div class="col-md-7 d-flex align-items-center">
-                        <h6 class="mb-0">School Information</h6>
+                        <h6 class="mb-0">School Details</h6>
                     </div>
                     <div class="col-md-4 text-end">
                         <a href="javascript:;" @onclick="ShowEdit">
@@ -237,7 +257,7 @@
                     @_farm.Description
                 </p>
                 <hr class="horizontal gray-light my-4">
-                <ul class="list-group">
+                @*<ul class="list-group">
                     <li class="list-group-item border-0 ps-0 pt-0 text-sm">
                         <strong class="text-dark">Address:</strong>
                         <div style="word-wrap: break-word;">@_farm.Address</div>
@@ -250,211 +270,59 @@
                         &nbsp; @_farm.Email</li>
                     <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Website:</strong>
                         &nbsp; @_farm.Website</li>
-                </ul>
+                </ul>*@
                 <hr class="horizontal gray-light my-2">
-                <SfAccordion>
-                    <AccordionItems>
-                        <AccordionItem>
-                            <HeaderTemplate>
-                                <div class="col-md-12 d-flex align-items-center">
-                                    <h6 class="mb-0">Basic Information</h6>
-                                </div>
-                            </HeaderTemplate>
-                            <ContentTemplate>
-                                <ul class="list-group">
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong
-                                            class="text-dark">Province:</strong> &nbsp; @_farm.Province</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                            class="text-dark">Region:</strong>
-                                        &nbsp; @(_farm.Region?.ToString() ?? "Not specified")</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">District:</strong>
-                                        &nbsp; @_farm.District</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Local
-                                            Authority:</strong> &nbsp; @_farm.LocalAuthority</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                            class="text-dark">Ward:</strong>
-                                        &nbsp; @_farm.Ward</li>
-                                </ul>
-                            </ContentTemplate>
-                        </AccordionItem>
-                        <AccordionItem>
-                            <HeaderTemplate>
-                                <div class="col-md-12 d-flex align-items-center">
-                                    <h6 class="mb-0">Farm Size</h6>
-                                </div>
-                            </HeaderTemplate>
-                            <ContentTemplate>
-                                <ul class="list-group">
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Total
-                                            Area:</strong>
-                                        &nbsp; @_farm.Size ha
-                                    </li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                            class="text-dark">Arable:</strong>
-                                        &nbsp; @_farm.Arable ha
-                                    </li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                            class="text-dark">Cleared:</strong>
-                                        &nbsp; @_farm.Cleared ha
-                                    </li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                            class="text-dark">Terrain:</strong>
-                                        &nbsp; @(_farm.Terrain?.ToString() ?? "Not specified")</li>
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Location:</strong>
-                                        &nbsp; @_farm.Latitude, @_farm.Longitude</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Altitude:</strong>
-                                        &nbsp; @_farm.Elevation m
-                                    </li>
-                                </ul>
-                            </ContentTemplate>
-                        </AccordionItem>
-                        <AccordionItem>
-                            <HeaderTemplate>
-                                <div class="col-md-12 d-flex align-items-center">
-                                    <h6 class="mb-0">Infrastructure</h6>
-                                </div>
-                            </HeaderTemplate>
-                            <ContentTemplate>
-                                <ul class="list-group">
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Water
-                                            Source:</strong>
-                                        &nbsp; @_farm.WaterSource</li>
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Water
-                                            Availability:</strong>
-                                        &nbsp; @(_farm.WaterAvailability?.ToString() ?? "Not specified")</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Irrigation
-                                            Systems:</strong>
-                                        &nbsp; @_farm.IrrigationSystems</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Buildings:</strong>
-                                        &nbsp; @_farm.Buildings</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Road
-                                            Access:</strong>
-                                        &nbsp; @(_farm.RoadAccess?.ToString() ?? "Not specified")</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Security:</strong>
-                                        &nbsp; @_farm.SecurityMeasures</li>
-                                </ul>
-                            </ContentTemplate>
-                        </AccordionItem>
-                        <AccordionItem>
-                            <HeaderTemplate>
-                                <div class="col-md-12 d-flex align-items-center">
-                                    <h6 class="mb-0">Land Use</h6>
-                                </div>
-                            </HeaderTemplate>
-                            <ContentTemplate>
-                                <ul class="list-group">
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Past
-                                            Crops:</strong>
-                                        &nbsp; @_farm.PastCrops</li>
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Land
-                                            Management:</strong>
-                                        &nbsp; @_farm.LandManagementPractice</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Irrigation
-                                            Systems:</strong>
-                                        &nbsp; @_farm.IrrigationSystems</li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Equipment:</strong>
-                                        &nbsp; @_farm.Equipment</li>
-                                </ul>
-                            </ContentTemplate>
-                        </AccordionItem>
-                    </AccordionItems>
-                </SfAccordion>
-                <hr class="horizontal gray-light my-2">
-                <div class="col-12 text-center mt-1">
-                    <a class="btn bg-gradient-dark mb-0 text-end" href="javascript:;" @onclick="ShowFieldsList">Manage
-                        Fields</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Fields List Panel -->
-    <div class="sidebar-container @_showFields">
-        <div class="card h-100">
-            <div class="card-header pb-0 p-3">
-                <div class="row">
-                    <div class="col-md-1 text-start">
-                        <a href="javascript:;" @onclick="GoBackToSchool">
-                            <i class="fas fa-arrow-left text-secondary text-sm" data-bs-toggle="tooltip"
-                               data-bs-placement="top" aria-hidden="true" aria-label="Go Back"
-                               data-bs-original-title="Go Back"></i><span class="sr-only">Go Back</span>
-                        </a>
-                    </div>
-                    <div class="col-md-7 d-flex align-items-center">
+                
+                <!-- Fields Section - Integrated directly into school details -->
+                <div class="field-list">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="mb-0">Fields</h6>
+                        <button class="btn btn-sm btn-success" @onclick="ShowEditField">
+                            <i class="fas fa-plus me-1"></i> Add Field
+                        </button>
                     </div>
-                    <div class="col-md-4 text-end">
-                        <a href="javascript:;" @onclick="ShowEditField" class="mx-4" title="Add Field">
-                            <i class="fas fa-plus text-secondary text-sm" data-bs-toggle="tooltip"
-                               data-bs-placement="top" aria-hidden="true" aria-label="Add Field"
-                               data-bs-original-title="Add Field"></i><span class="sr-only">Add Field</span>
-                        </a>
-                        <a href="javascript:;" @onclick="ShowUploadFields" title="Upload KML">
-                            <i class="fas fa-upload text-secondary text-sm" data-bs-toggle="tooltip"
-                               data-bs-placement="top" aria-hidden="true" aria-label="Upload Fields File"
-                               data-bs-original-title="Upload KML"></i><span class="sr-only">Upload KML</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body p-3">
-                <h5 class="mb-0">@_farm.Name</h5>
-                <hr class="horizontal gray-light my-4">
-
-                @if (_fields == null || !_fields.Any())
-                {
-                    <div class="text-center py-4">
-                        <p>No fields found for this school.</p>
-                        <button class="btn btn-sm btn-success" @onclick="ShowEditField">Add Field</button>
-                    </div>
-                }
-                else
-                {
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" placeholder="Search fields..."
-                               @bind-value="_fieldSearchTerm" @bind-value:event="oninput" @onkeyup="FilterFields">
-                        @if (!string.IsNullOrEmpty(_fieldSearchTerm))
-                        {
-                            <button class="btn btn-outline-secondary" type="button" @onclick="ClearFieldSearch">
-                                <i class="fa fa-times"></i>
-                            </button>
-                        }
-                    </div>
-
-                    <!-- Modified ListView with mouseover events -->
-                    <SfListView DataSource="@_filteredFields" Height="calc(100vh - 240px)">
-                        <ListViewFieldSettings TValue="FieldViewModel" Id="Id" Text="Name"></ListViewFieldSettings>
-                        <ListViewTemplates TValue="FieldViewModel">
-                            <Template>
-                                @{
-                                    FieldViewModel field = (FieldViewModel)context;
-                                    <div class="e-list-wrapper e-list-multi-line"
-                                         @onclick="(e => OnFieldSelect(field))"
-                                         @onmouseover="(e => HighlightField(field))"
-                                         @onmouseout="(e => UnhighlightField(field))">
-                                        <div class="e-list-item-header text-truncate">@field.Name</div>
-                                        <div class="e-list-content"
-                                             style="white-space: normal; font-size: 13px; padding-top: 4px;">
-                                            <div class="d-flex flex-wrap">
-                                                <span
-                                                    class="me-2 mb-1 badge bg-light text-dark">@field.SoilType.ToString()</span>
-                                                <span class="me-2 mb-1 badge bg-light text-dark">@field.Size ha</span>
-                                                <span
-                                                    class="mb-1 badge @(field.Irrigation ? "bg-success" : "bg-secondary")">
-                                                    @(field.Irrigation ? "Irrigated" : "Non-irrigated")
-                                                </span>
-                                            </div>
-                                            @if (!string.IsNullOrEmpty(field.Description))
-                                            {
-                                                <div
-                                                    class="text-muted mt-1 small">@(field.Description.Length > 50 ? field.Description.Substring(0, 50) + "..." : field.Description)</div>
-                                            }
+                    
+                    @if (_fieldsLoading)
+                    {
+                        <div class="text-center py-2">
+                            <SfSpinner></SfSpinner>
+                            <p class="mt-2">Loading fields...</p>
+                        </div>
+                    }
+                    else if (_fields == null || !_fields.Any())
+                    {
+                        <div class="alert alert-info text-center">
+                            <p>No fields have been added to this school.</p>
+                            <button class="btn btn-sm btn-success mt-2" @onclick="ShowEditField">Add Field</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="field-list-container">
+                            @foreach (var field in _fields)
+                            {
+                                <div class="field-item" @onclick="() => OnFieldSelect(field)" @onmouseover="() => HighlightField(field)" @onmouseout="() => UnhighlightField(field)">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <h6 class="mb-0">@field.Name</h6>
+                                        <div>
+                                            <span class="badge bg-light text-dark me-1">@field.Size ha</span>
+                                            <span class="badge @(field.Irrigation ? "bg-success" : "bg-secondary")">
+                                                @(field.Irrigation ? "Irrigated" : "Non-irrigated")
+                                            </span>
                                         </div>
-                                    </div>}
-                            </Template>
-                        </ListViewTemplates>
-                    </SfListView>
-                }
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(field.Description))
+                                    {
+                                        <p class="text-muted small mb-0">@(field.Description.Length > 100 ? field.Description.Substring(0, 100) + "..." : field.Description)</p>
+                                    }
+                                    <div class="mt-2">
+                                        <small class="text-muted">Soil Type: @field.SoilType</small>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -465,7 +333,7 @@
             <div class="card-header pb-0 p-3">
                 <div class="row">
                     <div class="col-md-1 text-start">
-                        <a href="javascript:;" @onclick="BackToFields">
+                        <a href="javascript:;" @onclick="GoBackToSchool">
                             <i class="fas fa-arrow-left text-secondary text-sm" data-bs-toggle="tooltip"
                                data-bs-placement="top" aria-hidden="true" aria-label="Go Back"
                                data-bs-original-title="Go Back"></i><span class="sr-only">Go Back</span>
@@ -715,7 +583,7 @@
                     <h5>Edit Field</h5>
                 }
             </div>
-            <button class="btn bg-white btn-icon-only" @onclick="BackToFields">
+            <button class="btn bg-white btn-icon-only" @onclick="CancelFieldEdit">
                 <i class="fa fa-times"></i>
             </button>
         </div>
@@ -811,7 +679,7 @@
 
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-lg bg-gradient-success w-100 mb-3">Save</button>
-                    <button type="button" class="btn btn-lg bg-gradient-secondary w-100" @onclick="BackToFields">
+                    <button type="button" class="btn btn-lg bg-gradient-secondary w-100" @onclick="CancelFieldEdit">
                         Cancel
                     </button>
                 </div>
@@ -1079,6 +947,7 @@
     private bool _showCoordinateForm = false;
     private bool _editingCoordinate = false;
     private bool _loading = true;
+    private bool _fieldsLoading = false;
     private bool _loadingKml = false;
     private string _searchTerm = string.Empty;
     private string _fieldSearchTerm = string.Empty;
@@ -1088,7 +957,6 @@
     private string _showSchools = "";
     private string _showAddSchool = "panel-hidden";
     private string _showSchoolDetails = "panel-hidden";
-    private string _showFields = "panel-hidden";
     private string _showFieldEdit = "panel-hidden";
     private string _showFieldDetails = "panel-hidden";
 
@@ -1233,16 +1101,8 @@
                 // Refresh field list
                 await LoadFields(_farm.Id);
 
-                // Select the field if it's a new one
-                if (isNewField && response.Result != null)
-                {
-                    await OnFieldSelect(response.Result);
-                }
-                else
-                {
-                    // Go back to fields list
-                    await BackToFields();
-                }
+                // Go back to school details view showing updated fields
+                CancelFieldEdit();
             }
             else
             {
@@ -1557,13 +1417,15 @@
             _showSchools = "panel-hidden";
             _showAddSchool = "panel-hidden";
             _showSchoolDetails = "";
-            _showFields = "panel-hidden";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "panel-hidden";
 
+            // Load fields for this farm
+            await LoadFields(_farm.Id);
+
             // Ensure UI state is updated before map operations
-            //StateHasChanged();
-            //await Task.Delay(150);
+            StateHasChanged();
+            await Task.Delay(150);
 
             if (_mapModule is not null)
             {
@@ -1620,9 +1482,6 @@
                     ).AsTask();
                 }
             }
-
-            // Load fields for this farm
-            await LoadFields(farm.Id);
         }
         catch (Exception ex)
         {
@@ -1668,7 +1527,6 @@
             _showSchools = "panel-hidden";
             _showAddSchool = "panel-hidden";
             _showSchoolDetails = "panel-hidden";
-            _showFields = "panel-hidden";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "";
 
@@ -2395,7 +2253,6 @@
             _showSchools = "panel-hidden";
             _showAddSchool = "";
             _showSchoolDetails = "panel-hidden";
-            _showFields = "panel-hidden";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "panel-hidden";
 
@@ -2415,7 +2272,6 @@
             _showSchools = "";
             _showAddSchool = "panel-hidden";
             _showSchoolDetails = "panel-hidden";
-            _showFields = "panel-hidden";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "panel-hidden";
         }
@@ -2427,7 +2283,6 @@
         _showSchools = "";
         _showAddSchool = "panel-hidden";
         _showSchoolDetails = "panel-hidden";
-        _showFields = "panel-hidden";
         _showFieldEdit = "panel-hidden";
         _showFieldDetails = "panel-hidden";
 
@@ -2442,7 +2297,6 @@
         _showSchools = "panel-hidden";
         _showAddSchool = "panel-hidden";
         _showSchoolDetails = "";
-        _showFields = "panel-hidden";
         _showFieldEdit = "panel-hidden";
         _showFieldDetails = "panel-hidden";
     }
@@ -2452,7 +2306,6 @@
         _showSchools = "panel-hidden";
         _showAddSchool = "";
         _showSchoolDetails = "panel-hidden";
-        _showFields = "panel-hidden";
         _showFieldEdit = "panel-hidden";
         _showFieldDetails = "panel-hidden";
     }
@@ -2465,7 +2318,6 @@
             _showSchools = "panel-hidden";
             _showAddSchool = "panel-hidden";
             _showSchoolDetails = "";
-            _showFields = "panel-hidden";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "panel-hidden";
         }
@@ -2475,7 +2327,6 @@
             _showSchools = "";
             _showAddSchool = "panel-hidden";
             _showSchoolDetails = "panel-hidden";
-            _showFields = "panel-hidden";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "panel-hidden";
         }
@@ -2506,7 +2357,6 @@
             _showSchools = "panel-hidden";
             _showAddSchool = "panel-hidden";
             _showSchoolDetails = "panel-hidden";
-            _showFields = "panel-hidden";
             _showFieldEdit = "";
             _showFieldDetails = "panel-hidden";
 
@@ -2579,7 +2429,6 @@
             _showSchools = "panel-hidden";
             _showAddSchool = "panel-hidden";
             _showSchoolDetails = "panel-hidden";
-            _showFields = "panel-hidden";
             _showFieldEdit = ""; // Show the edit form
             _showFieldDetails = "panel-hidden";
 
@@ -2601,146 +2450,17 @@
         }
     }
 
-    async Task CancelFieldEdit()
+    void CancelFieldEdit()
     {
-        try
-        {
-            Logger.LogInformation("Canceling field edit");
-
-            // Clear any drawings
-            if (_drawControl != null)
-            {
-                await _mapModule.InvokeVoidAsync("clearAllDrawings", _drawControl, DELETE_BUTTON_ID);
-            }
-
-            // Make sure drawing mode is off
-            if (_isInDrawingMode && _mapModule != null)
-            {
-                await _mapModule.InvokeAsync<bool>("toggleDrawingMode", _mapInstance, _drawControl, _dotNetRef, false);
-                _isInDrawingMode = false;
-            }
-
-            // Hide drawing button
-            await _mapModule.InvokeVoidAsync("toggleDrawButtonVisibility", false);
-
-            // Reset coordinates
-            _drawnCoordinates = new List<List<double>>();
-
-            // Go back to fields list
-            await BackToFields();
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error canceling field edit: {Message}", ex.Message);
-            _alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
-        }
-    }
-
-    async Task BackToFields()
-    {
-        await ShowSpinner();
-
-        try
-        {
-            Logger.LogInformation("Navigating back to fields list");
-
-            // Disable drawing mode when going back
-            if (_mapModule != null && _drawControl != null)
-            {
-                // Clear any existing drawings
-                await _mapModule.InvokeVoidAsync("clearAllDrawings", _drawControl, DELETE_BUTTON_ID);
-
-                // Make sure drawing mode is off
-                if (_isInDrawingMode)
-                {
-                    await _mapModule.InvokeAsync<bool>("toggleDrawingMode", _mapInstance, _drawControl, _dotNetRef, false);
-                    _isInDrawingMode = false;
-                }
-            }
-
-            // Hide drawing button when leaving field edit mode
-            await _mapModule.InvokeVoidAsync("toggleDrawButtonVisibility", false);
-
-            // Update UI state
-            _showSchools = "panel-hidden";
-            _showAddSchool = "panel-hidden";
-            _showSchoolDetails = "panel-hidden";
-            _showFields = "";
-            _showFieldEdit = "panel-hidden";
-            _showFieldDetails = "panel-hidden";
-
-            // Reset coordinate form
-            ResetCoordinateForm();
-
-            // Clear drawn coordinates
-            _drawnCoordinates = new List<List<double>>();
-
-            // When going back to fields list, redraw the farm and all its fields
-            if (_mapModule != null)
-            {
-                // Get farm details
-                var farmMap = await ApiCall.Get<FarmMapViewModel>(
-                    await ApiCall.GetHttpClient(), $"farms/GetFarmDetails/{_farm.Id}");
-
-                // Draw the farm boundary with clearExisting=true to clear the map first
-                if (farmMap.IsPolygon)
-                {
-                    await _mapModule.InvokeVoidAsync("drawPolygon",
-                        _mapInstance,
-                        _farm.Id,
-                        farmMap.FarmPolygon,
-                        false, // Not a field
-                        _farm.Name,
-                        null, // No crop data
-                        true // Clear existing layers
-                    ).AsTask();
-                }
-
-                // Draw all fields inside the farm boundary
-                foreach (var field in farmMap.Fields)
-                {
-                    await DrawFieldWithCropData(field);
-                }
-            }
-
-            Logger.LogInformation("Fields view displayed");
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error returning to fields view: {Message}", ex.Message);
-            _alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
-        }
-        finally
-        {
-            await HideSpinner();
-        }
-    }
-
-    async Task ShowFieldsList()
-    {
-        await LoadFields(_farm.Id);
-
+        // Go back to school details view
         _showSchools = "panel-hidden";
         _showAddSchool = "panel-hidden";
-        _showSchoolDetails = "panel-hidden";
-        _showFields = "";
+        _showSchoolDetails = "";
         _showFieldEdit = "panel-hidden";
         _showFieldDetails = "panel-hidden";
     }
 
-    void ShowUploadFields()
-    {
-        _showUploadFieldsDialog = true;
-        _loadedKmlFile = null;
-    }
-
-    void CloseKmlUploadDialog()
-    {
-        _showUploadFieldsDialog = false;
-        _loadedKmlFile = null;
-    }
-
-    void AddCoordinate()
+    async Task AddCoordinate()
     {
         _fieldLocation = new FieldLocationViewModel
         {
@@ -2766,6 +2486,18 @@
     {
         _showDeleteCoordinateDialog = false;
         _fieldLocation = new FieldLocationViewModel();
+    }
+
+    void ShowUploadFields()
+    {
+        _showUploadFieldsDialog = true;
+        _loadedKmlFile = null;
+    }
+
+    void CloseKmlUploadDialog()
+    {
+        _showUploadFieldsDialog = false;
+        _loadedKmlFile = null;
     }
 
     #endregion
@@ -2822,6 +2554,9 @@
     {
         try
         {
+            _fieldsLoading = true;
+            StateHasChanged();
+            
             _fields = (await ApiCall.Get<IEnumerable<FieldViewModel>>(
                 await ApiCall.GetHttpClient(), $"fields/getfarmfields/{farmId}")).ToList();
 
@@ -2833,6 +2568,11 @@
             Logger.LogError(ex, "Error loading fields");
             _fields = new List<FieldViewModel>();
             _filteredFields = new List<FieldViewModel>();
+        }
+        finally
+        {
+            _fieldsLoading = false;
+            StateHasChanged();
         }
     }
 
@@ -3140,5 +2880,4 @@
         public bool Success { get; set; }
         public string Message { get; set; }
     }
-
 }
