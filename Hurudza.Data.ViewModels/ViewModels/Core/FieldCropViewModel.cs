@@ -15,4 +15,6 @@ public class FieldCropViewModel : BaseViewModel
     public bool Irrigation { get; set; }
     public string? Field { get; set; }
     public string? Crop { get; set; }
+    public string Farm { get; set; }
+    public string FarmId { get; set; }
 }

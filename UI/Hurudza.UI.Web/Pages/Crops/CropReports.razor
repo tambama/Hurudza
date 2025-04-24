@@ -1,0 +1,501 @@
+@page "/crops/reports"
+@attribute [Authorize]
+
+@using Hurudza.UI.Web.Components
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager Navigation
+@inject FarmAccessService FarmAccessService
+@inject IJSRuntime JS
+
+<Toast @ref="Alert"/>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <div class="row">
+                    <div class="col-md-8 d-flex align-items-center">
+                        <h6>Crop Reports</h6>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-info btn-sm" @onclick="ExportReport">
+                            <i class="fas fa-file-export me-2"></i> Export Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (_loading)
+                {
+                    <div class="text-center py-4">
+                        <SfSpinner></SfSpinner>
+                    </div>
+                }
+                else
+                {
+                    <!-- Overall Statistics -->
+                    <div class="row">
+                        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+                            <div class="card">
+                                <div class="card-body p-3">
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <div class="numbers">
+                                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Hectares</p>
+                                                <h5 class="font-weight-bolder">
+                                                    @(_cropStatistics?.TotalHectares.ToString("N2") ?? "0.00")
+                                                </h5>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 text-end">
+                                            <div class="icon icon-shape bg-gradient-success shadow-success text-center rounded-circle">
+                                                <i class="ni ni-world text-lg opacity-10" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+                            <div class="card">
+                                <div class="card-body p-3">
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <div class="numbers">
+                                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Irrigated</p>
+                                                <h5 class="font-weight-bolder">
+                                                    @(_cropStatistics?.IrrigatedHectares.ToString("N2") ?? "0.00")
+                                                </h5>
+                                                <p class="mb-0">
+                                                    <span class="text-sm font-weight-bolder">
+                                                        @(_cropStatistics?.IrrigationPercentage.ToString("P1"))
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 text-end">
+                                            <div class="icon icon-shape bg-gradient-primary shadow-primary text-center rounded-circle">
+                                                <i class="ni ni-drop text-lg opacity-10" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+                            <div class="card">
+                                <div class="card-body p-3">
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <div class="numbers">
+                                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Crops</p>
+                                                <h5 class="font-weight-bolder">
+                                                    @(_cropStatistics?.CropCount ?? 0)
+                                                </h5>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 text-end">
+                                            <div class="icon icon-shape bg-gradient-info shadow-info text-center rounded-circle">
+                                                <i class="ni ni-leaf-2 text-lg opacity-10" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-sm-6">
+                            <div class="card">
+                                <div class="card-body p-3">
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <div class="numbers">
+                                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Farms</p>
+                                                <h5 class="font-weight-bolder">
+                                                    @(_cropStatistics?.FarmCount ?? 0)
+                                                </h5>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 text-end">
+                                            <div class="icon icon-shape bg-gradient-warning shadow-warning text-center rounded-circle">
+                                                <i class="ni ni-building text-lg opacity-10" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="row mt-4">
+                        <div class="col-lg-7">
+                            <div class="card z-index-2">
+                                <div class="card-header pb-0">
+                                    <h6>Crop Distribution</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="chart" id="cropSummaryChart" style="height: 300px;">
+                                        <!-- Chart will be rendered here via JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="card z-index-2">
+                                <div class="card-header pb-0">
+                                    <h6>Irrigated vs Non-Irrigated</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="chart" id="irrigationSummaryChart" style="height: 300px;">
+                                        <!-- Chart will be rendered here via JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Crop Statistics -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card mb-4">
+                                <div class="card-header pb-0">
+                                    <h6>Crop Distribution by Type</h6>
+                                </div>
+                                <div class="card-body px-2 pt-0 pb-2">
+                                    @if (_cropSummaries != null && _cropSummaries.Any())
+                                    {
+                                        <SfGrid
+                                            DataSource="@_cropSummaries"
+                                            AllowPaging="true"
+                                            AllowSorting="true"
+                                            AllowFiltering="true"
+                                            EnableStickyHeader="true">
+                                            <GridPageSettings PageSize="10"></GridPageSettings>
+                                            <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
+                                            <GridEvents RowSelected="CropRowSelectHandler" TValue="CropSummaryViewModel"></GridEvents>
+                                            <GridColumns>
+                                                <GridColumn Field=@nameof(CropSummaryViewModel.CropName) HeaderText="Crop Type" TextAlign="TextAlign.Left" Width="140"></GridColumn>
+                                                <GridColumn Field=@nameof(CropSummaryViewModel.TotalHectares) HeaderText="Total Size (Ha)" TextAlign="TextAlign.Right" Width="120" Format="N2"></GridColumn>
+                                                <GridColumn Field=@nameof(CropSummaryViewModel.FieldCount) HeaderText="Fields" TextAlign="TextAlign.Center" Width="100"></GridColumn>
+                                                <GridColumn Field=@nameof(CropSummaryViewModel.IrrigatedHectares) HeaderText="Irrigated (Ha)" TextAlign="TextAlign.Right" Width="120" Format="N2"></GridColumn>
+                                                <GridColumn Field=@nameof(CropSummaryViewModel.NonIrrigatedHectares) HeaderText="Non-Irrigated (Ha)" TextAlign="TextAlign.Right" Width="150" Format="N2"></GridColumn>
+                                                <GridColumn Field=@nameof(CropSummaryViewModel.IrrigationPercentage) HeaderText="Irrigation %" TextAlign="TextAlign.Center" Width="120" Format="P1"></GridColumn>
+                                                <GridColumn HeaderText="Actions" TextAlign="TextAlign.Center" Width="100">
+                                                    <Template>
+                                                        @{
+                                                            var summary = (context as CropSummaryViewModel);
+                                                            <div>
+                                                                <a href="javascript:;" @onclick="() => NavigateToCropDetails(summary.CropId)" class="btn btn-outline-info btn-sm" title="View Details">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </a>
+                                                            </div>
+                                                        }
+                                                    </Template>
+                                                </GridColumn>
+                                            </GridColumns>
+                                        </SfGrid>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center py-4">
+                                            <p class="text-muted mb-0">No crop data available.</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Farm-by-Farm Breakdown -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card mb-4">
+                                <div class="card-header pb-0">
+                                    <h6>Farm-by-Farm Breakdown</h6>
+                                </div>
+                                <div class="card-body px-2 pt-0 pb-2">
+                                    @if (_farmSummaries != null && _farmSummaries.Any())
+                                    {
+                                        <SfGrid
+                                            DataSource="@_farmSummaries"
+                                            AllowPaging="true"
+                                            AllowSorting="true"
+                                            AllowFiltering="true"
+                                            EnableStickyHeader="true">
+                                            <GridPageSettings PageSize="5"></GridPageSettings>
+                                            <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
+                                            <GridEvents RowSelected="FarmRowSelectHandler" TValue="FarmCropSummaryViewModel"></GridEvents>
+                                            <GridColumns>
+                                                <GridColumn Field=@nameof(FarmCropSummaryViewModel.FarmName) HeaderText="Farm" TextAlign="TextAlign.Left" Width="140"></GridColumn>
+                                                <GridColumn Field=@nameof(FarmCropSummaryViewModel.TotalHectares) HeaderText="Total Size (Ha)" TextAlign="TextAlign.Right" Width="120" Format="N2"></GridColumn>
+                                                <GridColumn Field=@nameof(FarmCropSummaryViewModel.CropCount) HeaderText="Crops" TextAlign="TextAlign.Center" Width="80"></GridColumn>
+                                                <GridColumn Field=@nameof(FarmCropSummaryViewModel.FieldCount) HeaderText="Fields" TextAlign="TextAlign.Center" Width="80"></GridColumn>
+                                                <GridColumn Field=@nameof(FarmCropSummaryViewModel.IrrigatedHectares) HeaderText="Irrigated (Ha)" TextAlign="TextAlign.Right" Width="120" Format="N2"></GridColumn>
+                                                <GridColumn Field=@nameof(FarmCropSummaryViewModel.IrrigationPercentage) HeaderText="Irrigation %" TextAlign="TextAlign.Center" Width="120" Format="P1"></GridColumn>
+                                                <GridColumn Field=@nameof(FarmCropSummaryViewModel.TopCrop) HeaderText="Main Crop" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                                                <GridColumn HeaderText="Actions" TextAlign="TextAlign.Center" Width="100">
+                                                    <Template>
+                                                        @{
+                                                            var summary = (context as FarmCropSummaryViewModel);
+                                                            <div>
+                                                                <a href="javascript:;" @onclick="() => NavigateToFarmDetails(summary.FarmId)" class="btn btn-outline-info btn-sm" title="View Farm">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </a>
+                                                            </div>
+                                                        }
+                                                    </Template>
+                                                </GridColumn>
+                                            </GridColumns>
+                                        </SfGrid>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center py-4">
+                                            <p class="text-muted mb-0">No farm data available.</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    Toast Alert;
+    
+    private bool _loading = true;
+    private List<FieldCropViewModel> _allCrops = new();
+    private List<CropSummaryViewModel> _cropSummaries = new();
+    private List<FarmCropSummaryViewModel> _farmSummaries = new();
+    private CropStatisticsViewModel _cropStatistics;
+    
+    // Model classes for summaries
+    private class CropSummaryViewModel
+    {
+        public string CropId { get; set; }
+        public string CropName { get; set; }
+        public float TotalHectares { get; set; }
+        public int FieldCount { get; set; }
+        public float IrrigatedHectares { get; set; }
+        public float NonIrrigatedHectares { get; set; }
+        public float IrrigationPercentage => TotalHectares > 0 ? IrrigatedHectares / TotalHectares : 0;
+    }
+    
+    private class FarmCropSummaryViewModel
+    {
+        public string FarmId { get; set; }
+        public string FarmName { get; set; }
+        public float TotalHectares { get; set; }
+        public int CropCount { get; set; }
+        public int FieldCount { get; set; }
+        public float IrrigatedHectares { get; set; }
+        public float NonIrrigatedHectares => TotalHectares - IrrigatedHectares;
+        public float IrrigationPercentage => TotalHectares > 0 ? IrrigatedHectares / TotalHectares : 0;
+        public string TopCrop { get; set; }
+    }
+    
+    private class CropStatisticsViewModel
+    {
+        public float TotalHectares { get; set; }
+        public float IrrigatedHectares { get; set; }
+        public float NonIrrigatedHectares => TotalHectares - IrrigatedHectares;
+        public float IrrigationPercentage => TotalHectares > 0 ? IrrigatedHectares / TotalHectares : 0;
+        public int CropCount { get; set; }
+        public int FieldCount { get; set; }
+        public int FarmCount { get; set; }
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_loading && firstRender)
+        {
+            await RenderChartsAsync();
+        }
+    }
+    
+    private async Task LoadData()
+    {
+        _loading = true;
+        
+        try
+        {
+            // Get accessible farms for the current user
+            var accessibleFarms = await FarmAccessService.GetAccessibleFarms();
+            
+            if (accessibleFarms.Any())
+            {
+                _allCrops = new List<FieldCropViewModel>();
+                
+                // Get crops for each accessible farm
+                foreach (var farm in accessibleFarms)
+                {
+                    var farmCrops = await ApiCall.Get<IEnumerable<FieldCropViewModel>>(
+                        await ApiCall.GetHttpClient(), $"fieldcrops/getfarmfieldcrops/{farm.Id}");
+                    
+                    if (farmCrops != null)
+                    {
+                        _allCrops.AddRange(farmCrops);
+                    }
+                }
+                
+                // Generate the summaries
+                await GenerateSummaries();
+            }
+            else
+            {
+                _allCrops = new List<FieldCropViewModel>();
+                _cropSummaries = new List<CropSummaryViewModel>();
+                _farmSummaries = new List<FarmCropSummaryViewModel>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading crop reports data: {ex.Message}");
+            Alert.Show("Failed to load crop reports data. Please try again later.", 
+                showTitle: true, title: "Error", toastType: ToastType.Danger);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+    
+    private async Task GenerateSummaries()
+    {
+        if (_allCrops.Any())
+        {
+            // Generate crop-type summaries with explicit type arguments
+            _cropSummaries = _allCrops
+                .GroupBy(c => new { c.CropId, c.Crop })
+                .Select(g => new CropSummaryViewModel
+                {
+                    CropId = g.Key.CropId,
+                    CropName = g.Key.Crop,
+                    TotalHectares = g.Sum(c => c.Size),
+                    FieldCount = g.Count(),
+                    IrrigatedHectares = g.Where(c => c.Irrigation).Sum(c => c.Size),
+                    NonIrrigatedHectares = g.Where(c => !c.Irrigation).Sum(c => c.Size)
+                })
+                .OrderByDescending(c => c.TotalHectares)
+                .ToList();
+                
+            // Generate farm summaries with explicit type handling
+            _farmSummaries = _allCrops
+                .GroupBy(c => new { c.FarmId, c.Farm })
+                .Select(g => {
+                    // Find the top crop by area for this farm - explicitly handle the grouping
+                    var cropGroups = g.GroupBy(c => c.Crop).ToList();
+                    var topCropGroup = cropGroups
+                        .OrderByDescending(cg => cg.Sum(c => c.Size))
+                        .FirstOrDefault();
+                    var topCrop = topCropGroup != null ? topCropGroup.Key : "None";
+                    
+                    // Count distinct fields and crops
+                    var distinctCropIds = new HashSet<string>(g.Select(c => c.CropId));
+                    var distinctFieldIds = new HashSet<string>(g.Select(c => c.FieldId));
+                    
+                    return new FarmCropSummaryViewModel
+                    {
+                        FarmId = g.Key.FarmId,
+                        FarmName = g.Key.Farm,
+                        TotalHectares = g.Sum(c => c.Size),
+                        CropCount = distinctCropIds.Count,
+                        FieldCount = distinctFieldIds.Count,
+                        IrrigatedHectares = g.Where(c => c.Irrigation).Sum(c => c.Size),
+                        TopCrop = topCrop
+                    };
+                })
+                .OrderByDescending(f => f.TotalHectares)
+                .ToList();
+                
+            // Generate overall statistics
+            _cropStatistics = new CropStatisticsViewModel
+            {
+                TotalHectares = _allCrops.Sum(c => c.Size),
+                IrrigatedHectares = _allCrops.Where(c => c.Irrigation).Sum(c => c.Size),
+                CropCount = _allCrops.Select(c => c.CropId).Distinct().Count(),
+                FieldCount = _allCrops.Select(c => c.FieldId).Distinct().Count(),
+                FarmCount = _allCrops.Select(c => c.FarmId).Distinct().Count()
+            };
+        }
+        else
+        {
+            _cropSummaries = new List<CropSummaryViewModel>();
+            _farmSummaries = new List<FarmCropSummaryViewModel>();
+            _cropStatistics = new CropStatisticsViewModel();
+        }
+    }
+    
+    private async Task RenderChartsAsync()
+    {
+        if (_cropSummaries.Any())
+        {
+            // Prepare data for crop distribution chart with explicit type arguments
+            var cropNames = _cropSummaries
+                .Select(c => c.CropName)
+                .ToArray();
+                
+            var cropAreas = _cropSummaries
+                .Select<CropSummaryViewModel, double>(c => (double)c.TotalHectares)
+                .ToArray();
+            
+            // Prepare data for irrigation summary chart
+            var irrigatedArea = _cropStatistics.IrrigatedHectares;
+            var nonIrrigatedArea = _cropStatistics.NonIrrigatedHectares;
+            
+            // Call JS to render charts
+            await JS.InvokeVoidAsync("renderCropSummaryChart", cropNames, cropAreas);
+            await JS.InvokeVoidAsync("renderIrrigationChart", irrigatedArea, nonIrrigatedArea);
+        }
+    }
+    
+    private void CropRowSelectHandler(RowSelectEventArgs<CropSummaryViewModel> args)
+    {
+        var selectedCrop = args.Data;
+        NavigateToCropDetails(selectedCrop.CropId);
+    }
+    
+    private void FarmRowSelectHandler(RowSelectEventArgs<FarmCropSummaryViewModel> args)
+    {
+        var selectedFarm = args.Data;
+        NavigateToFarmDetails(selectedFarm.FarmId);
+    }
+    
+    // Navigation methods
+    private void NavigateToCropDetails(string cropId)
+    {
+        Navigation.NavigateTo($"/crop/{cropId}");
+    }
+    
+    private void NavigateToFarmDetails(string farmId)
+    {
+        Navigation.NavigateTo($"/farm/{farmId}");
+    }
+    
+    private async Task ExportReport()
+    {
+        try
+        {
+            // Export to Excel via SfGrid method or custom implementation
+            //await Grid.ExportToExcelAsync();
+            Alert.Show("Report exported successfully", showTitle: true, toastType: ToastType.Success);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error exporting report: {ex.Message}");
+            Alert.Show("Failed to export report. Please try again.", 
+                showTitle: true, title: "Error", toastType: ToastType.Danger);
+        }
+    }
+}

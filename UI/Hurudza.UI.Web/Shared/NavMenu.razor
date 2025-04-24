@@ -1,8 +1,13 @@
-﻿@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+﻿@using Hurudza.Data.Data
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.UI.Web.Models
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
 @inject ILocalStorageService LocalStorageService
 @inject IApiCall ApiCall
+@inject FarmAccessService FarmAccessService
 
 <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main">
     <div class="sidenav-header">
@@ -33,9 +38,115 @@
                             </g>
                         </svg>
                     </div>
+                    <span class="nav-link-text ms-1">Dashboard</span>
+                </a>
+            </li>
+            
+            <li class="nav-item mt-3">
+                <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Farm Management</h6>
+            </li>
+            
+            @if (_accessibleFarms != null && _accessibleFarms.Any())
+            {
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#farmsSection" class="nav-link @FarmsActive" aria-controls="farmsSection" role="button" aria-expanded="@(_farmsExpanded ? "true" : "false")">
+                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="ni ni-building text-lg opacity-10" aria-hidden="true"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Farms</span>
+                    </a>
+                    <div class="collapse @(_farmsExpanded ? "show" : "")" id="farmsSection">
+                        <ul class="nav ms-4 ps-3">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/farms" onclick="@ActivateFarms">
+                                    <span class="sidenav-mini-icon"> F </span>
+                                    <span class="sidenav-normal"> All Farms </span>
+                                </a>
+                            </li>
+                            @foreach (var farm in _accessibleFarms)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/farm/@farm.Id" onclick="@(() => ActivateFarm(farm.Id))">
+                                        <span class="sidenav-mini-icon"> @farm.Name.Substring(0, 1) </span>
+                                        <span class="sidenav-normal text-truncate" style="max-width: 150px;"> @farm.Name </span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </li>
+                
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#fieldsSection" class="nav-link @FieldsActive" aria-controls="fieldsSection" role="button" aria-expanded="@(_fieldsExpanded ? "true" : "false")">
+                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="ni ni-map-big text-lg opacity-10" aria-hidden="true"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Fields</span>
+                    </a>
+                    <div class="collapse @(_fieldsExpanded ? "show" : "")" id="fieldsSection">
+                        <ul class="nav ms-4 ps-3">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/fields" onclick="@ActivateFields">
+                                    <span class="sidenav-mini-icon"> A </span>
+                                    <span class="sidenav-normal"> All Fields </span>
+                                </a>
+                            </li>
+                            @if (_hasFieldManagePermission)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/fields/create" onclick="@ActivateFields">
+                                        <span class="sidenav-mini-icon"> + </span>
+                                        <span class="sidenav-normal"> Create Field </span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </li>
+                
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#cropsSection" class="nav-link @CropsActive" aria-controls="cropsSection" role="button" aria-expanded="@(_cropsExpanded ? "true" : "false")">
+                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="ni ni-istanbul text-lg opacity-10" aria-hidden="true"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Crops</span>
+                    </a>
+                    <div class="collapse @(_cropsExpanded ? "show" : "")" id="cropsSection">
+                        <ul class="nav ms-4 ps-3">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/crops" onclick="@ActivateCrops">
+                                    <span class="sidenav-mini-icon"> A </span>
+                                    <span class="sidenav-normal"> All Crops </span>
+                                </a>
+                            </li>
+                            @if (_hasCropManagePermission)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/crops/create" onclick="@ActivateCrops">
+                                        <span class="sidenav-mini-icon"> + </span>
+                                        <span class="sidenav-normal"> Create Crop </span>
+                                    </a>
+                                </li>
+                            }
+                            <li class="nav-item">
+                                <a class="nav-link" href="/crops/reports" onclick="@ActivateCrops">
+                                    <span class="sidenav-mini-icon"> R </span>
+                                    <span class="sidenav-normal"> Crop Reports </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            }
+            
+            <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#tillageSection" class="nav-link @TillageActive" aria-controls="tillageSection" role="button" aria-expanded="@(_tillageExpanded ? "true" : "false")">
+                    <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center d-flex align-items-center justify-content-center  me-2">
+                        <i class="ni ni-delivery-fast text-lg opacity-10" aria-hidden="true"></i>
+                    </div>
                     <span class="nav-link-text ms-1">Tillage Program</span>
                 </a>
-                <div class="collapse" id="tillageSection">
+                <div class="collapse @(_tillageExpanded ? "show" : "")" id="tillageSection">
                     <ul class="nav ms-4 ps-3">
                         <li class="nav-item">
                             <a class="nav-link" href="/tillage-dashboard" onclick="@ActivateTillage">
@@ -77,7 +188,7 @@
                 </li>
                 
                 @* Only show Farm Assignments to System Administrators *@
-                @if (_user.IsInRole("SystemAdministrator"))
+                @if (_user.IsInRole(ApiRoles.SystemAdministrator))
                 {
                     <li class="nav-item">
                         <a class="nav-link @FarmAssignmentsActive" href="/farm-assignments" onclick="@ActivateFarmAssignments">
@@ -145,6 +256,17 @@
     private string FarmAssignmentsActive = "";
     private CustomAuthStateProvider _authProvider;
     private ClaimsPrincipal _user;
+    
+    // Accessible farms and permissions
+    private List<FarmListViewModel> _accessibleFarms = new();
+    private bool _hasFieldManagePermission = false;
+    private bool _hasCropManagePermission = false;
+    
+    // Menu expansion state
+    private bool _farmsExpanded = false;
+    private bool _fieldsExpanded = false;
+    private bool _cropsExpanded = false;
+    private bool _tillageExpanded = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -154,6 +276,22 @@
             var authState = await _authProvider.GetAuthenticationStateAsync();
             _user = authState.User;
 
+            if (_user.Identity?.IsAuthenticated == true)
+            {
+                await LoadAccessibleFarms();
+                await CheckPermissions();
+                
+                // Set initial expanded state based on URL
+                var currentUrl = Navigation.Uri.ToLower();
+                _farmsExpanded = currentUrl.Contains("/farm/");
+                _fieldsExpanded = currentUrl.Contains("/field/");
+                _cropsExpanded = currentUrl.Contains("/crop/");
+                _tillageExpanded = currentUrl.Contains("/tillage");
+                
+                // Set active menu based on URL
+                SetActiveMenuFromUrl(currentUrl);
+            }
+
             // Debug output
             Console.WriteLine($"NavMenu - Is authenticated: {_user.Identity?.IsAuthenticated}");
             Console.WriteLine($"NavMenu - User name: {_user.Identity?.Name}");
@@ -161,10 +299,100 @@
             Console.WriteLine($"NavMenu - User is in SystemAdministrator role: {_user.IsInRole(ApiRoles.SystemAdministrator)}");
             Console.WriteLine($"NavMenu - User is in Administrator role: {_user.IsInRole(ApiRoles.Administrator)}");
 
-            foreach(var claim in _user.Claims)
+            foreach (var claim in _user.Claims)
             {
                 Console.WriteLine($"NavMenu - Claim: {claim.Type} = {claim.Value}");
             }
+        }
+    }
+    
+    private async Task LoadAccessibleFarms()
+    {
+        try
+        {
+            // Get the current user's ID
+            var userId = _user.FindFirstValue(ClaimTypes.NameIdentifier) ?? 
+                        _user.FindFirstValue("UserId");
+            
+            if (!string.IsNullOrEmpty(userId))
+            {
+                // Call the API with the userId parameter
+                var client = await ApiCall.GetHttpClient();
+                var response = await ApiCall.Get<Models.ApiResponse<List<FarmListViewModel>>>(
+                    client, $"farmusers/getaccessiblefarms?userId={userId}");
+                
+                if (response?.Status == 200 && response.Result != null)
+                {
+                    _accessibleFarms = response.Result;
+                    Console.WriteLine($"NavMenu - Loaded {_accessibleFarms.Count} accessible farms for user {userId}");
+                }
+                else
+                {
+                    Console.WriteLine($"NavMenu - API returned non-success response: {response?.Status}, {response?.Title}");
+                    _accessibleFarms = new List<FarmListViewModel>();
+                }
+            }
+            else
+            {
+                Console.WriteLine("NavMenu - No user ID found, cannot load accessible farms");
+                _accessibleFarms = new List<FarmListViewModel>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"NavMenu - Error loading accessible farms: {ex.Message}");
+            _accessibleFarms = new List<FarmListViewModel>();
+        }
+    }
+    
+    private async Task CheckPermissions()
+    {
+        _hasFieldManagePermission = await FarmAccessService.HasPermission(Claims.FieldManage);
+        _hasCropManagePermission = await FarmAccessService.HasPermission(Claims.CropManage);
+        
+        Console.WriteLine($"NavMenu - Has Field Manage Permission: {_hasFieldManagePermission}");
+        Console.WriteLine($"NavMenu - Has Crop Manage Permission: {_hasCropManagePermission}");
+    }
+    
+    private void SetActiveMenuFromUrl(string url)
+    {
+        ResetAllMenus();
+        
+        if (url.Contains("/farm"))
+        {
+            ActivateFarms();
+        }
+        else if (url.Contains("/field"))
+        {
+            ActivateFields();
+        }
+        else if (url.Contains("/crop"))
+        {
+            ActivateCrops();
+        }
+        else if (url.Contains("/tillage"))
+        {
+            ActivateTillage();
+        }
+        else if (url.Contains("/user"))
+        {
+            ActivateUsers();
+        }
+        else if (url.Contains("/role"))
+        {
+            ActivateRoles();
+        }
+        else if (url.Contains("/farm-assignment"))
+        {
+            ActivateFarmAssignments();
+        }
+        else if (url.Contains("/ownership") || url.Contains("/entities"))
+        {
+            ActivateOwnership();
+        }
+        else
+        {
+            ActivateDashboard();
         }
     }
 
@@ -200,24 +428,35 @@
     {
         ResetAllMenus();
         FarmsActive = "active";
+        _farmsExpanded = true;
+    }
+    
+    private void ActivateFarm(string farmId)
+    {
+        ResetAllMenus();
+        FarmsActive = "active";
+        _farmsExpanded = true;
     }
 
     private void ActivateFields()
     {
         ResetAllMenus();
         FieldsActive = "active";
+        _fieldsExpanded = true;
     }
     
     private void ActivateCrops()
     {
         ResetAllMenus();
         CropsActive = "active";
+        _cropsExpanded = true;
     }
 
     private void ActivateTillage()
     {
         ResetAllMenus();
         TillageActive = "active";
+        _tillageExpanded = true;
     }
 
     private void ActivateOwnership()

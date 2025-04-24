@@ -1,0 +1,472 @@
+@page "/crop/{id}"
+@attribute [Authorize]
+
+@using Hurudza.UI.Web.Components
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager Navigation
+@inject FarmAccessService FarmAccessService
+@inject IJSRuntime JS
+
+<Toast @ref="Alert"/>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <div class="row">
+                    <div class="col-md-1 text-start">
+                        <a href="javascript:;" @onclick="NavigateBack">
+                            <i class="fas fa-arrow-left text-secondary text-sm" data-bs-toggle="tooltip"
+                               data-bs-placement="top" aria-hidden="true" aria-label="Go Back"
+                               data-bs-original-title="Go Back"></i><span class="sr-only">Go Back</span>
+                        </a>
+                    </div>
+                    <div class="col-md-7 d-flex align-items-center">
+                        <h6>@(_crop?.Name ?? "Crop Details")</h6>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <PermissionCheck Permission="@Claims.CropManage">
+                            <button class="btn btn-primary btn-sm" @onclick="ShowEditDialog">
+                                <i class="fas fa-edit me-2"></i> Edit Crop
+                            </button>
+                        </PermissionCheck>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (_loading)
+                {
+                    <div class="text-center py-4">
+                        <SfSpinner></SfSpinner>
+                    </div>
+                }
+                else if (_crop != null)
+                {
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3 class="mb-0">@_crop.Name</h3>
+                            
+                            <!-- Crop statistics summary -->
+                            <div class="row mt-4">
+                                <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+                                    <div class="card">
+                                        <div class="card-body p-3">
+                                            <div class="row">
+                                                <div class="col-8">
+                                                    <div class="numbers">
+                                                        <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Hectares</p>
+                                                        <h5 class="font-weight-bolder">
+                                                            @(_fieldCrops?.Sum(f => f.Size).ToString("N2") ?? "0.00")
+                                                        </h5>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4 text-end">
+                                                    <div class="icon icon-shape bg-gradient-success shadow-success text-center rounded-circle">
+                                                        <i class="ni ni-money-coins text-lg opacity-10" aria-hidden="true"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+                                    <div class="card">
+                                        <div class="card-body p-3">
+                                            <div class="row">
+                                                <div class="col-8">
+                                                    <div class="numbers">
+                                                        <p class="text-sm mb-0 text-uppercase font-weight-bold">Fields</p>
+                                                        <h5 class="font-weight-bolder">
+                                                            @(_fieldCrops?.Count ?? 0)
+                                                        </h5>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4 text-end">
+                                                    <div class="icon icon-shape bg-gradient-info shadow-info text-center rounded-circle">
+                                                        <i class="ni ni-world text-lg opacity-10" aria-hidden="true"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+                                    <div class="card">
+                                        <div class="card-body p-3">
+                                            <div class="row">
+                                                <div class="col-8">
+                                                    <div class="numbers">
+                                                        <p class="text-sm mb-0 text-uppercase font-weight-bold">Irrigated</p>
+                                                        <h5 class="font-weight-bolder">
+                                                            @(_fieldCrops?.Where(f => f.Irrigation).Sum(f => f.Size).ToString("N2") ?? "0.00")
+                                                        </h5>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4 text-end">
+                                                    <div class="icon icon-shape bg-gradient-primary shadow-primary text-center rounded-circle">
+                                                        <i class="ni ni-drop text-lg opacity-10" aria-hidden="true"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3 col-sm-6">
+                                    <div class="card">
+                                        <div class="card-body p-3">
+                                            <div class="row">
+                                                <div class="col-8">
+                                                    <div class="numbers">
+                                                        <p class="text-sm mb-0 text-uppercase font-weight-bold">Farms</p>
+                                                        <h5 class="font-weight-bolder">
+                                                            @(_fieldCrops?.Select(f => f.Farm).Distinct().Count() ?? 0)
+                                                        </h5>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4 text-end">
+                                                    <div class="icon icon-shape bg-gradient-warning shadow-warning text-center rounded-circle">
+                                                        <i class="ni ni-building text-lg opacity-10" aria-hidden="true"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Crop Locations Table -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card mb-4">
+                                        <div class="card-header pb-0">
+                                            <h6 class="mb-0">Crop Locations</h6>
+                                        </div>
+                                        <div class="card-body px-2 pt-0 pb-2">
+                                            @if (_fieldCrops != null && _fieldCrops.Any())
+                                            {
+                                                <SfGrid
+                                                    DataSource="@_fieldCrops"
+                                                    AllowPaging="true"
+                                                    AllowSorting="true"
+                                                    AllowFiltering="true"
+                                                    EnableStickyHeader="true">
+                                                    <GridPageSettings PageSize="5"></GridPageSettings>
+                                                    <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
+                                                    <GridColumns>
+                                                        <GridColumn Field=@nameof(FieldCropViewModel.Farm) HeaderText="Farm" TextAlign="TextAlign.Left" Width="140"></GridColumn>
+                                                        <GridColumn Field=@nameof(FieldCropViewModel.Field) HeaderText="Field" TextAlign="TextAlign.Left" Width="140"></GridColumn>
+                                                        <GridColumn Field=@nameof(FieldCropViewModel.Size) HeaderText="Size (Ha)" TextAlign="TextAlign.Right" Width="100" Format="N2"></GridColumn>
+                                                        <GridColumn Field=@nameof(FieldCropViewModel.PlantedDate) HeaderText="Planted Date" TextAlign="TextAlign.Center" Width="130" Format="yyyy-MM-dd" Type="ColumnType.Date"></GridColumn>
+                                                        <GridColumn Field=@nameof(FieldCropViewModel.HarvestDate) HeaderText="Harvest Date" TextAlign="TextAlign.Center" Width="130" Format="yyyy-MM-dd" Type="ColumnType.Date"></GridColumn>
+                                                        <GridColumn Field=@nameof(FieldCropViewModel.Irrigation) HeaderText="Irrigation" TextAlign="TextAlign.Center" Width="100">
+                                                            <Template>
+                                                                @{
+                                                                    var fieldCrop = (context as FieldCropViewModel);
+                                                                    <span class="badge bg-@(fieldCrop.Irrigation ? "success" : "secondary")">
+                                                                        @(fieldCrop.Irrigation ? "Yes" : "No")
+                                                                    </span>
+                                                                }
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn HeaderText="Actions" TextAlign="TextAlign.Center" Width="100">
+                                                            <Template>
+                                                                @{
+                                                                    var fieldCrop = (context as FieldCropViewModel);
+                                                                    <div>
+                                                                        <a href="/field/@fieldCrop.FieldId" class="btn btn-outline-info btn-sm" title="View Field">
+                                                                            <i class="fas fa-eye"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                }
+                                                            </Template>
+                                                        </GridColumn>
+                                                    </GridColumns>
+                                                </SfGrid>
+                                            }
+                                            else
+                                            {
+                                                <div class="text-center py-4">
+                                                    <p class="text-muted mb-0">This crop is not currently planted on any fields.</p>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Visualization - Placeholder for actual chart -->
+                            <div class="row mt-2">
+                                <div class="col-lg-6">
+                                    <div class="card z-index-2">
+                                        <div class="card-header pb-0">
+                                            <h6>Crop Distribution by Farm</h6>
+                                        </div>
+                                        <div class="card-body p-3">
+                                            <div class="chart" id="cropDistributionChart" style="height: 300px;">
+                                                <!-- Chart will be rendered here via JS -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-lg-6">
+                                    <div class="card z-index-2">
+                                        <div class="card-header pb-0">
+                                            <h6>Irrigated vs Non-Irrigated</h6>
+                                        </div>
+                                        <div class="card-body p-3">
+                                            <div class="chart" id="irrigationChart" style="height: 300px;">
+                                                <!-- Chart will be rendered here via JS -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-0">Crop not found or you don't have access to view it.</p>
+                        <button class="btn btn-primary mt-3" @onclick="NavigateToCropsList">
+                            Return to Crops List
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Crop Dialog -->
+<SfDialog @ref="EditDialog" Width="500px" Visible="false" ShowCloseIcon="true" IsModal="true">
+    <DialogEvents Closed="CloseEditDialog"></DialogEvents>
+    <DialogTemplates>
+        <Header>Edit Crop</Header>
+        <Content>
+            @if (_crop != null)
+            {
+                <EditForm Model="@_editCrop" OnValidSubmit="@UpdateCrop">
+                    <DataAnnotationsValidator></DataAnnotationsValidator>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Crop Name</label>
+                            <SfTextBox ID="name" TValue="string" @bind-Value="@(_editCrop.Name)" Placeholder="Crop Name"></SfTextBox>
+                            <ValidationMessage For="() => _editCrop.Name"/>
+                        </div>
+                        
+                        <!-- Add additional crop fields as needed -->
+                        
+                        <div class="form-group mt-3">
+                            <SfSpinner @ref="EditSpinner"></SfSpinner>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-success">Update Crop</button>
+                        <button type="button" @onclick="CloseEditDialog" class="btn btn-secondary ms-2">Cancel</button>
+                    </div>
+                </EditForm>
+            }
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+    [Parameter] public required string Id { get; set; }
+    
+    Toast Alert;
+    SfDialog EditDialog;
+    SfSpinner EditSpinner;
+    
+    // Helper class for farm distribution data
+    private class FarmDistribution 
+    {
+        public string Farm { get; set; }
+        public float Size { get; set; }
+    }
+    
+    private bool _loading = true;
+    private CropViewModel _crop;
+    private CropViewModel _editCrop = new()
+    {
+        Name = null
+    };
+    private List<FieldCropViewModel> _fieldCrops;
+    private List<FarmListViewModel> _accessibleFarms;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id != null)
+        {
+            await LoadData();
+        }
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _fieldCrops != null && _fieldCrops.Any())
+        {
+            await RenderChartsAsync();
+        }
+    }
+    
+    private async Task LoadData()
+    {
+        _loading = true;
+        
+        try
+        {
+            // Get accessible farms for the current user
+            _accessibleFarms = await FarmAccessService.GetAccessibleFarms();
+            
+            // Get crop details
+            var cropResponse = await ApiCall.Get<ApiResponse<CropViewModel>>(
+                await ApiCall.GetHttpClient(), $"crops/getcrop/{Id}");
+                
+            if (cropResponse?.Status == (int)HttpStatusCode.OK && cropResponse.Result != null)
+            {
+                _crop = cropResponse.Result;
+                _editCrop = new CropViewModel 
+                {
+                    Id = _crop.Id,
+                    Name = _crop.Name
+                };
+                
+                // Get all instances of this crop across accessible farms
+                var allFieldCrops = new List<FieldCropViewModel>();
+                
+                foreach (var farm in _accessibleFarms)
+                {
+                    var farmCrops = await ApiCall.Get<IEnumerable<FieldCropViewModel>>(
+                        await ApiCall.GetHttpClient(), $"fieldcrops/getfarmfieldcrops/{farm.Id}");
+                    
+                    if (farmCrops != null)
+                    {
+                        // Filter to only include instances of this crop
+                        // Explicitly specify the type for the lambda expression
+                        var relevantCrops = farmCrops.Where(c => c.CropId == Id).ToList();
+                        allFieldCrops.AddRange(relevantCrops);
+                    }
+                }
+                
+                _fieldCrops = allFieldCrops;
+            }
+            else
+            {
+                Alert.Show("Failed to load crop details.", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading crop data: {ex.Message}");
+            Alert.Show("Failed to load crop details. Please try again later.", 
+                showTitle: true, title: "Error", toastType: ToastType.Danger);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+    
+    private void GoBack()
+    {
+        NavigateBack();
+    }
+    
+    // Navigation methods
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/crops");
+    }
+    
+    private void NavigateToCropsList()
+    {
+        Navigation.NavigateTo("/crops");
+    }
+    
+    private void NavigateToFieldDetails(string fieldId)
+    {
+        Navigation.NavigateTo($"/field/{fieldId}");
+    }
+    
+    private void ShowEditDialog()
+    {
+        EditDialog.ShowAsync();
+    }
+    
+    private async Task CloseEditDialog()
+    {
+        await EditDialog.HideAsync();
+    }
+    
+    private async Task UpdateCrop()
+    {
+        await EditSpinner.ShowAsync();
+        
+        try
+        {
+            var response = await ApiCall.Update<ApiResponse<CropViewModel>, CropViewModel>(
+                await ApiCall.GetHttpClient(), "crops/updatecrop", Id, _editCrop);
+                
+            if (response?.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show("Crop updated successfully", showTitle: true, toastType: ToastType.Success);
+                await CloseEditDialog();
+                await LoadData();
+            }
+            else
+            {
+                Alert.Show(response?.Title ?? "Failed to update crop", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating crop: {ex.Message}");
+            Alert.Show("Failed to update crop. Please try again later.", 
+                showTitle: true, title: "Error", toastType: ToastType.Danger);
+        }
+        finally
+        {
+            await EditSpinner.HideAsync();
+        }
+    }
+    
+    private async Task RenderChartsAsync()
+    {
+        if (_fieldCrops != null && _fieldCrops.Any())
+        {
+                            // Prepare data for the distribution chart with explicit type arguments
+            var farmDistribution = _fieldCrops
+                .GroupBy(c => c.Farm)
+                .Select<IGrouping<string, FieldCropViewModel>, FarmDistribution>(g => new FarmDistribution { 
+                    Farm = g.Key, 
+                    Size = g.Sum(c => c.Size) 
+                })
+                .ToList();
+                
+            var farmNames = farmDistribution.Select(f => f.Farm).ToArray();
+            var farmSizes = farmDistribution.Select(f => f.Size).ToArray();
+            
+            // Prepare data for the irrigation chart with explicit selectors
+            var irrigatedSize = _fieldCrops
+                .Where(c => c.Irrigation)
+                .Sum(c => c.Size);
+                
+            var nonIrrigatedSize = _fieldCrops
+                .Where(c => !c.Irrigation)
+                .Sum(c => c.Size);
+            
+            // Call JS to render charts
+            await JS.InvokeVoidAsync("renderCropDistributionChart", farmNames, farmSizes);
+            await JS.InvokeVoidAsync("renderIrrigationChart", irrigatedSize, nonIrrigatedSize);
+        }
+    }
+}
