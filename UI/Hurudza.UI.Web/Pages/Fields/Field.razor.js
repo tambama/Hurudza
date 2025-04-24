@@ -45,31 +45,32 @@ window.loadMap = function(center) {
             attributionControl: true
         });
 
-        // Add navigation controls
-        mapInstance.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
-
-        // Add scale control
-        mapInstance.addControl(new mapboxgl.ScaleControl({
-            maxWidth: 200,
-            unit: 'metric'
-        }), 'bottom-left');
-
-        // Handle load event
-        let mapLoaded = false;
+        // Wait for map to load before adding controls
         mapInstance.on('load', () => {
             console.log('Map loaded successfully');
-            mapLoaded = true;
+
+            // Add navigation controls (after map load)
+            mapInstance.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+
+            // Add scale control (after map load)
+            mapInstance.addControl(new mapboxgl.ScaleControl({
+                maxWidth: 200,
+                unit: 'metric'
+            }), 'bottom-left');
+
+            // Add fullscreen control (after map load)
+            mapInstance.addControl(new mapboxgl.FullscreenControl(), 'top-right');
 
             // Store the map instance on the DOM element
             mapContainer.mapboxgl = mapInstance;
-        });
 
-        // Set a timeout to ensure we don't wait forever if the event doesn't fire
-        setTimeout(() => {
-            if (!mapLoaded) {
-                console.log("Map load event didn't fire, but continuing anyway");
+            // If we have pending function to run after load, run it now
+            if (window._pendingDrawOperation) {
+                console.log("Executing pending draw operation");
+                window._pendingDrawOperation();
+                window._pendingDrawOperation = null;
             }
-        }, 2000);
+        });
 
         console.log("Map initialization successful");
         return true;
@@ -82,18 +83,11 @@ window.loadMap = function(center) {
 // Function to draw field boundaries on the map
 window.drawFieldBoundary = function(coordinates, fieldName) {
     try {
-        // Wait a moment to ensure map is available
         console.log("Attempting to draw field boundary");
 
         // Use stored map instance
         if (!mapInstance) {
             console.error("Map instance not found");
-            return false;
-        }
-
-        // Check if map is loaded and has required methods
-        if (!mapInstance.loaded || !mapInstance.getSource || !mapInstance.addSource) {
-            console.error("Map instance is not fully initialized");
             return false;
         }
 
@@ -156,20 +150,9 @@ window.drawFieldBoundary = function(coordinates, fieldName) {
 
         // Check if map is loaded
         if (!mapInstance.loaded()) {
-            console.log("Map not fully loaded, waiting for load event");
-            mapInstance.on('load', drawField);
-
-            // Set a timeout in case the load event doesn't fire
-            setTimeout(() => {
-                try {
-                    if (mapInstance && !mapInstance.getLayer('field-outline')) {
-                        console.log("Load event didn't fire in time, trying to draw anyway");
-                        drawField();
-                    }
-                } catch (e) {
-                    console.error("Timeout error:", e);
-                }
-            }, 1000);
+            console.log("Map not fully loaded, storing draw function for later execution");
+            // Store the draw operation to execute after load
+            window._pendingDrawOperation = drawField;
         } else {
             return drawField();
         }
