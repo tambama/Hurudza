@@ -298,6 +298,7 @@
         await AddCropSpinner.ShowAsync();
 
         _newCrop.FieldId = Id;
+        _newCrop.FarmId = _field.FarmId;
 
         var success = await SaveFieldCrop(_newCrop);
 

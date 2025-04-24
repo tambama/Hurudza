@@ -40,4 +40,10 @@
 	  <Folder Include="Helpers\" />
 	  <Folder Include="Pages\Examples\" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Content Update="Pages\Fields\Field.razor.js">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	</ItemGroup>
 </Project>
