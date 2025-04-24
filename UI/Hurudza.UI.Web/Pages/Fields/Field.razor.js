@@ -4,6 +4,9 @@ import 'https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js';
 // Mapbox access token
 const mapboxToken = 'pk.eyJ1IjoicGVuaWVsdCIsImEiOiJjbGt3Y2gxM3YweWtrM3FwbW9jaWNkMWVyIn0.cDAgTWNXN-TVJROjgoWQiw';
 
+// Store the map instance to prevent duplicates
+let mapInstance = null;
+
 // Initialize Mapbox
 function initializeMapbox() {
     mapboxgl.accessToken = mapboxToken;
@@ -14,101 +17,189 @@ function initializeMapbox() {
 // Global function to load map that can be called from Blazor
 window.loadMap = function(center) {
     try {
-        console.log(`Loading map with center: [${center}]`);
+        console.log(`Attempting to load map with center: [${center}]`);
+
+        // Check if the map container exists
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) {
+            console.error("Map container 'map' not found in DOM");
+            return false;
+        }
+
+        // If a map already exists, remove it first
+        if (mapInstance) {
+            console.log("Removing existing map instance before creating a new one");
+            mapInstance.remove();
+            mapInstance = null;
+        }
 
         // Initialize Mapbox
         initializeMapbox();
 
         // Create map instance
-        const map = new mapboxgl.Map({
-            container: 'map',
+        mapInstance = new mapboxgl.Map({
+            container: mapContainer,
             style: 'mapbox://styles/mapbox/satellite-streets-v12',
             center: center,
-            zoom: 14,
+            zoom: 16,
             attributionControl: true
         });
 
         // Add navigation controls
-        map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+        mapInstance.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
 
         // Add scale control
-        map.addControl(new mapboxgl.ScaleControl({
+        mapInstance.addControl(new mapboxgl.ScaleControl({
             maxWidth: 200,
             unit: 'metric'
         }), 'bottom-left');
 
-        // Wait for map to load before returning
-        map.on('load', () => {
+        // Handle load event
+        let mapLoaded = false;
+        mapInstance.on('load', () => {
             console.log('Map loaded successfully');
+            mapLoaded = true;
+
+            // Store the map instance on the DOM element
+            mapContainer.mapboxgl = mapInstance;
         });
 
-        return map;
+        // Set a timeout to ensure we don't wait forever if the event doesn't fire
+        setTimeout(() => {
+            if (!mapLoaded) {
+                console.log("Map load event didn't fire, but continuing anyway");
+            }
+        }, 2000);
+
+        console.log("Map initialization successful");
+        return true;
     } catch (error) {
         console.error('Error initializing map:', error);
-        return null;
+        return false;
     }
 };
 
 // Function to draw field boundaries on the map
 window.drawFieldBoundary = function(coordinates, fieldName) {
     try {
-        // Get the map instance
-        const map = document.getElementById('map').mapboxgl;
-        if (!map) {
+        // Wait a moment to ensure map is available
+        console.log("Attempting to draw field boundary");
+
+        // Use stored map instance
+        if (!mapInstance) {
             console.error("Map instance not found");
             return false;
         }
 
-        // Clean up any existing field layers
-        if (map.getLayer('field-outline')) map.removeLayer('field-outline');
-        if (map.getLayer('field-fill')) map.removeLayer('field-fill');
-        if (map.getSource('field-source')) map.removeSource('field-source');
+        // Check if map is loaded and has required methods
+        if (!mapInstance.loaded || !mapInstance.getSource || !mapInstance.addSource) {
+            console.error("Map instance is not fully initialized");
+            return false;
+        }
 
-        // Add the field boundary source
-        map.addSource('field-source', {
-            'type': 'geojson',
-            'data': {
-                'type': 'Feature',
-                'geometry': {
-                    'type': 'Polygon',
-                    'coordinates': [coordinates]
-                },
-                'properties': {
-                    'name': fieldName
+        // Function to actually add the layers
+        const drawField = () => {
+            try {
+                console.log("Drawing field boundary with coordinates:", coordinates);
+
+                // Clean up any existing field layers
+                if (mapInstance.getLayer('field-outline')) mapInstance.removeLayer('field-outline');
+                if (mapInstance.getLayer('field-fill')) mapInstance.removeLayer('field-fill');
+                if (mapInstance.getSource('field-source')) mapInstance.removeSource('field-source');
+
+                // Add the field boundary source
+                mapInstance.addSource('field-source', {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'Polygon',
+                            'coordinates': [coordinates]
+                        },
+                        'properties': {
+                            'name': fieldName
+                        }
+                    }
+                });
+
+                // Add the field outline layer
+                mapInstance.addLayer({
+                    'id': 'field-outline',
+                    'type': 'line',
+                    'source': 'field-source',
+                    'layout': {},
+                    'paint': {
+                        'line-color': '#ff5500',
+                        'line-width': 2
+                    }
+                });
+
+                // Add the field fill layer
+                mapInstance.addLayer({
+                    'id': 'field-fill',
+                    'type': 'fill',
+                    'source': 'field-source',
+                    'layout': {},
+                    'paint': {
+                        'fill-color': '#ff9966',
+                        'fill-opacity': 0.1
+                    }
+                });
+
+                console.log("Field boundary drawn successfully");
+                return true;
+            } catch (err) {
+                console.error("Error in drawField function:", err);
+                return false;
+            }
+        };
+
+        // Check if map is loaded
+        if (!mapInstance.loaded()) {
+            console.log("Map not fully loaded, waiting for load event");
+            mapInstance.on('load', drawField);
+
+            // Set a timeout in case the load event doesn't fire
+            setTimeout(() => {
+                try {
+                    if (mapInstance && !mapInstance.getLayer('field-outline')) {
+                        console.log("Load event didn't fire in time, trying to draw anyway");
+                        drawField();
+                    }
+                } catch (e) {
+                    console.error("Timeout error:", e);
                 }
-            }
-        });
+            }, 1000);
+        } else {
+            return drawField();
+        }
 
-        // Add the field outline layer
-        map.addLayer({
-            'id': 'field-outline',
-            'type': 'line',
-            'source': 'field-source',
-            'layout': {},
-            'paint': {
-                'line-color': '#ff5500',
-                'line-width': 2
-            }
-        });
-
-        // Add the field fill layer
-        map.addLayer({
-            'id': 'field-fill',
-            'type': 'fill',
-            'source': 'field-source',
-            'layout': {},
-            'paint': {
-                'fill-color': '#ff9966',
-                'fill-opacity': 0.3
-            }
-        });
-
-        console.log("Field boundary drawn successfully");
         return true;
     } catch (error) {
         console.error("Error drawing field boundary:", error);
         return false;
     }
+};
+
+// Function to explicitly destroy the map
+window.destroyMap = function() {
+    if (mapInstance) {
+        console.log("Destroying map instance");
+        try {
+            mapInstance.remove();
+        } catch (e) {
+            console.error("Error removing map:", e);
+        }
+        mapInstance = null;
+        return true;
+    }
+    console.log("No map instance to destroy");
+    return false;
+};
+
+// Function to check if map is initialized
+window.isMapInitialized = function() {
+    return !!mapInstance;
 };
 
 export { initializeMapbox };

@@ -32,7 +32,13 @@
                 </div>
             </div>
             <div class="card-body px-2 pt-0 pb-2">
-                @if (_crops != null && _crops.Any())
+                @if (_loading)
+                {
+                    <div class="text-center p-4">
+                        <SfSpinner></SfSpinner>
+                    </div>
+                }
+                else if (_crops != null && _crops.Any())
                 {
                     <SfGrid
                         DataSource="@_crops"
@@ -57,12 +63,17 @@
                                     <span>@text</span>
                                 }
                             </HeaderTemplate>
+                            <Validator>
+                                <DataAnnotationsValidator></DataAnnotationsValidator>
+                            </Validator>
                             <Template>
                                 @{
                                     var fieldCrop = (context as FieldCropViewModel);
                                     <div>
                                         <div class="form-row">
                                             <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(fieldCrop.Id)"></SfTextBox>
+                                            <SfTextBox ID="fieldId" TValue="string" hidden="hidden" @bind-Value="@(fieldCrop.FieldId)"></SfTextBox>
+                                            <SfTextBox ID="farmId" TValue="string" hidden="hidden" @bind-Value="@(fieldCrop.FarmId)"></SfTextBox>
                                             <div class="form-group">
                                                 <label>Crop</label>
                                                 <SfComboBox ID="crop" TValue="string" TItem="CropViewModel" @bind-Value="@(fieldCrop.CropId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Crop" DataSource="@_availableCrops">
@@ -216,6 +227,7 @@
     FieldCropViewModel _selectedCrop;
     FieldCropViewModel _newCrop = new();
     bool flag = true;
+    bool _loading = true;
 
     private string GetHeader(FieldCropViewModel Value)
     {
@@ -253,6 +265,11 @@
                 {
                     args.Cancel = true;
                 }
+                else
+                {
+                    // Make sure data property is updated with the result from server
+                    await LoadData();
+                }
 
                 await SaveSpinner.HideAsync();
                 break;
@@ -285,6 +302,10 @@
     private void ShowAddCropDialog()
     {
         _newCrop = new FieldCropViewModel { FieldId = Id };
+        if (!string.IsNullOrEmpty(_field?.FarmId))
+        {
+            _newCrop.FarmId = _field.FarmId;
+        }
         AddCropDialog.ShowAsync();
     }
 
@@ -298,7 +319,10 @@
         await AddCropSpinner.ShowAsync();
 
         _newCrop.FieldId = Id;
-        _newCrop.FarmId = _field.FarmId;
+        if (string.IsNullOrEmpty(_newCrop.FarmId))
+        {
+            _newCrop.FarmId = _field.FarmId;
+        }
 
         var success = await SaveFieldCrop(_newCrop);
 
@@ -318,22 +342,37 @@
 
     private async Task LoadData()
     {
-        // Get field details
-        var fieldResponse = await ApiCall.Get<ApiResponse<FieldViewModel>>(await ApiCall.GetHttpClient(), "fields/getfield", Id);
-        if (fieldResponse.Status == (int)HttpStatusCode.OK)
+        _loading = true;
+        StateHasChanged();
+        
+        try
         {
-            _field = fieldResponse.Result;
+            // Get field details
+            var fieldResponse = await ApiCall.Get<ApiResponse<FieldViewModel>>(await ApiCall.GetHttpClient(), $"fields/getfield/{Id}");
+            if (fieldResponse.Status == (int)HttpStatusCode.OK)
+            {
+                _field = fieldResponse.Result;
 
-            // Get field crops
-            _crops = (await ApiCall.Get<IEnumerable<FieldCropViewModel>>(await ApiCall.GetHttpClient(), $"fieldcrops/getfieldfieldcrops/{Id}")).ToList();
+                // Get field crops
+                _crops = (await ApiCall.Get<IEnumerable<FieldCropViewModel>>(await ApiCall.GetHttpClient(), $"fieldcrops/getfieldfieldcrops/{Id}")).ToList();
 
-            // Get available crops
-            _availableCrops = (await ApiCall.Get<IEnumerable<CropViewModel>>(await ApiCall.GetHttpClient(), "crops/getcrops")).ToList();
+                // Get available crops
+                _availableCrops = (await ApiCall.Get<IEnumerable<CropViewModel>>(await ApiCall.GetHttpClient(), "crops/getcrops")).ToList();
+            }
+            else
+            {
+                Alert.Show("Failed to load field details", showTitle: true, toastType: ToastType.Danger);
+                Navigation.NavigateTo("/fields");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Alert.Show("Failed to load field details", showTitle: true, toastType: ToastType.Danger);
-            Navigation.NavigateTo("/fields");
+            Alert.Show($"Error loading data: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
         }
     }
 
@@ -344,68 +383,102 @@
 
     private async Task<bool> SaveFieldCrop(FieldCropViewModel model)
     {
-        var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldCropViewModel>, FieldCropViewModel>(
-            await ApiCall.GetHttpClient(), "fieldcrops/createfieldcrop", model);
+        try
+        {
+            var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldCropViewModel>, FieldCropViewModel>(
+                await ApiCall.GetHttpClient(), "fieldcrops/createfieldcrop", model);
 
-        if (response == null)
-        {
-            Alert.Show("Failed to save crop, please try again!", showTitle: true, toastType: ToastType.Danger);
-            return false;
+            if (response == null)
+            {
+                Alert.Show("Failed to save crop, please try again!", showTitle: true, toastType: ToastType.Danger);
+                return false;
+            }
+            else if (response.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+                return true;
+            }
+            else
+            {
+                Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+                return false;
+            }
         }
-        else if (response.Status == (int)HttpStatusCode.OK)
+        catch (Exception ex)
         {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
-            return true;
-        }
-        else
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
             return false;
         }
     }
 
     private async Task<bool> UpdateFieldCrop(FieldCropViewModel model)
     {
-        var response = await ApiCall.Update<UI.Shared.Models.ApiResponse<FieldCropViewModel>, FieldCropViewModel>(
-            await ApiCall.GetHttpClient(), "fieldcrops/updatefieldcrop", model.Id, model);
+        try
+        {
+            // Ensure we have FarmId and FieldId
+            if (string.IsNullOrEmpty(model.FarmId))
+            {
+                model.FarmId = _field.FarmId;
+            }
+            
+            if (string.IsNullOrEmpty(model.FieldId))
+            {
+                model.FieldId = Id;
+            }
+            
+            var response = await ApiCall.Update<UI.Shared.Models.ApiResponse<FieldCropViewModel>, FieldCropViewModel>(
+                await ApiCall.GetHttpClient(), "fieldcrops/updatefieldcrop", model.Id, model);
 
-        if (response == null)
-        {
-            Alert.Show("Failed to update crop, please try again!", showTitle: true, toastType: ToastType.Danger);
-            return false;
+            if (response == null)
+            {
+                Alert.Show("Failed to update crop, please try again!", showTitle: true, toastType: ToastType.Danger);
+                return false;
+            }
+            else if (response.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+                return true;
+            }
+            else
+            {
+                Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+                return false;
+            }
         }
-        else if (response.Status == (int)HttpStatusCode.OK)
+        catch (Exception ex)
         {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
-            return true;
-        }
-        else
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
             return false;
         }
     }
 
     private async Task<bool> DeleteFieldCrop(FieldCropViewModel model)
     {
-        var response = await ApiCall.Remove<UI.Shared.Models.ApiResponse<FieldCropViewModel>>(
-            await ApiCall.GetHttpClient(), "fieldcrops/deletefieldcrop", model.Id);
+        try
+        {
+            var response = await ApiCall.Remove<UI.Shared.Models.ApiResponse<FieldCropViewModel>>(
+                await ApiCall.GetHttpClient(), "fieldcrops/deletefieldcrop", model.Id);
 
-        if (response == null)
-        {
-            Alert.Show("Failed to delete crop, please try again!", showTitle: true, toastType: ToastType.Danger);
-            return false;
+            if (response == null)
+            {
+                Alert.Show("Failed to delete crop, please try again!", showTitle: true, toastType: ToastType.Danger);
+                return false;
+            }
+            else if (response.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
+                return true;
+            }
+            else
+            {
+                Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+                return false;
+            }
         }
-        else if (response.Status == (int)HttpStatusCode.OK)
+        catch (Exception ex)
         {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
-            return true;
-        }
-        else
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
             return false;
         }
     }
-
 }

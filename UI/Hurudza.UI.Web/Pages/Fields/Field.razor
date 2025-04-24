@@ -2,6 +2,7 @@
 
 @using Hurudza.UI.Web.Pages.Fields.Components
 @using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@implements IAsyncDisposable
 
 @attribute [Authorize]
 
@@ -16,6 +17,8 @@
         border-radius: 8px;
     }
 </style>
+
+<Toast @ref="_alert" />
 
 @if (_field == null)
 {
@@ -114,6 +117,7 @@ else
 }
 
 <SfDialog @ref="EditFieldDialog" Visible="false" ShowCloseIcon="true" IsModal="true" Width="500px">
+    <DialogEvents Closed="CloseEditDialog"></DialogEvents>
     <DialogTemplates>
         <Header>Edit Field Details</Header>
         <Content>
@@ -166,11 +170,55 @@ else
     private Toast _alert;
     private bool _loading = true;
     private IJSObjectReference _mapModule;
+    private bool _mapInitialized = false;
+    private System.Threading.Timer _mapInitTimer;
+    private string _currentFieldId;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            _currentFieldId = Id;
+            await LoadFieldData();
+        }
+        catch (Exception ex)
+        {
+            if (_alert != null)
+            {
+                _alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            }
+            Navigation.NavigateTo("/fields");
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            // Check if we're navigating to a different field
+            if (_currentFieldId != Id)
+            {
+                _currentFieldId = Id;
+                _mapInitialized = false; // Reset this flag to force map reinitialization
+                await LoadFieldData();
+            }
+        }
+        catch (Exception ex)
+        {
+            if (_alert != null)
+            {
+                _alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+    }
+
+    private async Task LoadFieldData()
+    {
+        try
+        {
+            _loading = true;
+            StateHasChanged();
+
             var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<FieldViewModel>>(
                 await ApiCall.GetHttpClient(), $"fields/getfield/{Id}");
 
@@ -212,13 +260,14 @@ else
         {
             if (_alert != null)
             {
-                _alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+                _alert.Show($"Error loading data: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
             }
-            Navigation.NavigateTo("/fields");
+            throw;
         }
         finally
         {
             _loading = false;
+            StateHasChanged();
         }
     }
 
@@ -226,44 +275,125 @@ else
     {
         try
         {
+            // Only load the JS module once
             if (firstRender)
             {
                 // Load the JavaScript module
                 _mapModule = await JS.InvokeAsync<IJSObjectReference>("import", "./Pages/Fields/Field.razor.js");
             }
             
-            if (_field != null && _mapModule != null)
+            // Always try to initialize the map if it's not initialized yet
+            if (_field != null && _mapModule != null && !_mapInitialized)
             {
-                // Create default center coordinates
-                double[] center = { 31.053028, -17.824858 }; // Default Zimbabwe coordinates
+                // Check if map container exists in DOM
+                await Task.Delay(300); // Short delay to ensure DOM is ready
                 
-                // If field has coordinates, use those
-                if (_field.Locations != null && _field.Locations.Any())
+                // Dispose previous timer if exists
+                _mapInitTimer?.Dispose();
+                
+                // Start a new timer
+                _mapInitTimer = new System.Threading.Timer(async _ => 
                 {
-                    // Calculate center of field from locations
-                    double avgLat = _field.Locations.Average(l => l.Latitude);
-                    double avgLng = _field.Locations.Average(l => l.Longitude);
-                    center = new[] { avgLng, avgLat };
-                }
-                
-                // Initialize the map
-                await JS.InvokeVoidAsync("loadMap", center);
-                
-                // Draw field boundary if coordinates exist
-                if (_field.Locations != null && _field.Locations.Count >= 3)
-                {
-                    var coordinates = _field.Locations
-                        .OrderBy(l => l.CreatedDate)
-                        .Select(l => new[] { l.Longitude, l.Latitude })
-                        .ToList();
-                        
-                    await JS.InvokeVoidAsync("drawFieldBoundary", coordinates, _field.Name);
-                }
+                    await InvokeAsync(async () => 
+                    {
+                        await InitializeMap();
+                    });
+                }, null, 100, System.Threading.Timeout.Infinite);
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error in OnAfterRenderAsync: {ex.Message}");
+            if (_alert != null)
+            {
+                _alert.Show($"Map initialization error: {ex.Message}", showTitle: true, toastType: ToastType.Warning);
+            }
+        }
+    }
+    
+    private async Task InitializeMap()
+    {
+        try
+        {
+            if (_field == null || _mapModule == null || _mapInitialized)
+            {
+                return;
+            }
+            
+            // Check if map is already initialized (in case we're calling this method multiple times)
+            bool isAlreadyInitialized = false;
+            try
+            {
+                isAlreadyInitialized = await JS.InvokeAsync<bool>("isMapInitialized");
+            }
+            catch
+            {
+                isAlreadyInitialized = false;
+            }
+            
+            if (isAlreadyInitialized)
+            {
+                Console.WriteLine("Map already initialized, marking as initialized");
+                _mapInitialized = true;
+                return;
+            }
+            
+            // Create default center coordinates
+            double[] center = { 31.053028, -17.824858 }; // Default Zimbabwe coordinates
+            
+            // If field has coordinates, use those
+            if (_field.Locations != null && _field.Locations.Any())
+            {
+                // Calculate center of field from locations
+                double avgLat = _field.Locations.Average(l => l.Latitude);
+                double avgLng = _field.Locations.Average(l => l.Longitude);
+                center = new[] { avgLng, avgLat };
+            }
+            
+            // Try to initialize the map - destroy any existing instance first
+            await JS.InvokeVoidAsync("destroyMap");
+            bool result = await JS.InvokeAsync<bool>("loadMap", center);
+            
+            if (result)
+            {
+                _mapInitialized = true;
+                Console.WriteLine($"Map initialized successfully for field {_field.Id}");
+                
+                // Draw field boundary if coordinates exist
+                if (_field.Locations != null && _field.Locations.Count >= 3)
+                {
+                    // Sort locations by created date and convert to coordinates
+                    var coordinates = _field.Locations
+                        .OrderBy(l => l.CreatedDate)
+                        .Select(l => new[] { l.Longitude, l.Latitude })
+                        .ToList();
+                    
+                    await Task.Delay(300); // Give map time to fully initialize
+                    await JS.InvokeVoidAsync("drawFieldBoundary", coordinates, _field.Name);
+                    Console.WriteLine($"Drew field boundary for {_field.Id} with {coordinates.Count} points");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Map initialization failed, will retry");
+                // Retry after a delay
+                _mapInitTimer?.Dispose();
+                _mapInitTimer = new System.Threading.Timer(async _ => 
+                {
+                    await InvokeAsync(async () => 
+                    {
+                        await InitializeMap();
+                    });
+                }, null, 500, System.Threading.Timeout.Infinite);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error initializing map: {ex.Message}");
+            if (_alert != null)
+            {
+                _alert.Show($"Map initialization error: {ex.Message}", showTitle: true, toastType: ToastType.Warning);
+            }
         }
     }
 
@@ -321,6 +451,16 @@ else
     {
         try
         {
+            // Dispose of the timer
+            _mapInitTimer?.Dispose();
+            _mapInitTimer = null;
+            
+            // Explicitly destroy the map when the component is disposed
+            if (_mapModule != null)
+            {
+                await JS.InvokeVoidAsync("destroyMap");
+            }
+            
             if (_mapModule != null)
             {
                 await _mapModule.DisposeAsync();
