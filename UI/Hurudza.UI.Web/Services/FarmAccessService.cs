@@ -249,8 +249,16 @@ public class FarmAccessService
     {
         try
         {
+            var userId = "";
+            var authState = await _authProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            if (user.Identity.IsAuthenticated)
+            {
+                userId = user.GetUserId();
+            }
+
             var response = await _apiCall.Get<ApiResponse<List<FarmListViewModel>>>(
-                await _apiCall.GetHttpClient(), "farmusers/getaccessiblefarms");
+                await _apiCall.GetHttpClient(), $"farmusers/getaccessiblefarms{(string.IsNullOrEmpty(userId) ? "" : $"/{userId}")}");
 
             if (response?.Status == 200 && response.Result != null)
             {

@@ -438,7 +438,7 @@ public class FarmUsersController : ControllerBase
     /// Gets all farms that a user can access
     /// </summary>
     [HttpGet("{userId}", Name = nameof(GetAccessibleFarms))]
-    public async Task<IActionResult> GetAccessibleFarms(string userId = null)
+    public async Task<IActionResult> GetAccessibleFarms(string? userId = null)
     {
         try
         {

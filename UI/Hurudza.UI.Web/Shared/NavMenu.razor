@@ -319,7 +319,7 @@
                 // Call the API with the userId parameter
                 var client = await ApiCall.GetHttpClient();
                 var response = await ApiCall.Get<Models.ApiResponse<List<FarmListViewModel>>>(
-                    client, $"farmusers/getaccessiblefarms?userId={userId}");
+                    client, $"farmusers/getaccessiblefarms/{userId}");
                 
                 if (response?.Status == 200 && response.Result != null)
                 {
