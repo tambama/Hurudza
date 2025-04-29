@@ -123,14 +123,14 @@
     .panel-hidden {
         display: none;
     }
-    
+
     /* Field list styles */
     .field-list {
         margin-top: 1rem;
         border-top: 1px solid #e9ecef;
         padding-top: 1rem;
     }
-    
+
     .field-item {
         border: 1px solid #e9ecef;
         border-radius: 8px;
@@ -138,7 +138,7 @@
         padding: 0.75rem;
         transition: all 0.2s ease;
     }
-    
+
     .field-item:hover {
         background-color: #f8f9fa;
         border-color: #dee2e6;
@@ -272,7 +272,7 @@
                         &nbsp; @_farm.Website</li>
                 </ul>*@
                 <hr class="horizontal gray-light my-2">
-                
+
                 <!-- Fields Section - Integrated directly into school details -->
                 <div class="field-list">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -281,7 +281,7 @@
                             <i class="fas fa-plus me-1"></i> Add Field
                         </button>
                     </div>
-                    
+
                     @if (_fieldsLoading)
                     {
                         <div class="text-center py-2">
@@ -301,7 +301,9 @@
                         <div class="field-list-container">
                             @foreach (var field in _fields)
                             {
-                                <div class="field-item" @onclick="() => OnFieldSelect(field)" @onmouseover="() => HighlightField(field)" @onmouseout="() => UnhighlightField(field)">
+                                <div class="field-item" @onclick="() => OnFieldSelect(field)"
+                                     @onmouseover="() => HighlightField(field)"
+                                     @onmouseout="() => UnhighlightField(field)">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <h6 class="mb-0">@field.Name</h6>
                                         <div>
@@ -2185,18 +2187,29 @@
             // Round to 2 decimal places for better display
             float roundedArea = (float)Math.Round(areaInHectares, 2);
 
+            // Determine if this is an initial calculation or a user-initiated drawing update
+            bool isInitialCalculation = _fieldEdit.Size < 0.01 && roundedArea > 0;
+
+            Logger.LogInformation($"Updating field size to {roundedArea} hectares (initial: {isInitialCalculation})");
+
             // Update the field size property with the calculated area
             _fieldEdit.Size = roundedArea;
 
-            // Show toast notification about the area calculation
-            _alert.Show($"Field size calculated using Turf.js: {roundedArea} hectares",
-                title: "Area Calculation",
-                toastType: ToastType.Success);
+            // Only show toast notification for user-initiated calculations
+            // or significant changes for initial calculations
+            if (!isInitialCalculation || _field.Size == 0 ||
+                Math.Abs((_field.Size - roundedArea) / Math.Max(_field.Size, 0.1f)) > 0.1)
+            {
+                // Show toast notification about the area calculation
+                string message = isInitialCalculation
+                    ? $"Field size calculated from boundary: {roundedArea} hectares"
+                    : $"Field size updated: {roundedArea} hectares";
+
+                _alert.Show(message, title: "Area Calculation", toastType: ToastType.Info);
+            }
 
             // Force UI refresh
             StateHasChanged();
-
-            Logger.LogInformation($"Field size updated to {roundedArea} hectares using Turf.js");
         }
         catch (Exception ex)
         {
@@ -2292,13 +2305,97 @@
         }
     }
 
-    void GoBackToSchool()
+    async Task GoBackToSchool()
     {
-        _showSchools = "panel-hidden";
-        _showAddSchool = "panel-hidden";
-        _showSchoolDetails = "";
-        _showFieldEdit = "panel-hidden";
-        _showFieldDetails = "panel-hidden";
+        try
+        {
+            await ShowSpinner();
+            Logger.LogInformation("Navigating back to school details from field view");
+
+            // Update UI state first
+            _showSchools = "panel-hidden";
+            _showAddSchool = "panel-hidden";
+            _showSchoolDetails = "";
+            _showFieldEdit = "panel-hidden";
+            _showFieldDetails = "panel-hidden";
+
+            // Ensure UI state is updated before map operations
+            StateHasChanged();
+            await Task.Delay(100);
+
+            // Reload the farm and all its fields on the map
+            if (_farm != null && !string.IsNullOrEmpty(_farm.Id))
+            {
+                // Get detailed farm information with field data
+                var farmMap = await ApiCall.Get<FarmMapViewModel>(
+                    await ApiCall.GetHttpClient(), $"farms/GetFarmDetails/{_farm.Id}");
+
+                if (_mapModule is not null)
+                {
+                    // First clear the map completely
+                    await _mapModule.InvokeVoidAsync("clearMap", _mapInstance).AsTask();
+                    await Task.Delay(100);
+
+                    // Draw the farm boundary if available
+                    if (farmMap.IsPolygon)
+                    {
+                        await _mapModule.InvokeVoidAsync("drawPolygon",
+                            _mapInstance,
+                            _farm.Id,
+                            farmMap.FarmPolygon,
+                            false, // Not a field
+                            _farm.Name,
+                            null, // No crop data for farm
+                            true // Clear existing layers
+                        ).AsTask();
+                    }
+
+                    // Draw all fields INSIDE the farm boundary
+                    foreach (var field in farmMap.Fields)
+                    {
+                        await DrawFieldWithCropData(field);
+                    }
+
+                    // If we have a farm boundary with meaningful coordinates, center on it
+                    if (farmMap.IsPolygon && farmMap.FarmCoordinates.Count > 0)
+                    {
+                        // Calculate center of the farm polygon
+                        double avgLat = farmMap.FarmCoordinates.Average(c => c[1]);
+                        double avgLng = farmMap.FarmCoordinates.Average(c => c[0]);
+
+                        // Center map with appropriate zoom
+                        await _mapModule.InvokeVoidAsync("setMapCenter",
+                            _mapInstance,
+                            avgLat,
+                            avgLng,
+                            14 // Zoom level appropriate for viewing a farm
+                        ).AsTask();
+                    }
+                    // Otherwise, fall back to farm coordinates
+                    else if (farmMap.Latitude != 0 && farmMap.Longitude != 0)
+                    {
+                        // Center the map on the farm coordinates
+                        await _mapModule.InvokeVoidAsync("setMapCenter",
+                            _mapInstance,
+                            farmMap.Latitude,
+                            farmMap.Longitude,
+                            14
+                        ).AsTask();
+                    }
+                }
+
+                Logger.LogInformation($"Re-loaded all field polygons for farm: {_farm.Name}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error navigating back to school details");
+            _alert.Show("Error loading school map data", showTitle: true, toastType: ToastType.Warning);
+        }
+        finally
+        {
+            await HideSpinner();
+        }
     }
 
     void ShowEdit()
@@ -2413,6 +2510,28 @@
 
                 // Log the coordinates being loaded for editing
                 Logger.LogInformation($"Loading {_drawnCoordinates.Count} coordinates for field editing");
+
+                // Calculate field size from existing coordinates if size is zero or very small 
+                // (indicating it might not have been properly calculated before)
+                if (_fieldEdit.Size < 0.01 && _field.Locations.Count >= 3)
+                {
+                    try
+                    {
+                        // Use global JS function to calculate the field size
+                        Logger.LogInformation("Calculating field size from existing coordinates");
+
+                        // Call the globally registered function
+                        await JS.InvokeVoidAsync("calculateAndUpdateFieldSize",
+                            _field.Locations.ToArray(),
+                            _dotNetRef);
+
+                        Logger.LogInformation("Field size calculation initiated");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(ex, "Error calculating field size from coordinates");
+                    }
+                }
 
                 // Add the existing polygon to the drawing tool
                 if (_mapModule != null && _drawControl != null && _drawnCoordinates.Count > 0)
@@ -2556,7 +2675,7 @@
         {
             _fieldsLoading = true;
             StateHasChanged();
-            
+
             _fields = (await ApiCall.Get<IEnumerable<FieldViewModel>>(
                 await ApiCall.GetHttpClient(), $"fields/getfarmfields/{farmId}")).ToList();
 
@@ -2880,4 +2999,5 @@
         public bool Success { get; set; }
         public string Message { get; set; }
     }
+
 }

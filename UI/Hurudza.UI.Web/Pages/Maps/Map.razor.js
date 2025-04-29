@@ -13,7 +13,7 @@ let drawControl = null;
  * @param {HTMLElement} element - The DOM element to attach the map to
  * @returns {Object} The map instance
  */
-export function addMapToElement(element) {
+function addMapToElement(element) {
     try {
         // Create and return a new map instance
         const map = new mapboxgl.Map({
@@ -88,7 +88,7 @@ class FilterControl {
  * @param {Object} dotNetRef - Reference to .NET component
  * @returns {boolean} Success indicator
  */
-export function addFilterButton(map, dotNetRef) {
+function addFilterButton(map, dotNetRef) {
     try {
         // Create and add filter control
         const filterControl = new FilterControl(dotNetRef);
@@ -149,7 +149,7 @@ export function addFilterButtonStyles() {
 }
 
 // Initialize map draw controls
-export function initializeDrawControls(map) {
+function initializeDrawControls(map) {
     try {
         // Check if MapboxDraw is available
         if (typeof MapboxDraw === 'undefined') {
@@ -249,7 +249,7 @@ export function initializeDrawControls(map) {
 }
 
 // Setup drawing mode with event blocking
-export function setupDrawingMode(map, draw, dotNetRef) {
+function setupDrawingMode(map, draw, dotNetRef) {
     try {
         // Create a new button element for drawing mode toggle
         const drawButton = document.createElement('button');
@@ -439,7 +439,7 @@ function toggleDrawingMode(map, draw, dotNetRef, drawButton, hasCompletedPolygon
  * @param {Array} coordinates - Array of [longitude, latitude] coordinates
  * @returns {number} Area in hectares
  */
-export function calculatePolygonAreaInHectares(coordinates) {
+function calculatePolygonAreaInHectares(coordinates) {
     try {
         if (!coordinates || coordinates.length < 3) {
             console.warn('Not enough coordinates to calculate area');
@@ -474,6 +474,76 @@ export function calculatePolygonAreaInHectares(coordinates) {
         return Promise.resolve(0);
     }
 }
+
+// This function calculates the field size from coordinates using Turf.js
+async function calculateFieldSizeFromCoordinates(coordinates) {
+    try {
+        // Load Turf.js if needed
+        if (typeof turf === 'undefined') {
+            await loadTurf();
+        }
+
+        if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 3) {
+            console.warn('Not enough coordinates to calculate area');
+            return 0;
+        }
+
+        // Create a closed polygon if not already closed
+        let polygonCoords = [...coordinates];
+        if (polygonCoords.length > 0 &&
+            (polygonCoords[0][0] !== polygonCoords[polygonCoords.length - 1][0] ||
+                polygonCoords[0][1] !== polygonCoords[polygonCoords.length - 1][1])) {
+            polygonCoords.push([...polygonCoords[0]]);
+        }
+
+        // Create a Turf.js polygon from coordinates
+        const polygon = turf.polygon([polygonCoords]);
+
+        // Calculate area in square meters
+        const areaInSquareMeters = turf.area(polygon);
+
+        // Convert to hectares (1 hectare = 10,000 square meters)
+        const hectares = areaInSquareMeters / 10000;
+
+        // Round to 2 decimal places
+        return Math.round(hectares * 100) / 100;
+    } catch (error) {
+        console.error('Error calculating field size from coordinates:', error);
+        return 0;
+    }
+}
+
+// Enhanced function to automatically calculate field size when editing
+// Calculate field size from existing coordinates
+window.calculateAndUpdateFieldSize = async function(fieldLocations, dotNetRef) {
+    try {
+        console.log("calculateAndUpdateFieldSize called with", fieldLocations.length, "coordinates");
+
+        if (!fieldLocations || !Array.isArray(fieldLocations) || fieldLocations.length < 3) {
+            console.warn('Not enough coordinates to calculate field size');
+            return 0;
+        }
+
+        // Convert field locations to the format needed for calculation
+        const coordinates = fieldLocations.map(loc => [loc.longitude, loc.latitude]);
+
+        // Calculate area using existing calculatePolygonAreaInHectares function
+        const areaInHectares = await calculatePolygonAreaInHectares(coordinates);
+
+        console.log(`Calculated field size from existing coordinates: ${areaInHectares} hectares`);
+
+        // Send calculated area to .NET component
+        if (dotNetRef && areaInHectares > 0) {
+            await dotNetRef.invokeMethodAsync('UpdateFieldSize', areaInHectares);
+            console.log('Field size updated on form');
+        }
+
+        return areaInHectares;
+    } catch (error) {
+        console.error('Error calculating and updating field size:', error);
+        return 0;
+    }
+};
 
 /**
  * Load Turf.js from CDN
@@ -709,7 +779,7 @@ export function updateDeleteControlVisibility(map, draw, deleteControl) {
     }
 }
 
-export function toggleDrawButtonVisibility(visible) {
+function toggleDrawButtonVisibility(visible) {
     try {
         const drawButton = document.getElementById('field-drawing-button');
         if (drawButton) {
@@ -915,7 +985,7 @@ export function loadExistingPolygonForEditing(map, draw, coordinates) {
  * @param {Object} draw - The MapboxDraw control instance
  * @returns {Promise<number>} Area in hectares
  */
-export async function calculatePolygonAreaFromDrawing(map, draw) {
+async function calculatePolygonAreaFromDrawing(map, draw) {
     try {
         // Get all features from the drawing tool
         const allFeatures = draw.getAll();
@@ -986,7 +1056,7 @@ function processDrawnPolygon(polygon, dotNetRef) {
 }
 
 // Clear any drawn polygons with safety checks
-export function clearDrawnPolygons(draw, deleteControl = null) {
+function clearDrawnPolygons(draw, deleteControl = null) {
     try {
         if (!draw) {
             console.warn('Draw control is null or undefined');
@@ -1043,7 +1113,7 @@ export function clearDrawnPolygons(draw, deleteControl = null) {
  * @param {boolean} clearExisting - Whether to clear existing layers before drawing
  * @returns {Promise<boolean>} Success indicator
  */
-export async function drawPolygon(map, id, coordinates, isField = false, name = 'Farm', cropData = null, clearExisting = false) {
+async function drawPolygon(map, id, coordinates, isField = false, name = 'Farm', cropData = null, clearExisting = false) {
     // Define source and layer IDs with unique prefixes to avoid conflicts
     const prefix = isField ? 'field-' : 'farm-';
     const sourceId = `${prefix}source-${id}`;
@@ -1228,7 +1298,7 @@ export async function drawPolygon(map, id, coordinates, isField = false, name = 
  * @param {Object} map - The Mapbox map instance
  * @param {Object} farms - GeoJSON FeatureCollection of farm data
  */
-export function loadFarms(map, farms) {
+function loadFarms(map, farms) {
     try {
         // Add debug to see if function is being called with data
         console.log("loadFarms called with data:", farms);
@@ -1430,7 +1500,7 @@ export function loadFarms(map, farms) {
  * @param {number} longitude - Longitude coordinate
  * @param {number} zoom - Optional zoom level (default: 14)
  */
-export function setMapCenter(map, latitude, longitude, zoom = 14) {
+function setMapCenter(map, latitude, longitude, zoom = 14) {
     try {
         map.easeTo({
             center: [longitude, latitude],
@@ -1458,7 +1528,7 @@ export function setMapStyle(map, style) {
     }
 }
 
-export function clearMap(map) {
+function clearMap(map) {
     try {
         console.log('Clearing map...');
 
@@ -1621,7 +1691,7 @@ function removeLayerSafely(map, layerId) {
  * @param {Object} map - The Mapbox map instance
  * @param {string} fieldId - ID of the field to highlight
  */
-export function highlightFieldOnMap(map, fieldId) {
+function highlightFieldOnMap(map, fieldId) {
     try {
         // Skip highlighting if in drawing mode
         if (isDrawingModeActive) return;
@@ -1653,7 +1723,7 @@ export function highlightFieldOnMap(map, fieldId) {
  * @param {Object} map - The Mapbox map instance
  * @param {string} fieldId - ID of the field to unhighlight
  */
-export function unhighlightFieldOnMap(map, fieldId) {
+function unhighlightFieldOnMap(map, fieldId) {
     try {
         // Skip unhighlighting if in drawing mode
         if (isDrawingModeActive) return;
@@ -1819,7 +1889,7 @@ export function checkForPolygonAndUpdateDeleteButton(draw, deleteButtonId) {
  * @param {string} deleteButtonId - ID of the delete button element
  * @returns {boolean} Success indicator
  */
-export function clearAllDrawings(draw, deleteButtonId) {
+function clearAllDrawings(draw, deleteButtonId) {
     try {
         if (draw) {
             draw.deleteAll();
@@ -1839,7 +1909,7 @@ export function clearAllDrawings(draw, deleteButtonId) {
 /**
  * Setup function that creates the drawing and delete controls
  */
-export function setupSimpleDrawingControls(map, draw, dotNetRef) {
+function setupSimpleDrawingControls(map, draw, dotNetRef) {
     console.log("Setting up simple drawing controls...");
 
     try {
@@ -1938,7 +2008,7 @@ export function setupSimpleDrawingControls(map, draw, dotNetRef) {
  * @param {string} deleteButtonId - ID of the delete button element
  * @returns {boolean} Success indicator
  */
-export function loadPolygonForEditing(map, draw, coordinates, deleteButtonId) {
+function loadPolygonForEditing(map, draw, coordinates, deleteButtonId) {
     try {
         console.log("Loading polygon for editing...");
 
@@ -2007,3 +2077,25 @@ export function updateDeleteButtonVisibility(deleteButtonId, visible) {
         console.error("Error updating delete button visibility:", error);
     }
 }
+
+// Expose functions for use by Blazor components
+export {
+    addMapToElement,
+    drawPolygon,
+    clearMap,
+    setMapCenter,
+    loadFarms,
+    addFilterButton,
+    initializeDrawControls,
+    setupDrawingMode,
+    calculatePolygonAreaFromDrawing,
+    loadPolygonForEditing,
+    clearAllDrawings,
+    toggleDrawButtonVisibility,
+    setupSimpleDrawingControls,
+    clearDrawnPolygons,
+    highlightFieldOnMap,
+    unhighlightFieldOnMap,
+    loadTurf,  // Export loadTurf function
+    calculateFieldSizeFromCoordinates  // Export calculation function
+};
