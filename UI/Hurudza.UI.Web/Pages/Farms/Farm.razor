@@ -324,37 +324,6 @@ else
                             <span class="badge bg-gradient-danger ms-auto">Female: @farm.FemaleTeachers</span>
                         </div>
                     </div>
-                    
-                    <!-- Facilities List -->
-                    <div class="mt-4">
-                        <h6>Facilities</h6>
-                        <ul class="list-group">
-                            @if (!string.IsNullOrEmpty(farm.Classrooms))
-                            {
-                                <li class="list-group-item border-0 ps-0 pt-0 text-sm">
-                                    <strong class="text-dark">Classrooms:</strong> @farm.Classrooms
-                                </li>
-                            }
-                            @if (!string.IsNullOrEmpty(farm.Laboratories))
-                            {
-                                <li class="list-group-item border-0 ps-0 pt-0 text-sm">
-                                    <strong class="text-dark">Laboratories:</strong> @farm.Laboratories
-                                </li>
-                            }
-                            @if (!string.IsNullOrEmpty(farm.Library))
-                            {
-                                <li class="list-group-item border-0 ps-0 pt-0 text-sm">
-                                    <strong class="text-dark">Library:</strong> @farm.Library
-                                </li>
-                            }
-                            @if (!string.IsNullOrEmpty(farm.SportsFacilities))
-                            {
-                                <li class="list-group-item border-0 ps-0 pt-0 text-sm">
-                                    <strong class="text-dark">Sports Facilities:</strong> @farm.SportsFacilities
-                                </li>
-                            }
-                        </ul>
-                    </div>
                 </div>
             </div>
         </div>
@@ -695,28 +664,14 @@ else
                 farm = farmResponse.Result;
                 
                 // Load fields
-                var fieldsResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<FieldViewModel>>>(
+                fields = await ApiCall.Get<List<FieldViewModel>>(
                     await ApiCall.GetHttpClient(), $"Fields/GetFarmFields/{FarmId}");
-                    
-                if (fieldsResponse?.Status == (int)HttpStatusCode.OK && fieldsResponse.Result != null)
-                {
-                    fields = fieldsResponse.Result;
-                }
                 
                 // Load field crops
                 try
                 {
-                    var cropResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<FieldCropViewModel>>>(
+                    fieldCrops = await ApiCall.Get<List<FieldCropViewModel>>(
                         await ApiCall.GetHttpClient(), $"FieldCrops/GetFarmFieldCrops/{FarmId}");
-                        
-                    if (cropResponse?.Status == (int)HttpStatusCode.OK && cropResponse.Result != null)
-                    {
-                        fieldCrops = cropResponse.Result;
-                    }
-                    else
-                    {
-                        fieldCrops = new List<FieldCropViewModel>();
-                    }
                 }
                 catch
                 {

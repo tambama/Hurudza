@@ -1,11 +1,12 @@
-@page "/farms/{FarmId}"
-@using Hurudza.Data.UI.Models.ViewModels.Core
-@using Hurudza.UI.Web.Directives
-@using Hurudza.UI.Web.Services
+@page "/farms/{FarmId}/details"
 @using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@using Hurudza.UI.Web.Services
+@attribute [Authorize]
+
 @inject IApiCall ApiCall
 @inject NavigationManager NavigationManager
 @inject FarmAccessService FarmAccessService
+@inject IJSRuntime JSRuntime
 
 <Toast @ref="Alert" />
 
@@ -27,266 +28,955 @@ else if (farm == null)
 }
 else
 {
-    <!-- Farm Header -->
-    <div class="row mb-4">
+    <div class="row">
         <div class="col-12">
-            <div class="card bg-gradient-default">
-                <div class="card-body p-4">
+            <div class="card mb-4">
+                <div class="card-header p-3">
                     <div class="row">
                         <div class="col-md-8">
-                            <h2 class="text-white mb-0">@farm.Name</h2>
-                            <p class="text-light mb-0">@farm.Address</p>
-                            <div class="d-flex align-items-center mt-3">
-                                <span class="badge bg-primary me-2">@farm.Size ha</span>
-                                <span class="badge bg-info me-2">Region @farm.Region</span>
-                                <span class="badge bg-success">@farm.SoilType</span>
+                            <div class="d-flex align-items-center">
+                                <div class="icon icon-shape icon-lg bg-gradient-primary shadow text-center">
+                                    <i class="ni ni-building opacity-10"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <h5 class="mb-0">@farm.Name</h5>
+                                    <p class="text-sm mb-0">@farm.Address</p>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-4 d-flex justify-content-end align-items-center">
-                            <!-- Only show for managers and admins -->
+                        <div class="col-md-4 d-flex justify-content-md-end">
+                            <button class="btn btn-outline-secondary me-2" @onclick="NavigateBack">
+                                <i class="fas fa-arrow-left me-2"></i>Back
+                            </button>
                             <FarmPermission FarmId="@FarmId" RequireManage="true">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-sm btn-primary" @onclick="NavigateToEdit">
-                                        <i class="fas fa-edit me-1"></i> Edit
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-info" @onclick="NavigateToUsers">
-                                        <i class="fas fa-users me-1"></i> Users
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                        More
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="javascript:void(0)" @onclick="NavigateToFields">Manage Fields</a></li>
-                                        <li><a class="dropdown-item" href="javascript:void(0)" @onclick="NavigateToCrops">Manage Crops</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" @onclick="ShowDeleteConfirmation">Delete Farm</a></li>
-                                    </ul>
-                                </div>
+                                <button class="btn btn-primary" @onclick="NavigateToEdit">
+                                    <i class="fas fa-edit me-2"></i>Edit
+                                </button>
                             </FarmPermission>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Farm Content Tabs -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header pb-0">
-                    <ul class="nav nav-tabs nav-tabs-primary" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link @(activeTab == "overview" ? "active" : "")" 
-                               @onclick='() => SetActiveTab("overview")' 
-                               href="javascript:void(0)">
-                                Overview
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(activeTab == "fields" ? "active" : "")" 
-                               @onclick='() => SetActiveTab("fields")' 
-                               href="javascript:void(0)">
-                                Fields
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(activeTab == "crops" ? "active" : "")" 
-                               @onclick='() => SetActiveTab("crops")' 
-                               href="javascript:void(0)">
-                                Crops
-                            </a>
-                        </li>
-                        <!-- Only show to users with tillage permission -->
-                        <FarmPermission Permission="Tillage.View" FarmId="@FarmId">
-                            <li class="nav-item">
-                                <a class="nav-link @(activeTab == "tillage" ? "active" : "")" 
-                                   @onclick='() => SetActiveTab("tillage")' 
-                                   href="javascript:void(0)">
-                                    Tillage
-                                </a>
-                            </li>
-                        </FarmPermission>
-                    </ul>
-                </div>
                 <div class="card-body">
-                    <div class="tab-content">
-                        <!-- Overview Tab -->
-                        <div class="tab-pane fade @(activeTab == "overview" ? "show active" : "")" id="overview" role="tabpanel">
+                    <!-- Tab navigation -->
+                    <ul class="nav nav-tabs" id="farmTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" 
+                                    type="button" role="tab" aria-controls="general" aria-selected="true">
+                                General
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="land-tab" data-bs-toggle="tab" data-bs-target="#land" 
+                                    type="button" role="tab" aria-controls="land" aria-selected="false">
+                                Land Details
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="school-tab" data-bs-toggle="tab" data-bs-target="#school" 
+                                    type="button" role="tab" aria-controls="school" aria-selected="false">
+                                School Information
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="location-tab" data-bs-toggle="tab" data-bs-target="#location" 
+                                    type="button" role="tab" aria-controls="location" aria-selected="false">
+                                Location Data
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="additional-tab" data-bs-toggle="tab" data-bs-target="#additional" 
+                                    type="button" role="tab" aria-controls="additional" aria-selected="false">
+                                Additional Info
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab content -->
+                    <div class="tab-content mt-4" id="farmTabsContent">
+
+                        <!-- General Tab -->
+                        <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h5>Farm Details</h5>
-                                    <div class="table-responsive">
-                                        <table class="table table-sm">
-                                            <tbody>
-                                                <tr>
-                                                    <th width="150">Contact Person</th>
-                                                    <td>@farm.ContactPerson</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Phone</th>
-                                                    <td>@farm.PhoneNumber</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Email</th>
-                                                    <td>@farm.Email</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Website</th>
-                                                    <td>@(string.IsNullOrEmpty(farm.Website) ? "N/A" : farm.Website)</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Established</th>
-                                                    <td>@farm.Year</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Location</th>
-                                                    <td>@farm.Province, @farm.District</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                    <div class="card card-frame shadow-sm">
+                                        <div class="card-header pb-0">
+                                            <h6 class="mb-0">Contact Information</h6>
+                                        </div>
+                                        <div class="card-body pt-2">
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item border-0 ps-0 pt-0">
+                                                    <div class="d-flex">
+                                                        <div>
+                                                            <i class="fas fa-user-tie text-primary me-2"></i>
+                                                        </div>
+                                                        <div class="d-flex flex-column">
+                                                            <h6 class="mb-0 text-sm">Contact Person</h6>
+                                                            <span class="text-muted text-xs">@farm.ContactPerson</span>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item border-0 ps-0">
+                                                    <div class="d-flex">
+                                                        <div>
+                                                            <i class="fas fa-phone text-primary me-2"></i>
+                                                        </div>
+                                                        <div class="d-flex flex-column">
+                                                            <h6 class="mb-0 text-sm">Phone</h6>
+                                                            <span class="text-muted text-xs">@farm.PhoneNumber</span>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item border-0 ps-0">
+                                                    <div class="d-flex">
+                                                        <div>
+                                                            <i class="fas fa-envelope text-primary me-2"></i>
+                                                        </div>
+                                                        <div class="d-flex flex-column">
+                                                            <h6 class="mb-0 text-sm">Email</h6>
+                                                            <span class="text-muted text-xs">@farm.Email</span>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                @if (!string.IsNullOrEmpty(farm.Website))
+                                                {
+                                                    <li class="list-group-item border-0 ps-0 pb-0">
+                                                        <div class="d-flex">
+                                                            <div>
+                                                                <i class="fas fa-globe text-primary me-2"></i>
+                                                            </div>
+                                                            <div class="d-flex flex-column">
+                                                                <h6 class="mb-0 text-sm">Website</h6>
+                                                                <span class="text-muted text-xs">@farm.Website</span>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
+                                
                                 <div class="col-md-6">
-                                    <h5>Land Information</h5>
-                                    <div class="table-responsive">
-                                        <table class="table table-sm">
-                                            <tbody>
-                                                <tr>
-                                                    <th width="150">Total Size</th>
-                                                    <td>@farm.Size hectares</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Arable Land</th>
-                                                    <td>@farm.Arable hectares</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Cleared Land</th>
-                                                    <td>@farm.Cleared hectares</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Soil Type</th>
-                                                    <td>@farm.SoilType</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Terrain</th>
-                                                    <td>@(farm.Terrain?.ToString() ?? "N/A")</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Water Source</th>
-                                                    <td>@(string.IsNullOrEmpty(farm.WaterSource) ? "N/A" : farm.WaterSource)</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                    <div class="card card-frame shadow-sm h-100">
+                                        <div class="card-header pb-0">
+                                            <h6 class="mb-0">Basic Information</h6>
+                                        </div>
+                                        <div class="card-body pt-2">
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item border-0 ps-0 pt-0">
+                                                    <div class="d-flex">
+                                                        <div>
+                                                            <i class="fas fa-calendar text-primary me-2"></i>
+                                                        </div>
+                                                        <div class="d-flex flex-column">
+                                                            <h6 class="mb-0 text-sm">Founded</h6>
+                                                            <span class="text-muted text-xs">@farm.Year</span>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item border-0 ps-0">
+                                                    <div class="d-flex">
+                                                        <div>
+                                                            <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                                        </div>
+                                                        <div class="d-flex flex-column">
+                                                            <h6 class="mb-0 text-sm">Location</h6>
+                                                            <span class="text-muted text-xs">@farm.Province, @farm.District</span>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item border-0 ps-0">
+                                                    <div class="d-flex">
+                                                        <div>
+                                                            <i class="fas fa-tag text-primary me-2"></i>
+                                                        </div>
+                                                        <div class="d-flex flex-column">
+                                                            <h6 class="mb-0 text-sm">Classification</h6>
+                                                            <div>
+                                                                <span class="badge bg-primary me-1">Region @farm.Region</span>
+                                                                <span class="badge bg-info">Conference @farm.Conference</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                @if (!string.IsNullOrEmpty(farm.FoundingMembers))
+                                                {
+                                                    <li class="list-group-item border-0 ps-0 pb-0">
+                                                        <div class="d-flex">
+                                                            <div>
+                                                                <i class="fas fa-users text-primary me-2"></i>
+                                                            </div>
+                                                            <div class="d-flex flex-column">
+                                                                <h6 class="mb-0 text-sm">Founding Members</h6>
+                                                                <span class="text-muted text-xs">@farm.FoundingMembers</span>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- Additional sections for Overview tab -->
+
+                            <!-- Mission and Vision -->
+                            <div class="row mt-4">
+                                @if (!string.IsNullOrEmpty(farm.Vision))
+                                {
+                                    <div class="col-md-6">
+                                        <div class="card card-frame shadow-sm h-100">
+                                            <div class="card-header pb-0">
+                                                <h6 class="mb-0">Vision</h6>
+                                            </div>
+                                            <div class="card-body pt-2">
+                                                <p class="text-sm">@farm.Vision</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                
+                                @if (!string.IsNullOrEmpty(farm.Mission))
+                                {
+                                    <div class="col-md-6">
+                                        <div class="card card-frame shadow-sm h-100">
+                                            <div class="card-header pb-0">
+                                                <h6 class="mb-0">Mission</h6>
+                                            </div>
+                                            <div class="card-body pt-2">
+                                                <p class="text-sm">@farm.Mission</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Description -->
                             @if (!string.IsNullOrEmpty(farm.Description))
                             {
                                 <div class="row mt-4">
                                     <div class="col-12">
-                                        <h5>Description</h5>
-                                        <p>@farm.Description</p>
+                                        <div class="card card-frame shadow-sm">
+                                            <div class="card-header pb-0">
+                                                <h6 class="mb-0">Description</h6>
+                                            </div>
+                                            <div class="card-body pt-2">
+                                                <p class="text-sm">@farm.Description</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             }
                         </div>
-                        
-                        <!-- Fields Tab -->
-                        <div class="tab-pane fade @(activeTab == "fields" ? "show active" : "")" id="fields" role="tabpanel">
-                            @if (fields == null || !fields.Any())
-                            {
-                                <div class="alert alert-info">
-                                    <p>No fields have been added to this farm yet.</p>
-                                    
-                                    <FarmPermission FarmId="@FarmId" RequireManage="true">
-                                        <button class="btn btn-sm btn-primary mt-2" @onclick="NavigateToAddField">
-                                            <i class="fas fa-plus me-1"></i> Add Field
-                                        </button>
-                                    </FarmPermission>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="mb-0">Fields (@fields.Count)</h5>
-                                    
-                                    <FarmPermission FarmId="@FarmId" RequireManage="true">
-                                        <button class="btn btn-sm btn-primary" @onclick="NavigateToAddField">
-                                            <i class="fas fa-plus me-1"></i> Add Field
-                                        </button>
-                                    </FarmPermission>
-                                </div>
-                                
-                                <div class="table-responsive">
-                                    <table class="table align-items-center mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-uppercase text-xxs font-weight-bolder opacity-7">Name</th>
-                                                <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Size (ha)</th>
-                                                <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Soil Type</th>
-                                                <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Irrigation</th>
-                                                <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var field in fields)
-                                            {
-                                                <tr>
-                                                    <td>
-                                                        <div class="d-flex px-2 py-1">
-                                                            <div class="d-flex flex-column justify-content-center">
-                                                                <h6 class="mb-0 text-sm">@field.Name</h6>
+
+                        <!-- Land Details Tab -->
+                        <div class="tab-pane fade" id="land" role="tabpanel" aria-labelledby="land-tab">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card card-frame shadow-sm">
+                                        <div class="card-header pb-0">
+                                            <h6 class="mb-0">Land Statistics</h6>
+                                        </div>
+                                        <div class="card-body pt-2">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="card bg-gradient-primary h-100">
+                                                        <div class="card-body p-3">
+                                                            <div class="row">
+                                                                <div class="col">
+                                                                    <div class="numbers">
+                                                                        <p class="text-sm mb-0 text-white font-weight-bold">Total Size</p>
+                                                                        <h5 class="text-white font-weight-bolder mb-0">
+                                                                            @farm.Size ha
+                                                                        </h5>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-auto">
+                                                                    <div class="icon icon-shape bg-white shadow text-center border-radius-md">
+                                                                        <i class="ni ni-world text-dark opacity-10"></i>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </td>
-                                                    <td>
-                                                        <p class="text-xs font-weight-bold mb-0">@field.Size</p>
-                                                    </td>
-                                                    <td>
-                                                        <p class="text-xs font-weight-bold mb-0">@field.SoilType</p>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge badge-sm bg-@(field.Irrigation ? "success" : "secondary")">
-                                                            @(field.Irrigation ? "Yes" : "No")
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <div class="d-flex">
-                                                            <a href="javascript:void(0)" @onclick="() => NavigateToFieldDetails(field.Id)" class="btn btn-link text-dark px-2 mb-0">
-                                                                <i class="fas fa-eye text-sm"></i>
-                                                            </a>
-                                                            
-                                                            <FarmPermission FarmId="@FarmId" RequireManage="true">
-                                                                <a href="javascript:void(0)" @onclick="() => NavigateToEditField(field.Id)" class="btn btn-link text-primary px-2 mb-0">
-                                                                    <i class="fas fa-pencil-alt text-sm"></i>
-                                                                </a>
-                                                                <button @onclick="() => DeleteField(field.Id)" class="btn btn-link text-danger px-2 mb-0">
-                                                                    <i class="fas fa-trash text-sm"></i>
-                                                                </button>
-                                                            </FarmPermission>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="card bg-gradient-success h-100">
+                                                        <div class="card-body p-3">
+                                                            <div class="row">
+                                                                <div class="col">
+                                                                    <div class="numbers">
+                                                                        <p class="text-sm mb-0 text-white font-weight-bold">Arable Land</p>
+                                                                        <h5 class="text-white font-weight-bolder mb-0">
+                                                                            @farm.Arable ha
+                                                                        </h5>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-auto">
+                                                                    <div class="icon icon-shape bg-white shadow text-center border-radius-md">
+                                                                        <i class="ni ni-paper-diploma text-dark opacity-10"></i>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="card bg-gradient-info h-100">
+                                                        <div class="card-body p-3">
+                                                            <div class="row">
+                                                                <div class="col">
+                                                                    <div class="numbers">
+                                                                        <p class="text-sm mb-0 text-white font-weight-bold">Cleared Land</p>
+                                                                        <h5 class="text-white font-weight-bolder mb-0">
+                                                                            @farm.Cleared ha
+                                                                        </h5>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-auto">
+                                                                    <div class="icon icon-shape bg-white shadow text-center border-radius-md">
+                                                                        <i class="ni ni-map-big text-dark opacity-10"></i>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="table-responsive mt-4">
+                                                <table class="table align-items-center mb-0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th class="text-uppercase text-xs font-weight-bolder opacity-7">Soil Type</th>
+                                                            <td class="ps-2">
+                                                                <span class="text-dark font-weight-bold text-sm">
+                                                                    @(!string.IsNullOrEmpty(farm.SoilType) ? farm.SoilType : "Not specified")
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="text-uppercase text-xs font-weight-bolder opacity-7">Terrain</th>
+                                                            <td class="ps-2">
+                                                                <span class="text-dark font-weight-bold text-sm">
+                                                                    @(farm.Terrain?.ToString() ?? "Not specified")
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="text-uppercase text-xs font-weight-bolder opacity-7">Road Access</th>
+                                                            <td class="ps-2">
+                                                                <span class="text-dark font-weight-bold text-sm">
+                                                                    @(farm.RoadAccess?.ToString() ?? "Not specified")
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            }
+
+                                <div class="col-md-6">
+                                    <div class="card card-frame shadow-sm">
+                                        <div class="card-header pb-0">
+                                            <h6 class="mb-0">Water & Irrigation</h6>
+                                        </div>
+                                        <div class="card-body pt-2">
+                                            <div class="row align-items-center mb-3">
+                                                <div class="col-md-6">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="@(farm.Irrigated ? "bg-gradient-success" : "bg-gradient-secondary") icon-shape icon-sm shadow text-center me-2">
+                                                            <i class="fas fa-tint text-white opacity-10"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0 text-sm">Irrigation Status</h6>
+                                                            <span class="text-muted text-xs">@(farm.Irrigated ? "Irrigated" : "Not Irrigated")</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="bg-gradient-info icon-shape icon-sm shadow text-center me-2">
+                                                            <i class="fas fa-water text-white opacity-10"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0 text-sm">Water Availability</h6>
+                                                            <span class="text-muted text-xs">@(farm.WaterAvailability?.ToString() ?? "Not specified")</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="table-responsive">
+                                                <table class="table align-items-center mb-0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th class="text-uppercase text-xs font-weight-bolder opacity-7">Water Source</th>
+                                                            <td class="ps-2">
+                                                                <span class="text-dark font-weight-bold text-sm">
+                                                                    @(!string.IsNullOrEmpty(farm.WaterSource) ? farm.WaterSource : "Not specified")
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                        @if (!string.IsNullOrEmpty(farm.PastCrops))
+                                                        {
+                                                            <tr>
+                                                                <th class="text-uppercase text-xs font-weight-bolder opacity-7">Past Crops</th>
+                                                                <td class="ps-2">
+                                                                    <span class="text-dark font-weight-bold text-sm">@farm.PastCrops</span>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(farm.LandManagementPractice))
+                                                        {
+                                                            <tr>
+                                                                <th class="text-uppercase text-xs font-weight-bolder opacity-7">Land Management</th>
+                                                                <td class="ps-2">
+                                                                    <span class="text-dark font-weight-bold text-sm">@farm.LandManagementPractice</span>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Fields Summary -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card card-frame shadow-sm">
+                                        <div class="card-header pb-0">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">Fields</h6>
+                                                <a class="btn btn-link text-primary p-0 m-0" href="/farm/@FarmId/fields">
+                                                    View All Fields <i class="fas fa-arrow-right ms-1"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="card-body pt-2">
+                                            @if (fields == null || !fields.Any())
+                                            {
+                                                <div class="alert alert-info">
+                                                    <p class="mb-0">No fields have been added to this farm yet.</p>
+                                                    <a href="/farm/@FarmId/fields/add" class="btn btn-sm btn-primary mt-2">Add Field</a>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="table-responsive">
+                                                    <table class="table align-items-center mb-0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="text-uppercase text-xs font-weight-bolder opacity-7">Name</th>
+                                                                <th class="text-uppercase text-xs font-weight-bolder opacity-7 ps-2">Size (ha)</th>
+                                                                <th class="text-uppercase text-xs font-weight-bolder opacity-7 ps-2">Soil Type</th>
+                                                                <th class="text-uppercase text-xs font-weight-bolder opacity-7 ps-2">Irrigation</th>
+                                                                <th class="text-secondary opacity-7"></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var field in fields.Take(5))
+                                                            {
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="d-flex px-2 py-1">
+                                                                            <div class="d-flex flex-column justify-content-center">
+                                                                                <h6 class="mb-0 text-sm">@field.Name</h6>
+                                                                                @if (!string.IsNullOrEmpty(field.Description))
+                                                                                {
+                                                                                    <p class="text-xs text-secondary mb-0">@field.Description</p>
+                                                                                }
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <p class="text-xs font-weight-bold mb-0">@field.Size.ToString("F2")</p>
+                                                                    </td>
+                                                                    <td>
+                                                                        <p class="text-xs font-weight-bold mb-0">@field.SoilType.ToString()</p>
+                                                                    </td>
+                                                                    <td>
+                                                                        @if (field.Irrigation)
+                                                                        {
+                                                                            <span class="badge badge-sm bg-gradient-success">Yes</span>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <span class="badge badge-sm bg-gradient-secondary">No</span>
+                                                                        }
+                                                                    </td>
+                                                                    <td class="align-middle text-center">
+                                                                        <a href="/field/@field.Id" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="View details">
+                                                                            <i class="fas fa-eye me-1"></i> View
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                    @if (fields.Count > 5)
+                                                    {
+                                                        <div class="text-center mt-3">
+                                                            <a href="/farm/@FarmId/fields" class="btn btn-sm btn-outline-primary">
+                                                                View All @fields.Count Fields
+                                                            </a>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        
-                        <!-- Crops Tab -->
-                        <div class="tab-pane fade @(activeTab == "crops" ? "show active" : "")" id="crops" role="tabpanel">
-                            <!-- Crops content here -->
-                            <p>Crop data and visualization will be displayed here.</p>
+
+                        <!-- School Information Tab -->
+                        <div class="tab-pane fade" id="school" role="tabpanel" aria-labelledby="school-tab">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card card-frame shadow-sm">
+                                        <div class="card-header pb-0">
+                                            <h6 class="mb-0">Student & Staff Demographics</h6>
+                                        </div>
+                                        <div class="card-body pt-3">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <!-- Student Demographics -->
+                                                    <div class="card bg-gradient-light mb-4">
+                                                        <div class="card-body p-3">
+                                                            <div class="row">
+                                                                <div class="col-8">
+                                                                    <div class="numbers">
+                                                                        <p class="text-sm mb-0 font-weight-bold">Total Students</p>
+                                                                        <h5 class="font-weight-bolder mb-0">
+                                                                            @(farm.MaleStudents + farm.FemaleStudents)
+                                                                        </h5>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4 text-end">
+                                                                    <div class="icon icon-shape bg-gradient-primary shadow text-center">
+                                                                        <i class="fas fa-user-graduate text-white opacity-10"></i>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="mt-3">
+                                                                <h6 class="text-sm mb-1">Gender Breakdown</h6>
+                                                                <div class="progress">
+                                                                    @{
+                                                                        var totalStudents = farm.MaleStudents + farm.FemaleStudents;
+                                                                        var malePercentage = totalStudents > 0 ? (farm.MaleStudents * 100) / totalStudents : 0;
+                                                                        var femalePercentage = totalStudents > 0 ? (farm.FemaleStudents * 100) / totalStudents : 0;
+                                                                    }
+                                                                    <div class="progress-bar bg-gradient-info" role="progressbar" style="width: @malePercentage%"></div>
+                                                                    <div class="progress-bar bg-gradient-danger" role="progressbar" style="width: @femalePercentage%"></div>
+                                                                </div>
+                                                                <div class="d-flex justify-content-between mt-1">
+                                                                    <span class="text-xs text-muted">Male: @farm.MaleStudents (@malePercentage.ToString("F0")%)</span>
+                                                                    <span class="text-xs text-muted">Female: @farm.FemaleStudents (@femalePercentage.ToString("F0")%)</span>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="mt-3">
+                                                                <h6 class="text-sm mb-1">Boarding Status</h6>
+                                                                <div class="progress">
+                                                                    @{
+                                                                        var totalScholars = farm.DayScholars + farm.BoardingScholars;
+                                                                        var dayPercentage = totalScholars > 0 ? (farm.DayScholars * 100) / totalScholars : 0;
+                                                                        var boardingPercentage = totalScholars > 0 ? (farm.BoardingScholars * 100) / totalScholars : 0;
+                                                                    }
+                                                                    <div class="progress-bar bg-gradient-success" role="progressbar" style="width: @dayPercentage%"></div>
+                                                                    <div class="progress-bar bg-gradient-primary" role="progressbar" style="width: @boardingPercentage%"></div>
+                                                                </div>
+                                                                <div class="d-flex justify-content-between mt-1">
+                                                                    <span class="text-xs text-muted">Day: @farm.DayScholars (@dayPercentage.ToString("F0")%)</span>
+                                                                    <span class="text-xs text-muted">Boarding: @farm.BoardingScholars (@boardingPercentage.ToString("F0")%)</span>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            @if (!string.IsNullOrEmpty(farm.StudentDemographics))
+                                                            {
+                                                                <div class="mt-3">
+                                                                    <h6 class="text-sm mb-1">Additional Demographics</h6>
+                                                                    <p class="text-xs text-muted mb-0">@farm.StudentDemographics</p>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <!-- Staff Demographics -->
+                                                    <div class="card bg-gradient-light mb-4">
+                                                        <div class="card-body p-3">
+                                                            <div class="row">
+                                                                <div class="col-8">
+                                                                    <div class="numbers">
+                                                                        <p class="text-sm mb-0 font-weight-bold">Teaching Staff</p>
+                                                                        <h5 class="font-weight-bolder mb-0">
+                                                                            @(farm.MaleTeachers + farm.FemaleTeachers)
+                                                                        </h5>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4 text-end">
+                                                                    <div class="icon icon-shape bg-gradient-warning shadow text-center">
+                                                                        <i class="fas fa-chalkboard-teacher text-white opacity-10"></i>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="mt-3">
+                                                                <h6 class="text-sm mb-1">Gender Breakdown</h6>
+                                                                <div class="progress">
+                                                                    @{
+                                                                        var totalTeachers = farm.MaleTeachers + farm.FemaleTeachers;
+                                                                        var maleTeacherPercentage = totalTeachers > 0 ? (farm.MaleTeachers * 100) / totalTeachers : 0;
+                                                                        var femaleTeacherPercentage = totalTeachers > 0 ? (farm.FemaleTeachers * 100) / totalTeachers : 0;
+                                                                    }
+                                                                    <div class="progress-bar bg-gradient-info" role="progressbar" style="width: @maleTeacherPercentage%"></div>
+                                                                    <div class="progress-bar bg-gradient-danger" role="progressbar" style="width: @femaleTeacherPercentage%"></div>
+                                                                </div>
+                                                                <div class="d-flex justify-content-between mt-1">
+                                                                    <span class="text-xs text-muted">Male: @farm.MaleTeachers (@maleTeacherPercentage.ToString("F0")%)</span>
+                                                                    <span class="text-xs text-muted">Female: @farm.FemaleTeachers (@femaleTeacherPercentage.ToString("F0")%)</span>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            @if (!string.IsNullOrEmpty(farm.NonTeachingStaff))
+                                                            {
+                                                                <div class="mt-3">
+                                                                    <h6 class="text-sm mb-1">Non-Teaching Staff</h6>
+                                                                    <p class="text-xs text-muted mb-0">@farm.NonTeachingStaff</p>
+                                                                </div>
+                                                            }
+                                                            
+                                                            @if (!string.IsNullOrEmpty(farm.Personnel))
+                                                            {
+                                                                <div class="mt-3">
+                                                                    <h6 class="text-sm mb-1">Other Personnel</h6>
+                                                                    <p class="text-xs text-muted mb-0">@farm.Personnel</p>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Facilities Section -->
+                                            <div class="mt-4">
+                                                <h6 class="mb-3">School Facilities</h6>
+                                                <div class="row">
+                                                    <div class="col-md-3 col-6 mb-3">
+                                                        <div class="card card-frame shadow-sm h-100">
+                                                            <div class="card-body p-3">
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="icon icon-shape bg-gradient-primary shadow rounded-circle text-center me-2">
+                                                                        <i class="fas fa-school text-white opacity-10"></i>
+                                                                    </div>
+                                                                    <h6 class="mb-0">Classrooms</h6>
+                                                                </div>
+                                                                <p class="text-xs text-muted mt-2 mb-0">
+                                                                    @(!string.IsNullOrEmpty(farm.Classrooms) ? farm.Classrooms : "No information provided")
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3 col-6 mb-3">
+                                                        <div class="card card-frame shadow-sm h-100">
+                                                            <div class="card-body p-3">
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="icon icon-shape bg-gradient-info shadow rounded-circle text-center me-2">
+                                                                        <i class="fas fa-flask text-white opacity-10"></i>
+                                                                    </div>
+                                                                    <h6 class="mb-0">Laboratories</h6>
+                                                                </div>
+                                                                <p class="text-xs text-muted mt-2 mb-0">
+                                                                    @(!string.IsNullOrEmpty(farm.Laboratories) ? farm.Laboratories : "No information provided")
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3 col-6 mb-3">
+                                                        <div class="card card-frame shadow-sm h-100">
+                                                            <div class="card-body p-3">
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="icon icon-shape bg-gradient-success shadow rounded-circle text-center me-2">
+                                                                        <i class="fas fa-book text-white opacity-10"></i>
+                                                                    </div>
+                                                                    <h6 class="mb-0">Library</h6>
+                                                                </div>
+                                                                <p class="text-xs text-muted mt-2 mb-0">
+                                                                    @(!string.IsNullOrEmpty(farm.Library) ? farm.Library : "No information provided")
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3 col-6 mb-3">
+                                                        <div class="card card-frame shadow-sm h-100">
+                                                            <div class="card-body p-3">
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="icon icon-shape bg-gradient-warning shadow rounded-circle text-center me-2">
+                                                                        <i class="fas fa-running text-white opacity-10"></i>
+                                                                    </div>
+                                                                    <h6 class="mb-0">Sports</h6>
+                                                                </div>
+                                                                <p class="text-xs text-muted mt-2 mb-0">
+                                                                    @(!string.IsNullOrEmpty(farm.SportsFacilities) ? farm.SportsFacilities : "No information provided")
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Performance Section -->
+                                            <div class="row mt-4">
+                                                <div class="col-md-6">
+                                                    <div class="card card-frame shadow-sm h-100">
+                                                        <div class="card-body p-3">
+                                                            <h6 class="mb-2">Academic Performance</h6>
+                                                            <p class="text-sm mb-0">
+                                                                @(!string.IsNullOrEmpty(farm.AverageExamScores) ? farm.AverageExamScores : "No information provided")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="card card-frame shadow-sm h-100">
+                                                        <div class="card-body p-3">
+                                                            <h6 class="mb-2">Extracurricular Achievements</h6>
+                                                            <p class="text-sm mb-0">
+                                                                @(!string.IsNullOrEmpty(farm.ExtraCurricularAchievements) ? farm.ExtraCurricularAchievements : "No information provided")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Community & Partnerships -->
+                                            <div class="row mt-4">
+                                                <div class="col-md-6">
+                                                    <div class="card card-frame shadow-sm h-100">
+                                                        <div class="card-body p-3">
+                                                            <h6 class="mb-2">Community Programs</h6>
+                                                            <p class="text-sm mb-0">
+                                                                @(!string.IsNullOrEmpty(farm.CommunityPrograms) ? farm.CommunityPrograms : "No information provided")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="card card-frame shadow-sm h-100">
+                                                        <div class="card-body p-3">
+                                                            <h6 class="mb-2">Partnerships</h6>
+                                                            <p class="text-sm mb-0">
+                                                                @(!string.IsNullOrEmpty(farm.Partnerships) ? farm.Partnerships : "No information provided")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        
-                        <!-- Tillage Tab -->
-                        <div class="tab-pane fade @(activeTab == "tillage" ? "show active" : "")" id="tillage" role="tabpanel">
-                            <!-- Tillage content here -->
-                            <p>Tillage programs and services will be displayed here.</p>
+
+                        <!-- Location Tab -->
+                        <div class="tab-pane fade" id="location" role="tabpanel" aria-labelledby="location-tab">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card card-frame shadow-sm">
+                                        <div class="card-header pb-0">
+                                            <h6 class="mb-0">Administrative Location</h6>
+                                        </div>
+                                        <div class="card-body pt-2">
+                                            <div class="table-responsive">
+                                                <table class="table align-items-center mb-0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th class="text-uppercase text-xs font-weight-bolder opacity-7">Province</th>
+                                                            <td class="ps-2">
+                                                                <span class="text-dark font-weight-bold text-sm">@farm.Province</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="text-uppercase text-xs font-weight-bolder opacity-7">District</th>
+                                                            <td class="ps-2">
+                                                                <span class="text-dark font-weight-bold text-sm">@farm.District</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="text-uppercase text-xs font-weight-bolder opacity-7">Local Authority</th>
+                                                            <td class="ps-2">
+                                                                <span class="text-dark font-weight-bold text-sm">@farm.LocalAuthority</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="text-uppercase text-xs font-weight-bolder opacity-7">Ward</th>
+                                                            <td class="ps-2">
+                                                                <span class="text-dark font-weight-bold text-sm">@farm.Ward</span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="card card-frame shadow-sm">
+                                        <div class="card-header pb-0">
+                                            <h6 class="mb-0">Geographic Coordinates</h6>
+                                        </div>
+                                        <div class="card-body pt-2">
+                                            <div class="table-responsive">
+                                                <table class="table align-items-center mb-0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th class="text-uppercase text-xs font-weight-bolder opacity-7">Latitude</th>
+                                                            <td class="ps-2">
+                                                                <span class="text-dark font-weight-bold text-sm">@farm.Latitude.ToString("F7")</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="text-uppercase text-xs font-weight-bolder opacity-7">Longitude</th>
+                                                            <td class="ps-2">
+                                                                <span class="text-dark font-weight-bold text-sm">@farm.Longitude.ToString("F7")</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="text-uppercase text-xs font-weight-bolder opacity-7">Elevation</th>
+                                                            <td class="ps-2">
+                                                                <span class="text-dark font-weight-bold text-sm">@farm.Elevation.ToString("F2") m</span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card card-frame shadow-sm">
+                                        <div class="card-header pb-0">
+                                            <h6 class="mb-0">Map View</h6>
+                                        </div>
+                                        <div class="card-body pt-2">
+                                            <div id="map" style="height: 400px;" class="border rounded">
+                                                <!-- Map will be rendered here -->
+                                                <div class="d-flex justify-content-center align-items-center h-100">
+                                                    <button class="btn btn-primary" @onclick="LoadMap">
+                                                        <i class="fas fa-map-marker-alt me-2"></i>Load Map
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Info Tab -->
+                        <div class="tab-pane fade" id="additional" role="tabpanel" aria-labelledby="additional-tab">
+                            <div class="row">
+                                @if (!string.IsNullOrEmpty(farm.Equipment))
+                                {
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card card-frame shadow-sm h-100">
+                                            <div class="card-header pb-0">
+                                                <h6 class="mb-0">Equipment</h6>
+                                            </div>
+                                            <div class="card-body pt-2">
+                                                <p class="text-sm mb-0">@farm.Equipment</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                
+                                @if (!string.IsNullOrEmpty(farm.Buildings))
+                                {
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card card-frame shadow-sm h-100">
+                                            <div class="card-header pb-0">
+                                                <h6 class="mb-0">Buildings</h6>
+                                            </div>
+                                            <div class="card-body pt-2">
+                                                <p class="text-sm mb-0">@farm.Buildings</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            
+                            <div class="row">
+                                @if (!string.IsNullOrEmpty(farm.SecurityMeasures))
+                                {
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card card-frame shadow-sm h-100">
+                                            <div class="card-header pb-0">
+                                                <h6 class="mb-0">Security Measures</h6>
+                                            </div>
+                                            <div class="card-body pt-2">
+                                                <p class="text-sm mb-0">@farm.SecurityMeasures</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                
+                                @if (!string.IsNullOrEmpty(farm.KeyMilestones))
+                                {
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card card-frame shadow-sm h-100">
+                                            <div class="card-header pb-0">
+                                                <h6 class="mb-0">Key Milestones</h6>
+                                            </div>
+                                            <div class="card-body pt-2">
+                                                <p class="text-sm mb-0">@farm.KeyMilestones</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            
+                            <div class="row">
+                                @if (!string.IsNullOrEmpty(farm.Problems))
+                                {
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card card-frame shadow-sm h-100">
+                                            <div class="card-header pb-0">
+                                                <h6 class="mb-0">Problems & Challenges</h6>
+                                            </div>
+                                            <div class="card-body pt-2">
+                                                <p class="text-sm mb-0">@farm.Problems</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                
+                                @if (!string.IsNullOrEmpty(farm.Recommendations))
+                                {
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card card-frame shadow-sm h-100">
+                                            <div class="card-header pb-0">
+                                                <h6 class="mb-0">Recommendations</h6>
+                                            </div>
+                                            <div class="card-body pt-2">
+                                                <p class="text-sm mb-0">@farm.Recommendations</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -295,28 +985,6 @@ else
     </div>
 }
 
-<!-- Delete Confirmation Modal -->
-<SfDialog @bind-Visible="isDeleteModalVisible" Width="400px" IsModal="true" ShowCloseIcon="true">
-    <DialogTemplates>
-        <Header>Confirm Delete</Header>
-        <Content>
-            <div>
-                <p>Are you sure you want to delete this farm?</p>
-                <div class="alert alert-danger">
-                    <p>This action will permanently delete the farm and all its associated data including fields, crops, and tillage programs. This action cannot be undone.</p>
-                </div>
-                
-                <div class="d-flex justify-content-end mt-4">
-                    <button type="button" class="btn btn-secondary me-2" @onclick="() => isDeleteModalVisible = false">Cancel</button>
-                    <button type="button" class="btn btn-danger" @onclick="ConfirmDeleteFarm">
-                        <i class="fas fa-trash me-1"></i> Delete Farm
-                    </button>
-                </div>
-            </div>
-        </Content>
-    </DialogTemplates>
-</SfDialog>
-
 @code {
     [Parameter]
     public string FarmId { get; set; }
@@ -324,9 +992,8 @@ else
     private FarmViewModel farm;
     private List<FieldViewModel> fields;
     private bool isLoading = true;
-    private string activeTab = "overview";
+    private bool mapLoaded = false;
     private Toast Alert;
-    private bool isDeleteModalVisible = false;
     
     protected override async Task OnInitializedAsync()
     {
@@ -350,18 +1017,18 @@ else
             }
             
             // Load farm details
-            var farmResponse = await ApiCall.Get<ApiResponse<FarmViewModel>>(
+            var farmResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<FarmViewModel>>(
                 await ApiCall.GetHttpClient(), $"farms/getfarm/{FarmId}");
                 
-            if (farmResponse?.Status == 200 && farmResponse.Result != null)
+            if (farmResponse?.Status == (int)HttpStatusCode.OK && farmResponse.Result != null)
             {
                 farm = farmResponse.Result;
                 
                 // Load fields
-                var fieldsResponse = await ApiCall.Get<ApiResponse<List<FieldViewModel>>>(
+                var fieldsResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<FieldViewModel>>>(
                     await ApiCall.GetHttpClient(), $"fields/getfarmfields/{FarmId}");
                     
-                if (fieldsResponse?.Status == 200 && fieldsResponse.Result != null)
+                if (fieldsResponse?.Status == (int)HttpStatusCode.OK && fieldsResponse.Result != null)
                 {
                     fields = fieldsResponse.Result;
                 }
@@ -383,109 +1050,36 @@ else
         }
     }
     
-    private void SetActiveTab(string tab)
+    private async Task LoadMap()
     {
-        activeTab = tab;
-    }
-    
-    private void ShowDeleteConfirmation()
-    {
-        isDeleteModalVisible = true;
-    }
-    
-    private async Task ConfirmDeleteFarm()
-    {
+        if (mapLoaded || farm == null || (farm.Latitude == 0 && farm.Longitude == 0))
+            return;
+            
         try
         {
-            var response = await ApiCall.Remove<ApiResponse<FarmViewModel>>(
-                await ApiCall.GetHttpClient(), $"farms/deletefarm/", FarmId);
-                
-            if (response?.Status == 200)
-            {
-                Alert?.Show("Farm deleted successfully", showTitle: true, toastType: ToastType.Success);
-                isDeleteModalVisible = false;
-                NavigateToFarms();
-            }
-            else
-            {
-                Alert?.Show(response?.Title ?? "Error deleting farm", showTitle: true, toastType: ToastType.Danger);
-            }
+            // Load the map using the JS interop
+            // This assumes there's a JavaScript function available to initialize a map
+            await JSRuntime.InvokeVoidAsync("initializeMap", "map", new double[] { farm.Longitude, farm.Latitude }, 14);
+            mapLoaded = true;
         }
         catch (Exception ex)
         {
-            Alert?.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            Alert?.Show($"Error loading map: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
         }
     }
-    
-    private async Task DeleteField(string fieldId)
-    {
-        try
-        {
-            var response = await ApiCall.Remove<ApiResponse<FieldViewModel>>(
-                await ApiCall.GetHttpClient(), $"fields/deletefield/", fieldId);
-                
-            if (response?.Status == 200)
-            {
-                Alert?.Show("Field deleted successfully", showTitle: true, toastType: ToastType.Success);
-                await LoadData(); // Refresh the fields
-            }
-            else
-            {
-                Alert?.Show(response?.Title ?? "Error deleting field", showTitle: true, toastType: ToastType.Danger);
-            }
-        }
-        catch (Exception ex)
-        {
-            Alert?.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
-        }
-    }
-    
-    #region Navigation Methods
     
     private void NavigateToEdit()
     {
         NavigationManager.NavigateTo($"/farms/{FarmId}/edit");
     }
     
-    private void NavigateToUsers()
+    private void NavigateBack()
     {
-        NavigationManager.NavigateTo($"/farms/{FarmId}/users");
-    }
-    
-    private void NavigateToFields()
-    {
-        NavigationManager.NavigateTo($"/farms/{FarmId}/fields");
-    }
-    
-    private void NavigateToCrops()
-    {
-        NavigationManager.NavigateTo($"/farms/{FarmId}/crops");
-    }
-    
-    private void NavigateToAddField()
-    {
-        NavigationManager.NavigateTo($"/farms/{FarmId}/fields/add");
-    }
-    
-    private void NavigateToFieldDetails(string fieldId)
-    {
-        NavigationManager.NavigateTo($"/farms/{FarmId}/fields/{fieldId}");
-    }
-    
-    private void NavigateToEditField(string fieldId)
-    {
-        NavigationManager.NavigateTo($"/farms/{FarmId}/fields/{fieldId}/edit");
-    }
-    
-    private void NavigateToFarms()
-    {
-        NavigationManager.NavigateTo("/farms");
+        NavigationManager.NavigateTo($"/farm/{FarmId}");
     }
     
     private void NavigateToDashboard()
     {
         NavigationManager.NavigateTo("/");
     }
-    
-    #endregion
 }
