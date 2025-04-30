@@ -9,6 +9,12 @@ export function initializeMap(containerId, center, zoom) {
     try {
         console.log(`Creating map in container #${containerId} at [${center}] with zoom ${zoom}`);
 
+        // Check if mapboxgl is available
+        if (typeof mapboxgl === 'undefined') {
+            console.error('Mapbox GL JS is not loaded. Make sure the script is included in your HTML.');
+            return false;
+        }
+
         // Initialize Mapbox
         mapboxgl.accessToken = mapboxToken;
 
@@ -17,6 +23,13 @@ export function initializeMap(containerId, center, zoom) {
         if (!container) {
             console.error(`Map container #${containerId} not found`);
             return false;
+        }
+
+        console.log(`Map container found with dimensions: ${container.offsetWidth}x${container.offsetHeight}`);
+
+        // Check if container has proper dimensions
+        if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+            console.warn(`Map container #${containerId} has zero width or height`);
         }
 
         // Create and store the map instance
@@ -38,13 +51,22 @@ export function initializeMap(containerId, center, zoom) {
         }), 'bottom-left');
 
         // Add current marker if coordinates are provided
-        if (center && center.length === 2 && center[0] !== 0 && center[1] !== 0) {
+        if (center && center.length === 2 && (center[0] !== 0 || center[1] !== 0)) {
             const marker = new mapboxgl.Marker({
                 color: "#FF5500",
-                draggable: false
+                draggable: true // Make it draggable for better UX
             })
                 .setLngLat(center)
                 .addTo(map);
+
+            // Add dragend event for the marker
+            marker.on('dragend', function() {
+                const lngLat = marker.getLngLat();
+                // Call the .NET method
+                if (map.dotNetReference) {
+                    map.dotNetReference.invokeMethodAsync('UpdateCoordinates', lngLat.lng, lngLat.lat);
+                }
+            });
 
             // Store marker in the map object
             map.currentMarker = marker;
@@ -56,12 +78,67 @@ export function initializeMap(containerId, center, zoom) {
         // Wait for map to load before returning
         map.on('load', () => {
             console.log(`Map #${containerId} loaded successfully`);
+
+            // Add geocoder (search) control
+            addGeocoderControl(map);
         });
 
         return true;
     } catch (error) {
         console.error(`Error creating map #${containerId}:`, error);
         return false;
+    }
+}
+
+// Add geocoder control to make it easy to search for locations
+function addGeocoderControl(map) {
+    try {
+        // Check if MapboxGeocoder is available
+        if (typeof MapboxGeocoder !== 'undefined') {
+            const geocoder = new MapboxGeocoder({
+                accessToken: mapboxgl.accessToken,
+                mapboxgl: mapboxgl,
+                marker: false, // Do not add a marker on geocoder result
+                placeholder: 'Search for a location'
+            });
+
+            map.addControl(geocoder, 'top-left');
+
+            // When a location is selected via the geocoder
+            geocoder.on('result', (e) => {
+                const coordinates = e.result.center; // [longitude, latitude]
+
+                // Update marker position
+                if (map.currentMarker) {
+                    map.currentMarker.setLngLat(coordinates);
+                } else {
+                    map.currentMarker = new mapboxgl.Marker({
+                        color: "#FF5500",
+                        draggable: true
+                    })
+                        .setLngLat(coordinates)
+                        .addTo(map);
+
+                    // Add dragend event for the marker
+                    map.currentMarker.on('dragend', function() {
+                        const lngLat = map.currentMarker.getLngLat();
+                        // Call the .NET method
+                        if (map.dotNetReference) {
+                            map.dotNetReference.invokeMethodAsync('UpdateCoordinates', lngLat.lng, lngLat.lat);
+                        }
+                    });
+                }
+
+                // Call the .NET method to update the form
+                if (map.dotNetReference) {
+                    map.dotNetReference.invokeMethodAsync('UpdateCoordinates', coordinates[0], coordinates[1]);
+                }
+            });
+        } else {
+            console.warn('MapboxGeocoder is not available. Search functionality will not be enabled.');
+        }
+    } catch (error) {
+        console.error('Error adding geocoder control:', error);
     }
 }
 
@@ -72,6 +149,9 @@ export function addMapClickHandler(containerId, dotNetRef) {
         console.error(`Map #${containerId} not found`);
         return false;
     }
+
+    // Store the .NET reference on the map object for other functions to access
+    map.dotNetReference = dotNetRef;
 
     // Add click event listener
     map.on('click', (e) => {
@@ -84,10 +164,17 @@ export function addMapClickHandler(containerId, dotNetRef) {
         } else {
             map.currentMarker = new mapboxgl.Marker({
                 color: "#FF5500",
-                draggable: false
+                draggable: true
             })
                 .setLngLat([lng, lat])
                 .addTo(map);
+
+            // Add dragend event for the marker
+            map.currentMarker.on('dragend', function() {
+                const lngLat = map.currentMarker.getLngLat();
+                // Call the .NET method
+                map.dotNetReference.invokeMethodAsync('UpdateCoordinates', lngLat.lng, lngLat.lat);
+            });
         }
 
         // Call the .NET method to update the form
@@ -202,30 +289,63 @@ export function drawFieldPolygon(containerId, fieldId, coordinates, name) {
     }
 }
 
-// Dispose a map instance
-export function disposeMap(containerId) {
-    const map = mapInstances[containerId];
-    if (map) {
-        map.remove();
-        delete mapInstances[containerId];
-        console.log(`Map #${containerId} disposed`);
-        return true;
-    }
-    return false;
-}
-
-// Center map on coordinates
-export function centerMap(containerId, lng, lat, zoom = 14) {
+// Fly to coordinates with animation
+export function flyToCoordinates(containerId, lng, lat, zoom = 14) {
     const map = mapInstances[containerId];
     if (map) {
         map.flyTo({
             center: [lng, lat],
             zoom: zoom,
-            essential: true
+            essential: true,
+            duration: 2000 // Animation duration in milliseconds
         });
-        console.log(`Map #${containerId} centered on [${lng}, ${lat}] with zoom ${zoom}`);
+        console.log(`Map #${containerId} flying to [${lng}, ${lat}] with zoom ${zoom}`);
         return true;
     }
     console.warn(`Map #${containerId} not found`);
+    return false;
+}
+
+// Create an elevation service
+export function getElevation(lng, lat) {
+    // This is a placeholder. In a real application, you might:
+    // 1. Use a Mapbox Terrain-RGB tileset
+    // 2. Use a third-party elevation API
+    // 3. Use a service like the Mapbox Tilequery API
+
+    // For now, return a simulated elevation value
+    // In Zimbabwe, elevations typically range from about 500m to 1500m
+    const simulatedElevation = Math.floor(800 + Math.random() * 700);
+    return simulatedElevation;
+}
+
+// Get current map bounds
+export function getMapBounds(containerId) {
+    const map = mapInstances[containerId];
+    if (map) {
+        const bounds = map.getBounds();
+        return {
+            north: bounds.getNorth(),
+            east: bounds.getEast(),
+            south: bounds.getSouth(),
+            west: bounds.getWest()
+        };
+    }
+    return null;
+}
+
+// Dispose a map instance
+export function disposeMap(containerId) {
+    const map = mapInstances[containerId];
+    if (map) {
+        // Remove reference to .NET object to prevent memory leaks
+        map.dotNetReference = null;
+
+        // Remove the map
+        map.remove();
+        delete mapInstances[containerId];
+        console.log(`Map #${containerId} disposed`);
+        return true;
+    }
     return false;
 }

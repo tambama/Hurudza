@@ -14,9 +14,37 @@
 
 <PageTitle>Create New Farm - Hurudza Farm Management</PageTitle>
 
-@* Add MapBox CSS reference *@
+@* Add MapBox styles and scripts *@
 <HeadContent>
+    <!-- Mapbox GL JS CSS -->
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet" />
+    
+    <!-- Mapbox GL JS Script -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+    
+    <!-- Mapbox Geocoder (for search functionality) -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css" />
+    
+    <style>
+        /* Ensure the map container is visible and sized properly */
+        #location-map {
+            min-height: 400px; 
+            width: 100%;
+            position: relative;
+        }
+        
+        /* Style the geocoder control */
+        .mapboxgl-ctrl-geocoder {
+            min-width: 100%;
+        }
+        
+        @@media (min-width: 640px) {
+            .mapboxgl-ctrl-geocoder {
+                min-width: 300px;
+            }
+        }
+    </style>
 </HeadContent>
 
 <Toast @ref="Alert" />
@@ -74,21 +102,445 @@
                             </div>
                         </div>
 
-                        <!-- Rest of the form fields - omitted for brevity -->
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="contactPerson">Contact Person <span class="text-danger">*</span></label>
+                                    <InputText id="contactPerson" class="form-control" @bind-Value="farm.ContactPerson" />
+                                    <ValidationMessage For="@(() => farm.ContactPerson)" />
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="phoneNumber">Phone Number <span class="text-danger">*</span></label>
+                                    <InputText id="phoneNumber" class="form-control" @bind-Value="farm.PhoneNumber" />
+                                    <ValidationMessage For="@(() => farm.PhoneNumber)" />
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="email">Email <span class="text-danger">*</span></label>
+                                    <InputText id="email" class="form-control" @bind-Value="farm.Email" />
+                                    <ValidationMessage For="@(() => farm.Email)" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="website">Website</label>
+                                    <InputText id="website" class="form-control" @bind-Value="farm.Website" />
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="year">Year Established</label>
+                                    <SfNumericTextBox TValue="int" Format="####" id="year" @bind-Value="farm.Year" Step="1" Min="1900" Max="@DateTime.Now.Year"></SfNumericTextBox>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="foundingMembers">Founding Members</label>
+                                    <InputText id="foundingMembers" class="form-control" @bind-Value="farm.FoundingMembers" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <div class="form-group">
+                                    <label for="description">Description</label>
+                                    <InputTextArea id="description" class="form-control" @bind-Value="farm.Description" rows="3" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="vision">Vision</label>
+                                    <InputTextArea id="vision" class="form-control" @bind-Value="farm.Vision" rows="3" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="mission">Mission</label>
+                                    <InputTextArea id="mission" class="form-control" @bind-Value="farm.Mission" rows="3" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-4">
+                                <h6 class="text-uppercase text-body text-xs font-weight-bolder mt-4">Land Information</h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="size">Total Size (Hectares)</label>
+                                    <SfNumericTextBox TValue="float" Format="n2" id="size" @bind-Value="farm.Size" Step="1" Min="0"></SfNumericTextBox>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="arable">Arable Land (Hectares)</label>
+                                    <SfNumericTextBox TValue="float" Format="n2" id="arable" @bind-Value="farm.Arable" Step="1" Min="0"></SfNumericTextBox>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="cleared">Cleared Land (Hectares)</label>
+                                    <SfNumericTextBox TValue="float" Format="n2" id="cleared" @bind-Value="farm.Cleared" Step="1" Min="0"></SfNumericTextBox>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="soilType">Soil Type</label>
+                                    <InputText id="soilType" class="form-control" @bind-Value="farm.SoilType" />
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="terrain">Terrain</label>
+                                    <SfDropDownList TValue="Terrain?" TItem="EnumItem" @bind-Value="farm.Terrain" DataSource="@terrainItems">
+                                        <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+                                    </SfDropDownList>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="roadAccess">Road Access</label>
+                                    <SfDropDownList TValue="RoadAccess?" TItem="EnumItem" @bind-Value="farm.RoadAccess" DataSource="@roadAccessItems">
+                                        <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+                                    </SfDropDownList>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="waterSource">Water Source</label>
+                                    <InputText id="waterSource" class="form-control" @bind-Value="farm.WaterSource" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="waterAvailability">Water Availability</label>
+                                    <SfDropDownList TValue="WaterAvailability?" TItem="EnumItem" @bind-Value="farm.WaterAvailability" DataSource="@waterAvailabilityItems">
+                                        <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+                                    </SfDropDownList>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <div class="form-check">
+                                    <InputCheckbox id="irrigated" class="form-check-input" @bind-Value="farm.Irrigated" />
+                                    <label class="form-check-label" for="irrigated">Has Irrigation</label>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="row mb-3">
                             <div class="col-12">
                                 <div class="alert alert-info">
                                     <i class="fas fa-info-circle me-2"></i>
-                                    You can use the map below to select the farm location. Click on the map to set the coordinates.
+                                    You can use the map below to select the farm location. Click on the map to set the coordinates or drag the marker to adjust the position.
                                 </div>
-                                <div id="location-map" style="height: 400px; width: 100%;" class="border rounded">
-                                    <!-- Map will be loaded here -->
-                                    <div class="d-flex justify-content-center align-items-center h-100">
-                                        <button class="btn btn-primary" @onclick="LoadMap">
-                                            <i class="fas fa-map-marker-alt me-2"></i>Load Map
-                                        </button>
-                                    </div>
+                                <!-- Map container with id="location-map" - This must match exactly what's expected in JavaScript -->
+                                <div id="location-map" style="height: 400px; width: 100%; position: relative;" class="border rounded mb-2">
+                                    @if (!mapLoaded)
+                                    {
+                                        <div class="d-flex justify-content-center align-items-center h-100 bg-light">
+                                            <div class="text-center">
+                                                <div class="spinner-border text-primary mb-2" role="status">
+                                                    <span class="visually-hidden">Loading map...</span>
+                                                </div>
+                                                <p>Loading map...</p>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="small text-muted">
+                                    Click on the map to place a marker or drag the marker to update coordinates. You can also use the zoom controls to get a better view.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="latitude">Latitude</label>
+                                    <SfNumericTextBox TValue="double" Format="n7" id="latitude" @bind-Value="farm.Latitude" Step="0.0000001"></SfNumericTextBox>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="longitude">Longitude</label>
+                                    <SfNumericTextBox TValue="double" Format="n7" id="longitude" @bind-Value="farm.Longitude" Step="0.0000001"></SfNumericTextBox>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="elevation">Elevation</label>
+                                    <SfNumericTextBox TValue="double" Format="n2" id="elevation" @bind-Value="farm.Elevation" Step="0.01"></SfNumericTextBox>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-4">
+                                <h6 class="text-uppercase text-body text-xs font-weight-bolder mt-4">Administrative Information</h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="region">Region</label>
+                                    <SfDropDownList TValue="Region?" TItem="EnumItem" @bind-Value="farm.Region" DataSource="@regionItems">
+                                        <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+                                    </SfDropDownList>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="conference">Conference</label>
+                                    <SfDropDownList TValue="Conference?" TItem="EnumItem" @bind-Value="farm.Conference" DataSource="@conferenceItems">
+                                        <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+                                    </SfDropDownList>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="province">Province</label>
+                                    <SfDropDownList TValue="string" TItem="ProvinceViewModel" @bind-Value="farm.ProvinceId" DataSource="@provinces">
+                                        <DropDownListEvents TValue="string" TItem="ProvinceViewModel" ValueChange="ProvinceChanged"></DropDownListEvents>
+                                        <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+                                    </SfDropDownList>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="district">District</label>
+                                    <SfDropDownList TValue="string" TItem="DistrictViewModel" @bind-Value="farm.DistrictId" DataSource="@districts">
+                                        <DropDownListEvents TValue="string" TItem="DistrictViewModel" ValueChange="DistrictChanged"></DropDownListEvents>
+                                        <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+                                    </SfDropDownList>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="localAuthority">Local Authority</label>
+                                    <SfDropDownList TValue="string" TItem="LocalAuthorityViewModel" @bind-Value="farm.LocalAuthorityId" DataSource="@localAuthorities">
+                                        <DropDownListEvents TValue="string" TItem="LocalAuthorityViewModel" ValueChange="LocalAuthorityChanged"></DropDownListEvents>
+                                        <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+                                    </SfDropDownList>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="ward">Ward</label>
+                                    <SfDropDownList TValue="string" TItem="WardViewModel" @bind-Value="farm.WardId" DataSource="@wards">
+                                        <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+                                    </SfDropDownList>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-4">
+                                <h6 class="text-uppercase text-body text-xs font-weight-bolder mt-4">School Information</h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="maleStudents">Male Students</label>
+                                    <SfNumericTextBox TValue="int" Format="n0" id="maleStudents" @bind-Value="farm.MaleStudents" Step="1" Min="0"></SfNumericTextBox>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="femaleStudents">Female Students</label>
+                                    <SfNumericTextBox TValue="int" Format="n0" id="femaleStudents" @bind-Value="farm.FemaleStudents" Step="1" Min="0"></SfNumericTextBox>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="dayScholars">Day Scholars</label>
+                                    <SfNumericTextBox TValue="int" Format="n0" id="dayScholars" @bind-Value="farm.DayScholars" Step="1" Min="0"></SfNumericTextBox>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="boardingScholars">Boarding Scholars</label>
+                                    <SfNumericTextBox TValue="int" Format="n0" id="boardingScholars" @bind-Value="farm.BoardingScholars" Step="1" Min="0"></SfNumericTextBox>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="maleTeachers">Male Teachers</label>
+                                    <SfNumericTextBox TValue="int" Format="n0" id="maleTeachers" @bind-Value="farm.MaleTeachers" Step="1" Min="0"></SfNumericTextBox>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="femaleTeachers">Female Teachers</label>
+                                    <SfNumericTextBox TValue="int" Format="n0" id="femaleTeachers" @bind-Value="farm.FemaleTeachers" Step="1" Min="0"></SfNumericTextBox>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="nonTeachingStaff">Non-Teaching Staff</label>
+                                    <InputText id="nonTeachingStaff" class="form-control" @bind-Value="farm.NonTeachingStaff" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="classrooms">Classrooms</label>
+                                    <InputText id="classrooms" class="form-control" @bind-Value="farm.Classrooms" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="laboratories">Laboratories</label>
+                                    <InputText id="laboratories" class="form-control" @bind-Value="farm.Laboratories" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="library">Library</label>
+                                    <InputText id="library" class="form-control" @bind-Value="farm.Library" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="sportsFacilities">Sports Facilities</label>
+                                    <InputText id="sportsFacilities" class="form-control" @bind-Value="farm.SportsFacilities" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <div class="form-group">
+                                    <label for="studentDemographics">Student Demographics</label>
+                                    <InputTextArea id="studentDemographics" class="form-control" @bind-Value="farm.StudentDemographics" rows="2" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="averageExamScores">Average Exam Scores</label>
+                                    <InputText id="averageExamScores" class="form-control" @bind-Value="farm.AverageExamScores" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="extraCurricularAchievements">Extracurricular Achievements</label>
+                                    <InputText id="extraCurricularAchievements" class="form-control" @bind-Value="farm.ExtraCurricularAchievements" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="communityPrograms">Community Programs</label>
+                                    <InputTextArea id="communityPrograms" class="form-control" @bind-Value="farm.CommunityPrograms" rows="2" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="partnerships">Partnerships</label>
+                                    <InputTextArea id="partnerships" class="form-control" @bind-Value="farm.Partnerships" rows="2" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-4">
+                                <h6 class="text-uppercase text-body text-xs font-weight-bolder mt-4">Additional Information</h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="equipment">Equipment</label>
+                                    <InputTextArea id="equipment" class="form-control" @bind-Value="farm.Equipment" rows="2" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="buildings">Buildings</label>
+                                    <InputTextArea id="buildings" class="form-control" @bind-Value="farm.Buildings" rows="2" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="pastCrops">Past Crops</label>
+                                    <InputTextArea id="pastCrops" class="form-control" @bind-Value="farm.PastCrops" rows="2" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="landManagementPractice">Land Management Practices</label>
+                                    <InputTextArea id="landManagementPractice" class="form-control" @bind-Value="farm.LandManagementPractice" rows="2" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="problems">Problems</label>
+                                    <InputTextArea id="problems" class="form-control" @bind-Value="farm.Problems" rows="2" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="recommendations">Recommendations</label>
+                                    <InputTextArea id="recommendations" class="form-control" @bind-Value="farm.Recommendations" rows="2" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <div class="form-group">
+                                    <label for="personnel">Personnel</label>
+                                    <InputTextArea id="personnel" class="form-control" @bind-Value="farm.Personnel" rows="2" />
                                 </div>
                             </div>
                         </div>
@@ -145,6 +597,9 @@
     
     protected override async Task OnInitializedAsync()
     {
+        // Create a reference to this component for JS interop
+        objRef = DotNetObjectReference.Create(this);
+        
         // Set default values for the farm
         farm = new FarmViewModel
         {
@@ -158,12 +613,15 @@
             Longitude = 31.053028
         };
         
-        // Create a reference to this component for JS interop
-        objRef = DotNetObjectReference.Create(this);
-        
         await LoadEnumItems();
         await LoadLocations();
         await LoadJavaScriptModule();
+        
+        // Auto-load map when the component initializes
+        if (_mapModule != null) {
+            await LoadMap();
+        }
+        
         isLoading = false;
     }
     
