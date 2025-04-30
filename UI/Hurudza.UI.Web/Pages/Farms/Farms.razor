@@ -1,11 +1,11 @@
 @page "/farms"
-@using System.Collections.ObjectModel;
-@using System.Diagnostics;
 @using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
 @attribute [Authorize]
 
 @inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JSRuntime
 
 <Toast @ref="Alert" />
 
@@ -13,614 +13,366 @@
     <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0">
-                <h6>Farms</h6>
+                <div class="d-flex justify-content-between flex-wrap align-items-center">
+                    <div>
+                        <h6 class="mb-0">Farms Management</h6>
+                        <p class="text-sm mb-0">Manage all farm properties and locations</p>
+                    </div>
+                    <div class="d-flex">
+                        <FarmPermission RequireAdmin="true">
+                            <button type="button" class="btn btn-primary btn-sm ms-auto" @onclick="NavigateToNewFarm">
+                                <i class="fas fa-plus me-2"></i>Add New Farm
+                            </button>
+                        </FarmPermission>
+                    </div>
+                </div>
             </div>
-            <div class="card-body px-2 pt-0 pb-2">
-                <SfGrid DataSource="@FarmList"
-                        @ref="Grid"
-                        AllowPaging="true"
-                        AllowExcelExport="true"
-                        AllowSorting="true"
-                        AllowMultiSorting="true"
-                        EnableStickyHeader="true"
-                        AllowResizing="true"
-                        AllowFiltering="true"
-                        AllowSelection="true"
-                        Toolbar="@(new List<string>() { "Add", "ExcelExport", "Print", "Search" })"
-                        ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Edit", "Delete", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
-                    <GridPageSettings PageSize="12"></GridPageSettings>
-                    <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
-                    <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="FarmViewModel"></GridEvents>
-                    <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog">
-                        <HeaderTemplate>
-                            @{
-                                var text = GetHeader((context as FarmViewModel));
-                                <span>@text</span>
-                            }
-                        </HeaderTemplate>
-                        <Validator>
-                            <DataAnnotationsValidator></DataAnnotationsValidator>
-                        </Validator>
-                        <Template>
-                            @{
-                                var Farm = (context as FarmViewModel);
-                                <div>
-                                    <div class="form-row">
-                                        <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(Farm.Id)"></SfTextBox>
-                                        <div class="form-group">
-                                            <label>Name</label>
-                                            <SfTextBox ID="name" TValue="string" @bind-Value="@(Farm.Name)" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Name" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Address</label>
-                                            <SfTextBox ID="surname" TValue="string" @bind-Value="@(Farm.Address)" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Address" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Contact Person</label>
-                                            <SfTextBox ID="contactPerson" TValue="string" @bind-Value="@(Farm.ContactPerson)" Placeholder="e.g. John Doe" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.ContactPerson" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Phone Number</label>
-                                            <SfTextBox ID="phone" TValue="string" @bind-Value="@(Farm.PhoneNumber)" Placeholder="e.g. 0771234567" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.PhoneNumber" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Email</label>
-                                            <SfTextBox ID="email" TValue="string" @bind-Value="@(Farm.Email)" Placeholder="e.g. your@email.com" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Email" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Website</label>
-                                            <SfTextBox ID="website" TValue="string" @bind-Value="@(Farm.Website)" Placeholder="e.g. www.school.ac.zw" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Website" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Farm Size (Hectares)</label>
-                                            <SfNumericTextBox ID="size" TValue="float" @bind-Value="@(Farm.Size)" Decimals=3 Format="n3" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
-                                            <ValidationMessage For="() => Farm.Size" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Arable (Hectares)</label>
-                                            <SfNumericTextBox ID="arable" TValue="float" @bind-Value="@(Farm.Arable)" Decimals=3 Format="n3" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
-                                            <ValidationMessage For="() => Farm.Arable" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Cleared (Hectares)</label>
-                                            <SfNumericTextBox ID="cleared" TValue="float" @bind-Value="@(Farm.Cleared)" Decimals=3 Format="n3" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
-                                            <ValidationMessage For="() => Farm.Cleared" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Soil Types</label>
-                                            <SfTextBox ID="soilTypes" TValue="string" @bind-Value="@(Farm.SoilType)" Placeholder="e.g. loamy, sandy, clay" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.SoilType" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Personnel</label>
-                                            <SfTextBox Multiline=true ID="personnel" TValue="string" @bind-Value="@(Farm.Personnel)" Placeholder="e.g. workers + qualifications" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Personnel" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Problems</label>
-                                            <SfTextBox Multiline=true ID="problems" TValue="string" @bind-Value="@(Farm.Problems)" Placeholder="e.g. pests and diseases" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Problems" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Latitude</label>
-                                            <SfNumericTextBox ID="latitude" TValue="double" @bind-Value="@(Farm.Latitude)" Decimals=15 Format="n15" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
-                                            <ValidationMessage For="() => Farm.Latitude" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Longitude</label>
-                                            <SfNumericTextBox ID="longitude" TValue="double" @bind-Value="@(Farm.Longitude)" Decimals=15 Format="n15" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
-                                            <ValidationMessage For="() => Farm.Longitude" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Altitude</label>
-                                            <SfNumericTextBox ID="altitude" TValue="double" @bind-Value="@(Farm.Elevation)" Decimals=8 Format="n8" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
-                                            <ValidationMessage For="() => Farm.Elevation" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Terrain</label>
-                                            <SfDropDownList ID="terrain" TValue="Terrain?" TItem="TerrainModel" @bind-Value="@(Farm.Terrain)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select Terrain" DataSource="@_terrains">
-                                                <DropDownListFieldSettings Value="Terrain" Text="Name"></DropDownListFieldSettings>
-                                            </SfDropDownList>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Farming Region</label>
-                                            <SfDropDownList ID="region" TValue="Region?" TItem="RegionModel" @bind-Value="@(Farm.Region)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Region" DataSource="@_regions">
-                                                <DropDownListFieldSettings Value="Region" Text="Name"></DropDownListFieldSettings>
-                                            </SfDropDownList>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Conference</label>
-                                            <SfDropDownList ID="conference" TValue="Conference?" TItem="ConferenceModel" @bind-Value="@(Farm.Conference)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select Conference" DataSource="@_conferences">
-                                                <DropDownListFieldSettings Value="Conference" Text="Name"></DropDownListFieldSettings>
-                                            </SfDropDownList>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Province</label>
-                                            <SfComboBox ID="province" TValue="string" TItem="ProvinceViewModel" @bind-Value="@(Farm.ProvinceId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Province" DataSource="@_provinces">
-                                                <ComboBoxEvents TItem="ProvinceViewModel" TValue="string" ValueChange="ProvinceChangeHandler"></ComboBoxEvents>
-                                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
-                                            </SfComboBox>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>District</label>
-                                            <SfComboBox ID="district" TValue="string" TItem="DistrictViewModel" @bind-Value="@(Farm.DistrictId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a District" DataSource="@_districts">
-                                                <ComboBoxEvents TItem="DistrictViewModel" TValue="string" ValueChange="DistrictChangeHandler"></ComboBoxEvents>
-                                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
-                                            </SfComboBox>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Local Authority</label>
-                                            <SfComboBox ID="localAuthority" TValue="string" TItem="LocalAuthorityViewModel" @bind-Value="@(Farm.LocalAuthorityId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Local Authority" DataSource="@_localAuthorities">
-                                                <ComboBoxEvents TItem="LocalAuthorityViewModel" TValue="string" ValueChange="LocalAuthorityChangeHandler"></ComboBoxEvents>
-                                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
-                                            </SfComboBox>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Ward</label>
-                                            <SfComboBox ID="ward" TValue="string" TItem="WardViewModel" @bind-Value="@(Farm.WardId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Ward" DataSource="@_wards">
-                                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
-                                            </SfComboBox>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Water Source</label>
-                                            <SfTextBox Multiline=true ID="waterSource" TValue="string" @bind-Value="@(Farm.WaterSource)" Placeholder="e.g. dam, borehole, river" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.WaterSource" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Water Availability</label>
-                                            <SfDropDownList ID="waterAvailability" TValue="WaterAvailability?" TItem="WaterAvailabilityModel" @bind-Value="@(Farm.WaterAvailability)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select Availability" DataSource="@_waterAvailabilities">
-                                                <DropDownListFieldSettings Value="WaterAvailability" Text="Name"></DropDownListFieldSettings>
-                                            </SfDropDownList>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Irrigation Systems</label>
-                                            <SfTextBox Multiline=true ID="irrigationSystems" TValue="string" @bind-Value="@(Farm.IrrigationSystems)" Placeholder="if any, specify types" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.IrrigationSystems" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Buildings</label>
-                                            <SfTextBox Multiline=true ID="buildings" TValue="string" @bind-Value="@(Farm.Buildings)" Placeholder="classrooms, storage sheds, etc." ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Buildings" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Road Access</label>
-                                            <SfDropDownList ID="roadAccess" TValue="RoadAccess?" TItem="RoadAccessModel" @bind-Value="@(Farm.RoadAccess)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select Road Access" DataSource="@_roadAccess">
-                                                <DropDownListFieldSettings Value="RoadAccess" Text="Name"></DropDownListFieldSettings>
-                                            </SfDropDownList>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Security/Fencing</label>
-                                            <SfTextBox Multiline=true ID="securityMeasures" TValue="string" @bind-Value="@(Farm.SecurityMeasures)" Placeholder="security measures, fencing type" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.SecurityMeasures" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Equipment</label>
-                                            <SfTextBox Multiline=true ID="equipment" TValue="string" @bind-Value="@(Farm.Equipment)" Placeholder="tractors, planters, etc." ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Equipment" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Year Established</label>
-                                            <SfNumericTextBox ID="yearEstablished" TValue="int" @bind-Value="@(Farm.Year)" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
-                                            <ValidationMessage For="() => Farm.Year" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Founding Members / Institution</label>
-                                            <SfTextBox Multiline=true ID="foundingMembers" TValue="string" @bind-Value="@(Farm.FoundingMembers)" Placeholder="individuals or institution" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.FoundingMembers" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Key Milestones</label>
-                                            <SfTextBox Multiline=true ID="keyMilestones" TValue="string" @bind-Value="@(Farm.KeyMilestones)" Placeholder="significant events" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.KeyMilestones" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Vision</label>
-                                            <SfTextBox Multiline=true ID="vision" TValue="string" @bind-Value="@(Farm.Vision)" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Vision" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Mission</label>
-                                            <SfTextBox Multiline=true ID="mission" TValue="string" @bind-Value="@(Farm.Mission)" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Mission" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Male Students</label>
-                                            <SfNumericTextBox ID="maleStudents" TValue="int" @bind-Value="@(Farm.MaleStudents)" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
-                                            <ValidationMessage For="() => Farm.MaleStudents" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Female Students</label>
-                                            <SfNumericTextBox ID="femaleStudents" TValue="int" @bind-Value="@(Farm.FemaleStudents)" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
-                                            <ValidationMessage For="() => Farm.FemaleStudents" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Day Scholars</label>
-                                            <SfNumericTextBox ID="dayScholars" TValue="int" @bind-Value="@(Farm.DayScholars)" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
-                                            <ValidationMessage For="() => Farm.DayScholars" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Boarding Scholars</label>
-                                            <SfNumericTextBox ID="boardingScholars" TValue="int" @bind-Value="@(Farm.BoardingScholars)" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
-                                            <ValidationMessage For="() => Farm.BoardingScholars" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Other Student Details</label>
-                                            <SfTextBox Multiline=true ID="studentDetails" TValue="string" @bind-Value="@(Farm.StudentDemographics)" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.StudentDemographics" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Male Teachers</label>
-                                            <SfNumericTextBox ID="maleTeachers" TValue="int" @bind-Value="@(Farm.MaleTeachers)" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
-                                            <ValidationMessage For="() => Farm.MaleTeachers" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Female Teachers</label>
-                                            <SfNumericTextBox ID="femaleTeachers" TValue="int" @bind-Value="@(Farm.FemaleTeachers)" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
-                                            <ValidationMessage For="() => Farm.FemaleTeachers" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Other Staff</label>
-                                            <SfTextBox Multiline=true ID="otherStaff" TValue="string" @bind-Value="@(Farm.NonTeachingStaff)" Placeholder="Non teaching staff details" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.NonTeachingStaff" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Average Exam Score</label>
-                                            <SfTextBox Multiline=true ID="averageExamScores" TValue="string" @bind-Value="@(Farm.AverageExamScores)" Placeholder="fore the past 3 years" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.AverageExamScores" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Extracurricular Achievements</label>
-                                            <SfTextBox Multiline=true ID="extracurricularAchievements" TValue="string" @bind-Value="@(Farm.ExtraCurricularAchievements)" Placeholder="Sports, arts, etc" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.ExtraCurricularAchievements" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Classrooms</label>
-                                            <SfTextBox Multiline=true ID="classrooms" TValue="string" @bind-Value="@(Farm.Classrooms)" Placeholder="Number, condition" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Classrooms" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Laboratories</label>
-                                            <SfTextBox Multiline=true ID="laboratories" TValue="string" @bind-Value="@(Farm.Laboratories)" Placeholder="Science, Computers, etc" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Laboratories" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Sports Facilities</label>
-                                            <SfTextBox Multiline=true ID="sportsFacilities" TValue="string" @bind-Value="@(Farm.SportsFacilities)" Placeholder="Playgrounds, Sports Equipment" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.SportsFacilities" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Library</label>
-                                            <SfTextBox Multiline=true ID="library" TValue="string" @bind-Value="@(Farm.Library)" Placeholder="Books, digital resources" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Library" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Community Programs</label>
-                                            <SfTextBox Multiline=true ID="communityPrograms" TValue="string" @bind-Value="@(Farm.CommunityPrograms)" Placeholder="Outreach, community service" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.CommunityPrograms" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Partnerships</label>
-                                            <SfTextBox Multiline=true ID="partnerships" TValue="string" @bind-Value="@(Farm.Partnerships)" Placeholder="With local business, NGOs, etc." ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Partnerships" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Extra Details</label>
-                                            <SfTextBox Multiline=true ID="extraDetails" TValue="string" @bind-Value="@(Farm.Description)" Placeholder="any other information" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Description" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Recommendations</label>
-                                            <SfTextBox Multiline=true ID="recommendations" TValue="string" @bind-Value="@(Farm.Recommendations)" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Farm.Recommendations" />
-                                        </div>
-                                        <div class="form-group">
-                                            <SfSpinner @ref="SaveSpinner"></SfSpinner>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </Template>
-                    </GridEditSettings>
-                    <GridColumns>
-                        <GridColumn Field=@nameof(FarmViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
-                        <GridColumn Field=@nameof(FarmViewModel.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
-                        <GridColumn Field=@nameof(FarmViewModel.Address) HeaderText="Address" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
-                        <GridColumn Field=@nameof(FarmViewModel.PhoneNumber) HeaderText="Phone Number" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
-                        <GridColumn Field=@nameof(FarmViewModel.Email) HeaderText="Email" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
-                        <GridColumn Field=@nameof(FarmViewModel.Size) HeaderText="Size (Ha)" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                        <GridColumn HeaderText="Actions" Width="150">
-                            <GridCommandColumns>
-                                <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-edit", CssClass = "e-flat" })"></GridCommandColumn>
-                                <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-delete", CssClass = "e-flat" })"></GridCommandColumn>
-                            </GridCommandColumns>
-                        </GridColumn>
-                    </GridColumns>
-                </SfGrid>
-                <SfDialog @ref="Dialog" Width="250px" Visible="false" ShowCloseIcon="true" IsModal="true">
-                    <DialogEvents Closed="Closed"></DialogEvents>
-                    <DialogTemplates>
-                        <Header> Delete Record</Header>
-                        <Content>
-                            You are about to Delete a Record @SelectedFarm.Name?
-                            <div class="form-group">
-                                <SfSpinner @ref="DeleteSpinner"></SfSpinner>
+            <div class="card-body px-0 pt-0 pb-2">
+                <!-- Filters -->
+                <div class="px-3 py-3">
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <div class="input-group input-group-outline">
+                                <SfTextBox @bind-Value="searchText" Placeholder="Search farms..." @oninput="ApplyFilters"></SfTextBox>
                             </div>
-                        </Content>
-                    </DialogTemplates>
-                    <DialogButtons>
-                        <DialogButton OnClick="@OkClick" Content="OK" IsPrimary="true"></DialogButton>
-                        <DialogButton OnClick="@CancelClick" Content="Cancel"></DialogButton>
-                    </DialogButtons>
-                </SfDialog>
+                        </div>
+                        <div class="col-md-3">
+                            <SfDropDownList TValue="string" DataSource="@provinceFilter" @bind-Value="selectedProvince" 
+                                            Placeholder="Filter by Province" AllowFiltering="true">
+                                <DropDownListEvents TValue="string" ValueChange="ApplyFilters"></DropDownListEvents>
+                            </SfDropDownList>
+                        </div>
+                        <div class="col-md-3">
+                            <SfDropDownList TValue="Region?" DataSource="@regionItems" @bind-Value="selectedRegion" 
+                                            Placeholder="Filter by Region" AllowFiltering="true">
+                                <DropDownListEvents TValue="Region?" ValueChange="ApplyFilters"></DropDownListEvents>
+                                <DropDownListFieldSettings Value="Region" Text="Name"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
+                                <i class="fas fa-sync-alt me-2"></i>Reset Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading indicator -->
+                @if (isLoading)
+                {
+                    <div class="d-flex justify-content-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Farm Grid -->
+                    <SfGrid DataSource="@filteredFarms"
+                            @ref="Grid"
+                            AllowPaging="true"
+                            AllowExcelExport="true"
+                            AllowSorting="true"
+                            AllowMultiSorting="true"
+                            EnableStickyHeader="true"
+                            AllowResizing="true"
+                            AllowSelection="true"
+                            EnableVirtualization="true"
+                            EnableHover="true"
+                            Toolbar="@(new List<string>() { "ExcelExport", "Print", "Search" })"
+                            ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                        <GridPageSettings PageSize="10"></GridPageSettings>
+                        <GridFilterSettings Type="FilterType.Menu" Mode="FilterBarMode.Immediate"></GridFilterSettings>
+                        <GridEvents RowSelected="RowSelectHandler" TValue="FarmViewModel"></GridEvents>
+                        
+                        <GridColumns>
+                            <GridColumn Field=@nameof(FarmViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field=@nameof(FarmViewModel.Name) HeaderText="Farm Name" TextAlign="TextAlign.Left" Width="180" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                            <GridColumn Field=@nameof(FarmViewModel.Province) HeaderText="Province" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                            <GridColumn Field=@nameof(FarmViewModel.District) HeaderText="District" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                            <GridColumn Field=@nameof(FarmViewModel.Size) HeaderText="Size (Ha)" TextAlign="TextAlign.Right" Format="N2" Width="90"></GridColumn>
+                            <GridColumn Field=@nameof(FarmViewModel.Arable) HeaderText="Arable (Ha)" TextAlign="TextAlign.Right" Format="N2" Width="100"></GridColumn>
+                            <GridColumn Field=@nameof(FarmViewModel.Region) HeaderText="Region" TextAlign="TextAlign.Center" Width="90" DisplayAsyncFunction="GetRegionBadge"></GridColumn>
+                            <GridColumn Field=@nameof(FarmViewModel.Irrigated) HeaderText="Irrigation" TextAlign="TextAlign.Center" Width="100" DisplayAsyncFunction="GetIrrigationStatus"></GridColumn>
+                            <GridColumn HeaderText="Actions" Width="150" TextAlign="TextAlign.Center">
+                                <Template>
+                                    @{
+                                        var farm = (context as FarmViewModel);
+                                        <div class="btn-group">
+                                            <a href="/farm/@farm.Id" class="btn btn-link text-primary p-1" data-bs-toggle="tooltip" data-bs-title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <FarmPermission FarmId="@farm.Id" RequireManage="true">
+                                                <a href="/farms/@farm.Id/edit" class="btn btn-link text-info p-1" data-bs-toggle="tooltip" data-bs-title="Edit Farm">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-link text-danger p-1" @onclick="() => OpenDeleteConfirmation(farm)" data-bs-toggle="tooltip" data-bs-title="Delete Farm">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </FarmPermission>
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                }
             </div>
         </div>
     </div>
 </div>
 
+<!-- Delete Confirmation Dialog -->
+<SfDialog @bind-Visible="isDeleteDialogVisible" Width="400px" IsModal="true" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>Confirm Deletion</Header>
+        <Content>
+            @if (selectedFarm != null)
+            {
+                <div>
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <p class="mb-0">Are you sure you want to delete the farm <strong>@selectedFarm.Name</strong>?</p>
+                    </div>
+                    <p>This action cannot be undone and will remove all farm data including fields, crops, and historical records.</p>
+                    
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="button" class="btn btn-secondary me-2" @onclick="() => isDeleteDialogVisible = false">Cancel</button>
+                        <button type="button" class="btn btn-danger" @onclick="DeleteSelectedFarm" disabled="@isDeleting">
+                            @if (isDeleting)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                <span>Deleting...</span>
+                            }
+                            else
+                            {
+                                <span>Delete Farm</span>
+                            }
+                        </button>
+                    </div>
+                </div>
+            }
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
 @code {
-    SfGrid<FarmViewModel> Grid;
-    SfDialog Dialog;
-    SfSpinner SaveSpinner;
-    SfSpinner DeleteSpinner;
-    Toast Alert;
-    List<FarmViewModel> FarmList;
-    ObservableCollection<ProvinceViewModel> _provinces = new ObservableCollection<ProvinceViewModel>();
-    ObservableCollection<DistrictViewModel> _districts = new ObservableCollection<DistrictViewModel>();
-    ObservableCollection<DistrictViewModel> _allDistricts = new ObservableCollection<DistrictViewModel>();
-    ObservableCollection<LocalAuthorityViewModel> _localAuthorities = new ObservableCollection<LocalAuthorityViewModel>();
-    ObservableCollection<LocalAuthorityViewModel> _allLocalAuthorities = new ObservableCollection<LocalAuthorityViewModel>();
-    ObservableCollection<WardViewModel> _wards = new ObservableCollection<WardViewModel>();
-    ObservableCollection<WardViewModel> _allWards = new ObservableCollection<WardViewModel>();
-    List<RegionModel> _regions = Enum.GetValues<Region>().Select(x => new RegionModel(x)).ToList();
-    List<TerrainModel> _terrains = Enum.GetValues<Terrain>().Select(x => new TerrainModel(x)).ToList();
-    List<ConferenceModel> _conferences = Enum.GetValues<Conference>().Select(x => new ConferenceModel(x)).ToList();
-    List<WaterAvailabilityModel> _waterAvailabilities = Enum.GetValues<WaterAvailability>().Select(x => new WaterAvailabilityModel(x)).ToList();
-    List<RoadAccessModel> _roadAccess = Enum.GetValues<RoadAccess>().Select(x => new RoadAccessModel(x)).ToList();
-    public bool EnableDistrictDropdown = false;
-    public bool EnableLocalAuthorityDropdown = false;
-    public bool EnableWardDropdown = false;
-    public Query DistrictQuery { get; set; } = null;
-    public Query LocalAuthorityQuery { get; set; } = null;
-    public Query WardQuery { get; set; } = null;
-    bool Enabled = true;
-    bool Data = false;
-    FarmViewModel SelectedFarm;
-    bool flag = true;
-    ClaimsPrincipal Farm;
-    bool ShowSaveSpinner { get; set; } = false;
-
-    private string GetHeader(FarmViewModel Value)
-    {
-        if (string.IsNullOrEmpty(Value.Id))
-        {
-            return "Add New Farm";
-        }
-        else
-        {
-            return "Edit Details of " + Value.Name;
-        }
-    }
-
-    private void Closed()
-    {
-        flag = true;
-    }
-
-    private async Task ActionBeginHandler(ActionEventArgs<FarmViewModel> args)
-    {
-        switch (args.RequestType)
-        {
-            case Action.FilterChoiceRequest:
-                args.FilterChoiceCount = 100;
-                break;
-            case Action.Add:
-                Data = true;
-                break;
-            case Action.Delete when flag:
-                args.Cancel = true;
-                await Dialog.ShowAsync();
-                flag = false;
-                break;
-            case Action.Save:
-                {
-                    if (SaveSpinner.Visible)
-                    {
-                        args.Cancel = true;
-                        break;
-                    }
-
-                    await SaveSpinner.ShowAsync();
-                    if (!string.IsNullOrEmpty(args.Data.Id))
-                    {
-                        if (!await UpdateFarm(args.Data))
-                        {
-                            args.Cancel = true;
-                        }
-                    }
-                    else
-                    {
-                        if (!await SaveFarm(args.Data))
-                        {
-                            args.Cancel = true;
-                        }
-                    }
-
-
-                    await SaveSpinner.HideAsync();
-                    break;
-                }
-        }
-    }
-
-    private void RowSelectHandler(RowSelectEventArgs<FarmViewModel> args)
-    {
-        SelectedFarm = args.Data;
-    }
-
-    private async Task OkClick()
-    {
-        await DeleteSpinner.ShowAsync();
-        if (await DeleteFarm(SelectedFarm))
-        {
-            await Grid.DeleteRecordAsync();
-            await Dialog.HideAsync();
-        }
-        await DeleteSpinner.HideAsync();
-    }
-
-    private async Task CancelClick()
-    {
-        await Dialog.HideAsync();
-    }
-
+    // References
+    private SfGrid<FarmViewModel> Grid;
+    private Toast Alert;
+    
+    // Data
+    private List<FarmViewModel> farms = new();
+    private List<FarmViewModel> filteredFarms = new();
+    private FarmViewModel selectedFarm;
+    
+    // Filters
+    private string searchText = "";
+    private string selectedProvince = "";
+    private Region? selectedRegion = null;
+    private List<string> provinceFilter = new();
+    private List<RegionModel> regionItems = new();
+    
+    // State
+    private bool isLoading = true;
+    private bool isDeleteDialogVisible = false;
+    private bool isDeleting = false;
+    
     protected override async Task OnInitializedAsync()
     {
-        FarmList = (await ApiCall.Get<IEnumerable<FarmViewModel>>(await ApiCall.GetHttpClient(), "Farms/getFarms/")).ToList();
-
-        _provinces = (await ApiCall.Get<ObservableCollection<ProvinceViewModel>>(await ApiCall.GetHttpClient(), "provinces/getprovinces"));
-        _districts = (await ApiCall.Get<ObservableCollection<DistrictViewModel>>(await ApiCall.GetHttpClient(), "districts/getdistricts"));
-        _allDistricts = _districts;
-        _localAuthorities = (await ApiCall.Get<ObservableCollection<LocalAuthorityViewModel>>(await ApiCall.GetHttpClient(), "localAuthorities/getLocalAuthorities"));
-        _allLocalAuthorities = _localAuthorities;
-        _wards = (await ApiCall.Get<ObservableCollection<WardViewModel>>(await ApiCall.GetHttpClient(), "wards/getWards"));
-        _allWards = _wards;
+        // Initialize filter dropdowns
+        regionItems = Enum.GetValues<Region>().Select(x => new RegionModel(x)).ToList();
+        
+        // Add empty option for filters
+        regionItems.Insert(0, new RegionModel { Region = null, Name = "All Regions" });
+        
+        await LoadFarms();
     }
-
-    private async Task<bool> SaveFarm(FarmViewModel model)
+    
+    private async Task LoadFarms()
     {
-        var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FarmViewModel>, FarmViewModel>(await ApiCall.GetHttpClient(), "farms/createfarm", model);
-
-        if (response == null)
-        {
-            Alert.Show("Failed to save Farm, please try again!", showTitle: true, toastType: ToastType.Danger);
-        }
-        else if (response.Status == (int)HttpStatusCode.OK)
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
-            return true;
-        }
-        else
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
-        }
-
-        return false;
-    }
-
-    private async Task<bool> UpdateFarm(FarmViewModel model)
-    {
-        var response = await ApiCall.Update<ApiResponse<FarmViewModel>, FarmViewModel>(await ApiCall.GetHttpClient(), "Farms/updateFarm", model.Id, model);
-
-        if (response == null)
-        {
-            Alert.Show("Failed to update Farm, please try again!", showTitle: true, toastType: ToastType.Danger);
-        }
-        else if (response.Status == (int)HttpStatusCode.OK)
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
-            return true;
-        }
-        else
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
-        }
-
-        return false;
-    }
-
-    private async Task<bool> DeleteFarm(FarmViewModel model)
-    {
-        var response = await ApiCall.Remove<ApiResponse<FarmViewModel>>(await ApiCall.GetHttpClient(), "Farms/deleteFarm", model.Id);
-
-        if (response == null)
-        {
-            Alert.Show("Failed to delete Farm, please try again!", showTitle: true, toastType: ToastType.Danger);
-        }
-        else if (response.Status == (int)HttpStatusCode.OK)
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
-            return true;
-        }
-        else
-        {
-            Alert.Show(response.Title, showTitle: true, toastType: ToastType.Danger);
-        }
-
-        return false;
-    }
-
-    public void ProvinceChangeHandler(ChangeEventArgs<string, ProvinceViewModel> args)
-    {
-        var districts = _allDistricts.Where(d => d.ProvinceId == args.Value).OrderBy(w => w.Name).ToList();
-        _districts.Clear();
-
         try
         {
-            foreach (var item in districts)
+            isLoading = true;
+            
+            // Get farms from API
+            var response = await ApiCall.Get<List<FarmViewModel>>(
+                await ApiCall.GetHttpClient(), "Farms/GetFarms");
+                
+            if (response != null)
             {
-                _districts.Add(item);
+                farms = response;
+                
+                // Initialize province filter from available data
+                provinceFilter = farms
+                    .Where(f => !string.IsNullOrEmpty(f.Province))
+                    .Select(f => f.Province)
+                    .Distinct()
+                    .OrderBy(p => p)
+                    .ToList();
+                    
+                // Add "All Provinces" option at the beginning
+                provinceFilter.Insert(0, "All Provinces");
+                
+                // Apply any existing filters
+                ApplyFilters();
+            }
+            else
+            {
+                farms = new List<FarmViewModel>();
+                filteredFarms = new List<FarmViewModel>();
+                Alert.Show("Error loading farms data. Please try again later.", showTitle: true, toastType: ToastType.Danger);
             }
         }
         catch (Exception ex)
         {
-            Debug.WriteLine(ex.Message);
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            farms = new List<FarmViewModel>();
+            filteredFarms = new List<FarmViewModel>();
         }
-
-        StateHasChanged();
+        finally
+        {
+            isLoading = false;
+        }
     }
-
-    public void DistrictChangeHandler(ChangeEventArgs<string, DistrictViewModel> args)
+    
+    private void ApplyFilters()
     {
-        var localAuthorities = _allLocalAuthorities.Where(l => l.DistrictId == args.Value).OrderBy(w => w.Name).ToList();
-        var wards = _allWards.Where(w => w.DistrictId == args.Value).OrderBy(w => w.Name).ToList();
-
-        _localAuthorities.Clear();
-        _wards.Clear();
-
+        filteredFarms = farms;
+        
+        // Apply province filter
+        if (!string.IsNullOrEmpty(selectedProvince) && selectedProvince != "All Provinces")
+        {
+            filteredFarms = filteredFarms
+                .Where(f => f.Province == selectedProvince)
+                .ToList();
+        }
+        
+        // Apply region filter
+        if (selectedRegion.HasValue)
+        {
+            filteredFarms = filteredFarms
+                .Where(f => f.Region == selectedRegion)
+                .ToList();
+        }
+        
+        // Apply search filter
+        if (!string.IsNullOrEmpty(searchText))
+        {
+            var search = searchText.ToLower();
+            filteredFarms = filteredFarms
+                .Where(f => 
+                    (f.Name?.ToLower().Contains(search) ?? false) ||
+                    (f.Address?.ToLower().Contains(search) ?? false) ||
+                    (f.District?.ToLower().Contains(search) ?? false) ||
+                    (f.Province?.ToLower().Contains(search) ?? false) ||
+                    (f.LocalAuthority?.ToLower().Contains(search) ?? false) ||
+                    (f.Ward?.ToLower().Contains(search) ?? false)
+                )
+                .ToList();
+        }
+    }
+    
+    private void ClearFilters()
+    {
+        searchText = "";
+        selectedProvince = "";
+        selectedRegion = null;
+        filteredFarms = farms;
+    }
+    
+    private void RowSelectHandler(RowSelectEventArgs<FarmViewModel> args)
+    {
+        selectedFarm = args.Data;
+    }
+    
+    private void OpenDeleteConfirmation(FarmViewModel farm)
+    {
+        selectedFarm = farm;
+        isDeleteDialogVisible = true;
+    }
+    
+    private async Task DeleteSelectedFarm()
+    {
+        if (selectedFarm == null) return;
+        
         try
         {
-            foreach (var item in localAuthorities)
+            isDeleting = true;
+            
+            // Call API to delete farm
+            var response = await ApiCall.Remove<ApiResponse<FarmViewModel>>(
+                await ApiCall.GetHttpClient(), "Farms/DeleteFarm", selectedFarm.Id);
+                
+            if (response?.Status == (int)HttpStatusCode.OK)
             {
-                _localAuthorities.Add(item);
+                Alert.Show($"Farm '{selectedFarm.Name}' deleted successfully", showTitle: true, toastType: ToastType.Success);
+                
+                // Refresh farms list
+                await LoadFarms();
+                
+                // Close dialog
+                isDeleteDialogVisible = false;
             }
-
-            foreach (var item in wards)
+            else
             {
-                _wards.Add(item);
+                Alert.Show(response?.Title ?? "Error deleting farm", showTitle: true, toastType: ToastType.Danger);
             }
         }
         catch (Exception ex)
         {
-            Debug.WriteLine(ex.Message);
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
         }
-
-        StateHasChanged();
+        finally
+        {
+            isDeleting = false;
+        }
     }
-
-    public void LocalAuthorityChangeHandler(ChangeEventArgs<string, LocalAuthorityViewModel> args)
+    
+    private void NavigateToNewFarm()
     {
-        var wards = _allWards.Where(w => w.LocalAuthorityId == args.Value).OrderBy(w => w.Name).ToList();
-        _wards.Clear();
-
-        try
-        {
-            foreach (var item in wards)
-            {
-                _wards.Add(item);
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex.Message);
-        }
-
-        StateHasChanged();
+        NavigationManager.NavigateTo("/farms/new");
     }
-
+    
+    // Helper methods for grid display
+    private async Task<string> GetRegionBadge(FarmViewModel farm)
+    {
+        if (!farm.Region.HasValue) 
+            return "<span class='badge bg-secondary'>Not Set</span>";
+            
+        var badgeClass = farm.Region switch
+        {
+            Region.I => "bg-success",
+            Region.II => "bg-info",
+            Region.III => "bg-primary",
+            Region.IV => "bg-warning",
+            Region.V => "bg-danger",
+            _ => "bg-secondary"
+        };
+        
+        return $"<span class='badge {badgeClass}'>Region {farm.Region}</span>";
+    }
+    
+    private async Task<string> GetIrrigationStatus(FarmViewModel farm)
+    {
+        return farm.Irrigated 
+            ? "<span class='badge bg-success'>Yes</span>" 
+            : "<span class='badge bg-secondary'>No</span>";
+    }
+    
+    // Model for Region dropdown
+    public class RegionModel
+    {
+        public Region? Region { get; set; }
+        public string Name { get; set; }
+        
+        public RegionModel() { }
+        
+        public RegionModel(Region region)
+        {
+            Region = region;
+            Name = $"Region {region}";
+        }
+    }
 }
