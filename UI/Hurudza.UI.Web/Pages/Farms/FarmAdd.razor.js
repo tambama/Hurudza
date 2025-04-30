@@ -1,12 +1,11 @@
-// Farm Map Functionality
-// Requires Mapbox GL JS to be included in the page
+// FarmAdd.razor.js - Should be placed in UI/Hurudza.UI.Web/Pages/Farms/
 
 // Initialize Mapbox
 const mapboxToken = 'pk.eyJ1IjoicGVuaWVsdCIsImEiOiJjbGt3Y2gxM3YweWtrM3FwbW9jaWNkMWVyIn0.cDAgTWNXN-TVJROjgoWQiw';
 const mapInstances = {};
 
 // Initialize a map on the specified container
-window.initializeMap = function(containerId, center, zoom) {
+export function initializeMap(containerId, center, zoom) {
     try {
         console.log(`Creating map in container #${containerId} at [${center}] with zoom ${zoom}`);
 
@@ -64,10 +63,10 @@ window.initializeMap = function(containerId, center, zoom) {
         console.error(`Error creating map #${containerId}:`, error);
         return false;
     }
-};
+}
 
 // Add a click handler to a map
-window.addMapClickHandler = function(containerId, dotNetRef) {
+export function addMapClickHandler(containerId, dotNetRef) {
     const map = mapInstances[containerId];
     if (!map) {
         console.error(`Map #${containerId} not found`);
@@ -96,10 +95,10 @@ window.addMapClickHandler = function(containerId, dotNetRef) {
     });
 
     return true;
-};
+}
 
 // Draw a polygon for a field
-window.drawFieldPolygon = function(containerId, fieldId, coordinates, name) {
+export function drawFieldPolygon(containerId, fieldId, coordinates, name) {
     try {
         const map = mapInstances[containerId];
         if (!map) {
@@ -201,10 +200,10 @@ window.drawFieldPolygon = function(containerId, fieldId, coordinates, name) {
         console.error(`Error drawing field polygon for ${fieldId}:`, error);
         return false;
     }
-};
+}
 
 // Dispose a map instance
-window.disposeMap = function(containerId) {
+export function disposeMap(containerId) {
     const map = mapInstances[containerId];
     if (map) {
         map.remove();
@@ -213,10 +212,10 @@ window.disposeMap = function(containerId) {
         return true;
     }
     return false;
-};
+}
 
 // Center map on coordinates
-window.centerMap = function(containerId, lng, lat, zoom = 14) {
+export function centerMap(containerId, lng, lat, zoom = 14) {
     const map = mapInstances[containerId];
     if (map) {
         map.flyTo({
