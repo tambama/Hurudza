@@ -1,0 +1,801 @@
+@page "/farm/{FarmId}"
+@using System.Net
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.Data.UI.Models.ViewModels.Tillage
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@using Hurudza.UI.Web.Services
+@attribute [Authorize]
+
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject FarmAccessService FarmAccessService
+@inject IJSRuntime JSRuntime
+
+<Toast @ref="Alert" />
+
+@if (isLoading)
+{
+    <div class="d-flex justify-content-center my-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (farm == null)
+{
+    <div class="alert alert-warning">
+        <h5>Access Denied</h5>
+        <p>You do not have permission to view this farm or the farm does not exist.</p>
+        <button class="btn btn-primary" @onclick="NavigateToDashboard">Return to Dashboard</button>
+    </div>
+}
+else
+{
+    <!-- Farm Header Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-primary">
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <h2 class="text-white mb-0">@farm.Name</h2>
+                            <p class="text-white opacity-8 mb-0">@farm.Address</p>
+                            <div class="d-flex align-items-center mt-3">
+                                <span class="badge bg-gradient-success me-2">Region @farm.Region</span>
+                                <span class="badge bg-gradient-info me-2">Conference: @farm.Conference</span>
+                                @if (farm.Irrigated)
+                                {
+                                    <span class="badge bg-gradient-success">Irrigated</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-gradient-warning">Non-Irrigated</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-lg-4 d-flex justify-content-end align-items-center">
+                            <!-- Only show for managers and admins -->
+                            <FarmPermission FarmId="@FarmId" RequireManage="true">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-light" @onclick="NavigateToEdit">
+                                        <i class="fas fa-edit me-1"></i> Edit
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-light" @onclick="NavigateToDetails">
+                                        <i class="fas fa-info-circle me-1"></i> Details
+                                    </button>
+                                </div>
+                            </FarmPermission>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Size</p>
+                                <h5 class="font-weight-bolder mb-0">
+                                    @farm.Size ha
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                                <i class="ni ni-world text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Arable Land</p>
+                                <h5 class="font-weight-bolder mb-0">
+                                    @farm.Arable ha
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-success shadow text-center border-radius-md">
+                                <i class="ni ni-paper-diploma text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Cleared Land</p>
+                                <h5 class="font-weight-bolder mb-0">
+                                    @farm.Cleared ha
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                                <i class="ni ni-map-big text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Fields</p>
+                                <h5 class="font-weight-bolder mb-0">
+                                    @(fields?.Count ?? 0)
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-warning shadow text-center border-radius-md">
+                                <i class="fas fa-puzzle-piece text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- School/Farm Information and Location -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h6>Farm Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <th width="150">Established Year</th>
+                                            <td>@farm.Year</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Contact Person</th>
+                                            <td>@farm.ContactPerson</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Phone</th>
+                                            <td>@farm.PhoneNumber</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Email</th>
+                                            <td>@farm.Email</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Water Source</th>
+                                            <td>@(!string.IsNullOrEmpty(farm.WaterSource) ? farm.WaterSource : "Not specified")</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Soil Type</th>
+                                            <td>@(!string.IsNullOrEmpty(farm.SoilType) ? farm.SoilType : "Not specified")</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <th width="150">Province</th>
+                                            <td>@farm.Province</td>
+                                        </tr>
+                                        <tr>
+                                            <th>District</th>
+                                            <td>@farm.District</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Local Authority</th>
+                                            <td>@farm.LocalAuthority</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Ward</th>
+                                            <td>@farm.Ward</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Terrain</th>
+                                            <td>@(farm.Terrain?.ToString() ?? "Not specified")</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Road Access</th>
+                                            <td>@(farm.RoadAccess?.ToString() ?? "Not specified")</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(farm.Vision) || !string.IsNullOrEmpty(farm.Description))
+                    {
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                @if (!string.IsNullOrEmpty(farm.Vision))
+                                {
+                                    <div class="mb-3">
+                                        <h6>Vision</h6>
+                                        <p class="text-sm mb-0">@farm.Vision</p>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(farm.Description))
+                                {
+                                    <div>
+                                        <h6>Description</h6>
+                                        <p class="text-sm mb-0">@farm.Description</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header pb-0">
+                    <h6>School Statistics</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex">
+                            <h6 class="mb-1">Student Enrollment</h6>
+                            <span class="ms-auto">@(farm.MaleStudents + farm.FemaleStudents) students</span>
+                        </div>
+                        <div class="progress">
+                            @{
+                                var totalStudents = farm.MaleStudents + farm.FemaleStudents;
+                                var malePercentage = totalStudents > 0 ? (farm.MaleStudents * 100) / totalStudents : 0;
+                                var femalePercentage = totalStudents > 0 ? (farm.FemaleStudents * 100) / totalStudents : 0;
+                            }
+                            <div class="progress-bar bg-gradient-info" role="progressbar" style="width: @malePercentage%"></div>
+                            <div class="progress-bar bg-gradient-danger" role="progressbar" style="width: @femalePercentage%"></div>
+                        </div>
+                        <div class="d-flex mt-1">
+                            <span class="badge bg-gradient-info">Male: @farm.MaleStudents</span>
+                            <span class="badge bg-gradient-danger ms-auto">Female: @farm.FemaleStudents</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex">
+                            <h6 class="mb-1">Student Type</h6>
+                            <span class="ms-auto">@(farm.DayScholars + farm.BoardingScholars) total</span>
+                        </div>
+                        <div class="progress">
+                            @{
+                                var totalScholars = farm.DayScholars + farm.BoardingScholars;
+                                var dayPercentage = totalScholars > 0 ? (farm.DayScholars * 100) / totalScholars : 0;
+                                var boardingPercentage = totalScholars > 0 ? (farm.BoardingScholars * 100) / totalScholars : 0;
+                            }
+                            <div class="progress-bar bg-gradient-success" role="progressbar" style="width: @dayPercentage%"></div>
+                            <div class="progress-bar bg-gradient-primary" role="progressbar" style="width: @boardingPercentage%"></div>
+                        </div>
+                        <div class="d-flex mt-1">
+                            <span class="badge bg-gradient-success">Day: @farm.DayScholars</span>
+                            <span class="badge bg-gradient-primary ms-auto">Boarding: @farm.BoardingScholars</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex">
+                            <h6 class="mb-1">Staff</h6>
+                            <span class="ms-auto">@(farm.MaleTeachers + farm.FemaleTeachers) teachers</span>
+                        </div>
+                        <div class="progress">
+                            @{
+                                var totalTeachers = farm.MaleTeachers + farm.FemaleTeachers;
+                                var maleTeacherPercentage = totalTeachers > 0 ? (farm.MaleTeachers * 100) / totalTeachers : 0;
+                                var femaleTeacherPercentage = totalTeachers > 0 ? (farm.FemaleTeachers * 100) / totalTeachers : 0;
+                            }
+                            <div class="progress-bar bg-gradient-info" role="progressbar" style="width: @maleTeacherPercentage%"></div>
+                            <div class="progress-bar bg-gradient-danger" role="progressbar" style="width: @femaleTeacherPercentage%"></div>
+                        </div>
+                        <div class="d-flex mt-1">
+                            <span class="badge bg-gradient-info">Male: @farm.MaleTeachers</span>
+                            <span class="badge bg-gradient-danger ms-auto">Female: @farm.FemaleTeachers</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Facilities List -->
+                    <div class="mt-4">
+                        <h6>Facilities</h6>
+                        <ul class="list-group">
+                            @if (!string.IsNullOrEmpty(farm.Classrooms))
+                            {
+                                <li class="list-group-item border-0 ps-0 pt-0 text-sm">
+                                    <strong class="text-dark">Classrooms:</strong> @farm.Classrooms
+                                </li>
+                            }
+                            @if (!string.IsNullOrEmpty(farm.Laboratories))
+                            {
+                                <li class="list-group-item border-0 ps-0 pt-0 text-sm">
+                                    <strong class="text-dark">Laboratories:</strong> @farm.Laboratories
+                                </li>
+                            }
+                            @if (!string.IsNullOrEmpty(farm.Library))
+                            {
+                                <li class="list-group-item border-0 ps-0 pt-0 text-sm">
+                                    <strong class="text-dark">Library:</strong> @farm.Library
+                                </li>
+                            }
+                            @if (!string.IsNullOrEmpty(farm.SportsFacilities))
+                            {
+                                <li class="list-group-item border-0 ps-0 pt-0 text-sm">
+                                    <strong class="text-dark">Sports Facilities:</strong> @farm.SportsFacilities
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crop and Tillage Statistics -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                    <h6>Current Season Crops</h6>
+                    <a href="/farm/@FarmId/crop-statistics" class="btn btn-link text-info m-0 p-0">
+                        View Details <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (cropStats == null || !cropStats.Any())
+                    {
+                        <div class="alert alert-info">
+                            <p class="mb-0">No crops have been planted for the current season.</p>
+                            <a href="/farm/@FarmId/fields" class="btn btn-sm btn-primary mt-2">Manage Fields</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div style="height: 230px;">
+                            <SfChart>
+                                <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
+                                <ChartPrimaryYAxis Title="Hectares"></ChartPrimaryYAxis>
+                                <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                                <ChartSeriesCollection>
+                                    <ChartSeries DataSource="@cropStats" XName="CropName" YName="TotalHectares" 
+                                                Type="ChartSeriesType.Column" Name="Total Hectares">
+                                    </ChartSeries>
+                                </ChartSeriesCollection>
+                            </SfChart>
+                        </div>
+                        <div class="table-responsive mt-3">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-xxs font-weight-bolder opacity-7">Crop</th>
+                                        <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Hectares</th>
+                                        <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Irrigated %</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var stat in cropStats.Take(4))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        <h6 class="mb-0 text-sm">@stat.CropName</h6>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <p class="text-sm font-weight-bold mb-0">@stat.TotalHectares.ToString("F2")</p>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var irrigationPct = stat.TotalHectares > 0
+                                                        ? Math.Round((stat.IrrigatedHectares / stat.TotalHectares) * 100, 1)
+                                                        : 0;
+                                                }
+                                                <div class="d-flex align-items-center">
+                                                    <span class="text-sm font-weight-bold mb-0 me-2">@irrigationPct%</span>
+                                                    <div>
+                                                        <div class="progress">
+                                                            <div class="progress-bar bg-gradient-info" role="progressbar" 
+                                                                aria-valuenow="@irrigationPct" aria-valuemin="0" 
+                                                                aria-valuemax="100" style="width: @irrigationPct%">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                    <h6>Tillage Progress</h6>
+                    <a href="/farm/@FarmId/tillage-programs" class="btn btn-link text-info m-0 p-0">
+                        View Programs <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (tillageStats == null || !IsValidTillageStats())
+                    {
+                        <div class="alert alert-info">
+                            <p class="mb-0">No tillage programs are currently active for this farm.</p>
+                            <a href="/farm/@FarmId/tillage-programs" class="btn btn-sm btn-primary mt-2">Manage Tillage</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <h6 class="text-sm mb-0">Total Planned</h6>
+                                        <h5 class="font-weight-bolder mb-0">@tillageStats.TotalPlanned.ToString("F2") ha</h5>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <div class="bg-gradient-primary icon-shape icon-sm rounded-circle text-center">
+                                            <i class="fas fa-ruler text-white opacity-10"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <h6 class="text-sm mb-0">Total Tilled</h6>
+                                        <h5 class="font-weight-bolder mb-0">@tillageStats.TotalTilled.ToString("F2") ha</h5>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <div class="bg-gradient-success icon-shape icon-sm rounded-circle text-center">
+                                            <i class="fas fa-check text-white opacity-10"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card bg-gradient-light mb-0">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="numbers">
+                                                    <p class="text-sm mb-0 font-weight-bold">Overall Progress</p>
+                                                    <h5 class="font-weight-bolder mb-0">
+                                                        @tillageStats.CompletionPercentage.ToString("F0")%
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 text-end">
+                                                <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                                                    <i class="fas fa-tractor text-lg opacity-10" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="progress mt-2">
+                                            <div class="progress-bar bg-gradient-primary" role="progressbar" 
+                                                 style="width: @tillageStats.CompletionPercentage%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <h6 class="text-sm mb-0">Services Completed</h6>
+                                        <h5 class="font-weight-bolder mb-0">@tillageStats.CompletedServices / @tillageStats.TotalServices</h5>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <div class="bg-gradient-info icon-shape icon-sm rounded-circle text-center">
+                                            <i class="fas fa-list-check text-white opacity-10"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <h6 class="text-sm mb-0">Revenue</h6>
+                                        <h5 class="font-weight-bolder mb-0">@tillageStats.TotalRevenue.ToString("C2")</h5>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <div class="bg-gradient-warning icon-shape icon-sm rounded-circle text-center">
+                                            <i class="fas fa-dollar-sign text-white opacity-10"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fields Overview -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                    <h6>Fields Overview</h6>
+                    <a href="/farm/@FarmId/fields" class="btn btn-link text-info m-0 p-0">
+                        Manage Fields <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    @if (fields == null || !fields.Any())
+                    {
+                        <div class="alert alert-info mx-3 mt-3">
+                            <p class="mb-0">No fields have been added to this farm yet.</p>
+                            <a href="/farm/@FarmId/fields/add" class="btn btn-sm btn-primary mt-2">Add Field</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Size (ha)</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Soil Type</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Irrigation</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Current Crop</th>
+                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var field in fields)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        <h6 class="mb-0 text-sm">@field.Name</h6>
+                                                        @if (!string.IsNullOrEmpty(field.Description))
+                                                        {
+                                                            <p class="text-xs text-secondary mb-0">@field.Description</p>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <p class="text-xs font-weight-bold mb-0">@field.Size.ToString("F2")</p>
+                                            </td>
+                                            <td>
+                                                <p class="text-xs font-weight-bold mb-0">@field.SoilType.ToString()</p>
+                                            </td>
+                                            <td>
+                                                @if (field.Irrigation)
+                                                {
+                                                    <span class="badge badge-sm bg-gradient-success">Yes</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-sm bg-gradient-secondary">No</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var currentCrop = GetCurrentCropForField(field.Id);
+                                                    if (!string.IsNullOrEmpty(currentCrop))
+                                                    {
+                                                        <span class="badge badge-sm bg-gradient-info">@currentCrop</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge badge-sm bg-gradient-light">None</span>
+                                                    }
+                                                }
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <a href="/field/@field.Id" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="View details">
+                                                    <i class="fas fa-eye me-1"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string FarmId { get; set; }
+    
+    private FarmViewModel farm;
+    private List<FieldViewModel> fields;
+    private List<FieldCropViewModel> fieldCrops;
+    private List<CropStatistic> cropStats;
+    private TillageSummaryViewModel tillageStats;
+    private bool isLoading = true;
+    private Toast Alert;
+    
+    private class CropStatistic
+    {
+        public string CropName { get; set; }
+        public float TotalHectares { get; set; }
+        public int FieldCount { get; set; }
+        public float IrrigatedHectares { get; set; }
+        public float NonIrrigatedHectares { get; set; }
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+    
+    private async Task LoadData()
+    {
+        try
+        {
+            isLoading = true;
+            
+            // Check if user has access to this farm
+            bool canAccess = await FarmAccessService.CanAccessFarm(FarmId);
+            if (!canAccess)
+            {
+                // No access - set farm to null to show the error
+                farm = null;
+                isLoading = false;
+                return;
+            }
+            
+            // Load farm details
+            var farmResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<FarmViewModel>>(
+                await ApiCall.GetHttpClient(), $"Farms/GetFarm/{FarmId}");
+                
+            if (farmResponse?.Status == (int)HttpStatusCode.OK && farmResponse.Result != null)
+            {
+                farm = farmResponse.Result;
+                
+                // Load fields
+                var fieldsResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<FieldViewModel>>>(
+                    await ApiCall.GetHttpClient(), $"Fields/GetFarmFields/{FarmId}");
+                    
+                if (fieldsResponse?.Status == (int)HttpStatusCode.OK && fieldsResponse.Result != null)
+                {
+                    fields = fieldsResponse.Result;
+                }
+                
+                // Load field crops
+                try
+                {
+                    var cropResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<FieldCropViewModel>>>(
+                        await ApiCall.GetHttpClient(), $"FieldCrops/GetFarmFieldCrops/{FarmId}");
+                        
+                    if (cropResponse?.Status == (int)HttpStatusCode.OK && cropResponse.Result != null)
+                    {
+                        fieldCrops = cropResponse.Result;
+                    }
+                    else
+                    {
+                        fieldCrops = new List<FieldCropViewModel>();
+                    }
+                }
+                catch
+                {
+                    fieldCrops = new List<FieldCropViewModel>();
+                }
+                
+                // Load crop statistics
+                try
+                {
+                    cropStats = await ApiCall.Get<List<CropStatistic>>(
+                        await ApiCall.GetHttpClient(), $"FieldCrops/GetFarmCropStatistics/{FarmId}");
+                }
+                catch
+                {
+                    cropStats = new List<CropStatistic>();
+                }
+                
+                // Load tillage statistics
+                try
+                {
+                    tillageStats = await ApiCall.Get<TillageSummaryViewModel>(
+                        await ApiCall.GetHttpClient(), $"TillagePrograms/GetFarmSummary/{FarmId}");
+                }
+                catch
+                {
+                    tillageStats = null;
+                }
+            }
+            else
+            {
+                // Farm not found or error loading
+                farm = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert?.Show($"Error loading farm: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            farm = null;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    
+    private bool IsValidTillageStats()
+    {
+        return tillageStats != null && tillageStats.FarmId == FarmId;
+    }
+    
+    private string GetCurrentCropForField(string fieldId)
+    {
+        if (fieldCrops == null || !fieldCrops.Any())
+            return null;
+            
+        var currentCrop = fieldCrops
+            .Where(fc => fc.FieldId == fieldId)
+            .OrderByDescending(fc => fc.PlantedDate)
+            .FirstOrDefault();
+            
+        return currentCrop?.Crop;
+    }
+    
+    #region Navigation Methods
+    
+    private void NavigateToEdit()
+    {
+        NavigationManager.NavigateTo($"/farms/{FarmId}/edit");
+    }
+    
+    private void NavigateToDetails()
+    {
+        NavigationManager.NavigateTo($"/farms/{FarmId}/details");
+    }
+    
+    private void NavigateToDashboard()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+    
+    #endregion
+}

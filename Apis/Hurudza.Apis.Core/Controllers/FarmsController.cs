@@ -52,6 +52,23 @@ public class FarmsController : Controller
 
         return Ok(farms);
     }
+    
+    [HttpGet("{id}", Name = nameof(GetFarm))]
+    public async Task<IActionResult> GetFarm(string id)
+    {
+        var farm = await _context.Farms
+            .Include(f => f.Province)
+            .Include(f => f.District)
+            .Include(f => f.LocalAuthority)
+            .Include(f => f.Ward)
+            .ProjectTo<FarmViewModel>(_configuration)
+            .FirstOrDefaultAsync(f => f.Id == id)
+            .ConfigureAwait(false);
+
+        return Ok(farm == null 
+            ? new ApiResponse((int)HttpStatusCode.NotFound, "Farm not found") 
+            : new ApiOkResponse(farm));
+    }
 
     [HttpGet("{id}", Name = nameof(GetFarmDetails))]
     public async Task<IActionResult> GetFarmDetails(string id)
