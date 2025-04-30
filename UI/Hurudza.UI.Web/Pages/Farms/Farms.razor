@@ -1,4 +1,7 @@
 @page "/farms"
+@using System.Net
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels.Core
 @using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
 @attribute [Authorize]
 
@@ -37,15 +40,15 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <SfDropDownList TValue="string" DataSource="@provinceFilter" @bind-Value="selectedProvince" 
+                            <SfDropDownList TValue="string" TItem="string" DataSource="@provinceFilter" @bind-Value="selectedProvince" 
                                             Placeholder="Filter by Province" AllowFiltering="true">
-                                <DropDownListEvents TValue="string" ValueChange="ApplyFilters"></DropDownListEvents>
+                                <DropDownListEvents TValue="string" TItem="string" ValueChange="ApplyFilters"></DropDownListEvents>
                             </SfDropDownList>
                         </div>
                         <div class="col-md-3">
-                            <SfDropDownList TValue="Region?" DataSource="@regionItems" @bind-Value="selectedRegion" 
+                            <SfDropDownList TValue="Region?" TItem="RegionModel" DataSource="@regionItems" @bind-Value="selectedRegion" 
                                             Placeholder="Filter by Region" AllowFiltering="true">
-                                <DropDownListEvents TValue="Region?" ValueChange="ApplyFilters"></DropDownListEvents>
+                                <DropDownListEvents TValue="Region?" TItem="RegionModel" ValueChange="ApplyFilters"></DropDownListEvents>
                                 <DropDownListFieldSettings Value="Region" Text="Name"></DropDownListFieldSettings>
                             </SfDropDownList>
                         </div>
@@ -93,8 +96,45 @@
                             <GridColumn Field=@nameof(FarmViewModel.District) HeaderText="District" TextAlign="TextAlign.Left" Width="120"></GridColumn>
                             <GridColumn Field=@nameof(FarmViewModel.Size) HeaderText="Size (Ha)" TextAlign="TextAlign.Right" Format="N2" Width="90"></GridColumn>
                             <GridColumn Field=@nameof(FarmViewModel.Arable) HeaderText="Arable (Ha)" TextAlign="TextAlign.Right" Format="N2" Width="100"></GridColumn>
-                            <GridColumn Field=@nameof(FarmViewModel.Region) HeaderText="Region" TextAlign="TextAlign.Center" Width="90" DisplayAsyncFunction="GetRegionBadge"></GridColumn>
-                            <GridColumn Field=@nameof(FarmViewModel.Irrigated) HeaderText="Irrigation" TextAlign="TextAlign.Center" Width="100" DisplayAsyncFunction="GetIrrigationStatus"></GridColumn>
+                            <GridColumn Field=@nameof(FarmViewModel.Region) HeaderText="Region" TextAlign="TextAlign.Center" Width="90">
+                                <Template>
+                                    @{
+                                        var farm = (context as FarmViewModel);
+                                        if (!farm.Region.HasValue)
+                                        {
+                                            <span class='badge bg-secondary'>Not Set</span>
+                                        }
+                                        else
+                                        {
+                                            var badgeClass = farm.Region switch
+                                            {
+                                                Region.I => "bg-success",
+                                                Region.II => "bg-info",
+                                                Region.III => "bg-primary",
+                                                Region.IV => "bg-warning",
+                                                Region.V => "bg-danger",
+                                                _ => "bg-secondary"
+                                            };
+                                            <span class='badge @badgeClass'>Region @farm.Region</span>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field=@nameof(FarmViewModel.Irrigated) HeaderText="Irrigation" TextAlign="TextAlign.Center" Width="100">
+                                <Template>
+                                    @{
+                                        var farm = (context as FarmViewModel);
+                                        if (farm.Irrigated)
+                                        {
+                                            <span class='badge bg-success'>Yes</span>
+                                        }
+                                        else
+                                        {
+                                            <span class='badge bg-secondary'>No</span>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
                             <GridColumn HeaderText="Actions" Width="150" TextAlign="TextAlign.Center">
                                 <Template>
                                     @{
@@ -333,32 +373,6 @@
     private void NavigateToNewFarm()
     {
         NavigationManager.NavigateTo("/farms/new");
-    }
-    
-    // Helper methods for grid display
-    private async Task<string> GetRegionBadge(FarmViewModel farm)
-    {
-        if (!farm.Region.HasValue) 
-            return "<span class='badge bg-secondary'>Not Set</span>";
-            
-        var badgeClass = farm.Region switch
-        {
-            Region.I => "bg-success",
-            Region.II => "bg-info",
-            Region.III => "bg-primary",
-            Region.IV => "bg-warning",
-            Region.V => "bg-danger",
-            _ => "bg-secondary"
-        };
-        
-        return $"<span class='badge {badgeClass}'>Region {farm.Region}</span>";
-    }
-    
-    private async Task<string> GetIrrigationStatus(FarmViewModel farm)
-    {
-        return farm.Irrigated 
-            ? "<span class='badge bg-success'>Yes</span>" 
-            : "<span class='badge bg-secondary'>No</span>";
     }
     
     // Model for Region dropdown
