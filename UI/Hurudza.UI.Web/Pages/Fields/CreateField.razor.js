@@ -29,6 +29,9 @@ export function initializeDrawControls(map, dotNetRef) {
  * @param {Object} dotNetRef - Reference to .NET component
  */
 export function setupDrawingEvents(map, draw, dotNetRef) {
+    // Store the reference globally in the module
+    dotNetReference = dotNetRef;
+    
     console.log("Setting up drawing event handlers for field creation");
     return mapDrawing.setupDrawingEvents(map, draw, dotNetRef);
 }

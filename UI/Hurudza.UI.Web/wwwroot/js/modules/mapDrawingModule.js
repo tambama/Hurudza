@@ -15,6 +15,9 @@ let deleteButton = null;
 let isDrawingModeActive = false;
 let originalCursor = '';
 
+// Store the .NET reference at module level to ensure it's available for all callbacks
+let dotNetReference = null;
+
 /**
  * Initialize Mapbox with the access token
  */
@@ -80,6 +83,9 @@ export function initializeDrawControls(map, dotNetRef) {
     try {
         console.log("Initializing draw controls");
 
+        // Store the .NET reference at module level
+        dotNetReference = dotNetRef;
+
         // Create Mapbox Draw instance with standardized options
         const draw = new MapboxDraw({
             displayControlsDefault: false,
@@ -141,7 +147,7 @@ export function initializeDrawControls(map, dotNetRef) {
         map.addControl(draw);
 
         // Create custom drawing and delete buttons
-        createCustomControls(map, draw, dotNetRef);
+        createCustomControls(map, draw);
 
         console.log("Draw controls initialized");
         return draw;
@@ -155,10 +161,9 @@ export function initializeDrawControls(map, dotNetRef) {
  * Create custom drawing and delete buttons
  * @param {Object} map - The Mapbox map instance
  * @param {Object} draw - The MapboxDraw instance
- * @param {Object} dotNetRef - Reference to .NET component
  * @returns {Object} - References to the created buttons
  */
-function createCustomControls(map, draw, dotNetRef) {
+function createCustomControls(map, draw) {
     try {
         // Create a container for custom controls
         const controlContainer = document.createElement('div');
@@ -188,7 +193,7 @@ function createCustomControls(map, draw, dotNetRef) {
 
         // Drawing button click handler
         drawButton.addEventListener('click', () => {
-            toggleDrawingMode(map, draw, dotNetRef);
+            toggleDrawingMode(map, draw);
         });
 
         // Delete button click handler
@@ -206,8 +211,13 @@ function createCustomControls(map, draw, dotNetRef) {
             // Reset drawing cursor
             map.getCanvas().style.cursor = originalCursor || '';
 
-            // Notify .NET
-            dotNetRef.invokeMethodAsync('OnDrawingDeleted');
+            // Notify .NET - use module level reference
+            if (dotNetReference) {
+                dotNetReference.invokeMethodAsync('OnDrawingDeleted')
+                    .catch(error => {
+                        console.warn("Error notifying .NET of drawing deletion:", error);
+                    });
+            }
         });
 
         console.log("Custom controls created");
@@ -222,10 +232,9 @@ function createCustomControls(map, draw, dotNetRef) {
  * Toggle drawing mode
  * @param {Object} map - The Mapbox map instance
  * @param {Object} draw - The MapboxDraw instance
- * @param {Object} dotNetRef - Reference to .NET component
  * @returns {boolean} - Success indicator
  */
-function toggleDrawingMode(map, draw, dotNetRef) {
+function toggleDrawingMode(map, draw) {
     try {
         // Toggle state
         isDrawingModeActive = !isDrawingModeActive;
@@ -262,10 +271,15 @@ function toggleDrawingMode(map, draw, dotNetRef) {
             console.log("Drawing mode deactivated");
         }
 
-        // Notify .NET of drawing mode change
-        dotNetRef.invokeMethodAsync('SetDrawingMode', isDrawingModeActive).catch(error => {
-            console.warn("Error notifying .NET of drawing mode change:", error);
-        });
+        // Notify .NET of drawing mode change using module-level reference
+        if (dotNetReference) {
+            dotNetReference.invokeMethodAsync('SetDrawingMode', isDrawingModeActive)
+                .catch(error => {
+                    console.warn("Error notifying .NET of drawing mode change:", error);
+                });
+        } else {
+            console.warn("dotNetReference is null, cannot notify .NET of drawing mode change");
+        }
 
         return true;
     } catch (error) {
@@ -332,6 +346,9 @@ export async function setupDrawingEvents(map, draw, dotNetRef) {
     try {
         console.log("Setting up drawing event handlers");
 
+        // Store the .NET reference at module level
+        dotNetReference = dotNetRef;
+
         // Load Turf.js if needed
         if (typeof turf === 'undefined') {
             await loadTurf();
@@ -354,7 +371,7 @@ export async function setupDrawingEvents(map, draw, dotNetRef) {
             // Process the drawn polygon
             if (e.features && e.features.length > 0) {
                 const polygon = e.features[0];
-                processDrawnPolygon(polygon, dotNetRef);
+                processDrawnPolygon(polygon);
             }
         });
 
@@ -363,7 +380,7 @@ export async function setupDrawingEvents(map, draw, dotNetRef) {
             // Process the updated polygon
             if (e.features && e.features.length > 0) {
                 const polygon = e.features[0];
-                processDrawnPolygon(polygon, dotNetRef);
+                processDrawnPolygon(polygon);
             }
         });
 
@@ -376,7 +393,12 @@ export async function setupDrawingEvents(map, draw, dotNetRef) {
             }
 
             // Notify .NET that the drawing was deleted
-            dotNetRef.invokeMethodAsync('OnDrawingDeleted');
+            if (dotNetReference) {
+                dotNetReference.invokeMethodAsync('OnDrawingDeleted')
+                    .catch(error => {
+                        console.warn("Error notifying .NET of drawing deletion:", error);
+                    });
+            }
         });
 
         // Add mouse blocking during draw mode to prevent unwanted interactions
@@ -403,9 +425,8 @@ export async function setupDrawingEvents(map, draw, dotNetRef) {
 /**
  * Process a drawn polygon - calculate area and extract coordinates
  * @param {Object} polygon - The GeoJSON polygon feature
- * @param {Object} dotNetRef - Reference to .NET component
  */
-function processDrawnPolygon(polygon, dotNetRef) {
+function processDrawnPolygon(polygon) {
     if (polygon && polygon.geometry && polygon.geometry.type === 'Polygon') {
         try {
             // Calculate area in square meters, convert to hectares
@@ -414,16 +435,27 @@ function processDrawnPolygon(polygon, dotNetRef) {
 
             console.log(`Calculated area: ${areaInHectares.toFixed(2)} hectares`);
 
-            // Update field size in the form
-            dotNetRef.invokeMethodAsync('UpdateFieldSize', areaInHectares);
-
             // Extract coordinates (omitting the last point which duplicates the first)
             const coordinates = polygon.geometry.coordinates[0].slice(0, -1).map(coord => {
                 return [coord[0], coord[1]]; // longitude, latitude
             });
 
-            // Send coordinates to .NET
-            dotNetRef.invokeMethodAsync('OnPolygonDrawn', coordinates);
+            // Use module-level .NET reference
+            if (dotNetReference) {
+                // Update field size in the form
+                dotNetReference.invokeMethodAsync('UpdateFieldSize', areaInHectares)
+                    .catch(error => {
+                        console.warn("Error notifying .NET of field size:", error);
+                    });
+
+                // Send coordinates to .NET
+                dotNetReference.invokeMethodAsync('OnPolygonDrawn', coordinates)
+                    .catch(error => {
+                        console.warn("Error notifying .NET of polygon coordinates:", error);
+                    });
+            } else {
+                console.warn("dotNetReference is null, cannot notify .NET of polygon drawn");
+            }
         } catch (error) {
             console.error("Error processing polygon:", error);
         }
@@ -940,9 +972,30 @@ export function highlightDrawTool() {
     }
 }
 
-// Export additional utility functions as needed
+/**
+ * Toggle drawing tool button visibility
+ * @param {boolean} show - Whether to show the button
+ * @returns {boolean} - Success indicator
+ */
+export function toggleDrawButtonVisibility(show = true) {
+    try {
+        if (drawButton) {
+            drawButton.style.display = show ? 'block' : 'none';
+            console.log(`Draw button visibility set to ${show ? 'visible' : 'hidden'}`);
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error("Error toggling draw button visibility:", error);
+        return false;
+    }
+}
+
+// Export module-level variables and additional utility functions
+export { isDrawingModeActive };
+
+// Helper function for clearing the map
 export function clearMap(map) {
-    console.log("Clearing map layers in field creation view");
-    // Convert to Promise to ensure it completes before returning
-    return mapDrawing.clearMapLayers(map);
+    console.log("Clearing map layers");
+    return clearMapLayers(map);
 }
