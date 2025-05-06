@@ -8,6 +8,7 @@ using Hurudza.Data.Models.Models;
 using Hurudza.Data.UI.Models.ViewModels.Tillage;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using ApiResponse = Hurudza.Apis.Base.Models.ApiResponse;
 using IConfigurationProvider = AutoMapper.IConfigurationProvider;
 
@@ -131,19 +132,49 @@ public class TillageProgramsController : Controller
     [HttpDelete("{id}", Name = nameof(DeleteTillageProgram))]
     public async Task<IActionResult> DeleteTillageProgram(string id)
     {
-        var program = await _context.TillagePrograms
-            .FirstOrDefaultAsync(tp => tp.Id == id)
-            .ConfigureAwait(false);
+        // Use a transaction to ensure data consistency when deleting program and services
+        using var transaction = await _context.Database.BeginTransactionAsync();
+    
+        try
+        {
+            var program = await _context.TillagePrograms
+                .FirstOrDefaultAsync(tp => tp.Id == id)
+                .ConfigureAwait(false);
 
-        if (program == null) return NotFound();
+            if (program == null) return NotFound();
 
-        program.Deleted = true;
-        program.IsActive = false;
+            // First, find and delete all associated tillage services
+            var services = await _context.TillageServices
+                .Where(ts => ts.TillageProgramId == id)
+                .ToListAsync();
+            
+            foreach (var service in services)
+            {
+                service.Deleted = true;
+                service.IsActive = false;
+                _context.Entry(service).State = EntityState.Modified;
+            }
 
-        _context.Entry(program).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
+            // Then mark the program as deleted
+            program.Deleted = true;
+            program.IsActive = false;
+            _context.Entry(program).State = EntityState.Modified;
 
-        return Ok(new ApiOkResponse(program, $"Tillage program '{program.Name}' was deleted successfully"));
+            // Save all changes and commit the transaction
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return Ok(new ApiOkResponse(program, $"Tillage program '{program.Name}' and all associated services were deleted successfully"));
+        }
+        catch (Exception ex)
+        {
+            // Roll back transaction if anything goes wrong
+            await transaction.RollbackAsync();
+            Log.Error(ex, "Error in DeleteTillageProgram");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new ApiResponse((int)HttpStatusCode.InternalServerError,
+                    $"Error deleting tillage program: {ex.Message}"));
+        }
     }
     
     [HttpGet(Name = nameof(GetTillageSummary))]

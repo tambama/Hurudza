@@ -2,9 +2,12 @@
 @attribute [Authorize]
 
 @using Hurudza.Data.UI.Models.ViewModels.Tillage
+@using Hurudza.Data.UI.Models.ViewModels.Core
 @using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@using Hurudza.UI.Web.Services
 @inject IApiCall ApiCall
 @inject NavigationManager Navigation
+@inject FarmAccessService FarmAccessService
 
 <Toast @ref="Alert"/>
 
@@ -164,8 +167,10 @@
                 
                 <div class="form-group mb-3">
                     <label>Recipient Farm</label>
-                    <SfDropDownList TValue="string" TItem="FarmViewModel" @bind-Value="@_serviceModel.RecipientFarmId" DataSource="@_farms" Placeholder="Select Farm">
+                    <SfDropDownList TValue="string" TItem="FarmViewModel" @bind-Value="@_serviceModel.RecipientFarmId" 
+                                    DataSource="@_farms" Placeholder="Select Farm">
                         <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                        <DropDownListEvents TValue="string" TItem="FarmViewModel" ValueChange="@OnFarmChange"></DropDownListEvents>
                     </SfDropDownList>
                     <ValidationMessage For="@(() => _serviceModel.RecipientFarmId)" />
                 </div>
@@ -197,10 +202,16 @@
                 
                 <div class="form-group mb-3">
                     <label>Field (Optional)</label>
-                    <SfDropDownList TValue="string" TItem="FieldViewModel" @bind-Value="@_serviceModel.FieldId" DataSource="@_fields" Placeholder="Select Field" AllowFiltering="true">
+                    <SfDropDownList TValue="string" TItem="FieldViewModel" @bind-Value="@_serviceModel.FieldId" 
+                                    DataSource="@_fieldsForSelectedFarm" Placeholder="Select Field" 
+                                    AllowFiltering="true" Enabled="@(_fieldsForSelectedFarm.Any())">
                         <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
                         <DropDownListEvents TItem="FieldViewModel" TValue="string" ValueChange="@OnFieldChange"></DropDownListEvents>
                     </SfDropDownList>
+                    @if (!_fieldsForSelectedFarm.Any() && !string.IsNullOrEmpty(_serviceModel.RecipientFarmId))
+                    {
+                        <div class="text-muted small mt-1">No fields found for this farm.</div>
+                    }
                 </div>
                 
                 <div class="form-group mb-3">
@@ -280,7 +291,9 @@
     private TillageServiceViewModel _selectedService;
     private List<FarmViewModel> _farms;
     private List<FieldViewModel> _fields = new();
+    private List<FieldViewModel> _fieldsForSelectedFarm = new();
     private List<TillageTypeModel> _tillageTypes = Enum.GetValues<TillageType>().Select(x => new TillageTypeModel(x)).ToList();
+    private Dictionary<string, List<FieldViewModel>> _farmFieldsCache = new();
     
     protected override async Task OnInitializedAsync()
     {
@@ -313,8 +326,18 @@
                 _farms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(
                     await ApiCall.GetHttpClient(), "Farms/getFarms")).ToList();
                     
-                // Load fields from program's farm
+                // Initialize the farm fields cache with the program's farm
                 await LoadFieldsForFarm(_program.FarmId);
+                
+                // Cache fields for farms that already have services
+                foreach (var service in _tillageServices)
+                {
+                    if (!string.IsNullOrEmpty(service.RecipientFarmId) && 
+                        !_farmFieldsCache.ContainsKey(service.RecipientFarmId))
+                    {
+                        await LoadFieldsForFarm(service.RecipientFarmId);
+                    }
+                }
             }
             else
             {
@@ -340,13 +363,23 @@
     {
         try
         {
-            _fields = (await ApiCall.Get<IEnumerable<FieldViewModel>>(
+            // Check if farm fields are already cached
+            if (_farmFieldsCache.ContainsKey(farmId))
+            {
+                return;
+            }
+            
+            // Load fields for the farm
+            var farmFields = (await ApiCall.Get<IEnumerable<FieldViewModel>>(
                 await ApiCall.GetHttpClient(), $"fields/getfarmfields/{farmId}")).ToList();
+                
+            // Add to cache
+            _farmFieldsCache[farmId] = farmFields;
         }
         catch (Exception ex)
         {
             Alert.Show($"Error loading fields: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
-            _fields = new List<FieldViewModel>();
+            _farmFieldsCache[farmId] = new List<FieldViewModel>();
         }
     }
     
@@ -370,10 +403,13 @@
             IsCompleted = false
         };
         
+        // Clear the fields for selected farm
+        _fieldsForSelectedFarm = new List<FieldViewModel>();
+        
         ServiceDialog.ShowAsync();
     }
     
-    private void EditService(TillageServiceViewModel service)
+    private async void EditService(TillageServiceViewModel service)
     {
         _isEditing = true;
         _selectedService = service;
@@ -390,6 +426,17 @@
             IsCompleted = service.IsCompleted,
             ServiceCost = service.ServiceCost
         };
+        
+        // Load fields for the selected farm if needed
+        if (!string.IsNullOrEmpty(service.RecipientFarmId))
+        {
+            await LoadFieldsForFarm(service.RecipientFarmId);
+            
+            // Update the fields dropdown
+            _fieldsForSelectedFarm = _farmFieldsCache.ContainsKey(service.RecipientFarmId) 
+                ? _farmFieldsCache[service.RecipientFarmId] 
+                : new List<FieldViewModel>();
+        }
         
         ServiceDialog.ShowAsync();
     }
@@ -515,14 +562,38 @@
         CompleteDialog.HideAsync();
     }
     
-    private void OnFieldChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, FieldViewModel> args)
+    private async Task OnFarmChange(ChangeEventArgs<string, FarmViewModel> args)
     {
         if (!string.IsNullOrEmpty(args.Value))
         {
-            var selectedField = _fields.FirstOrDefault(f => f.Id == args.Value);
+            // Load fields for the selected farm
+            await LoadFieldsForFarm(args.Value);
+            
+            // Update the fields dropdown
+            _fieldsForSelectedFarm = _farmFieldsCache.ContainsKey(args.Value) 
+                ? _farmFieldsCache[args.Value] 
+                : new List<FieldViewModel>();
+                
+            // Clear the selected field
+            _serviceModel.FieldId = null;
+        }
+        else
+        {
+            // Clear the fields dropdown if no farm is selected
+            _fieldsForSelectedFarm = new List<FieldViewModel>();
+            _serviceModel.FieldId = null;
+        }
+    }
+    
+    private void OnFieldChange(ChangeEventArgs<string, FieldViewModel> args)
+    {
+        if (!string.IsNullOrEmpty(args.Value))
+        {
+            var selectedField = _fieldsForSelectedFarm.FirstOrDefault(f => f.Id == args.Value);
             if (selectedField != null)
             {
                 // Optionally auto-fill the hectares based on field size
+                // Uncomment the line below if you want to auto-fill hectares
                 // _serviceModel.Hectares = selectedField.Size;
             }
         }

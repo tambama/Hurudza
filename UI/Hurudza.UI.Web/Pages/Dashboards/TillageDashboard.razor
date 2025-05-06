@@ -3,8 +3,10 @@
 
 @using Hurudza.Data.UI.Models.ViewModels.Tillage
 @using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@using Hurudza.UI.Web.Services
 @inject IApiCall ApiCall
 @inject NavigationManager Navigation
+@inject FarmAccessService FarmAccessService
 
 <Toast @ref="Alert"/>
 
@@ -271,16 +273,16 @@
 @code {
     private Toast Alert;
     private bool _loading = true;
+    private List<FarmListViewModel> _accessibleFarms = new();
 
     // Dashboard data
     private List<TillageSummaryViewModel> _farmSummaries = new();
     private TillageStatisticsViewModel _stats = new TillageStatisticsViewModel();
 
-    // REMOVED: This string template is causing the error because the Template property expects a RenderFragment, not a string
-    // public string ServicesLabelTemplate = "<div class='chart-datalabel'>${point.x}: ${point.percentage}%</div>";
-
     protected override async Task OnInitializedAsync()
     {
+        // Get farms user has access to
+        _accessibleFarms = await FarmAccessService.GetAccessibleFarms();
         await LoadData();
     }
 
@@ -291,13 +293,60 @@
 
         try
         {
-            // Load tillage statistics
-            _stats = await ApiCall.Get<TillageStatisticsViewModel>(
-                await ApiCall.GetHttpClient(), "TillageServices/GetTillageStatistics");
+            // Initialize stats
+            _stats = new TillageStatisticsViewModel();
+            _farmSummaries = new List<TillageSummaryViewModel>();
 
-            // Load farm summaries
-            _farmSummaries = await ApiCall.Get<List<TillageSummaryViewModel>>(
-                await ApiCall.GetHttpClient(), "TillagePrograms/GetTillageSummary");
+            // If user has access to farms
+            if (_accessibleFarms != null && _accessibleFarms.Any())
+            {
+                // For each accessible farm, load the summary and combine them
+                List<TillageSummaryViewModel> summaries = new();
+                foreach (var farm in _accessibleFarms)
+                {
+                    try
+                    {
+                        var farmSummary = await ApiCall.Get<TillageSummaryViewModel>(
+                            await ApiCall.GetHttpClient(), $"TillagePrograms/GetFarmTillageSummary/{farm.Id}");
+                        
+                        if (farmSummary != null && farmSummary.TotalPlanned > 0)
+                        {
+                            // Add farm name to summary if not present
+                            if (string.IsNullOrEmpty(farmSummary.FarmName))
+                            {
+                                farmSummary.FarmName = farm.Name;
+                            }
+                            
+                            summaries.Add(farmSummary);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error loading summary for farm {farm.Name}: {ex.Message}");
+                        // Continue to the next farm if one fails
+                        continue;
+                    }
+                }
+                
+                // Use the gathered summaries for display
+                _farmSummaries = summaries;
+                
+                // Combine all summaries for stats
+                _stats = new TillageStatisticsViewModel
+                {
+                    TotalPrograms = _farmSummaries.Count,
+                    TotalPlannedHectares = _farmSummaries.Sum(s => s.TotalPlanned),
+                    TotalTilledHectares = _farmSummaries.Sum(s => s.TotalTilled),
+                    TotalServices = _farmSummaries.Sum(s => s.TotalServices),
+                    CompletedServices = _farmSummaries.Sum(s => s.CompletedServices),
+                    TotalRevenue = _farmSummaries.Sum(s => s.TotalRevenue)
+                };
+            }
+            else
+            {
+                // No access to any farms
+                Alert.Show("You don't have access to any farms", showTitle: true, toastType: ToastType.Warning);
+            }
         }
         catch (Exception ex)
         {

@@ -4,9 +4,11 @@
 
 @using Hurudza.Data.UI.Models.ViewModels.Tillage
 @using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@using Hurudza.UI.Web.Services
 @inject IApiCall ApiCall
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
 
 <Toast @ref="Alert"/>
 
@@ -245,7 +247,7 @@
                 {
                     <div class="form-group mb-3">
                         <label>Farm</label>
-                        <SfDropDownList TValue="string" TItem="FarmViewModel" @bind-Value="@_programModel.FarmId" DataSource="@_farms" Placeholder="Select Farm">
+                        <SfDropDownList TValue="string" TItem="FarmViewModel" @bind-Value="@_programModel.FarmId" DataSource="@_accessibleFarmsForDropdown" Placeholder="Select Farm">
                             <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
                         </SfDropDownList>
                         <ValidationMessage For="@(() => _programModel.FarmId)" />
@@ -284,7 +286,7 @@
         <Header>Delete Tillage Program</Header>
         <Content>
             <p>Are you sure you want to delete the tillage program "<strong>@(_selectedProgram?.Name)</strong>"?</p>
-            <p class="text-danger">This action cannot be undone.</p>
+            <p class="text-danger">This action cannot be undone and will delete all associated services.</p>
             
             <div class="d-flex justify-content-end mt-4">
                 <button type="button" class="btn btn-secondary me-2" @onclick="CancelDelete">Cancel</button>
@@ -315,12 +317,17 @@
     private TillageProgramViewModel _selectedProgram;
     private TillageSummaryViewModel _tillageSummary;
     private List<FarmViewModel> _farms;
+    private List<FarmViewModel> _accessibleFarmsForDropdown = new();
+    private List<FarmListViewModel> _accessibleFarms = new();
     
     protected override async Task OnInitializedAsync()
     {
         // Set a default date range for new programs
         _programModel.StartDate = DateTime.Today;
         _programModel.EndDate = DateTime.Today.AddMonths(6);
+        
+        // Get farms user has access to
+        _accessibleFarms = await FarmAccessService.GetAccessibleFarms();
         
         await LoadData();
     }
@@ -329,6 +336,16 @@
     {
         if (!string.IsNullOrEmpty(FarmId))
         {
+            // Check if user has access to this farm
+            bool canAccess = await FarmAccessService.CanAccessFarm(FarmId);
+            if (!canAccess)
+            {
+                // User doesn't have access, redirect to main tillage programs page
+                Alert.Show("You don't have access to this farm", showTitle: true, toastType: ToastType.Warning);
+                Navigation.NavigateTo("/tillage-programs");
+                return;
+            }
+            
             await LoadFarmDetails();
         }
     }
@@ -357,25 +374,98 @@
         
         try
         {
+            // Initialize lists
+            _tillagePrograms = new List<TillageProgramViewModel>();
+            
             // Load tillage programs
             if (string.IsNullOrEmpty(FarmId))
             {
-                _tillagePrograms = (await ApiCall.Get<IEnumerable<TillageProgramViewModel>>(
-                    await ApiCall.GetHttpClient(), "TillagePrograms/GetTillagePrograms")).ToList();
+                // When no specific farm is selected, load all programs but filter to accessible farms
+                if (_accessibleFarms != null && _accessibleFarms.Any())
+                {
+                    // Load all tillage programs
+                    var allPrograms = (await ApiCall.Get<IEnumerable<TillageProgramViewModel>>(
+                        await ApiCall.GetHttpClient(), "TillagePrograms/GetTillagePrograms")).ToList();
                     
-                // Load farms for dropdown
-                _farms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(
-                    await ApiCall.GetHttpClient(), "Farms/getFarms")).ToList();
+                    // Filter to only show programs for farms user has access to
+                    var accessibleFarmIds = _accessibleFarms.Select(f => f.Id).ToList();
+                    _tillagePrograms = allPrograms
+                        .Where(tp => accessibleFarmIds.Contains(tp.FarmId))
+                        .ToList();
                     
-                // Load overall tillage summary
-                _tillageSummary = await ApiCall.Get<TillageSummaryViewModel>(
-                    await ApiCall.GetHttpClient(), "TillagePrograms/GetTillageSummary");
+                    // Load accessible farms for dropdown
+                    _farms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(
+                        await ApiCall.GetHttpClient(), "Farms/getFarms")).ToList();
+                    
+                    _accessibleFarmsForDropdown = _farms
+                        .Where(f => accessibleFarmIds.Contains(f.Id))
+                        .ToList();
+                    
+                    // Combine summaries from all accessible farms
+                    List<TillageSummaryViewModel> summaries = new();
+                    foreach (var farm in _accessibleFarms)
+                    {
+                        try
+                        {
+                            var farmSummary = await ApiCall.Get<TillageSummaryViewModel>(
+                                await ApiCall.GetHttpClient(), $"TillagePrograms/GetFarmTillageSummary/{farm.Id}");
+                            
+                            if (farmSummary != null && (farmSummary.TotalPlanned > 0 || farmSummary.TotalServices > 0))
+                            {
+                                summaries.Add(farmSummary);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error loading summary for farm {farm.Name}: {ex.Message}");
+                            // Continue to the next farm if one fails
+                            continue;
+                        }
+                    }
+                    
+                    // Combine all summaries into one
+                    if (summaries.Any())
+                    {
+                        _tillageSummary = new TillageSummaryViewModel
+                        {
+                            TotalPlanned = summaries.Sum(s => s.TotalPlanned),
+                            TotalTilled = summaries.Sum(s => s.TotalTilled),
+                            TotalServices = summaries.Sum(s => s.TotalServices),
+                            CompletedServices = summaries.Sum(s => s.CompletedServices),
+                            TotalRevenue = summaries.Sum(s => s.TotalRevenue)
+                        };
+                    }
+                    else
+                    {
+                        _tillageSummary = new TillageSummaryViewModel();
+                    }
+                }
+                else
+                {
+                    // No farms accessible
+                    Alert.Show("You don't have access to any farms", showTitle: true, toastType: ToastType.Warning);
+                    _tillagePrograms = new List<TillageProgramViewModel>();
+                    _tillageSummary = new TillageSummaryViewModel();
+                }
             }
             else
             {
+                // For a specific farm, check access first (already checked in OnParametersSetAsync but double-check)
+                bool canAccess = await FarmAccessService.CanAccessFarm(FarmId);
+                if (!canAccess)
+                {
+                    // User doesn't have access, show no data
+                    _tillagePrograms = new List<TillageProgramViewModel>();
+                    _tillageSummary = new TillageSummaryViewModel();
+                    Alert.Show("You don't have access to this farm", showTitle: true, toastType: ToastType.Warning);
+                    _loading = false;
+                    return;
+                }
+                
+                // Load programs for the specific farm
                 _tillagePrograms = (await ApiCall.Get<IEnumerable<TillageProgramViewModel>>(
                     await ApiCall.GetHttpClient(), $"TillagePrograms/GetFarmTillagePrograms/{FarmId}")).ToList();
-                    
+                
                 // Set default farm ID for new programs
                 _programModel.FarmId = FarmId;
                 
@@ -391,6 +481,7 @@
             // Initialize empty lists to prevent null references
             _tillagePrograms = new List<TillageProgramViewModel>();
             if (_farms == null) _farms = new List<FarmViewModel>();
+            _tillageSummary = new TillageSummaryViewModel();
         }
         finally
         {
@@ -461,6 +552,14 @@
     {
         try
         {
+            // Check if user has access to the farm they're trying to create/edit a program for
+            bool canAccess = await FarmAccessService.CanAccessFarm(_programModel.FarmId);
+            if (!canAccess)
+            {
+                Alert.Show("You don't have access to this farm", showTitle: true, toastType: ToastType.Warning);
+                return;
+            }
+
             UI.Shared.Models.ApiResponse<TillageProgramViewModel> response;
             
             if (_isEditing)
@@ -495,12 +594,21 @@
     {
         try
         {
+            // Check if user has access to the farm for this program
+            bool canAccess = await FarmAccessService.CanAccessFarm(_selectedProgram.FarmId);
+            if (!canAccess)
+            {
+                Alert.Show("You don't have access to this farm", showTitle: true, toastType: ToastType.Warning);
+                await DeleteDialog.HideAsync();
+                return;
+            }
+            
             var response = await ApiCall.Remove<UI.Shared.Models.ApiResponse<TillageProgramViewModel>>(
                 await ApiCall.GetHttpClient(), "TillagePrograms/DeleteTillageProgram", _selectedProgram.Id);
                 
             if (response.Status == (int)HttpStatusCode.OK)
             {
-                Alert.Show("Tillage program deleted successfully", showTitle: true, toastType: ToastType.Success);
+                Alert.Show("Tillage program and all associated services deleted successfully", showTitle: true, toastType: ToastType.Success);
                 await LoadData();
                 await DeleteDialog.HideAsync();
             }
