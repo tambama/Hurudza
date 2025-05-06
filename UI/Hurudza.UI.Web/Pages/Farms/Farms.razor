@@ -1,13 +1,15 @@
 @page "/farms"
+@attribute [Authorize]
+
 @using System.Net
 @using Hurudza.Data.Enums.Enums
 @using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.UI.Web.Services
 @using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
-@attribute [Authorize]
-
 @inject IApiCall ApiCall
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
 @inject IJSRuntime JSRuntime
 
 <Toast @ref="Alert" />
@@ -19,14 +21,15 @@
                 <div class="d-flex justify-content-between flex-wrap align-items-center">
                     <div>
                         <h6 class="mb-0">Farms Management</h6>
-                        <p class="text-sm mb-0">Manage all farm properties and locations</p>
+                        <p class="text-sm mb-0">Manage farms that you have access to</p>
                     </div>
                     <div class="d-flex">
-                        <FarmPermission RequireAdmin="true">
+                        @if (_hasFarmAdminPermission)
+                        {
                             <button type="button" class="btn btn-primary btn-sm ms-auto" @onclick="NavigateToNewFarm">
                                 <i class="fas fa-plus me-2"></i>Add New Farm
                             </button>
-                        </FarmPermission>
+                        }
                     </div>
                 </div>
             </div>
@@ -69,94 +72,107 @@
                         </div>
                     </div>
                 }
+                else if (filteredFarms == null || !filteredFarms.Any())
+                {
+                    <div class="text-center p-4">
+                        <div class="alert alert-info">
+                            <p class="mb-0">No farms found or you don't have access to any farms.</p>
+                        </div>
+                    </div>
+                }
                 else
                 {
                     <!-- Farm Grid -->
-                    <SfGrid DataSource="@filteredFarms"
-                            @ref="Grid"
-                            AllowPaging="true"
-                            AllowExcelExport="true"
-                            AllowSorting="true"
-                            AllowMultiSorting="true"
-                            EnableStickyHeader="true"
-                            AllowResizing="true"
-                            AllowSelection="true"
-                            EnableVirtualization="true"
-                            EnableHover="true"
-                            Toolbar="@(new List<string>() { "ExcelExport", "Print", "Search" })"
-                            ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
-                        <GridPageSettings PageSize="10"></GridPageSettings>
-                        <GridFilterSettings Type="FilterType.Menu" Mode="FilterBarMode.Immediate"></GridFilterSettings>
-                        <GridEvents RowSelected="RowSelectHandler" TValue="FarmViewModel"></GridEvents>
-                        
-                        <GridColumns>
-                            <GridColumn Field=@nameof(FarmViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
-                            <GridColumn Field=@nameof(FarmViewModel.Name) HeaderText="Farm Name" TextAlign="TextAlign.Left" Width="180" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
-                            <GridColumn Field=@nameof(FarmViewModel.Province) HeaderText="Province" TextAlign="TextAlign.Left" Width="120"></GridColumn>
-                            <GridColumn Field=@nameof(FarmViewModel.District) HeaderText="District" TextAlign="TextAlign.Left" Width="120"></GridColumn>
-                            <GridColumn Field=@nameof(FarmViewModel.Size) HeaderText="Size (Ha)" TextAlign="TextAlign.Right" Format="N2" Width="90"></GridColumn>
-                            <GridColumn Field=@nameof(FarmViewModel.Arable) HeaderText="Arable (Ha)" TextAlign="TextAlign.Right" Format="N2" Width="100"></GridColumn>
-                            <GridColumn Field=@nameof(FarmViewModel.Region) HeaderText="Region" TextAlign="TextAlign.Center" Width="90">
-                                <Template>
-                                    @{
-                                        var farm = (context as FarmViewModel);
-                                        if (!farm.Region.HasValue)
-                                        {
-                                            <span class='badge bg-secondary'>Not Set</span>
-                                        }
-                                        else
-                                        {
-                                            var badgeClass = farm.Region switch
+                    <div style="height: calc(100vh - 300px); width: 100%;">
+                        <SfGrid DataSource="@filteredFarms"
+                                @ref="Grid"
+                                AllowPaging="true"
+                                AllowExcelExport="true"
+                                AllowSorting="true"
+                                AllowMultiSorting="true"
+                                EnableStickyHeader="true"
+                                AllowResizing="true"
+                                AllowSelection="true"
+                                EnableVirtualization="true"
+                                EnableHover="true"
+                                Height="100%"
+                                Width="100%"
+                                Toolbar="@(new List<string>() { "ExcelExport", "Print", "Search" })"
+                                ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                            <GridPageSettings PageSize="10"></GridPageSettings>
+                            <GridFilterSettings Type="FilterType.Menu" Mode="FilterBarMode.Immediate"></GridFilterSettings>
+                            <GridEvents RowSelected="RowSelectHandler" TValue="FarmViewModel"></GridEvents>
+                            
+                            <GridColumns>
+                                <GridColumn Field=@nameof(FarmViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                <GridColumn Field=@nameof(FarmViewModel.Name) HeaderText="Farm Name" TextAlign="TextAlign.Left" Width="180" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                                <GridColumn Field=@nameof(FarmViewModel.Province) HeaderText="Province" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                                <GridColumn Field=@nameof(FarmViewModel.District) HeaderText="District" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                                <GridColumn Field=@nameof(FarmViewModel.Size) HeaderText="Size (Ha)" TextAlign="TextAlign.Right" Format="N2" Width="90"></GridColumn>
+                                <GridColumn Field=@nameof(FarmViewModel.Arable) HeaderText="Arable (Ha)" TextAlign="TextAlign.Right" Format="N2" Width="100"></GridColumn>
+                                <GridColumn Field=@nameof(FarmViewModel.Region) HeaderText="Region" TextAlign="TextAlign.Center" Width="90">
+                                    <Template>
+                                        @{
+                                            var farm = (context as FarmViewModel);
+                                            if (!farm.Region.HasValue)
                                             {
-                                                Region.I => "bg-success",
-                                                Region.II => "bg-info",
-                                                Region.III => "bg-primary",
-                                                Region.IV => "bg-warning",
-                                                Region.V => "bg-danger",
-                                                _ => "bg-secondary"
-                                            };
-                                            <span class='badge @badgeClass'>Region @farm.Region</span>
+                                                <span class='badge bg-secondary'>Not Set</span>
+                                            }
+                                            else
+                                            {
+                                                var badgeClass = farm.Region switch
+                                                {
+                                                    Region.I => "bg-success",
+                                                    Region.II => "bg-info",
+                                                    Region.III => "bg-primary",
+                                                    Region.IV => "bg-warning",
+                                                    Region.V => "bg-danger",
+                                                    _ => "bg-secondary"
+                                                };
+                                                <span class='badge @badgeClass'>Region @farm.Region</span>
+                                            }
                                         }
-                                    }
-                                </Template>
-                            </GridColumn>
-                            <GridColumn Field=@nameof(FarmViewModel.Irrigated) HeaderText="Irrigation" TextAlign="TextAlign.Center" Width="100">
-                                <Template>
-                                    @{
-                                        var farm = (context as FarmViewModel);
-                                        if (farm.Irrigated)
-                                        {
-                                            <span class='badge bg-success'>Yes</span>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field=@nameof(FarmViewModel.Irrigated) HeaderText="Irrigation" TextAlign="TextAlign.Center" Width="100">
+                                    <Template>
+                                        @{
+                                            var farm = (context as FarmViewModel);
+                                            if (farm.Irrigated)
+                                            {
+                                                <span class='badge bg-success'>Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class='badge bg-secondary'>No</span>
+                                            }
                                         }
-                                        else
-                                        {
-                                            <span class='badge bg-secondary'>No</span>
-                                        }
-                                    }
-                                </Template>
-                            </GridColumn>
-                            <GridColumn HeaderText="Actions" Width="150" TextAlign="TextAlign.Center">
-                                <Template>
-                                    @{
-                                        var farm = (context as FarmViewModel);
-                                        <div class="btn-group">
-                                            <a href="/farm/@farm.Id" class="btn btn-link text-primary p-1" data-bs-toggle="tooltip" data-bs-title="View Details">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <FarmPermission FarmId="@farm.Id" RequireManage="true">
-                                                <a href="/farms/@farm.Id/edit" class="btn btn-link text-info p-1" data-bs-toggle="tooltip" data-bs-title="Edit Farm">
-                                                    <i class="fas fa-edit"></i>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn HeaderText="Actions" Width="150" TextAlign="TextAlign.Center">
+                                    <Template>
+                                        @{
+                                            var farm = (context as FarmViewModel);
+                                            <div class="btn-group">
+                                                <a href="/farm/@farm.Id" class="btn btn-link text-primary p-1" data-bs-toggle="tooltip" data-bs-title="View Details">
+                                                    <i class="fas fa-eye"></i>
                                                 </a>
-                                                <button class="btn btn-link text-danger p-1" @onclick="() => OpenDeleteConfirmation(farm)" data-bs-toggle="tooltip" data-bs-title="Delete Farm">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </FarmPermission>
-                                        </div>
-                                    }
-                                </Template>
-                            </GridColumn>
-                        </GridColumns>
-                    </SfGrid>
+                                                @if (CanManageFarm(farm.Id))
+                                                {
+                                                    <a href="/farms/@farm.Id/edit" class="btn btn-link text-info p-1" data-bs-toggle="tooltip" data-bs-title="Edit Farm">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button class="btn btn-link text-danger p-1" @onclick="() => OpenDeleteConfirmation(farm)" data-bs-toggle="tooltip" data-bs-title="Delete Farm">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                }
+                                            </div>
+                                        }
+                                    </Template>
+                                </GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    </div>
                 }
             </div>
         </div>
@@ -206,6 +222,8 @@
     private List<FarmViewModel> farms = new();
     private List<FarmViewModel> filteredFarms = new();
     private FarmViewModel selectedFarm;
+    private List<FarmListViewModel> _accessibleFarms;
+    private Dictionary<string, bool> _farmManagePermissions = new();
     
     // Filters
     private string searchText = "";
@@ -218,14 +236,26 @@
     private bool isLoading = true;
     private bool isDeleteDialogVisible = false;
     private bool isDeleting = false;
+    private bool _hasFarmAdminPermission = false;
+    private ClaimsPrincipal _user;
     
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+        
+        // Check permissions for adding new farms
+        _hasFarmAdminPermission = await FarmAccessService.HasPermission(Claims.FarmManage) || 
+                                 await FarmAccessService.HasPermission(Claims.FarmCreate);
+        
         // Initialize filter dropdowns
         regionItems = Enum.GetValues<Region>().Select(x => new RegionModel(x)).ToList();
         
         // Add empty option for filters
         regionItems.Insert(0, new RegionModel { Region = null, Name = "All Regions" });
+        
+        // Load accessible farms
+        _accessibleFarms = await FarmAccessService.GetAccessibleFarms();
         
         await LoadFarms();
     }
@@ -236,13 +266,36 @@
         {
             isLoading = true;
             
-            // Get farms from API
-            var response = await ApiCall.Get<List<FarmViewModel>>(
-                await ApiCall.GetHttpClient(), "Farms/GetFarms");
-                
-            if (response != null)
+            // Get detailed farm information for accessible farms
+            if (_accessibleFarms != null && _accessibleFarms.Any())
             {
-                farms = response;
+                // Option 1: Use the GetAccessibleFarmDetails endpoint if available
+                var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<FarmViewModel>>>(
+                    await ApiCall.GetHttpClient(), "farmusers/GetAccessibleFarmDetails");
+                    
+                if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
+                {
+                    farms = response.Result;
+                }
+                else
+                {
+                    // Option 2: If that endpoint is not available, load each farm individually
+                    farms = new List<FarmViewModel>();
+                    
+                    foreach (var accessibleFarm in _accessibleFarms)
+                    {
+                        var farmResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<FarmViewModel>>(
+                            await ApiCall.GetHttpClient(), "Farms/GetFarm", accessibleFarm.Id);
+                            
+                        if (farmResponse?.Status == (int)HttpStatusCode.OK && farmResponse.Result != null)
+                        {
+                            farms.Add(farmResponse.Result);
+                            
+                            // Cache the farm management permission
+                            _farmManagePermissions[accessibleFarm.Id] = await FarmAccessService.CanManageFarm(accessibleFarm.Id);
+                        }
+                    }
+                }
                 
                 // Initialize province filter from available data
                 provinceFilter = farms
@@ -258,11 +311,48 @@
                 // Apply any existing filters
                 ApplyFilters();
             }
+            else if (_user.IsInRole("SystemAdministrator"))
+            {
+                // System administrators can see all farms
+                var response = await ApiCall.Get<List<FarmViewModel>>(
+                    await ApiCall.GetHttpClient(), "Farms/GetFarms");
+                    
+                if (response != null)
+                {
+                    farms = response;
+                    
+                    // For system admin, all farms are manageable
+                    foreach (var farm in farms)
+                    {
+                        _farmManagePermissions[farm.Id] = true;
+                    }
+                    
+                    // Initialize province filter
+                    provinceFilter = farms
+                        .Where(f => !string.IsNullOrEmpty(f.Province))
+                        .Select(f => f.Province)
+                        .Distinct()
+                        .OrderBy(p => p)
+                        .ToList();
+                        
+                    // Add "All Provinces" option
+                    provinceFilter.Insert(0, "All Provinces");
+                    
+                    // Apply filters
+                    ApplyFilters();
+                }
+                else
+                {
+                    farms = new List<FarmViewModel>();
+                    filteredFarms = new List<FarmViewModel>();
+                    Alert.Show("Error loading farms data. Please try again later.", showTitle: true, toastType: ToastType.Danger);
+                }
+            }
             else
             {
                 farms = new List<FarmViewModel>();
                 filteredFarms = new List<FarmViewModel>();
-                Alert.Show("Error loading farms data. Please try again later.", showTitle: true, toastType: ToastType.Danger);
+                Alert.Show("You don't have access to any farms.", showTitle: true, toastType: ToastType.Warning);
             }
         }
         catch (Exception ex)
@@ -325,6 +415,7 @@
     private void RowSelectHandler(RowSelectEventArgs<FarmViewModel> args)
     {
         selectedFarm = args.Data;
+        NavigationManager.NavigateTo($"/farm/{selectedFarm.Id}");
     }
     
     private void OpenDeleteConfirmation(FarmViewModel farm)
@@ -342,7 +433,7 @@
             isDeleting = true;
             
             // Call API to delete farm
-            var response = await ApiCall.Remove<ApiResponse<FarmViewModel>>(
+            var response = await ApiCall.Remove<UI.Shared.Models.ApiResponse<FarmViewModel>>(
                 await ApiCall.GetHttpClient(), "Farms/DeleteFarm", selectedFarm.Id);
                 
             if (response?.Status == (int)HttpStatusCode.OK)
@@ -373,6 +464,20 @@
     private void NavigateToNewFarm()
     {
         NavigationManager.NavigateTo("/farms/new");
+    }
+    
+    private bool CanManageFarm(string farmId)
+    {
+        // System administrators can manage all farms
+        if (_user.IsInRole("SystemAdministrator"))
+            return true;
+            
+        // Check if we have the permission cached
+        if (_farmManagePermissions.TryGetValue(farmId, out bool canManage))
+            return canManage;
+            
+        // Default to false if not found
+        return false;
     }
     
     // Model for Region dropdown

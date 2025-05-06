@@ -154,7 +154,7 @@
 </div>
 
 <!-- Add/Edit Tillage Service Dialog -->
-<SfDialog @ref="ServiceDialog" IsModal="true" Width="500px" Height="auto" ShowCloseIcon="true">
+<SfDialog @ref="ServiceDialog" IsModal="true" Width="500px" Height="auto" Visible="false" ShowCloseIcon="true">
     <DialogTemplates>
         <Header>@(_isEditing ? "Edit Tillage Service" : "Add Tillage Service")</Header>
         <Content>
@@ -227,7 +227,7 @@
 </SfDialog>
 
 <!-- Delete Confirmation Dialog -->
-<SfDialog @ref="DeleteDialog" IsModal="true" Width="400px" ShowCloseIcon="true">
+<SfDialog @ref="DeleteDialog" IsModal="true" Width="400px" Visible="false" ShowCloseIcon="true">
     <DialogTemplates>
         <Header>Delete Tillage Service</Header>
         <Content>
@@ -243,7 +243,7 @@
 </SfDialog>
 
 <!-- Complete Service Confirmation Dialog -->
-<SfDialog @ref="CompleteDialog" IsModal="true" Width="400px" ShowCloseIcon="true">
+<SfDialog @ref="CompleteDialog" IsModal="true" Width="400px" Visible="false" ShowCloseIcon="true">
     <DialogTemplates>
         <Header>Complete Tillage Service</Header>
         <Content>
@@ -469,7 +469,7 @@
         try
         {
             var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<TillageServiceViewModel>>(
-                await ApiCall.GetHttpClient(), $"TillageServices/CompleteTillageService/{_selectedService.Id}");
+                await ApiCall.GetHttpClient(), $"TillageServices/CompleteTillageService/{_selectedService.Id}/complete");
                 
             if (response.Status == (int)HttpStatusCode.OK)
             {

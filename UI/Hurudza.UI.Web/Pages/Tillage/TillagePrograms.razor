@@ -205,7 +205,7 @@
 </div>
 
 <!-- Add/Edit Tillage Program Dialog -->
-<SfDialog @ref="ProgramDialog" IsModal="true" Width="500px" Height="auto" ShowCloseIcon="true">
+<SfDialog @ref="ProgramDialog" IsModal="true" Width="500px" Height="auto" Visible="false" ShowCloseIcon="true">
     <DialogTemplates>
         <Header>@(_isEditing ? "Edit Tillage Program" : "Add New Tillage Program")</Header>
         <Content>
@@ -279,7 +279,7 @@
 </SfDialog>
 
 <!-- Delete Confirmation Dialog -->
-<SfDialog @ref="DeleteDialog" IsModal="true" Width="400px" ShowCloseIcon="true">
+<SfDialog @ref="DeleteDialog" IsModal="true" Width="400px" Visible="false" ShowCloseIcon="true">
     <DialogTemplates>
         <Header>Delete Tillage Program</Header>
         <Content>
