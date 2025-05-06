@@ -942,5 +942,7 @@ export function highlightDrawTool() {
 
 // Export additional utility functions as needed
 export function clearMap(map) {
-    return clearMapLayers(map);
+    console.log("Clearing map layers in field creation view");
+    // Convert to Promise to ensure it completes before returning
+    return mapDrawing.clearMapLayers(map);
 }
