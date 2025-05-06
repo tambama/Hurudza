@@ -693,7 +693,7 @@ else
                 try
                 {
                     tillageStats = await ApiCall.Get<TillageSummaryViewModel>(
-                        await ApiCall.GetHttpClient(), $"TillagePrograms/GetFarmSummary/{FarmId}");
+                        await ApiCall.GetHttpClient(), $"TillagePrograms/GetFarmTillageSummary/{FarmId}");
                 }
                 catch
                 {
