@@ -378,56 +378,73 @@ export function highlightDrawTool() {
     return true;
 }
 
-// Clear the map of all sources and layers
+/**
+ * Clears all custom sources and layers from the map
+ * @param {Object} map - The Mapbox map instance
+ * @returns {boolean} Success indicator
+ */
 export function clearMap(map) {
     try {
-        console.log("Clearing map");
+        console.log('Clearing map...');
 
-        // Store current camera position
-        const center = map.getCenter();
-        const zoom = map.getZoom();
+        // Store the current camera position
+        const currentCenter = map.getCenter();
+        const currentZoom = map.getZoom();
 
-        // Get all sources from the map
+        // Get all map style layers
         const style = map.getStyle();
-        if (!style || !style.sources) {
-            console.warn("Map style not loaded yet");
+        if (!style || !style.layers || !style.sources) {
+            console.warn('Map style not fully loaded, cannot reset layers');
             return false;
         }
 
-        // Find custom sources (non-mapbox sources)
-        const customSources = Object.keys(style.sources).filter(source =>
-            !source.startsWith('mapbox.') && source !== 'composite');
+        // Find custom layers (farm and field layers)
+        const customLayers = style.layers.filter(layer => {
+            return (layer.id.startsWith('farm-') ||
+                layer.id.startsWith('field-') ||
+                layer.id === 'clusters' ||
+                layer.id === 'cluster-count' ||
+                layer.id === 'unclustered-point');
+        });
 
-        // Find custom layers
-        const customLayers = style.layers.filter(layer =>
-            (layer.source && customSources.includes(layer.source)) ||
-            layer.id.startsWith('farm-') ||
-            layer.id.startsWith('field-'));
+        // Find custom sources
+        const customSourceIds = Object.keys(style.sources).filter(id => {
+            return (id.startsWith('farm-') ||
+                id.startsWith('field-') ||
+                id === 'farms');
+        });
 
-        // Remove custom layers first
+        // Remove all custom layers first
         customLayers.forEach(layer => {
             if (map.getLayer(layer.id)) {
+                // Remove event handlers first
+                try {
+                    map.off('click', layer.id);
+                    map.off('mouseenter', layer.id);
+                    map.off('mouseleave', layer.id);
+                } catch (e) {
+                    console.warn(`Error removing handlers for layer ${layer.id}:`, e);
+                }
+
+                // Then remove the layer
                 map.removeLayer(layer.id);
             }
         });
 
         // Then remove custom sources
-        customSources.forEach(source => {
-            if (map.getSource(source)) {
-                map.removeSource(source);
+        customSourceIds.forEach(sourceId => {
+            if (map.getSource(sourceId)) {
+                map.removeSource(sourceId);
             }
         });
 
-        // Restore camera position
-        map.jumpTo({
-            center: center,
-            zoom: zoom
-        });
+        // Trigger map repaint to apply changes
+        map.triggerRepaint();
 
-        console.log("Map cleared successfully");
+        console.log('Map cleared successfully');
         return true;
     } catch (error) {
-        console.error("Error clearing map:", error);
+        console.error('Error clearing map:', error);
         return false;
     }
 }

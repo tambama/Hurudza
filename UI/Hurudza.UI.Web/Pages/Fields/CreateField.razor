@@ -357,6 +357,8 @@
         {
             // Clear the map first
             await _mapModule.InvokeVoidAsync("clearMap", _mapInstance);
+
+            await Task.Delay(100);
                 
             // Check if farm has polygon coordinates
             if (_selectedFarm.IsPolygon && _selectedFarm.FarmPolygon.Count > 0 && 
@@ -368,6 +370,8 @@
                     _selectedFarm.Id,
                     _selectedFarm.FarmPolygon,
                     _selectedFarm.Name);
+
+                await Task.Delay(100);
                     
                 // Calculate bounds of the farm polygon for better centering
                 double minLat = double.MaxValue, maxLat = double.MinValue;
