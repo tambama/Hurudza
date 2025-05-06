@@ -13,6 +13,7 @@
 @inject IApiCall ApiCall
 @inject FarmAccessService FarmAccessService
 @inject AuthenticationStateProvider AuthStateProvider
+@inject ILogger<CreateField> Logger
 
 <HeadContent>
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet" />
@@ -447,88 +448,46 @@
         }
     }
 
-    // JS invokable method to handle coordinates from drawn polygon
     [JSInvokable]
     public Task OnPolygonDrawn(List<List<double>> coordinates)
     {
-        try
-        {
-            // Store the drawn coordinates
-            _drawnCoordinates = coordinates;
-            
-            // Update flag to show area was calculated automatically
-            _areaCalculated = true;
-            
-            // Validate the form
-            ValidateForm();
-            
-            // Force UI refresh
-            StateHasChanged();
-            
-            return Task.CompletedTask;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in OnPolygonDrawn: {ex.Message}");
-            return Task.CompletedTask;
-        }
-    }
+        // Store the drawn coordinates
+        _drawnCoordinates = coordinates;
     
-    // JS invokable method to handle area calculation
+        // Trigger UI update
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
     [JSInvokable]
     public Task UpdateFieldSize(double areaInHectares)
     {
-        try
-        {
-            // Update the field size with the calculated area
-            _field.Size = (float)Math.Round(areaInHectares, 2);
-            
-            // Update flag to show area was calculated automatically
-            _areaCalculated = true;
-            
-            // Validate the form
-            ValidateForm();
-            
-            // Force UI refresh
-            StateHasChanged();
-            
-            return Task.CompletedTask;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in UpdateFieldSize: {ex.Message}");
-            return Task.CompletedTask;
-        }
-    }
+        // Update field size with calculated value
+        _field.Size = (float)Math.Round(areaInHectares, 2);
     
-    // Method to handle drawing cancellation
+        // Set flag indicating area was calculated
+        _areaCalculated = true;
+    
+        // Trigger UI update
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
     [JSInvokable]
     public Task OnDrawingDeleted()
     {
-        try
-        {
-            // Reset the drawn coordinates
-            _drawnCoordinates = new List<List<double>>();
-            
-            // Reset the field size
-            _field.Size = 0;
-            
-            // Update flag to show area is no longer auto-calculated
-            _areaCalculated = false;
-            
-            // Validate the form
-            ValidateForm();
-            
-            // Force UI refresh
-            StateHasChanged();
-            
-            return Task.CompletedTask;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in OnDrawingDeleted: {ex.Message}");
-            return Task.CompletedTask;
-        }
+        // Reset drawn coordinates
+        _drawnCoordinates = new List<List<double>>();
+    
+        // Reset field size if appropriate
+        _field.Size = 0;
+    
+        // Reset area calculated flag
+        _areaCalculated = false;
+    
+        // Trigger UI update
+        StateHasChanged();
+        return Task.CompletedTask;
     }
 
     private void FarmChangeHandler(ChangeEventArgs<string, FarmViewModel> args)
@@ -592,11 +551,9 @@
 
     private async Task SaveFieldCoordinates(string fieldId, List<List<double>> coordinates)
     {
-        try
-        {
-            if (coordinates.Count < 3) return;
-            
-            // Convert drawn coordinates to field locations and save each one
+        if (coordinates.Count < 3) return;
+    
+        try {
             foreach (var coord in coordinates)
             {
                 if (coord.Count >= 2)
@@ -608,18 +565,18 @@
                         Latitude = coord[1],
                         Altitude = coord.Count > 2 ? coord[2] : 0
                     };
-                    
-                    // Save coordinate
+                
+                    // Save the coordinate
                     var client = await ApiCall.GetHttpClient();
                     await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldLocationViewModel>, FieldLocationViewModel>(
                         client, "fieldLocations/createfieldLocation", location);
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            _alert.Show($"Error saving field coordinates: {ex.Message}", 
+        } catch (Exception ex) {
+            // Handle exceptions consistently
+            _alert.Show($"Error saving field boundary: {ex.Message}", 
                 showTitle: true, toastType: ToastType.Warning);
+            Logger.LogError(ex, "Error saving field coordinates");
         }
     }
 
