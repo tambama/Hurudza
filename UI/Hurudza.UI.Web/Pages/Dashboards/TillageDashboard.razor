@@ -169,16 +169,8 @@
                                                 <AccumulationChartSeries DataSource="@GetServicesData()"
                                                                          XName="Status" YName="Count"
                                                                          Name="Services" InnerRadius="40%">
-                                                    <AccumulationDataLabelSettings Visible="true" Name="Status"
-                                                                                   Position="AccumulationLabelPosition.Inside">
-                                                        <Template>
-                                                            @{
-                                                                // Using a RenderFragment instead of a string
-                                                                <div class='chart-datalabel'>
-                                                                    ${point.x}: ${point.percentage}%
-                                                                </div>
-                                                            }
-                                                        </Template>
+                                                    <AccumulationDataLabelSettings Visible="true" Name="Status" Position="AccumulationLabelPosition.Inside" 
+                                                                                   Format="${point.x}: ${point.percentage}%">
                                                     </AccumulationDataLabelSettings>
                                                 </AccumulationChartSeries>
                                             </AccumulationChartSeriesCollection>
@@ -232,10 +224,10 @@
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div class="text-sm font-weight-bold text-end mb-0">@farm.TotalPlanned.ToString("N2") ha</div>
+                                                        <div class="text-sm font-weight-bold text-start mb-0">@farm.TotalPlanned.ToString("N2") ha</div>
                                                     </td>
                                                     <td>
-                                                        <div class="text-sm font-weight-bold text-end mb-0">@farm.TotalTilled.ToString("N2") ha</div>
+                                                        <div class="text-sm font-weight-bold text-start mb-0">@farm.TotalTilled.ToString("N2") ha</div>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex align-items-center">
