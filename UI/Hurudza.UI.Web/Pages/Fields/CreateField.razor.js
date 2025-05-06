@@ -1,5 +1,5 @@
-// Import shared map drawing functionality
-import * as mapDrawing from '../modules/mapDrawingModule.js';
+// Correct import path for the shared map drawing module
+import * as mapDrawing from '../../js/modules/mapDrawingModule.js';
 
 /**
  * Initialize the map for field creation
