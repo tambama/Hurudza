@@ -1,6 +1,8 @@
 // Correct import path for the shared map drawing module
 import * as mapDrawing from '../../js/modules/mapDrawingModule.js';
 
+let localDotNetRef = null;
+
 /**
  * Initialize the map for field creation
  * @param {HTMLElement} element - The DOM element to attach the map to
@@ -19,6 +21,15 @@ export function initializeMap(element) {
  */
 export function initializeDrawControls(map, dotNetRef) {
     console.log("Initializing draw controls for field creation");
+
+    // Store reference locally in this module
+    if (dotNetRef) {
+        localDotNetRef = dotNetRef;
+        console.log("Stored dotNetRef locally in CreateField.razor.js");
+    } else {
+        console.warn("No dotNetRef provided to initializeDrawControls");
+    }
+    
     return mapDrawing.initializeDrawControls(map, dotNetRef);
 }
 
@@ -29,10 +40,20 @@ export function initializeDrawControls(map, dotNetRef) {
  * @param {Object} dotNetRef - Reference to .NET component
  */
 export function setupDrawingEvents(map, draw, dotNetRef) {
-    // Store the reference globally in the module
-    dotNetReference = dotNetRef;
-    
     console.log("Setting up drawing event handlers for field creation");
+
+    if (dotNetRef) {
+        localDotNetRef = dotNetRef;
+        console.log("Updated dotNetRef in setupDrawingEvents");
+    } else if (localDotNetRef) {
+        // Use locally stored reference if none provided
+        dotNetRef = localDotNetRef;
+        console.log("Using stored dotNetRef");
+    } else {
+        console.warn("No dotNetRef available");
+    }
+
+    // Make sure we're passing the dotNetRef to mapDrawing module
     return mapDrawing.setupDrawingEvents(map, draw, dotNetRef);
 }
 

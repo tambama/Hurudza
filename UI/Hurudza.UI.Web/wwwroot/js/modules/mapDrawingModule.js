@@ -273,6 +273,7 @@ function toggleDrawingMode(map, draw) {
 
         // Notify .NET of drawing mode change using module-level reference
         if (dotNetReference) {
+            console.log("Notifying .NET of drawing mode change");
             dotNetReference.invokeMethodAsync('SetDrawingMode', isDrawingModeActive)
                 .catch(error => {
                     console.warn("Error notifying .NET of drawing mode change:", error);
@@ -346,8 +347,13 @@ export async function setupDrawingEvents(map, draw, dotNetRef) {
     try {
         console.log("Setting up drawing event handlers");
 
-        // Store the .NET reference at module level
-        dotNetReference = dotNetRef;
+        // Ensure we store the .NET reference at module level
+        if (dotNetRef) {
+            dotNetReference = dotNetRef;
+            console.log("Successfully stored .NET reference");
+        } else {
+            console.warn("No dotNetRef provided to setupDrawingEvents");
+        }
 
         // Load Turf.js if needed
         if (typeof turf === 'undefined') {
@@ -454,7 +460,7 @@ function processDrawnPolygon(polygon) {
                         console.warn("Error notifying .NET of polygon coordinates:", error);
                     });
             } else {
-                console.warn("dotNetReference is null, cannot notify .NET of polygon drawn");
+                console.warn("dotNetReference is null, cannot send polygon data to .NET");
             }
         } catch (error) {
             console.error("Error processing polygon:", error);

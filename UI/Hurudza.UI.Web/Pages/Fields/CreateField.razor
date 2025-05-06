@@ -165,7 +165,7 @@
                     </div>
 
                     <!-- Map guide -->
-                    <div class="alert alert-info mt-4">
+                    <div class="alert bg-info mt-4">
                         <div class="d-flex align-items-center">
                             <i class="fas fa-info-circle me-2"></i>
                             <div>
@@ -295,6 +295,9 @@
         {
             try
             {
+                // Create .NET object reference BEFORE initializing JavaScript
+                _dotNetRef = DotNetObjectReference.Create(this);
+        
                 // Initialize the map
                 _mapModule = await JS.InvokeAsync<IJSObjectReference>("import",
                     "./Pages/Fields/CreateField.razor.js");
@@ -305,8 +308,16 @@
                     _mapInstance = await _mapModule.InvokeAsync<IJSObjectReference>(
                         "initializeMap", _mapElement);
 
-                    // Initialize drawing controls
-                    await InitializeDrawingControls();
+                    // Initialize drawing controls with the .NET reference
+                    _drawControl = await _mapModule.InvokeAsync<IJSObjectReference>(
+                        "initializeDrawControls", _mapInstance, _dotNetRef);
+
+                    // Set up event handlers for drawing, ensuring the reference is passed
+                    if (_drawControl != null)
+                    {
+                        await _mapModule.InvokeVoidAsync("setupDrawingEvents",
+                            _mapInstance, _drawControl, _dotNetRef);
+                    }
                 }
             }
             catch (Exception ex)
