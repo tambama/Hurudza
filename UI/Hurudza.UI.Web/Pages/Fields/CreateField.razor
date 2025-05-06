@@ -16,15 +16,56 @@
 
 <HeadContent>
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet" />
-    <!-- Add MapboxDraw CSS -->
     <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.3.0/mapbox-gl-draw.css" rel="stylesheet" />
+    <style>
+        /* Full-height map container */
+        .map-container {
+            height: calc(100vh - 230px);
+            min-height: 500px;
+            position: relative;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        /* Status badge styles */
+        .badge-area-calculated {
+            background-color: #28a745;
+            color: white;
+            padding: 0.35rem 0.5rem;
+            border-radius: 0.25rem;
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.75rem;
+        }
+
+        .badge-area-needed {
+            background-color: #ffc107;
+            color: #212529;
+            padding: 0.35rem 0.5rem;
+            border-radius: 0.25rem;
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.75rem;
+        }
+
+        /* Draw tool highlight effect */
+        @@keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse-animation {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
 </HeadContent>
 
 <Toast @ref="_alert"/>
 
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card mb-4">
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
             <div class="card-header p-3">
                 <div class="row">
                     <div class="col-md-8">
@@ -38,119 +79,132 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Form Column -->
+    <div class="col-lg-4">
+        <div class="card h-100">
             <div class="card-body p-3">
-                <div class="row">
-                    <!-- Form Column -->
-                    <div class="col-lg-4">
-                        <EditForm Model="@_field" OnValidSubmit="@SaveField">
-                            <DataAnnotationsValidator />
-                            <ValidationSummary />
+                <EditForm Model="@_field" OnValidSubmit="@SaveField">
+                    <DataAnnotationsValidator />
 
-                            <!-- Farm Selection -->
-                            <div class="form-group mb-3">
-                                <label>Farm *</label>
-                                <SfDropDownList TValue="string" TItem="FarmViewModel" @bind-Value="_field.FarmId"
-                                               DataSource="@_accessibleFarms" Placeholder="Select Farm"
-                                               PopupHeight="250px" CssClass="w-100">
-                                    <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
-                                    <DropDownListEvents TItem="FarmViewModel" TValue="string" ValueChange="FarmChangeHandler"></DropDownListEvents>
-                                </SfDropDownList>
-                                <ValidationMessage For="@(() => _field.FarmId)" />
-                            </div>
-
-                            <!-- Field Name -->
-                            <div class="form-group mb-3">
-                                <label>Field Name *</label>
-                                <SfTextBox @bind-Value="_field.Name" Placeholder="Enter field name"></SfTextBox>
-                                <ValidationMessage For="@(() => _field.Name)" />
-                            </div>
-
-                            <!-- Field Description -->
-                            <div class="form-group mb-3">
-                                <label>Description</label>
-                                <SfTextBox Multiline="true" @bind-Value="_field.Description" Placeholder="Field description" Height="80px"></SfTextBox>
-                            </div>
-
-                            <!-- Field Size (auto-calculated from drawn boundary) -->
-                            <div class="form-group mb-3">
-                                <label>Size (Hectares) *</label>
-                                <div class="d-flex align-items-center">
-                                    <SfNumericTextBox TValue="float" @bind-Value="_field.Size" Format="N2" Decimals="2" Placeholder="0.00" Readonly="@_areaCalculated"></SfNumericTextBox>
-                                    @if (_areaCalculated)
-                                    {
-                                        <span class="badge bg-success ms-2">
-                                            <i class="fas fa-calculator me-1"></i> Auto-calculated
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-warning ms-2">
-                                            <i class="fas fa-exclamation-triangle me-1"></i> Draw on map
-                                        </span>
-                                    }
-                                </div>
-                                <ValidationMessage For="@(() => _field.Size)" />
-                                <small class="text-muted">Draw the field boundary on the map to calculate area automatically</small>
-                            </div>
-
-                            <!-- Soil Type -->
-                            <div class="form-group mb-3">
-                                <label>Soil Type</label>
-                                <SfDropDownList TValue="SoilType" TItem="SoilTypeModel" @bind-Value="_field.SoilType"
-                                               DataSource="@_soilTypes" Placeholder="Select soil type"
-                                               PopupHeight="250px" CssClass="w-100">
-                                    <DropDownListFieldSettings Value="SoilType" Text="Name"></DropDownListFieldSettings>
-                                </SfDropDownList>
-                            </div>
-
-                            <!-- Irrigation -->
-                            <div class="form-group mb-3">
-                                <SfCheckBox Label="Under Irrigation" @bind-Checked="_field.Irrigation"></SfCheckBox>
-                            </div>
-
-                            <!-- Map guide -->
-                            <div class="alert alert-info mt-3">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    <div>
-                                        <strong>Map Instructions</strong>
-                                        <p class="mb-0 small">Use the draw tool <i class="fas fa-draw-polygon"></i> in the top right corner of the map to draw your field boundary. Area will be calculated automatically.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Submission buttons -->
-                            <div class="d-grid gap-2 mt-4">
-                                <button type="submit" class="btn bg-gradient-success w-100" disabled="@(_isSaving || !_formValid)">
-                                    @if (_isSaving)
-                                    {
-                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                        <span>Saving...</span>
-                                    }
-                                    else
-                                    {
-                                        <span><i class="fas fa-save me-2"></i>Save Field</span>
-                                    }
-                                </button>
-                                <button type="button" class="btn bg-gradient-secondary w-100" @onclick="NavigateBack">
-                                    <i class="fas fa-times me-2"></i>Cancel
-                                </button>
-                            </div>
-                        </EditForm>
+                    <!-- Farm Selection -->
+                    <div class="form-group mb-3">
+                        <label>Farm *</label>
+                        <SfDropDownList TValue="string" TItem="FarmViewModel" @bind-Value="_field.FarmId"
+                                       DataSource="@_accessibleFarms" Placeholder="Select Farm"
+                                       PopupHeight="250px" CssClass="w-100">
+                            <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                            <DropDownListEvents TItem="FarmViewModel" TValue="string" ValueChange="FarmChangeHandler"></DropDownListEvents>
+                        </SfDropDownList>
+                        <ValidationMessage For="@(() => _field.FarmId)" />
                     </div>
 
-                    <!-- Map Column -->
-                    <div class="col-lg-8">
-                        <div class="card mb-3">
-                            <div class="card-header p-2">
-                                <h6 class="mb-0">Draw Field Boundary</h6>
-                            </div>
-                            <div class="card-body p-0">
-                                <!-- The map container needs appropriate height to be usable -->
-                                <div id="map" @ref="_mapElement" style="width: 100%; height: 500px;" class="border-radius-lg"></div>
+                    <!-- Field Name -->
+                    <div class="form-group mb-3">
+                        <label>Field Name *</label>
+                        <SfTextBox @bind-Value="_field.Name" Placeholder="Enter field name"></SfTextBox>
+                        <ValidationMessage For="@(() => _field.Name)" />
+                    </div>
+
+                    <!-- Field Description -->
+                    <div class="form-group mb-3">
+                        <label>Description</label>
+                        <SfTextBox Multiline="true" @bind-Value="_field.Description" Placeholder="Field description" Height="80px"></SfTextBox>
+                    </div>
+
+                    <!-- Field Size (auto-calculated from drawn boundary) -->
+                    <div class="form-group mb-3">
+                        <label>Size (Hectares) *</label>
+                        <div class="d-flex align-items-center">
+                            <SfNumericTextBox TValue="float" @bind-Value="_field.Size" Format="N2" Decimals="2" Placeholder="0.00" Readonly="@_areaCalculated"></SfNumericTextBox>
+                            @if (_areaCalculated)
+                            {
+                                <span class="badge-area-calculated ms-2">
+                                    <i class="fas fa-calculator me-1"></i> Auto-calculated
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge-area-needed ms-2">
+                                    <i class="fas fa-exclamation-triangle me-1"></i> Draw on map
+                                </span>
+                            }
+                        </div>
+                        <ValidationMessage For="@(() => _field.Size)" />
+                        <small class="text-muted">Draw the field boundary on the map to calculate area automatically</small>
+                    </div>
+
+                    <!-- Soil Type -->
+                    <div class="form-group mb-3">
+                        <label>Soil Type</label>
+                        <SfDropDownList TValue="SoilType" TItem="SoilTypeModel" @bind-Value="_field.SoilType"
+                                       DataSource="@_soilTypes" Placeholder="Select soil type"
+                                       PopupHeight="250px" CssClass="w-100">
+                            <DropDownListFieldSettings Value="SoilType" Text="Name"></DropDownListFieldSettings>
+                        </SfDropDownList>
+                    </div>
+
+                    <!-- Irrigation -->
+                    <div class="form-group mb-3">
+                        <SfCheckBox Label="Under Irrigation" @bind-Checked="_field.Irrigation"></SfCheckBox>
+                    </div>
+
+                    <!-- Map guide -->
+                    <div class="alert alert-info mt-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <div>
+                                <strong>Map Instructions</strong>
+                                <p class="mb-0 small">Use the draw tool <i class="fas fa-draw-polygon"></i> in the top right corner of the map to draw your field boundary. The field area will be calculated automatically.</p>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Submission buttons -->
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn bg-gradient-success w-100" disabled="@(_isSaving || !_formValid)">
+                            @if (_isSaving)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                <span>Saving...</span>
+                            }
+                            else
+                            {
+                                <span><i class="fas fa-save me-2"></i>Save Field</span>
+                            }
+                        </button>
+                        <button type="button" class="btn bg-gradient-secondary w-100" @onclick="NavigateBack">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Column -->
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Draw Field Boundary</h6>
+                    @if (_selectedFarm != null)
+                    {
+                        <span class="badge bg-primary">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            @_selectedFarm.Name
+                        </span>
+                    }
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <!-- Full-height map container -->
+                <div class="map-container">
+                    <div id="map" @ref="_mapElement" style="width: 100%; height: 100%;" class="border-radius-lg"></div>
                 </div>
             </div>
         </div>
@@ -250,21 +304,27 @@
             await ShowSpinner();
             
             // Get all farms the user has access to
-            var accessibleFarmIds = await FarmAccessService.GetAccessibleFarms();
+            var accessibleFarmIds = await FarmAccessService.GetUserAccessibleFarms(_user.GetUserId());
             
             if (accessibleFarmIds.Any())
             {
                 // Get details for each accessible farm
-                _accessibleFarms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(
-                    await ApiCall.GetHttpClient(), "farms/getFarms"))
-                    .Where(f => accessibleFarmIds.Any(af => af.Id == f.Id))
-                    .ToList();
+                var client = await ApiCall.GetHttpClient();
+                var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<FarmViewModel>>>(
+                    client, "farms/GetFarms");
                 
-                // If only one farm, select it automatically
-                if (_accessibleFarms.Count == 1)
+                if (response?.Status == 200 && response.Result != null)
                 {
-                    _field.FarmId = _accessibleFarms[0].Id;
-                    await LoadFarmDetails(_field.FarmId);
+                    _accessibleFarms = response.Result
+                        .Where(f => accessibleFarmIds.Contains(f.Id))
+                        .ToList();
+                    
+                    // If only one farm, select it automatically
+                    if (_accessibleFarms.Count == 1)
+                    {
+                        _field.FarmId = _accessibleFarms[0].Id;
+                        await LoadFarmDetails(_field.FarmId);
+                    }
                 }
             }
             else
@@ -294,43 +354,53 @@
             await ShowSpinner();
             
             // Get detailed farm information with field data
-            _selectedFarm = await ApiCall.Get<FarmMapViewModel>(
-                await ApiCall.GetHttpClient(), $"farms/GetFarmDetails/{farmId}");
+            var client = await ApiCall.GetHttpClient();
+            var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<FarmMapViewModel>>(
+                client, $"farms/GetFarmDetails/{farmId}");
             
-            if (_selectedFarm != null && _mapModule != null && _mapInstance != null)
+            if (response?.Status == 200 && response.Result != null)
             {
-                // Clear the map
-                await _mapModule.InvokeVoidAsync("clearMap", _mapInstance);
+                _selectedFarm = response.Result;
                 
-                // Draw the farm boundary if available
-                if (_selectedFarm.IsPolygon)
+                if (_mapModule != null && _mapInstance != null)
                 {
-                    await _mapModule.InvokeVoidAsync("drawFarmBoundary",
-                        _mapInstance,
-                        _selectedFarm.Id,
-                        _selectedFarm.FarmPolygon,
-                        _selectedFarm.Name);
-                }
-                
-                // Center the map on the farm
-                if (_selectedFarm.IsPolygon && _selectedFarm.FarmCoordinates.Count > 0)
-                {
-                    // Calculate center of the farm polygon
-                    double avgLat = _selectedFarm.FarmCoordinates.Average(c => c[1]);
-                    double avgLng = _selectedFarm.FarmCoordinates.Average(c => c[0]);
+                    // Clear the map
+                    await _mapModule.InvokeVoidAsync("clearMap", _mapInstance);
                     
-                    await _mapModule.InvokeVoidAsync("centerMap", _mapInstance, avgLat, avgLng, 15);
-                }
-                else if (_selectedFarm.Latitude != 0 && _selectedFarm.Longitude != 0)
-                {
-                    await _mapModule.InvokeVoidAsync("centerMap", 
-                        _mapInstance, _selectedFarm.Latitude, _selectedFarm.Longitude, 15);
-                }
-                else
-                {
-                    // Default view for Zimbabwe
-                    await _mapModule.InvokeVoidAsync("centerMap", 
-                        _mapInstance, -17.824858, 31.053028, 7);
+                    // Draw the farm boundary if available
+                    if (_selectedFarm.IsPolygon && _selectedFarm.FarmPolygon.Count > 0 && 
+                        _selectedFarm.FarmPolygon[0].Count > 0)
+                    {
+                        await _mapModule.InvokeVoidAsync("drawFarmBoundary",
+                            _mapInstance,
+                            _selectedFarm.Id,
+                            _selectedFarm.FarmPolygon,
+                            _selectedFarm.Name);
+                            
+                        // Highlight the draw tool after farm boundary is drawn
+                        await _mapModule.InvokeVoidAsync("highlightDrawTool", _mapInstance);
+                    }
+                    
+                    // Center the map on the farm
+                    if (_selectedFarm.IsPolygon && _selectedFarm.FarmCoordinates.Count > 0)
+                    {
+                        // Calculate center of the farm polygon
+                        double avgLat = _selectedFarm.FarmCoordinates.Average(c => c[1]);
+                        double avgLng = _selectedFarm.FarmCoordinates.Average(c => c[0]);
+                        
+                        await _mapModule.InvokeVoidAsync("centerMap", _mapInstance, avgLat, avgLng, 15);
+                    }
+                    else if (_selectedFarm.Latitude != 0 && _selectedFarm.Longitude != 0)
+                    {
+                        await _mapModule.InvokeVoidAsync("centerMap", 
+                            _mapInstance, _selectedFarm.Latitude, _selectedFarm.Longitude, 15);
+                    }
+                    else
+                    {
+                        // Default view for Zimbabwe
+                        await _mapModule.InvokeVoidAsync("centerMap", 
+                            _mapInstance, -17.824858, 31.053028, 7);
+                    }
                 }
             }
         }
@@ -470,10 +540,11 @@
             await ShowSpinner();
             
             // Create field in the database
+            var client = await ApiCall.GetHttpClient();
             var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldViewModel>, CreateFieldViewModel>(
-                await ApiCall.GetHttpClient(), "fields/createfield", _field);
+                client, "fields/createfield", _field);
             
-            if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
+            if (response?.Status == 200 && response.Result != null)
             {
                 // Save was successful, now save the coordinates if drawn
                 if (_drawnCoordinates.Count >= 3)
@@ -524,8 +595,9 @@
                     };
                     
                     // Save coordinate
+                    var client = await ApiCall.GetHttpClient();
                     await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldLocationViewModel>, FieldLocationViewModel>(
-                        await ApiCall.GetHttpClient(), "fieldLocations/createfieldLocation", location);
+                        client, "fieldLocations/createfieldLocation", location);
                 }
             }
         }

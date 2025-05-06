@@ -69,7 +69,7 @@ public class FarmAccessService
         try
         {
             var response = await _apiCall.Get<ApiResponse<List<string>>>(
-                await _apiCall.GetHttpClient(), $"farmusers/getaccessiblefarms?userId={userId}");
+                await _apiCall.GetHttpClient(), $"farmusers/getaccessiblefarms/{userId}");
 
             if (response?.Status == 200 && response.Result != null)
             {
