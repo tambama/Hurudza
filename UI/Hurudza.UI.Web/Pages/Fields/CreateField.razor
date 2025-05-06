@@ -1,0 +1,588 @@
+@page "/fields/create"
+@implements IAsyncDisposable
+@using Hurudza.Common.Utils.Extensions
+@using Hurudza.Data.Data
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@attribute [Authorize]
+
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject IApiCall ApiCall
+@inject FarmAccessService FarmAccessService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<HeadContent>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet" />
+    <!-- Add MapboxDraw CSS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.3.0/mapbox-gl-draw.css" rel="stylesheet" />
+</HeadContent>
+
+<Toast @ref="_alert"/>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card mb-4">
+            <div class="card-header p-3">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5 class="mb-0">Create New Field</h5>
+                        <p class="text-sm mb-0">Enter field details and draw the boundary on the map</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-sm bg-gradient-secondary" @onclick="NavigateBack">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Fields
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-3">
+                <div class="row">
+                    <!-- Form Column -->
+                    <div class="col-lg-4">
+                        <EditForm Model="@_field" OnValidSubmit="@SaveField">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+
+                            <!-- Farm Selection -->
+                            <div class="form-group mb-3">
+                                <label>Farm *</label>
+                                <SfDropDownList TValue="string" TItem="FarmViewModel" @bind-Value="_field.FarmId"
+                                               DataSource="@_accessibleFarms" Placeholder="Select Farm"
+                                               PopupHeight="250px" CssClass="w-100">
+                                    <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                                    <DropDownListEvents TItem="FarmViewModel" TValue="string" ValueChange="FarmChangeHandler"></DropDownListEvents>
+                                </SfDropDownList>
+                                <ValidationMessage For="@(() => _field.FarmId)" />
+                            </div>
+
+                            <!-- Field Name -->
+                            <div class="form-group mb-3">
+                                <label>Field Name *</label>
+                                <SfTextBox @bind-Value="_field.Name" Placeholder="Enter field name"></SfTextBox>
+                                <ValidationMessage For="@(() => _field.Name)" />
+                            </div>
+
+                            <!-- Field Description -->
+                            <div class="form-group mb-3">
+                                <label>Description</label>
+                                <SfTextBox Multiline="true" @bind-Value="_field.Description" Placeholder="Field description" Height="80px"></SfTextBox>
+                            </div>
+
+                            <!-- Field Size (auto-calculated from drawn boundary) -->
+                            <div class="form-group mb-3">
+                                <label>Size (Hectares) *</label>
+                                <div class="d-flex align-items-center">
+                                    <SfNumericTextBox TValue="float" @bind-Value="_field.Size" Format="N2" Decimals="2" Placeholder="0.00" Readonly="@_areaCalculated"></SfNumericTextBox>
+                                    @if (_areaCalculated)
+                                    {
+                                        <span class="badge bg-success ms-2">
+                                            <i class="fas fa-calculator me-1"></i> Auto-calculated
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning ms-2">
+                                            <i class="fas fa-exclamation-triangle me-1"></i> Draw on map
+                                        </span>
+                                    }
+                                </div>
+                                <ValidationMessage For="@(() => _field.Size)" />
+                                <small class="text-muted">Draw the field boundary on the map to calculate area automatically</small>
+                            </div>
+
+                            <!-- Soil Type -->
+                            <div class="form-group mb-3">
+                                <label>Soil Type</label>
+                                <SfDropDownList TValue="SoilType" TItem="SoilTypeModel" @bind-Value="_field.SoilType"
+                                               DataSource="@_soilTypes" Placeholder="Select soil type"
+                                               PopupHeight="250px" CssClass="w-100">
+                                    <DropDownListFieldSettings Value="SoilType" Text="Name"></DropDownListFieldSettings>
+                                </SfDropDownList>
+                            </div>
+
+                            <!-- Irrigation -->
+                            <div class="form-group mb-3">
+                                <SfCheckBox Label="Under Irrigation" @bind-Checked="_field.Irrigation"></SfCheckBox>
+                            </div>
+
+                            <!-- Map guide -->
+                            <div class="alert alert-info mt-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <div>
+                                        <strong>Map Instructions</strong>
+                                        <p class="mb-0 small">Use the draw tool <i class="fas fa-draw-polygon"></i> in the top right corner of the map to draw your field boundary. Area will be calculated automatically.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submission buttons -->
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn bg-gradient-success w-100" disabled="@(_isSaving || !_formValid)">
+                                    @if (_isSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        <span>Saving...</span>
+                                    }
+                                    else
+                                    {
+                                        <span><i class="fas fa-save me-2"></i>Save Field</span>
+                                    }
+                                </button>
+                                <button type="button" class="btn bg-gradient-secondary w-100" @onclick="NavigateBack">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+
+                    <!-- Map Column -->
+                    <div class="col-lg-8">
+                        <div class="card mb-3">
+                            <div class="card-header p-2">
+                                <h6 class="mb-0">Draw Field Boundary</h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <!-- The map container needs appropriate height to be usable -->
+                                <div id="map" @ref="_mapElement" style="width: 100%; height: 500px;" class="border-radius-lg"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner Overlay -->
+<SfSpinner @ref="_spinnerRef" Size="40" Type="SpinnerType.Bootstrap" CssClass="global-spinner" Visible="false"></SfSpinner>
+
+@code {
+    // UI elements
+    private ElementReference _mapElement;
+    private Toast _alert;
+    private SfSpinner _spinnerRef;
+
+    // Map related objects
+    private IJSObjectReference _mapModule;
+    private IJSObjectReference _mapInstance;
+    private IJSObjectReference _drawControl;
+    private DotNetObjectReference<CreateField> _dotNetRef;
+
+    // Models and data
+    private CreateFieldViewModel _field = new CreateFieldViewModel
+    {
+        SoilType = SoilType.Loamy,
+        Irrigation = false
+    };
+    private List<FarmViewModel> _accessibleFarms = new();
+    private List<SoilTypeModel> _soilTypes = Enum.GetValues<SoilType>().Select(x => new SoilTypeModel(x)).ToList();
+    private FarmMapViewModel _selectedFarm;
+    
+    // State tracking
+    private bool _isSaving = false;
+    private bool _formValid = false;
+    private bool _areaCalculated = false;
+    private List<List<double>> _drawnCoordinates = new();
+    private ClaimsPrincipal _user;
+    private bool _hasFieldManagePermission = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Get user and permissions
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+        _hasFieldManagePermission = await FarmAccessService.HasPermission(Claims.FieldManage) || 
+                                   await FarmAccessService.HasPermission(Claims.FieldCreate);
+                                   
+        if (!_hasFieldManagePermission)
+        {
+            // Redirect if user doesn't have permission
+            Navigation.NavigateTo("/fields");
+            return;
+        }
+
+        // Load accessible farms
+        await LoadAccessibleFarms();
+        
+        // Create .NET object reference for JS interop
+        _dotNetRef = DotNetObjectReference.Create(this);
+        
+        // Validate form state
+        ValidateForm();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // Initialize the map
+                _mapModule = await JS.InvokeAsync<IJSObjectReference>("import", 
+                    "./Pages/Fields/CreateField.razor.js");
+
+                if (_mapModule != null)
+                {
+                    // Create the map instance
+                    _mapInstance = await _mapModule.InvokeAsync<IJSObjectReference>(
+                        "initializeMap", _mapElement);
+                    
+                    // Initialize drawing controls
+                    await InitializeDrawingControls();
+                }
+            }
+            catch (Exception ex)
+            {
+                _alert.Show($"Error initializing map: {ex.Message}", 
+                    showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+    }
+
+    private async Task LoadAccessibleFarms()
+    {
+        try
+        {
+            await ShowSpinner();
+            
+            // Get all farms the user has access to
+            var accessibleFarmIds = await FarmAccessService.GetAccessibleFarms();
+            
+            if (accessibleFarmIds.Any())
+            {
+                // Get details for each accessible farm
+                _accessibleFarms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(
+                    await ApiCall.GetHttpClient(), "farms/getFarms"))
+                    .Where(f => accessibleFarmIds.Any(af => af.Id == f.Id))
+                    .ToList();
+                
+                // If only one farm, select it automatically
+                if (_accessibleFarms.Count == 1)
+                {
+                    _field.FarmId = _accessibleFarms[0].Id;
+                    await LoadFarmDetails(_field.FarmId);
+                }
+            }
+            else
+            {
+                _alert.Show("You don't have access to any farms. Please contact an administrator.", 
+                    showTitle: true, toastType: ToastType.Warning);
+                Navigation.NavigateTo("/fields");
+            }
+        }
+        catch (Exception ex)
+        {
+            _alert.Show($"Error loading farms: {ex.Message}", 
+                showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            await HideSpinner();
+        }
+    }
+
+    private async Task LoadFarmDetails(string farmId)
+    {
+        if (string.IsNullOrEmpty(farmId)) return;
+        
+        try
+        {
+            await ShowSpinner();
+            
+            // Get detailed farm information with field data
+            _selectedFarm = await ApiCall.Get<FarmMapViewModel>(
+                await ApiCall.GetHttpClient(), $"farms/GetFarmDetails/{farmId}");
+            
+            if (_selectedFarm != null && _mapModule != null && _mapInstance != null)
+            {
+                // Clear the map
+                await _mapModule.InvokeVoidAsync("clearMap", _mapInstance);
+                
+                // Draw the farm boundary if available
+                if (_selectedFarm.IsPolygon)
+                {
+                    await _mapModule.InvokeVoidAsync("drawFarmBoundary",
+                        _mapInstance,
+                        _selectedFarm.Id,
+                        _selectedFarm.FarmPolygon,
+                        _selectedFarm.Name);
+                }
+                
+                // Center the map on the farm
+                if (_selectedFarm.IsPolygon && _selectedFarm.FarmCoordinates.Count > 0)
+                {
+                    // Calculate center of the farm polygon
+                    double avgLat = _selectedFarm.FarmCoordinates.Average(c => c[1]);
+                    double avgLng = _selectedFarm.FarmCoordinates.Average(c => c[0]);
+                    
+                    await _mapModule.InvokeVoidAsync("centerMap", _mapInstance, avgLat, avgLng, 15);
+                }
+                else if (_selectedFarm.Latitude != 0 && _selectedFarm.Longitude != 0)
+                {
+                    await _mapModule.InvokeVoidAsync("centerMap", 
+                        _mapInstance, _selectedFarm.Latitude, _selectedFarm.Longitude, 15);
+                }
+                else
+                {
+                    // Default view for Zimbabwe
+                    await _mapModule.InvokeVoidAsync("centerMap", 
+                        _mapInstance, -17.824858, 31.053028, 7);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _alert.Show($"Error loading farm details: {ex.Message}", 
+                showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            await HideSpinner();
+        }
+    }
+
+    private async Task InitializeDrawingControls()
+    {
+        if (_mapModule != null && _mapInstance != null)
+        {
+            // Initialize drawing controls
+            _drawControl = await _mapModule.InvokeAsync<IJSObjectReference>(
+                "initializeDrawControls", _mapInstance, _dotNetRef);
+            
+            if (_drawControl != null)
+            {
+                // Set up event handlers for drawing
+                await _mapModule.InvokeVoidAsync("setupDrawingEvents", 
+                    _mapInstance, _drawControl, _dotNetRef);
+            }
+        }
+    }
+
+    // JS invokable method to handle coordinates from drawn polygon
+    [JSInvokable]
+    public Task OnPolygonDrawn(List<List<double>> coordinates)
+    {
+        try
+        {
+            // Store the drawn coordinates
+            _drawnCoordinates = coordinates;
+            
+            // Update flag to show area was calculated automatically
+            _areaCalculated = true;
+            
+            // Validate the form
+            ValidateForm();
+            
+            // Force UI refresh
+            StateHasChanged();
+            
+            return Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in OnPolygonDrawn: {ex.Message}");
+            return Task.CompletedTask;
+        }
+    }
+    
+    // JS invokable method to handle area calculation
+    [JSInvokable]
+    public Task UpdateFieldSize(double areaInHectares)
+    {
+        try
+        {
+            // Update the field size with the calculated area
+            _field.Size = (float)Math.Round(areaInHectares, 2);
+            
+            // Update flag to show area was calculated automatically
+            _areaCalculated = true;
+            
+            // Validate the form
+            ValidateForm();
+            
+            // Force UI refresh
+            StateHasChanged();
+            
+            return Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in UpdateFieldSize: {ex.Message}");
+            return Task.CompletedTask;
+        }
+    }
+    
+    // Method to handle drawing cancellation
+    [JSInvokable]
+    public Task OnDrawingDeleted()
+    {
+        try
+        {
+            // Reset the drawn coordinates
+            _drawnCoordinates = new List<List<double>>();
+            
+            // Reset the field size
+            _field.Size = 0;
+            
+            // Update flag to show area is no longer auto-calculated
+            _areaCalculated = false;
+            
+            // Validate the form
+            ValidateForm();
+            
+            // Force UI refresh
+            StateHasChanged();
+            
+            return Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in OnDrawingDeleted: {ex.Message}");
+            return Task.CompletedTask;
+        }
+    }
+
+    private void FarmChangeHandler(ChangeEventArgs<string, FarmViewModel> args)
+    {
+        LoadFarmDetails(args.Value);
+        ValidateForm();
+    }
+
+    private void ValidateForm()
+    {
+        // Basic validation - requires farm ID, name, and either manual or calculated area
+        _formValid = !string.IsNullOrEmpty(_field.FarmId) && 
+                     !string.IsNullOrEmpty(_field.Name) && 
+                     (_field.Size > 0 || _drawnCoordinates.Count >= 3);
+    }
+
+    private async Task SaveField()
+    {
+        if (!_formValid) return;
+        
+        try
+        {
+            _isSaving = true;
+            await ShowSpinner();
+            
+            // Create field in the database
+            var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldViewModel>, CreateFieldViewModel>(
+                await ApiCall.GetHttpClient(), "fields/createfield", _field);
+            
+            if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
+            {
+                // Save was successful, now save the coordinates if drawn
+                if (_drawnCoordinates.Count >= 3)
+                {
+                    await SaveFieldCoordinates(response.Result.Id, _drawnCoordinates);
+                }
+                
+                _alert.Show("Field created successfully!", showTitle: true, toastType: ToastType.Success);
+                
+                // Navigate to the field detail page
+                Navigation.NavigateTo($"/field/{response.Result.Id}");
+            }
+            else
+            {
+                _alert.Show(response?.Title ?? "Failed to create field", 
+                    showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            _alert.Show($"Error saving field: {ex.Message}", 
+                showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            _isSaving = false;
+            await HideSpinner();
+        }
+    }
+
+    private async Task SaveFieldCoordinates(string fieldId, List<List<double>> coordinates)
+    {
+        try
+        {
+            if (coordinates.Count < 3) return;
+            
+            // Convert drawn coordinates to field locations and save each one
+            foreach (var coord in coordinates)
+            {
+                if (coord.Count >= 2)
+                {
+                    var location = new FieldLocationViewModel
+                    {
+                        FieldId = fieldId,
+                        Longitude = coord[0],
+                        Latitude = coord[1],
+                        Altitude = coord.Count > 2 ? coord[2] : 0
+                    };
+                    
+                    // Save coordinate
+                    await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldLocationViewModel>, FieldLocationViewModel>(
+                        await ApiCall.GetHttpClient(), "fieldLocations/createfieldLocation", location);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _alert.Show($"Error saving field coordinates: {ex.Message}", 
+                showTitle: true, toastType: ToastType.Warning);
+        }
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/fields");
+    }
+
+    private async Task ShowSpinner()
+    {
+        if (_spinnerRef != null)
+        {
+            await _spinnerRef.ShowAsync();
+        }
+    }
+
+    private async Task HideSpinner()
+    {
+        if (_spinnerRef != null)
+        {
+            await _spinnerRef.HideAsync();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            // Clean up JavaScript resources
+            if (_drawControl != null)
+            {
+                await _drawControl.DisposeAsync();
+            }
+            
+            if (_mapInstance != null)
+            {
+                await _mapInstance.DisposeAsync();
+            }
+            
+            if (_mapModule != null)
+            {
+                await _mapModule.DisposeAsync();
+            }
+            
+            // Dispose the .NET reference
+            _dotNetRef?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error disposing resources: {ex.Message}");
+        }
+    }
+}
