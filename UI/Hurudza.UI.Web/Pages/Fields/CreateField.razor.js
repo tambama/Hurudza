@@ -2,8 +2,6 @@
 import 'https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js';
 // Import MapboxDraw for boundary drawing
 import 'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.3.0/mapbox-gl-draw.js';
-// Import Turf.js for area calculations
-import 'https://unpkg.com/@turf/turf@6/dist/turf.min.js';
 
 // Mapbox access token - this should match the one used in Map.razor.js
 const mapboxToken = 'pk.eyJ1IjoicGVuaWVsdCIsImEiOiJjbGt3Y2gxM3YweWtrM3FwbW9jaWNkMWVyIn0.cDAgTWNXN-TVJROjgoWQiw';
@@ -126,9 +124,14 @@ export function initializeDrawControls(map, dotNetRef) {
 }
 
 // Setup event handlers for drawing
-export function setupDrawingEvents(map, draw, dotNetRef) {
+export async function setupDrawingEvents(map, draw, dotNetRef) {
     try {
         console.log("Setting up drawing event handlers");
+
+        // Load Turf.js if needed
+        if (typeof turf === 'undefined') {
+            await loadTurf();
+        }
 
         // Handle create events
         map.on('draw.create', function(e) {
@@ -232,6 +235,40 @@ export function clearMap(map) {
         console.error("Error clearing map:", error);
         return false;
     }
+}
+
+/**
+ * Load Turf.js from CDN
+ * @returns {Promise} Promise that resolves with the turf object
+ */
+function loadTurf() {
+    return new Promise((resolve, reject) => {
+        // Check if Turf is already loaded
+        if (window.turf) {
+            resolve(window.turf);
+            return;
+        }
+
+        // Create script element
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js';
+        script.integrity = 'sha512-Wm2tQKurvPeBdx5ZPQjTvdGQS0OZNnSbzLNL1l35y5td2Xu8wt+a+/a4EoTFAcchZoVLqI8bhkYYTiPwP5xXw==';
+        script.crossOrigin = 'anonymous';
+
+        script.onload = () => {
+            if (window.turf) {
+                resolve(window.turf);
+            } else {
+                reject(new Error('Turf.js loaded but not available in window.turf'));
+            }
+        };
+
+        script.onerror = () => {
+            reject(new Error('Failed to load Turf.js'));
+        };
+
+        document.head.appendChild(script);
+    });
 }
 
 // Center map on coordinates with specific zoom level
