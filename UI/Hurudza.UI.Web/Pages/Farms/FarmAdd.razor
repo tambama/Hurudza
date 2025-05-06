@@ -11,6 +11,7 @@
 @inject IApiCall ApiCall
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+@inject ILogger<FarmAdd> Logger
 
 <PageTitle>Create New Farm - Hurudza Farm Management</PageTitle>
 
@@ -19,16 +20,13 @@
     <!-- Mapbox GL JS CSS -->
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet" />
     
-    <!-- Mapbox GL JS Script -->
-    <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
-    
     <!-- Mapbox Geocoder (for search functionality) -->
-    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
     <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css" />
-    
-    <style>
+</HeadContent>
+
+<style>
         /* Ensure the map container is visible and sized properly */
-        #location-map {
+        #map {
             min-height: 400px; 
             width: 100%;
             position: relative;
@@ -45,7 +43,6 @@
             }
         }
     </style>
-</HeadContent>
 
 <Toast @ref="Alert" />
 
@@ -66,7 +63,7 @@
                 </div>
             </div>
             <div class="card-body">
-                @if (isLoading)
+                @if (false)
                 {
                     <div class="text-center py-4">
                         <SfSpinner Size="50"></SfSpinner>
@@ -251,12 +248,12 @@
 
                         <div class="row mb-3">
                             <div class="col-12">
-                                <div class="alert alert-info">
+                                <div class="alert bg-info">
                                     <i class="fas fa-info-circle me-2"></i>
                                     You can use the map below to select the farm location. Click on the map to set the coordinates or drag the marker to adjust the position.
                                 </div>
                                 <!-- Map container with id="location-map" - This must match exactly what's expected in JavaScript -->
-                                <div id="location-map" style="height: 400px; width: 100%; position: relative;" class="border rounded mb-2">
+                                <div id="map" @ref="_mapElement" style="height: 400px; width: 100%; position: relative;" class="border rounded mb-2">
                                     @if (!mapLoaded)
                                     {
                                         <div class="d-flex justify-content-center align-items-center h-100 bg-light">
@@ -576,8 +573,12 @@
     private bool mapLoaded = false;
     private DotNetObjectReference<FarmAdd> objRef;
     
+    // Element reference for the map container
+    private ElementReference _mapElement;
+    
     // JavaScript module reference
-    private IJSObjectReference _mapModule;
+    private IJSObjectReference? _mapModule;
+    private IJSObjectReference? _mapInstance;
     
     // Dropdown data sources
     private List<ProvinceViewModel> provinces = new();
@@ -597,9 +598,6 @@
     
     protected override async Task OnInitializedAsync()
     {
-        // Create a reference to this component for JS interop
-        objRef = DotNetObjectReference.Create(this);
-        
         // Set default values for the farm
         farm = new FarmViewModel
         {
@@ -615,30 +613,57 @@
         
         await LoadEnumItems();
         await LoadLocations();
-        await LoadJavaScriptModule();
-        
-        // Auto-load map when the component initializes
-        if (_mapModule != null) {
-            await LoadMap();
-        }
         
         isLoading = false;
+        await Task.Delay(100);
+        StateHasChanged();
     }
     
-    private async Task LoadJavaScriptModule()
+    // Using the same pattern as Map.razor - initialize map after the DOM is ready
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        try 
+        if (firstRender)
         {
-            // Import the JavaScript module - similar to how Map.razor does it
-            _mapModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", 
-                "./Pages/Farms/FarmAdd.razor.js");
+            try
+            {
+                Logger.LogInformation("Initializing map...");
+                
+                // Import the JavaScript module
+                _mapModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", 
+                    "./Pages/Farms/FarmAdd.razor.js");
             
-            Console.WriteLine("Farm Add JS module loaded successfully");
-        }
-        catch (Exception ex)
-        {
-            Alert?.Show($"Error loading map resources: {ex.Message}", showTitle: true, toastType: ToastType.Warning);
-            Console.WriteLine($"Error loading JS module: {ex.Message}");
+                Console.WriteLine("Farm Add JS module loaded successfully");
+
+                if (_mapModule is not null)
+                {
+                    // Create and get map instance
+                    _mapInstance = await _mapModule.InvokeAsync<IJSObjectReference>("addMapToElement", _mapElement);
+                    
+                    // Create a reference to this component for JS interop
+                    objRef = DotNetObjectReference.Create(this);
+                    
+                    // Add click handler to map
+                    if (_mapInstance != null)
+                    {
+                        await _mapModule.InvokeVoidAsync("addClickHandler", _mapInstance, objRef);
+                        mapLoaded = true;
+                        StateHasChanged(); // Update UI
+                    }
+                    
+                }
+            
+                // Pass the string ID instead of ElementReference
+                // _mapInstance = await _mapModule.InvokeAsync<IJSObjectReference>(
+                //     "addMapToElement", 
+                //     "location-map", // Use the ID string directly
+                //     new double[] { farm.Longitude, farm.Latitude }, 
+                //     6);
+            }
+            catch (Exception ex)
+            {
+                Alert?.Show($"Error initializing map: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+                Console.WriteLine($"Error in OnAfterRenderAsync: {ex.Message}");
+            }
         }
     }
     
@@ -672,7 +697,7 @@
             Alert?.Show($"Error loading dropdown options: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
         }
     }
-
+    
     private async Task LoadLocations()
     {
         try
@@ -799,29 +824,7 @@
         }
     }
     
-    private async Task LoadMap()
-    {
-        if (mapLoaded || _mapModule == null)
-            return;
-            
-        try
-        {
-            // Initialize the map using the imported module
-            await _mapModule.InvokeVoidAsync("initializeMap", "location-map", 
-                new double[] { farm.Longitude, farm.Latitude }, 6);
-            
-            // Add click handler for map using the module
-            await _mapModule.InvokeVoidAsync("addMapClickHandler", "location-map", objRef);
-            
-            mapLoaded = true;
-        }
-        catch (Exception ex)
-        {
-            Alert?.Show($"Error loading map: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
-        }
-    }
-    
-    // Method to be called from JavaScript when map is clicked
+    // JSInvokable method to be called from JavaScript when map is clicked
     [JSInvokable]
     public void UpdateCoordinates(double longitude, double latitude)
     {
@@ -910,13 +913,13 @@
         {
             // Clean up managed resources
             objRef?.Dispose();
-            
-            // Clean up the map if it was loaded
-            if (mapLoaded && _mapModule != null)
+        
+            // Dispose the map instance if created
+            if (_mapInstance != null)
             {
-                await _mapModule.InvokeVoidAsync("disposeMap", "location-map");
+                await _mapInstance.DisposeAsync();
             }
-            
+        
             // Dispose of the JS module
             if (_mapModule != null)
             {
