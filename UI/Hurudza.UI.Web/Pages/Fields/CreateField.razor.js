@@ -447,7 +447,6 @@ function loadTurf() {
         // Create script element
         const script = document.createElement('script');
         script.src = 'https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js';
-        script.integrity = 'sha512-Wm2tQKurvPeBdx5ZPQjTvdGQS0OZNnSbzLNL1l35y5td2Xu8wt+a+/a4EoTFAcchZoVLqI8bhkYYTiPwP5xXw==';
         script.crossOrigin = 'anonymous';
 
         script.onload = () => {
@@ -485,7 +484,14 @@ export function centerMap(map, latitude, longitude, zoom) {
     }
 }
 
-// Draw farm boundary on the map
+/**
+ * Enhanced function to draw farm boundary with improved styling and interaction
+ * @param {Object} map - The Mapbox map instance
+ * @param {string} farmId - ID of the farm
+ * @param {Array} polygons - Array of coordinate arrays for the farm boundary
+ * @param {string} farmName - Name of the farm
+ * @returns {boolean} Success indicator
+ */
 export function drawFarmBoundary(map, farmId, polygons, farmName) {
     try {
         console.log(`Drawing farm boundary for ${farmName}`);
@@ -505,6 +511,9 @@ export function drawFarmBoundary(map, farmId, polygons, farmName) {
             }
             if (map.getLayer(`farm-outline-${farmId}`)) {
                 map.removeLayer(`farm-outline-${farmId}`);
+            }
+            if (map.getLayer(`farm-hover-${farmId}`)) {
+                map.removeLayer(`farm-hover-${farmId}`);
             }
             // Then remove the source
             map.removeSource(`farm-${farmId}`);
@@ -526,7 +535,7 @@ export function drawFarmBoundary(map, farmId, polygons, farmName) {
             }
         });
 
-        // Add fill layer
+        // Add fill layer with improved styling
         map.addLayer({
             'id': `farm-fill-${farmId}`,
             'type': 'fill',
@@ -534,11 +543,24 @@ export function drawFarmBoundary(map, farmId, polygons, farmName) {
             'layout': {},
             'paint': {
                 'fill-color': '#40b7d5',
-                'fill-opacity': 0.2
+                'fill-opacity': 0.2,
+                'fill-outline-color': '#40b7d5'
             }
         });
 
-        // Add outline layer
+        // Add hover effect layer (initially transparent)
+        map.addLayer({
+            'id': `farm-hover-${farmId}`,
+            'type': 'fill',
+            'source': `farm-${farmId}`,
+            'layout': {},
+            'paint': {
+                'fill-color': '#40b7d5',
+                'fill-opacity': 0 // Initially transparent
+            }
+        });
+
+        // Add outline layer with improved styling
         map.addLayer({
             'id': `farm-outline-${farmId}`,
             'type': 'line',
@@ -546,40 +568,54 @@ export function drawFarmBoundary(map, farmId, polygons, farmName) {
             'layout': {},
             'paint': {
                 'line-color': '#40b7d5',
-                'line-width': 3
+                'line-width': 3,
+                'line-opacity': 0.8,
+                'line-dasharray': [0.5, 1] // Create a dashed line effect
             }
         });
 
-        // Add click handler for popup
+        // Add click handler for popup with improved content
         map.on('click', `farm-fill-${farmId}`, (e) => {
             // Skip if in drawing mode
             if (isDrawingModeActive) return;
 
-            // Create popup at click location
+            // Get coordinates at click point
+            const coordinates = e.lngLat;
+
+            // Create popup with improved styling
             new mapboxgl.Popup({
                 closeButton: true,
-                closeOnClick: true
+                closeOnClick: true,
+                maxWidth: '300px',
+                className: 'farm-popup' // For custom CSS styling
             })
-                .setLngLat(e.lngLat)
+                .setLngLat(coordinates)
                 .setHTML(`
-                <div style="max-width: 250px; word-wrap: break-word;">
-                    <h5 style="margin-bottom: 5px; font-weight: bold;">${farmName}</h5>
-                    <p class="small mb-0">Click the draw tool to add a field boundary</p>
+                <div style="max-width: 280px; word-wrap: break-word;">
+                    <h5 style="margin-bottom: 10px; font-weight: 600; color: #40b7d5;">${farmName}</h5>
+                    <div style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                        <p class="mb-1" style="font-size: 13px;"><i class="fas fa-info-circle me-2" style="color: #40b7d5;"></i>Farm boundary shown in blue</p>
+                        <p class="mb-0" style="font-size: 13px;"><i class="fas fa-draw-polygon me-2" style="color: #ff5500;"></i>Click the draw tool to add a field boundary</p>
+                    </div>
                 </div>
             `)
                 .addTo(map);
         });
 
-        // Add hover effect
+        // Add hover effects
         map.on('mouseenter', `farm-fill-${farmId}`, () => {
             if (!isDrawingModeActive) {
                 map.getCanvas().style.cursor = 'pointer';
+                map.setPaintProperty(`farm-hover-${farmId}`, 'fill-opacity', 0.4);
+                map.setPaintProperty(`farm-outline-${farmId}`, 'line-width', 4);
             }
         });
 
         map.on('mouseleave', `farm-fill-${farmId}`, () => {
             if (!isDrawingModeActive) {
                 map.getCanvas().style.cursor = '';
+                map.setPaintProperty(`farm-hover-${farmId}`, 'fill-opacity', 0);
+                map.setPaintProperty(`farm-outline-${farmId}`, 'line-width', 3);
             }
         });
 
@@ -590,3 +626,40 @@ export function drawFarmBoundary(map, farmId, polygons, farmName) {
         return false;
     }
 }
+
+/**
+ * Fits the map view to the provided bounds with padding
+ * @param {Object} map - The Mapbox map instance
+ * @param {number} minLat - Minimum latitude of bounds
+ * @param {number} minLng - Minimum longitude of bounds
+ * @param {number} maxLat - Maximum latitude of bounds
+ * @param {number} maxLng - Maximum longitude of bounds
+ * @returns {boolean} Success indicator
+ */
+export function fitMapToBounds(map, minLat, minLng, maxLat, maxLng) {
+    try {
+        console.log(`Fitting map to bounds: [${minLng}, ${minLat}], [${maxLng}, ${maxLat}]`);
+
+        // Add padding to ensure the entire polygon is visible
+        const padding = 50; // Pixels of padding around the bounds
+
+        map.fitBounds(
+            [
+                [minLng, minLat], // Southwest corner
+                [maxLng, maxLat]  // Northeast corner
+            ],
+            {
+                padding: padding,
+                duration: 1000, // Animation duration in milliseconds
+                maxZoom: 16 // Prevent zooming in too close
+            }
+        );
+
+        console.log("Map fitted to bounds successfully");
+        return true;
+    } catch (error) {
+        console.error("Error fitting map to bounds:", error);
+        return false;
+    }
+}
+

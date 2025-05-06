@@ -302,29 +302,24 @@
         try
         {
             await ShowSpinner();
-            
-            // Get all farms the user has access to
-            var accessibleFarmIds = await FarmAccessService.GetUserAccessibleFarms(_user.GetUserId());
-            
-            if (accessibleFarmIds.Any())
+        
+            // Get all farms the user has access to with full details in a single call
+            var accessibleFarms = await FarmAccessService.GetAccessibleFarms();
+        
+            if (accessibleFarms.Any())
             {
-                // Get details for each accessible farm
-                var client = await ApiCall.GetHttpClient();
-                var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<FarmViewModel>>>(
-                    client, "farms/GetFarms");
-                
-                if (response?.Status == 200 && response.Result != null)
+                // Convert FarmListViewModel to FarmViewModel for dropdown
+                _accessibleFarms = accessibleFarms.Select(f => new FarmViewModel 
+                { 
+                    Id = f.Id, 
+                    Name = f.Name 
+                }).ToList();
+            
+                // If only one farm, select it automatically
+                if (_accessibleFarms.Count == 1)
                 {
-                    _accessibleFarms = response.Result
-                        .Where(f => accessibleFarmIds.Contains(f.Id))
-                        .ToList();
-                    
-                    // If only one farm, select it automatically
-                    if (_accessibleFarms.Count == 1)
-                    {
-                        _field.FarmId = _accessibleFarms[0].Id;
-                        await LoadFarmDetails(_field.FarmId);
-                    }
+                    _field.FarmId = _accessibleFarms[0].Id;
+                    await LoadFarmDetails(_field.FarmId);
                 }
             }
             else
@@ -346,74 +341,90 @@
     }
 
     private async Task LoadFarmDetails(string farmId)
+{
+    if (string.IsNullOrEmpty(farmId)) return;
+    
+    try
     {
-        if (string.IsNullOrEmpty(farmId)) return;
+        await ShowSpinner();
         
-        try
+        // Get detailed farm information with field data
+        var client = await ApiCall.GetHttpClient();
+        _selectedFarm = await ApiCall.Get<FarmMapViewModel>(
+            client, $"farms/GetFarmDetails/{farmId}");
+
+        if (_mapModule != null && _mapInstance != null)
         {
-            await ShowSpinner();
-            
-            // Get detailed farm information with field data
-            var client = await ApiCall.GetHttpClient();
-            var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<FarmMapViewModel>>(
-                client, $"farms/GetFarmDetails/{farmId}");
-            
-            if (response?.Status == 200 && response.Result != null)
-            {
-                _selectedFarm = response.Result;
+            // Clear the map first
+            await _mapModule.InvokeVoidAsync("clearMap", _mapInstance);
                 
-                if (_mapModule != null && _mapInstance != null)
+            // Check if farm has polygon coordinates
+            if (_selectedFarm.IsPolygon && _selectedFarm.FarmPolygon.Count > 0 && 
+                _selectedFarm.FarmPolygon[0].Count >= 3)
+            {
+                // Draw the farm boundary
+                await _mapModule.InvokeVoidAsync("drawFarmBoundary",
+                    _mapInstance,
+                    _selectedFarm.Id,
+                    _selectedFarm.FarmPolygon,
+                    _selectedFarm.Name);
+                    
+                // Calculate bounds of the farm polygon for better centering
+                double minLat = double.MaxValue, maxLat = double.MinValue;
+                double minLng = double.MaxValue, maxLng = double.MinValue;
+                    
+                foreach (var coord in _selectedFarm.FarmCoordinates)
                 {
-                    // Clear the map
-                    await _mapModule.InvokeVoidAsync("clearMap", _mapInstance);
-                    
-                    // Draw the farm boundary if available
-                    if (_selectedFarm.IsPolygon && _selectedFarm.FarmPolygon.Count > 0 && 
-                        _selectedFarm.FarmPolygon[0].Count > 0)
+                    if (coord.Count >= 2)
                     {
-                        await _mapModule.InvokeVoidAsync("drawFarmBoundary",
-                            _mapInstance,
-                            _selectedFarm.Id,
-                            _selectedFarm.FarmPolygon,
-                            _selectedFarm.Name);
-                            
-                        // Highlight the draw tool after farm boundary is drawn
-                        await _mapModule.InvokeVoidAsync("highlightDrawTool", _mapInstance);
-                    }
-                    
-                    // Center the map on the farm
-                    if (_selectedFarm.IsPolygon && _selectedFarm.FarmCoordinates.Count > 0)
-                    {
-                        // Calculate center of the farm polygon
-                        double avgLat = _selectedFarm.FarmCoordinates.Average(c => c[1]);
-                        double avgLng = _selectedFarm.FarmCoordinates.Average(c => c[0]);
-                        
-                        await _mapModule.InvokeVoidAsync("centerMap", _mapInstance, avgLat, avgLng, 15);
-                    }
-                    else if (_selectedFarm.Latitude != 0 && _selectedFarm.Longitude != 0)
-                    {
-                        await _mapModule.InvokeVoidAsync("centerMap", 
-                            _mapInstance, _selectedFarm.Latitude, _selectedFarm.Longitude, 15);
-                    }
-                    else
-                    {
-                        // Default view for Zimbabwe
-                        await _mapModule.InvokeVoidAsync("centerMap", 
-                            _mapInstance, -17.824858, 31.053028, 7);
+                        minLng = Math.Min(minLng, coord[0]);
+                        maxLng = Math.Max(maxLng, coord[0]);
+                        minLat = Math.Min(minLat, coord[1]);
+                        maxLat = Math.Max(maxLat, coord[1]);
                     }
                 }
+                    
+                // Center the map on the polygon centroid with appropriate zoom
+                double centerLat = (minLat + maxLat) / 2;
+                double centerLng = (minLng + maxLng) / 2;
+                    
+                // Calculate appropriate zoom level based on polygon size
+                // Default to zoom level 15 if calculation fails
+                int zoomLevel = 15;
+                    
+                // Fit to bounds with slight padding
+                await _mapModule.InvokeVoidAsync("fitMapToBounds", 
+                    _mapInstance, 
+                    minLat, minLng, 
+                    maxLat, maxLng);
+                    
+                // Highlight the draw tool after farm boundary is drawn
+                await _mapModule.InvokeVoidAsync("highlightDrawTool");
+            }
+            else if (_selectedFarm.Latitude != 0 && _selectedFarm.Longitude != 0)
+            {
+                // If no polygon but farm has coordinates, center on those
+                await _mapModule.InvokeVoidAsync("centerMap", 
+                    _mapInstance, _selectedFarm.Latitude, _selectedFarm.Longitude, 15);
+            }
+            else
+            {
+                // Default view for Zimbabwe if no farm coordinates
+                await _mapModule.InvokeVoidAsync("centerMap", 
+                    _mapInstance, -17.824858, 31.053028, 7);
             }
         }
-        catch (Exception ex)
-        {
-            _alert.Show($"Error loading farm details: {ex.Message}", 
-                showTitle: true, toastType: ToastType.Danger);
-        }
-        finally
-        {
-            await HideSpinner();
-        }
     }
+    catch (Exception ex)
+    {
+        _alert.Show($"Error loading farm details: {ex.Message}", 
+            showTitle: true, toastType: ToastType.Danger);
+    }
+    finally
+    {
+        await HideSpinner();
+    }
+}
 
     private async Task InitializeDrawingControls()
     {
