@@ -3,9 +3,12 @@
 
 @using Hurudza.UI.Web.Pages.Farms
 @using Hurudza.UI.Shared.Api.Interfaces
+@using Hurudza.UI.Web.Services
 @using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
 @inject IApiCall ApiCall
 @inject NavigationManager Navigation
+@inject FarmAccessService FarmAccessService
+@inject AuthenticationStateProvider AuthStateProvider
 
 <Toast @ref="Alert"/>
 
@@ -13,148 +16,487 @@
     <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0">
-                <h6>Fields</h6>
+                <div class="d-flex justify-content-between">
+                    <h6>Fields</h6>
+                    @if (_hasFieldManagePermission)
+                    {
+                        <button class="btn btn-sm btn-success" @onclick="NavigateToCreateField">
+                            <i class="fas fa-plus me-2"></i>Add New Field
+                        </button>
+                    }
+                </div>
             </div>
             <div class="card-body px-2 pt-0 pb-2">
-                <SfGrid
-                    DataSource="@_fields"
-                    @ref="Grid"
-                    AllowPaging="true"
-                    AllowExcelExport="true"
-                    AllowSorting="true"
-                    AllowMultiSorting="true"
-                    EnableStickyHeader="true"
-                    AllowResizing="true"
-                    AllowFiltering="true"
-                    AllowSelection="true"
-                    Toolbar="@(new List<string>() { "Add", "ExcelExport", "Print", "Search" })"
-                    ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Edit", "Delete", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
-                    <GridPageSettings PageSize="12"></GridPageSettings>
-                    <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
-                    <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="FieldViewModel"></GridEvents>
-                    <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog">
-                        <HeaderTemplate>
-                            @{
-                                var text = GetHeader((context as FieldViewModel));
-                                <span>@text</span>
-                            }
-                        </HeaderTemplate>
-                        <Validator>
-                            <DataAnnotationsValidator></DataAnnotationsValidator>
-                        </Validator>
-                        <Template>
-                            @{
-                                var Field = (context as FieldViewModel);
-                                <div>
-                                    <div class="form-row">
-                                        <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(Field.Id)"></SfTextBox>
-                                        <div class="form-group">
-                                            <label>Farm</label>
-                                            <SfComboBox ID="farm" TValue="string" TItem="FarmViewModel" @bind-Value="@(Field.FarmId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Farm" DataSource="@_farms">
-                                                <ComboBoxEvents TItem="FarmViewModel" TValue="string"></ComboBoxEvents>
-                                                <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
-                                            </SfComboBox>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Field Name</label>
-                                            <SfTextBox ID="name" TValue="string" @bind-Value="@(Field.Name)" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Field.Name"/>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Description</label>
-                                            <SfTextBox ID="name" TValue="string" @bind-Value="@(Field.Description)" Multiline="true" ValidateOnInput="true"></SfTextBox>
-                                            <ValidationMessage For="() => Field.Description"/>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Size (Hectares)</label>
-                                            <SfNumericTextBox ID="size" TValue="float" @bind-Value="@(Field.Size)" Decimals=3 Format="n3" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
-                                            <ValidationMessage For="() => Field.Size"/>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Soil Type</label>
-                                            <SfDropDownList ID="region" TValue="SoilType" TItem="SoilTypeModel" @bind-Value="@(Field.SoilType)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Soil Type" DataSource="@_regions">
-                                                <DropDownListFieldSettings Value="SoilType" Text="Name"></DropDownListFieldSettings>
-                                            </SfDropDownList>
-                                        </div>
-                                        <div class="form-group">
-                                            <SfCheckBox Label="Is under Irrigation?" @bind-Checked="@(Field.Irrigation)"></SfCheckBox>
-                                        </div>
-                                        <div class="form-group">
-                                            <SfSpinner @ref="SaveSpinner"></SfSpinner>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </Template>
-                    </GridEditSettings>
-                    <GridColumns>
-                        <GridColumn Field=@nameof(FieldViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
-                        <GridColumn Field=@nameof(FieldViewModel.Farm) HeaderText="Farm" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
-                        <GridColumn Field=@nameof(FieldViewModel.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
-                        <GridColumn Field=@nameof(FieldViewModel.Description) HeaderText="Description" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
-                        <GridColumn Field=@nameof(FieldViewModel.Size) HeaderText="Size (Ha)" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                        <GridColumn Field=@nameof(FieldViewModel.SoilType) HeaderText="Soil Type" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                        <GridColumn Field=@nameof(FieldViewModel.Irrigation) HeaderText="Irrigation" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" Width="120">
+                @if (isLoading)
+                {
+                    <div class="d-flex justify-content-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <SfGrid
+                        DataSource="@_fields"
+                        @ref="Grid"
+                        AllowPaging="true"
+                        AllowExcelExport="true"
+                        AllowSorting="true"
+                        AllowMultiSorting="true"
+                        EnableStickyHeader="true"
+                        AllowResizing="true"
+                        AllowFiltering="true"
+                        AllowSelection="true"
+                        Toolbar="@(new List<string>() { "ExcelExport", "Print", "Search" })"
+                        ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                        <GridPageSettings PageSize="12"></GridPageSettings>
+                        <GridFilterSettings Type="FilterType.Excel" ShowFilterBarStatus="true"></GridFilterSettings>
+                        <GridEvents OnActionBegin="ActionBeginHandler" RowSelected="RowSelectHandler" TValue="FieldViewModel"></GridEvents>
+                        <GridEditSettings AllowAdding="@_hasFieldManagePermission" AllowEditing="@_hasFieldManagePermission" AllowDeleting="@_hasFieldManagePermission" Mode="EditMode.Dialog">
+                            <HeaderTemplate>
+                                @{
+                                    var text = GetHeader((context as FieldViewModel));
+                                    <span>@text</span>
+                                }
+                            </HeaderTemplate>
+                            <Validator>
+                                <DataAnnotationsValidator></DataAnnotationsValidator>
+                            </Validator>
                             <Template>
                                 @{
-                                    var field = (context as FieldViewModel);
-                                    <div class="template_checkbox">
-                                        @if (field.Irrigation)
-                                        {
-                                            <input type="checkbox" checked>
-                                        }
-                                        else
-                                        {
-                                            <input type="checkbox">
-                                        }
+                                    var Field = (context as FieldViewModel);
+                                    <div>
+                                        <div class="form-row">
+                                            <SfTextBox ID="id" TValue="string" hidden="hidden" @bind-Value="@(Field.Id)"></SfTextBox>
+                                            <div class="form-group">
+                                                <label>Farm</label>
+                                                <SfComboBox ID="farm" TValue="string" TItem="FarmViewModel" @bind-Value="@(Field.FarmId)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Farm" DataSource="@_accessibleFarmsForDropdown">
+                                                    <ComboBoxEvents TItem="FarmViewModel" TValue="string"></ComboBoxEvents>
+                                                    <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                                                </SfComboBox>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Field Name</label>
+                                                <SfTextBox ID="name" TValue="string" @bind-Value="@(Field.Name)" ValidateOnInput="true"></SfTextBox>
+                                                <ValidationMessage For="() => Field.Name"/>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <SfTextBox ID="name" TValue="string" @bind-Value="@(Field.Description)" Multiline="true" ValidateOnInput="true"></SfTextBox>
+                                                <ValidationMessage For="() => Field.Description"/>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Size (Hectares)</label>
+                                                <SfNumericTextBox ID="size" TValue="float" @bind-Value="@(Field.Size)" Decimals=3 Format="n3" FloatLabelType="@FloatLabelType.Auto"></SfNumericTextBox>
+                                                <ValidationMessage For="() => Field.Size"/>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Soil Type</label>
+                                                <SfDropDownList ID="region" TValue="SoilType" TItem="SoilTypeModel" @bind-Value="@(Field.SoilType)" PopupHeight="350px" PopupWidth="350px" Placeholder="Select a Soil Type" DataSource="@_regions">
+                                                    <DropDownListFieldSettings Value="SoilType" Text="Name"></DropDownListFieldSettings>
+                                                </SfDropDownList>
+                                            </div>
+                                            <div class="form-group">
+                                                <SfCheckBox Label="Is under Irrigation?" @bind-Checked="@(Field.Irrigation)"></SfCheckBox>
+                                            </div>
+                                            <div class="form-group">
+                                                <SfSpinner @ref="SaveSpinner"></SfSpinner>
+                                            </div>
+                                        </div>
                                     </div>
                                 }
                             </Template>
-                        </GridColumn>
-                        <GridColumn HeaderText="Actions" TextAlign="TextAlign.Center" Width="150">
-                            <GridCommandColumns>
-                                <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-edit", CssClass = "e-flat" })"></GridCommandColumn>
-                                <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-delete", CssClass = "e-flat" })"></GridCommandColumn>
-                            </GridCommandColumns>
-                        </GridColumn>
-                    </GridColumns>
-                </SfGrid>
-                <SfDialog @ref="Dialog" Width="250px" Visible="false" ShowCloseIcon="true" IsModal="true">
-                    <DialogEvents Closed="Closed"></DialogEvents>
-                    <DialogTemplates>
-                        <Header> Delete Record</Header>
-                        <Content>
-                            You are about to Delete a Record @SelectedField.Name?
-                            <div class="form-group">
-                                <SfSpinner @ref="DeleteSpinner"></SfSpinner>
-                            </div>
-                        </Content>
-                    </DialogTemplates>
-                    <DialogButtons>
-                        <DialogButton OnClick="@OkClick" Content="OK" IsPrimary="true"></DialogButton>
-                        <DialogButton OnClick="@CancelClick" Content="Cancel"></DialogButton>
-                    </DialogButtons>
-                </SfDialog>
+                        </GridEditSettings>
+                        <GridColumns>
+                            <GridColumn Field=@nameof(FieldViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                            <GridColumn Field=@nameof(FieldViewModel.Farm) HeaderText="Farm" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                            <GridColumn Field=@nameof(FieldViewModel.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                            <GridColumn Field=@nameof(FieldViewModel.Description) HeaderText="Description" TextAlign="TextAlign.Center" Width="120" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                            <GridColumn Field=@nameof(FieldViewModel.Size) HeaderText="Size (Ha)" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                            <GridColumn Field=@nameof(FieldViewModel.SoilType) HeaderText="Soil Type" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                            <GridColumn Field=@nameof(FieldViewModel.Irrigation) HeaderText="Irrigation" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" Width="120">
+                                <Template>
+                                    @{
+                                        var field = (context as FieldViewModel);
+                                        <div class="template_checkbox">
+                                            @if (field.Irrigation)
+                                            {
+                                                <input type="checkbox" checked>
+                                            }
+                                            else
+                                            {
+                                                <input type="checkbox">
+                                            }
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText="Actions" TextAlign="TextAlign.Center" Width="150">
+                                <Template>
+                                    @{
+                                        var field = (context as FieldViewModel);
+                                        <div class="d-flex justify-content-center">
+                                            @if (_hasFieldManagePermission)
+                                            {
+                                                <button type="button" class="btn btn-outline-primary btn-sm me-1" @onclick="() => ShowEditDialog(field)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm me-1" @onclick="() => DeleteFieldPrompt(field)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            }
+                                            <button type="button" class="btn btn-outline-info btn-sm" @onclick="() => ViewFieldDetails(field)">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                    
+                    <!-- Delete Confirmation Dialog -->
+                    <SfDialog @ref="DeleteDialog" Width="350px" Visible="false" ShowCloseIcon="true" IsModal="true">
+                        <DialogTemplates>
+                            <Header>Delete Field</Header>
+                            <Content>
+                                @if (SelectedField != null)
+                                {
+                                    <div>
+                                        <p>Are you sure you want to delete the field <strong>@SelectedField.Name</strong>?</p>
+                                        <p class="text-danger">This action cannot be undone.</p>
+                                        
+                                        <div class="d-flex justify-content-end mt-3">
+                                            <button type="button" class="btn btn-secondary me-2" @onclick="CancelDelete">Cancel</button>
+                                            <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">
+                                                @if (isDeleting)
+                                                {
+                                                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                                    <span>Deleting...</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Delete</span>
+                                                }
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </Content>
+                        </DialogTemplates>
+                    </SfDialog>
+                    
+                    <!-- Field Edit Dialog -->
+                    <SfDialog @ref="EditDialog" Width="500px" Height="auto" IsModal="true" ShowCloseIcon="true" Visible="false">
+                        <DialogTemplates>
+                            <Header>
+                                @if (FieldToEdit != null)
+                                {
+                                    <span>Edit Field: @FieldToEdit.Name</span>
+                                }
+                                else
+                                {
+                                    <span>Add New Field</span>
+                                }
+                            </Header>
+                            <Content>
+                                @if (FieldToEdit != null)
+                                {
+                                    <EditForm Model="@FieldToEdit" OnValidSubmit="@HandleEditSubmit">
+                                        <DataAnnotationsValidator />
+                                        <ValidationSummary />
+                                        
+                                        <div class="form-group mb-3">
+                                            <label>Farm</label>
+                                            <SfDropDownList TValue="string" TItem="FarmViewModel" @bind-Value="@FieldToEdit.FarmId" 
+                                                            DataSource="@_accessibleFarmsForDropdown" Placeholder="Select Farm">
+                                                <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                                            </SfDropDownList>
+                                            <ValidationMessage For="@(() => FieldToEdit.FarmId)" />
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label>Field Name</label>
+                                            <SfTextBox @bind-Value="@FieldToEdit.Name" Placeholder="Enter field name"></SfTextBox>
+                                            <ValidationMessage For="@(() => FieldToEdit.Name)" />
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label>Description</label>
+                                            <SfTextBox Multiline="true" @bind-Value="@FieldToEdit.Description" Placeholder="Enter description"></SfTextBox>
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label>Size (Hectares)</label>
+                                            <SfNumericTextBox TValue="float" @bind-Value="@FieldToEdit.Size" Format="N2"></SfNumericTextBox>
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label>Soil Type</label>
+                                            <SfDropDownList TValue="SoilType" TItem="SoilTypeModel" @bind-Value="@FieldToEdit.SoilType" 
+                                                            DataSource="@_regions" Placeholder="Select soil type">
+                                                <DropDownListFieldSettings Value="SoilType" Text="Name"></DropDownListFieldSettings>
+                                            </SfDropDownList>
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <SfCheckBox Label="Is under Irrigation?" @bind-Checked="@FieldToEdit.Irrigation"></SfCheckBox>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-end mt-4">
+                                            <button type="button" class="btn btn-secondary me-2" @onclick="CancelEdit">Cancel</button>
+                                            <button type="submit" class="btn btn-primary">
+                                                @if (isSaving)
+                                                {
+                                                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                                    <span>Saving...</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Save</span>
+                                                }
+                                            </button>
+                                        </div>
+                                    </EditForm>
+                                }
+                            </Content>
+                        </DialogTemplates>
+                    </SfDialog>
+                }
             </div>
         </div>
     </div>
 </div>
 
-@code{
+@code {
+    // Component references
     SfGrid<FieldViewModel> Grid;
-    SfDialog Dialog;
+    SfDialog DeleteDialog;
+    SfDialog EditDialog;
     SfSpinner SaveSpinner;
-    SfSpinner DeleteSpinner;
     Toast Alert;
-    List<FieldViewModel> _fields;
-    List<FarmViewModel> _farms;
+    
+    // Data
+    List<FieldViewModel> _fields = new List<FieldViewModel>();
+    List<FarmViewModel> _farms = new List<FarmViewModel>();
+    List<FarmViewModel> _accessibleFarmsForDropdown = new List<FarmViewModel>();
+    List<FarmListViewModel> _accessibleFarms = new List<FarmListViewModel>();
     List<SoilTypeModel> _regions = Enum.GetValues<SoilType>().Select(x => new SoilTypeModel(x)).ToList();
-    bool Enabled = true;
-    bool Data = false;
+    
+    // Check if we're on the first load to prevent auto-opening of dialogs
+    private bool isFirstLoad = true;
+    
+    // State
+    bool isLoading = true;
+    bool isDeleting = false;
+    bool isSaving = false;
     FieldViewModel SelectedField;
-    bool flag = true;
-    ClaimsPrincipal Field;
+    FieldViewModel FieldToEdit;
+    ClaimsPrincipal _user;
+    bool _hasFieldManagePermission = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+        
+        // Check user permissions for managing fields
+        _hasFieldManagePermission = await FarmAccessService.HasPermission(Claims.FieldManage) || 
+                                   await FarmAccessService.HasPermission(Claims.FieldCreate);
+        
+        // Load accessible farms for the current user
+        _accessibleFarms = await FarmAccessService.GetAccessibleFarms();
+        
+        await LoadFieldsForAccessibleFarms();
+    }
+    
+    private async Task LoadFieldsForAccessibleFarms()
+    {
+        isLoading = true;
+        _fields.Clear();
+        
+        try
+        {
+            if (_accessibleFarms.Any())
+            {
+                // Load all farms for reference
+                _farms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(await ApiCall.GetHttpClient(), "Farms/getFarms/")).ToList();
+                
+                // Convert farm list to FarmViewModel for the dropdown
+                _accessibleFarmsForDropdown = _farms
+                    .Where(f => _accessibleFarms.Any(af => af.Id == f.Id))
+                    .ToList();
+                
+                // Get farm IDs the user has access to
+                var farmIds = _accessibleFarms.Select(f => f.Id).ToList();
+                
+                // Load fields for each accessible farm
+                foreach (var farmId in farmIds)
+                {
+                    var farmFields = await ApiCall.Get<IEnumerable<FieldViewModel>>(
+                        await ApiCall.GetHttpClient(), $"Fields/getfarmfields/{farmId}");
+                    
+                    if (farmFields != null)
+                    {
+                        _fields.AddRange(farmFields);
+                    }
+                }
+            }
+            else
+            {
+                // If user has system admin role, get all fields
+                if (_user.IsInRole("SystemAdministrator"))
+                {
+                    _fields = (await ApiCall.Get<IEnumerable<FieldViewModel>>(
+                        await ApiCall.GetHttpClient(), "Fields/getFields/")).ToList();
+                    
+                    // Also load all farms
+                    _farms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(
+                        await ApiCall.GetHttpClient(), "Farms/getFarms/")).ToList();
+                    
+                    // Use all farms for the dropdown
+                    _accessibleFarmsForDropdown = _farms;
+                }
+                else
+                {
+                    Alert.Show("You don't have access to any farms.", showTitle: true, toastType: ToastType.Warning);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading fields: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    
+    private void RowSelectHandler(RowSelectEventArgs<FieldViewModel> args)
+    {
+        SelectedField = args.Data;
+    }
+    
+    private async Task ActionBeginHandler(ActionEventArgs<FieldViewModel> args)
+    {
+        // Handle grid events if needed
+        if (args.RequestType == Action.FilterChoiceRequest)
+        {
+            args.FilterChoiceCount = 100;
+        }
+    }
+    
+    #region Edit Field Functions
+    
+    private void ShowEditDialog(FieldViewModel field)
+    {
+        // Create a copy of the field to avoid modifying the original directly
+        FieldToEdit = new FieldViewModel
+        {
+            Id = field.Id,
+            Name = field.Name,
+            Description = field.Description,
+            FarmId = field.FarmId,
+            Size = field.Size,
+            SoilType = field.SoilType,
+            Irrigation = field.Irrigation
+        };
+        
+        EditDialog.ShowAsync();
+    }
+    
+    private void ShowAddDialog()
+    {
+        // Create a new field
+        FieldToEdit = new FieldViewModel
+        {
+            Irrigation = false,
+            SoilType = SoilType.Loamy
+        };
+        
+        // Set default farm if only one is accessible
+        if (_accessibleFarmsForDropdown.Count == 1)
+        {
+            FieldToEdit.FarmId = _accessibleFarmsForDropdown[0].Id;
+        }
+        
+        EditDialog.ShowAsync();
+    }
+    
+    private async Task HandleEditSubmit()
+    {
+        isSaving = true;
+        
+        try
+        {
+            if (string.IsNullOrEmpty(FieldToEdit.Id))
+            {
+                // Creating a new field
+                await SaveField(FieldToEdit);
+            }
+            else
+            {
+                // Updating existing field
+                await UpdateField(FieldToEdit);
+            }
+            
+            // Close dialog and refresh data
+            await EditDialog.HideAsync();
+            await LoadFieldsForAccessibleFarms();
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+    
+    private void CancelEdit()
+    {
+        EditDialog.HideAsync();
+    }
+    
+    #endregion
+    
+    #region Delete Field Functions
+    
+    private void DeleteFieldPrompt(FieldViewModel field)
+    {
+        SelectedField = field;
+        DeleteDialog.ShowAsync();
+    }
+    
+    private void CancelDelete()
+    {
+        DeleteDialog.HideAsync();
+    }
+    
+    private async Task ConfirmDelete()
+    {
+        isDeleting = true;
+        
+        try
+        {
+            if (await DeleteField(SelectedField))
+            {
+                await DeleteDialog.HideAsync();
+                await LoadFieldsForAccessibleFarms();
+            }
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+    
+    #endregion
+    
+    private void ViewFieldDetails(FieldViewModel field)
+    {
+        Navigation.NavigateTo($"/field/{field.Id}");
+    }
+    
     private string GetHeader(FieldViewModel Value)
     {
         if (string.IsNullOrEmpty(Value.Id))
@@ -166,89 +508,18 @@
             return "Edit Details of " + Value.Name;
         }
     }
-
-    private void Closed()
-    {
-        flag = true;
-    }
-
-    private async Task ActionBeginHandler(ActionEventArgs<FieldViewModel> args)
-    {
-        switch (args.RequestType)
-        {
-            case Action.FilterChoiceRequest:
-                args.FilterChoiceCount = 100;
-                break;
-            case Action.Add:
-                Data = true;
-                break;
-            case Action.Delete when flag:
-                args.Cancel = true;
-                await Dialog.ShowAsync();
-                flag = false;
-                break;
-            case Action.Save:
-            {
-                if (SaveSpinner.Visible)
-                {
-                    args.Cancel = true;
-                    break;
-                }
-
-                await SaveSpinner.ShowAsync();
-                if (!string.IsNullOrEmpty(args.Data.Id))
-                {
-                    if (!await UpdateField(args.Data))
-                    {
-                        args.Cancel = true;
-                    }
-                }
-                else
-                {
-                    if (!await SaveField(args.Data))
-                    {
-                        args.Cancel = true;
-                    }
-                }
-
-
-                await SaveSpinner.HideAsync();
-                break;
-            }
-        }
-    }
-
-    private void RowSelectHandler(RowSelectEventArgs<FieldViewModel> args)
-    {
-        SelectedField = args.Data;
-        Navigation.NavigateTo($"/field/{SelectedField.Id}");
-    }
-
-    private async Task OkClick()
-    {
-        await DeleteSpinner.ShowAsync();
-        if (await DeleteField(SelectedField))
-        {
-            await Grid.DeleteRecordAsync();
-            await Dialog.HideAsync();
-        }
-        await DeleteSpinner.HideAsync();
-    }
-
-    private async Task CancelClick()
-    {
-        await Dialog.HideAsync();
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        _fields = (await ApiCall.Get<IEnumerable<FieldViewModel>>(await ApiCall.GetHttpClient(), "Fields/getFields/")).ToList();
-        _farms = (await ApiCall.Get<IEnumerable<FarmViewModel>>(await ApiCall.GetHttpClient(), "Farms/getFarms/")).ToList();
-    }
-
+    
     private async Task<bool> SaveField(FieldViewModel model)
     {
-        var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldViewModel>, FieldViewModel>(await ApiCall.GetHttpClient(), "fields/createfield", model);
+        // Verify the user has access to the selected farm
+        if (!_accessibleFarms.Any(f => f.Id == model.FarmId))
+        {
+            Alert.Show("You don't have permission to create fields for this farm.", showTitle: true, toastType: ToastType.Danger);
+            return false;
+        }
+        
+        var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FieldViewModel>, FieldViewModel>(
+            await ApiCall.GetHttpClient(), "fields/createfield", model);
 
         if (response == null)
         {
@@ -269,7 +540,15 @@
 
     private async Task<bool> UpdateField(FieldViewModel model)
     {
-        var response = await ApiCall.Update<UI.Shared.Models.ApiResponse<FieldViewModel>, FieldViewModel>(await ApiCall.GetHttpClient(), "Fields/updateField", model.Id, model);
+        // Verify the user has access to the selected farm
+        if (!_accessibleFarms.Any(f => f.Id == model.FarmId))
+        {
+            Alert.Show("You don't have permission to update fields for this farm.", showTitle: true, toastType: ToastType.Danger);
+            return false;
+        }
+        
+        var response = await ApiCall.Update<UI.Shared.Models.ApiResponse<FieldViewModel>, FieldViewModel>(
+            await ApiCall.GetHttpClient(), "Fields/updateField", model.Id, model);
 
         if (response == null)
         {
@@ -290,7 +569,15 @@
 
     private async Task<bool> DeleteField(FieldViewModel model)
     {
-        var response = await ApiCall.Remove<UI.Shared.Models.ApiResponse<FieldViewModel>>(await ApiCall.GetHttpClient(), "Fields/deleteField", model.Id);
+        // Verify the user has access to the selected farm
+        if (!_accessibleFarms.Any(f => f.Id == model.FarmId))
+        {
+            Alert.Show("You don't have permission to delete fields for this farm.", showTitle: true, toastType: ToastType.Danger);
+            return false;
+        }
+        
+        var response = await ApiCall.Remove<UI.Shared.Models.ApiResponse<FieldViewModel>>(
+            await ApiCall.GetHttpClient(), "Fields/deleteField", model.Id);
 
         if (response == null)
         {
@@ -307,5 +594,15 @@
         }
 
         return false;
+    }
+    
+    private void NavigateToCreateField()
+    {
+        // For consistency with the original code, navigate to the create page
+        Navigation.NavigateTo("/fields/create");
+        
+        // Alternative approach: show the add dialog directly
+        // Uncomment the line below and comment out the Navigation line above to use this approach
+        // ShowAddDialog();
     }
 }
