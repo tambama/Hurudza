@@ -454,6 +454,25 @@ export async function calculateFieldSizeFromCoordinates(coordinates) {
     }
 }
 
+export function setupDrawingEvents(map, draw, dotNetRef) {
+    try {
+        // Set up standard drawing events using the imported mapDrawingModule function
+        mapDrawing.setupDrawingEvents(map, draw, dotNetRef);
+
+        // Return success object that matches the expected SetupResult format
+        return {
+            Success: true,
+            Message: "Drawing controls setup successfully"
+        };
+    } catch (error) {
+        console.error("Error setting up simple drawing controls:", error);
+        return {
+            Success: false,
+            Message: error.message
+        };
+    }
+}
+
 // Export other utility functions
 export const loadTurf = mapDrawing.loadTurf;
 export const toggleDrawButtonVisibility = mapDrawing.toggleDrawButtonVisibility;

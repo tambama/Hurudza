@@ -2943,11 +2943,10 @@
                     if (_drawControl is not null)
                     {
                         // Call setup function - now returns simple success/message object
-                        var setup = await _mapModule.InvokeAsync<SetupResult>(
-                            "setupSimpleDrawingControls", _mapInstance, _drawControl, _dotNetRef);
+                        await _mapModule.InvokeVoidAsync(
+                            "setupDrawingEvents", _mapInstance, _drawControl, _dotNetRef);
 
-                        Logger.LogInformation("Drawing controls setup: {success}, {message}",
-                            setup.Success, setup.Message);
+                        Logger.LogInformation("Drawing controls setup completed");
                     }
 
                     // Important: Only load clusters once after initialization
