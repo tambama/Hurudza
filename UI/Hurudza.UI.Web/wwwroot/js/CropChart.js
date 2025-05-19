@@ -1,178 +1,276 @@
-// Function to render the crop distribution chart
-window.renderCropDistributionChart = function (farmNames, farmSizes) {
-    // Check if the chart container exists
-    const chartContainer = document.getElementById('cropDistributionChart');
-    if (!chartContainer) return;
+/**
+ * Hurudza Farm Management System
+ * Chart rendering functions for crop reports and statistics
+ */
 
-    // Clear any existing chart
-    chartContainer.innerHTML = '';
+// Chart instances for reuse and updating
+let chartInstances = {};
 
-    // Create the chart using Chart.js or any other library you have available
-    // This example uses Chart.js
-    const ctx = document.createElement('canvas');
-    chartContainer.appendChild(ctx);
+/**
+ * Initialize the charting system
+ */
+function initCharts() {
+    console.log('Chart system initialized');
 
-    // Ensure Chart.js is available
-    if (typeof Chart === 'undefined') {
-        console.error('Chart.js is not loaded');
-        return;
-    }
+    // Clean up any existing charts when page changes
+    window.addEventListener('beforeunload', function() {
+        destroyAllCharts();
+    });
+}
 
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: farmNames,
-            datasets: [{
-                label: 'Hectares',
-                data: farmSizes,
-                backgroundColor: 'rgba(66, 135, 245, 0.7)',
-                borderColor: 'rgba(66, 135, 245, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Hectares'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Farm'
-                    }
-                }
+/**
+ * Destroy all chart instances to prevent memory leaks
+ */
+function destroyAllCharts() {
+    for (const key in chartInstances) {
+        if (chartInstances[key]) {
+            try {
+                chartInstances[key].destroy();
+            } catch (e) {
+                console.warn(`Failed to destroy chart ${key}:`, e);
             }
         }
-    });
-};
+    }
+    chartInstances = {};
+}
 
-// Function to render the irrigation chart
-window.renderIrrigationChart = function (irrigatedSize, nonIrrigatedSize) {
-    // Check if the chart container exists
-    const chartContainer = document.getElementById('irrigationChart');
-    if (!chartContainer) return;
-
-    // Clear any existing chart
-    chartContainer.innerHTML = '';
-
-    // Create the chart using Chart.js or any other library you have available
-    const ctx = document.createElement('canvas');
-    chartContainer.appendChild(ctx);
-
-    // Ensure Chart.js is available
-    if (typeof Chart === 'undefined') {
-        console.error('Chart.js is not loaded');
-        return;
+/**
+ * Create or get a canvas element within a container
+ * @param {string} containerId - ID of the container element
+ * @returns {HTMLCanvasElement|null} - Canvas element or null if container not found
+ */
+function getOrCreateCanvas(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.error(`Chart container not found: ${containerId}`);
+        return null;
     }
 
-    new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: ['Irrigated', 'Non-Irrigated'],
-            datasets: [{
-                data: [irrigatedSize, nonIrrigatedSize],
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.7)',
-                    'rgba(201, 203, 207, 0.7)'
-                ],
-                borderColor: [
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(201, 203, 207, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
+    // Check if container already has a canvas
+    let canvas = container.querySelector('canvas');
+
+    // If no canvas exists, create one
+    if (!canvas) {
+        canvas = document.createElement('canvas');
+        container.innerHTML = ''; // Clear container
+        container.appendChild(canvas);
+        console.log(`Created new canvas in container ${containerId}`);
+    }
+
+    return canvas;
+}
+
+/**
+ * Renders a bar chart showing crop distribution by hectares
+ * @param {string[]} labels - Array of crop names
+ * @param {number[]} values - Array of hectare values for each crop
+ */
+function renderCropSummaryChart(labels, values) {
+    try {
+        console.log('Attempting to render crop summary chart with data:', { labels, values });
+
+        if (!labels || !values || labels.length === 0) {
+            console.error('Invalid data for crop summary chart');
+            return;
+        }
+
+        const canvas = getOrCreateCanvas('cropSummaryChart');
+        if (!canvas) return;
+
+        // Destroy previous chart instance if it exists
+        if (chartInstances.cropSummary) {
+            chartInstances.cropSummary.destroy();
+        }
+
+        // Convert values to numbers and ensure they're valid
+        const safeValues = values.map(v => Number(v) || 0);
+
+        // Create color array
+        const backgroundColors = safeValues.map(() => 'rgba(76, 175, 80, 0.7)');
+        const borderColors = safeValues.map(() => 'rgba(76, 175, 80, 1)');
+
+        // Create the chart
+        chartInstances.cropSummary = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Hectares',
+                    data: safeValues,
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Hectares'
+                        }
+                    }
                 },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.label || '';
-                            let value = context.raw || 0;
-                            let sum = context.dataset.data.reduce((a, b) => a + b, 0);
-                            let percentage = ((value * 100) / sum).toFixed(1) + '%';
-                            return `${label}: ${value.toFixed(2)} Ha (${percentage})`;
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.parsed.y.toFixed(2)} ha`;
+                            }
                         }
                     }
                 }
             }
-        }
-    });
-};
+        });
 
-// Function to create a summary chart showing crop distribution across all farms
-window.renderCropSummaryChart = function(cropNames, cropAreas) {
-    // Check if the chart container exists
-    const chartContainer = document.getElementById('cropSummaryChart');
-    if (!chartContainer) return;
-
-    // Clear any existing chart
-    chartContainer.innerHTML = '';
-
-    // Create the chart using Chart.js
-    const ctx = document.createElement('canvas');
-    chartContainer.appendChild(ctx);
-
-    // Ensure Chart.js is available
-    if (typeof Chart === 'undefined') {
-        console.error('Chart.js is not loaded');
-        return;
+        console.log('Crop summary chart rendered successfully');
+    } catch (err) {
+        console.error('Error rendering crop summary chart:', err);
     }
+}
 
-    // Generate colors for each crop
-    const generateColors = (count) => {
-        const colors = [];
-        for (let i = 0; i < count; i++) {
-            const hue = (i * 137) % 360; // Use golden angle approximation for good distribution
-            colors.push(`hsla(${hue}, 70%, 60%, 0.7)`);
+/**
+ * Renders a pie chart showing irrigated vs non-irrigated distribution
+ * @param {number} irrigatedArea - Total irrigated hectares
+ * @param {number} nonIrrigatedArea - Total non-irrigated hectares
+ */
+function renderIrrigationChart(irrigatedArea, nonIrrigatedArea) {
+    try {
+        console.log('Attempting to render irrigation chart with data:', { irrigatedArea, nonIrrigatedArea });
+
+        // Try both possible container IDs
+        let canvas = getOrCreateCanvas('irrigationChart');
+        if (!canvas) {
+            canvas = getOrCreateCanvas('irrigationSummaryChart');
+            if (!canvas) {
+                console.error('Could not find irrigation chart container');
+                return;
+            }
         }
-        return colors;
-    };
 
-    const backgroundColor = generateColors(cropNames.length);
-    const borderColor = backgroundColor.map(color => color.replace('0.7', '1'));
+        // Destroy previous chart instance if it exists
+        if (chartInstances.irrigation) {
+            chartInstances.irrigation.destroy();
+        }
 
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: cropNames,
-            datasets: [{
-                data: cropAreas,
-                backgroundColor: backgroundColor,
-                borderColor: borderColor,
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.label || '';
-                            let value = context.raw || 0;
-                            let sum = context.dataset.data.reduce((a, b) => a + b, 0);
-                            let percentage = ((value * 100) / sum).toFixed(1) + '%';
-                            return `${label}: ${value.toFixed(2)} Ha (${percentage})`;
+        // Convert to proper numbers and ensure they're not zero
+        const safeIrrigated = Number(irrigatedArea) || 0.01;
+        const safeNonIrrigated = Number(nonIrrigatedArea) || 0.01;
+
+        // Create the chart
+        chartInstances.irrigation = new Chart(canvas, {
+            type: 'pie',
+            data: {
+                labels: ['Irrigated', 'Non-Irrigated'],
+                datasets: [{
+                    data: [safeIrrigated, safeNonIrrigated],
+                    backgroundColor: [
+                        'rgba(76, 175, 80, 0.7)',
+                        'rgba(245, 124, 0, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(76, 175, 80, 1)',
+                        'rgba(245, 124, 0, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = safeIrrigated + safeNonIrrigated;
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.parsed.toFixed(2)} ha (${percentage}%)`;
+                            }
                         }
                     }
                 }
             }
+        });
+
+        console.log('Irrigation chart rendered successfully');
+    } catch (err) {
+        console.error('Error rendering irrigation chart:', err);
+    }
+}
+
+/**
+ * Renders a bar chart showing crop distribution by farm
+ * @param {string[]} farms - Array of farm names
+ * @param {number[]} hectares - Array of hectare values for each farm
+ */
+function renderCropDistributionChart(farms, hectares) {
+    try {
+        console.log('Attempting to render crop distribution chart with data:', { farms, hectares });
+
+        if (!farms || !hectares || farms.length === 0) {
+            console.error('Invalid data for crop distribution chart');
+            return;
         }
-    });
-};
+
+        const canvas = getOrCreateCanvas('cropDistributionChart');
+        if (!canvas) return;
+
+        // Destroy previous chart instance if it exists
+        if (chartInstances.cropDistribution) {
+            chartInstances.cropDistribution.destroy();
+        }
+
+        // Convert values to numbers and ensure they're valid
+        const safeHectares = hectares.map(v => Number(v) || 0);
+
+        // Create the chart
+        chartInstances.cropDistribution = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: farms,
+                datasets: [{
+                    label: 'Hectares',
+                    data: safeHectares,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Hectares'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.parsed.y.toFixed(2)} ha`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        console.log('Crop distribution chart rendered successfully');
+    } catch (err) {
+        console.error('Error rendering crop distribution chart:', err);
+    }
+}
+
+// Initialize the chart system when the script loads
+initCharts();

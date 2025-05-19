@@ -2,6 +2,7 @@
 
 // Track initial toggle state
 let isFirstToggle = true;
+console.log("Enter app.js with love");
 
 /**
  * Function to toggle sidebar - accessible from Blazor via JS Interop

@@ -373,6 +373,13 @@
         finally
         {
             _loading = false;
+            await InvokeAsync(StateHasChanged);
+        
+            // Render charts if data is available
+            if (_fieldCrops != null && _fieldCrops.Any())
+            {
+                await RenderChartsAsync();
+            }
         }
     }
     
