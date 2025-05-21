@@ -9,7 +9,8 @@ public class UserProfiles : Profile
     public UserProfiles()
     {
         CreateMap<UserProfile, UserProfileViewModel>()
-            .ForMember(dst => dst.Fullname, opts => opts.MapFrom(src => src.User.Fullname));
+            .ForMember(dst => dst.Fullname, opts => opts.MapFrom(src => src.User.Fullname))
+            .ForMember(dst => dst.Farm, opts => opts.MapFrom(src => src.Farm.Name));
 
         CreateMap<UserProfile, UserViewModel>()
             .ForMember(dst => dst.Id, opts => opts.MapFrom(src => src.UserId))
