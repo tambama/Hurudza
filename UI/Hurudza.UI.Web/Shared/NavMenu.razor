@@ -9,56 +9,40 @@
 @inject IApiCall ApiCall
 @inject FarmAccessService FarmAccessService
 
-<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main">
+<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 "
+       id="sidenav-main">
     <div class="sidenav-header">
-        <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
+        <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
+           aria-hidden="true" id="iconSidenav"></i>
         <a class="navbar-brand m-0" href="/" target="_blank">
             <img src="_content/Hurudza.UI.Shared/img/logo-ct-dark.png" class="navbar-brand-img h-100" alt="main_logo">
             <span class="ms-1 font-weight-bold">Hurudza</span>
         </a>
     </div>
     <hr class="horizontal dark mt-0">
-    
+
     <div class="collapse navbar-collapse  w-auto h-auto" id="sidenav-collapse-main">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link @DashboardActive" href="/" onclick="@ActivateDashboard">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center d-flex align-items-center justify-content-center  me-2">
-                        <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                            <title>shop</title>
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g transform="translate(-1716.000000, -439.000000)" fill="#FFFFFF" fill-rule="nonzero">
-                                    <g transform="translate(1716.000000, 291.000000)">
-                                        <g transform="translate(0.000000, 148.000000)">
-                                            <path class="color-background" d="M46.7199583,10.7414583 L40.8449583,0.949791667 C40.4909749,0.360605034 39.8540131,0 39.1666667,0 L7.83333333,0 C7.1459869,0 6.50902508,0.360605034 6.15504167,0.949791667 L0.280041667,10.7414583 C0.0969176761,11.0460037 -1.23209662e-05,11.3946378 -1.23209662e-05,11.75 C-0.00758042603,16.0663731 3.48367543,19.5725301 7.80004167,19.5833333 L7.81570833,19.5833333 C9.75003686,19.5882688 11.6168794,18.8726691 13.0522917,17.5760417 C16.0171492,20.2556967 20.5292675,20.2556967 23.494125,17.5760417 C26.4604562,20.2616016 30.9794188,20.2616016 33.94575,17.5760417 C36.2421905,19.6477597 39.5441143,20.1708521 42.3684437,18.9103691 C45.1927731,17.649886 47.0084685,14.8428276 47.0000295,11.75 C47.0000295,11.3946378 46.9030823,11.0460037 46.7199583,10.7414583 Z" opacity="0.598981585"></path>
-                                            <path class="color-background" d="M39.198,22.4912623 C37.3776246,22.4928106 35.5817531,22.0149171 33.951625,21.0951667 L33.92225,21.1107282 C31.1430221,22.6838032 27.9255001,22.9318916 24.9844167,21.7998837 C24.4750389,21.605469 23.9777983,21.3722567 23.4960833,21.1018359 L23.4745417,21.1129513 C20.6961809,22.6871153 17.4786145,22.9344611 14.5386667,21.7998837 C14.029926,21.6054643 13.533337,21.3722507 13.0522917,21.1018359 C11.4250962,22.0190609 9.63246555,22.4947009 7.81570833,22.4912623 C7.16510551,22.4842162 6.51607673,22.4173045 5.875,22.2911849 L5.875,44.7220845 C5.875,45.9498589 6.7517757,46.9451667 7.83333333,46.9451667 L19.5833333,46.9451667 L19.5833333,33.6066734 L27.4166667,33.6066734 L27.4166667,46.9451667 L39.1666667,46.9451667 C40.2482243,46.9451667 41.125,45.9498589 41.125,44.7220845 L41.125,22.2822926 C40.4887822,22.4116582 39.8442868,22.4815492 39.198,22.4912623 Z"></path>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
-                    </div>
-                    <span class="nav-link-text ms-1">Dashboard</span>
-                </a>
-            </li>
-            
-            <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#tillageSection" class="nav-link @TillageActive" aria-controls="tillageSection" role="button" aria-expanded="@(_tillageExpanded ? "true" : "false")">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center d-flex align-items-center justify-content-center  me-2">
-                        <i class="ni ni-delivery-fast text-lg opacity-10" aria-hidden="true"></i>
+                <a data-bs-toggle="collapse" href="#tillageSection" class="nav-link @TillageActive"
+                   aria-controls="tillageSection" role="button" aria-expanded="@(_tillageExpanded ? "true" : "false")"
+                   onclick="@ActivateTillage">
+                    <div
+                        class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center d-flex align-items-center justify-content-center me-2">
+                        <i class="fas fa-tractor text-lg opacity-10" aria-hidden="true"></i>
                     </div>
                     <span class="nav-link-text ms-1">Tillage Program</span>
                 </a>
-                <div class="collapse @(_tillageExpanded ? "show" : "")" id="tillageSection">
+                <div class="collapse @(_tillageExpanded ? "show" : "hidden")" id="tillageSection">
                     <ul class="nav ms-4 ps-3">
                         <li class="nav-item">
-                            <a class="nav-link" href="/tillage-dashboard" onclick="@ActivateTillage">
+                            <a class="nav-link" href="/">
                                 <span class="sidenav-mini-icon"> D </span>
                                 <span class="sidenav-normal"> Dashboard </span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/tillage-programs" onclick="@ActivateTillage">
+                            <a class="nav-link" href="/tillage-programs">
                                 <span class="sidenav-mini-icon"> P </span>
                                 <span class="sidenav-normal"> Programs </span>
                             </a>
@@ -66,95 +50,88 @@
                     </ul>
                 </div>
             </li>
-            
+
+            <li class="nav-item">
+                <a class="nav-link @MapActive" href="/map" onclick="@ActivateMap">
+                    <div
+                        class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center d-flex align-items-center justify-content-center me-2">
+                        <i class="fas fa-map-marked-alt text-lg opacity-10" aria-hidden="true"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Map</span>
+                </a>
+            </li>
+
             <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Farm Management</h6>
             </li>
-            
+
             @if (_accessibleFarms != null && _accessibleFarms.Any())
             {
                 <li class="nav-item">
-                    <a data-bs-toggle="collapse" href="#farmsSection" class="nav-link @FarmsActive" aria-controls="farmsSection" role="button" aria-expanded="@(_farmsExpanded ? "true" : "false")">
-                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                    <a data-bs-toggle="collapse" href="#farmsSection" class="nav-link @FarmsActive"
+                       aria-controls="farmsSection" role="button" aria-expanded="@(_farmsExpanded ? "true" : "false")"
+                       onclick="@ActivateFarms">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="ni ni-building text-lg opacity-10" aria-hidden="true"></i>
                         </div>
                         <span class="nav-link-text ms-1">Farms</span>
                     </a>
-                    <div class="collapse @(_farmsExpanded ? "show" : "")" id="farmsSection">
+                    <div class="collapse @(_farmsExpanded ? "show" : "hidden")" id="farmsSection">
                         <ul class="nav ms-4 ps-3">
                             <li class="nav-item">
-                                <a class="nav-link" href="/farms" onclick="@ActivateFarms">
+                                <a class="nav-link" href="/farms">
                                     <span class="sidenav-mini-icon"> F </span>
                                     <span class="sidenav-normal"> All Farms </span>
                                 </a>
                             </li>
-                            @foreach (var farm in _accessibleFarms)
+                            @if (_accessibleFarms.Count <= 5)
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/farm/@farm.Id" onclick="@(() => ActivateFarm(farm.Id))">
-                                        <span class="sidenav-mini-icon"> @farm.Name.Substring(0, 1) </span>
-                                        <span class="sidenav-normal text-truncate" style="max-width: 150px;"> @farm.Name </span>
-                                    </a>
-                                </li>
+                                @foreach (var farm in _accessibleFarms)
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/farm/@farm.Id">
+                                            <span class="sidenav-mini-icon"> @farm.Name.Substring(0, 1) </span>
+                                            <span class="sidenav-normal text-truncate"
+                                                  style="max-width: 150px;"> @farm.Name </span>
+                                        </a>
+                                    </li>
+                                }
                             }
                         </ul>
                     </div>
                 </li>
-                
+
                 <li class="nav-item">
-                    <a data-bs-toggle="collapse" href="#fieldsSection" class="nav-link @FieldsActive" aria-controls="fieldsSection" role="button" aria-expanded="@(_fieldsExpanded ? "true" : "false")">
-                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                    <a class="nav-link @FieldsActive" href="/fields" onclick="@ActivateFields">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="ni ni-map-big text-lg opacity-10" aria-hidden="true"></i>
                         </div>
                         <span class="nav-link-text ms-1">Fields</span>
                     </a>
-                    <div class="collapse @(_fieldsExpanded ? "show" : "")" id="fieldsSection">
-                        <ul class="nav ms-4 ps-3">
-                            <li class="nav-item">
-                                <a class="nav-link" href="/fields" onclick="@ActivateFields">
-                                    <span class="sidenav-mini-icon"> A </span>
-                                    <span class="sidenav-normal"> All Fields </span>
-                                </a>
-                            </li>
-                            @if (_hasFieldManagePermission)
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/fields/create" onclick="@ActivateFields">
-                                        <span class="sidenav-mini-icon"> + </span>
-                                        <span class="sidenav-normal"> Create Field </span>
-                                    </a>
-                                </li>
-                            }
-                        </ul>
-                    </div>
                 </li>
-                
+
                 <li class="nav-item">
-                    <a data-bs-toggle="collapse" href="#cropsSection" class="nav-link @CropsActive" aria-controls="cropsSection" role="button" aria-expanded="@(_cropsExpanded ? "true" : "false")">
-                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                            <i class="ni ni-istanbul text-lg opacity-10" aria-hidden="true"></i>
+                    <a data-bs-toggle="collapse" href="#cropsSection" class="nav-link @CropsActive"
+                       aria-controls="cropsSection" role="button" aria-expanded="@(_cropsExpanded ? "true" : "false")"
+                       onclick="@ActivateCrops">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-seedling text-lg opacity-10" aria-hidden="true"></i>
                         </div>
                         <span class="nav-link-text ms-1">Crops</span>
                     </a>
-                    <div class="collapse @(_cropsExpanded ? "show" : "")" id="cropsSection">
+                    <div class="collapse @(_cropsExpanded ? "show" : "hidden")" id="cropsSection">
                         <ul class="nav ms-4 ps-3">
                             <li class="nav-item">
-                                <a class="nav-link" href="/crops" onclick="@ActivateCrops">
+                                <a class="nav-link" href="/crops">
                                     <span class="sidenav-mini-icon"> A </span>
                                     <span class="sidenav-normal"> All Crops </span>
                                 </a>
                             </li>
-                            @if (_hasCropManagePermission)
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/crops/create" onclick="@ActivateCrops">
-                                        <span class="sidenav-mini-icon"> + </span>
-                                        <span class="sidenav-normal"> Create Crop </span>
-                                    </a>
-                                </li>
-                            }
                             <li class="nav-item">
-                                <a class="nav-link" href="/crops/reports" onclick="@ActivateCrops">
+                                <a class="nav-link" href="/crops/reports">
                                     <span class="sidenav-mini-icon"> R </span>
                                     <span class="sidenav-normal"> Crop Reports </span>
                                 </a>
@@ -172,7 +149,8 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link @UsersActive" href="/users" onclick="@ActivateUsers">
-                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="ni ni-single-02 text-lg opacity-10" aria-hidden="true"></i>
                         </div>
                         <span class="nav-link-text ms-1">Users</span>
@@ -180,19 +158,22 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link @RolesActive" href="/roles" onclick="@ActivateRoles">
-                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="ni ni-key-25 text-lg opacity-10" aria-hidden="true"></i>
                         </div>
                         <span class="nav-link-text ms-1">Roles</span>
                     </a>
                 </li>
-                
+
                 @* Only show Farm Assignments to System Administrators *@
                 @if (_user.IsInRole(ApiRoles.SystemAdministrator))
                 {
                     <li class="nav-item">
-                        <a class="nav-link @FarmAssignmentsActive" href="/farm-assignments" onclick="@ActivateFarmAssignments">
-                            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <a class="nav-link @FarmAssignmentsActive" href="/farm-assignments"
+                           onclick="@ActivateFarmAssignments">
+                            <div
+                                class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                                 <i class="ni ni-badge text-lg opacity-10" aria-hidden="true"></i>
                             </div>
                             <span class="nav-link-text ms-1">Farm Assignments</span>
@@ -201,50 +182,61 @@
                 }
             }
 
-            <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#componentsExamples" class="nav-link @OwnershipActive" aria-controls="componentsExamples" role="button" aria-expanded="false">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center d-flex align-items-center justify-content-center  me-2">
-                        <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                            <title>customer-support</title>
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g transform="translate(-1717.000000, -291.000000)" fill="#FFFFFF" fill-rule="nonzero">
-                                    <g transform="translate(1716.000000, 291.000000)">
-                                        <g transform="translate(1.000000, 0.000000)">
-                                            <path class="color-background" d="M45,0 L26,0 C25.447,0 25,0.447 25,1 L25,20 C25,20.379 25.214,20.725 25.553,20.895 C25.694,20.965 25.848,21 26,21 C26.212,21 26.424,20.933 26.6,20.8 L34.333,15 L45,15 C45.553,15 46,14.553 46,14 L46,1 C46,0.447 45.553,0 45,0 Z" opacity="0.59858631"></path>
-                                            <path class="color-foreground" d="M22.883,32.86 C20.761,32.012 17.324,31 13,31 C8.676,31 5.239,32.012 3.116,32.86 C1.224,33.619 0,35.438 0,37.494 L0,41 C0,41.553 0.447,42 1,42 L25,42 C25.553,42 26,41.553 26,41 L26,37.494 C26,35.438 24.776,33.619 22.883,32.86 Z"></path>
-                                            <path class="color-foreground" d="M13,28 C17.432,28 21,22.529 21,18 C21,13.589 17.411,10 13,10 C8.589,10 5,13.589 5,18 C5,22.529 8.568,28 13,28 Z"></path>
+            @if (false)
+            {
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#componentsExamples" class="nav-link @OwnershipActive"
+                       aria-controls="componentsExamples" role="button" aria-expanded="false">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center d-flex align-items-center justify-content-center  me-2">
+                            <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1"
+                                 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                <title>customer-support</title>
+                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g transform="translate(-1717.000000, -291.000000)" fill="#FFFFFF"
+                                       fill-rule="nonzero">
+                                        <g transform="translate(1716.000000, 291.000000)">
+                                            <g transform="translate(1.000000, 0.000000)">
+                                                <path class="color-background"
+                                                      d="M45,0 L26,0 C25.447,0 25,0.447 25,1 L25,20 C25,20.379 25.214,20.725 25.553,20.895 C25.694,20.965 25.848,21 26,21 C26.212,21 26.424,20.933 26.6,20.8 L34.333,15 L45,15 C45.553,15 46,14.553 46,14 L46,1 C46,0.447 45.553,0 45,0 Z"
+                                                      opacity="0.59858631"></path>
+                                                <path class="color-foreground"
+                                                      d="M22.883,32.86 C20.761,32.012 17.324,31 13,31 C8.676,31 5.239,32.012 3.116,32.86 C1.224,33.619 0,35.438 0,37.494 L0,41 C0,41.553 0.447,42 1,42 L25,42 C25.553,42 26,41.553 26,41 L26,37.494 C26,35.438 24.776,33.619 22.883,32.86 Z"></path>
+                                                <path class="color-foreground"
+                                                      d="M13,28 C17.432,28 21,22.529 21,18 C21,13.589 17.411,10 13,10 C8.589,10 5,13.589 5,18 C5,22.529 8.568,28 13,28 Z"></path>
+                                            </g>
                                         </g>
                                     </g>
                                 </g>
-                            </g>
-                        </svg>
+                            </svg>
+                        </div>
+                        <span class="nav-link-text ms-1">Ownership</span>
+                    </a>
+                    <div class="collapse" id="componentsExamples">
+                        <ul class="nav ms-4 ps-3">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/ownership" onclick="@ActivateOwnership">
+                                    <span class="sidenav-mini-icon"> O </span>
+                                    <span class="sidenav-normal"> Ownership </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/entities" onclick="@ActivateOwnership">
+                                    <span class="sidenav-mini-icon"> E </span>
+                                    <span class="sidenav-normal"> Entities </span>
+                                </a>
+                            </li>
+                        </ul>
                     </div>
-                    <span class="nav-link-text ms-1">Ownership</span>
-                </a>
-                <div class="collapse" id="componentsExamples">
-                    <ul class="nav ms-4 ps-3">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/ownership" onclick="@ActivateOwnership">
-                                <span class="sidenav-mini-icon"> O </span>
-                                <span class="sidenav-normal"> Ownership </span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/entities" onclick="@ActivateOwnership">
-                                <span class="sidenav-mini-icon"> E </span>
-                                <span class="sidenav-normal"> Entities </span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+                </li>
+            }
         </ul>
     </div>
 </aside>
 
 @code
 {
-    private string DashboardActive = "active";
+    private string MapActive = "";
     private string StatsActive = "";
     private string FarmsActive = "";
     private string FieldsActive = "";
@@ -256,12 +248,12 @@
     private string FarmAssignmentsActive = "";
     private CustomAuthStateProvider _authProvider;
     private ClaimsPrincipal _user;
-    
+
     // Accessible farms and permissions
     private List<FarmListViewModel> _accessibleFarms = new();
     private bool _hasFieldManagePermission = false;
     private bool _hasCropManagePermission = false;
-    
+
     // Menu expansion state
     private bool _farmsExpanded = false;
     private bool _fieldsExpanded = false;
@@ -280,14 +272,14 @@
             {
                 await LoadAccessibleFarms();
                 await CheckPermissions();
-                
+
                 // Set initial expanded state based on URL
                 var currentUrl = Navigation.Uri.ToLower();
                 _farmsExpanded = currentUrl.Contains("/farm/");
                 _fieldsExpanded = currentUrl.Contains("/field/");
                 _cropsExpanded = currentUrl.Contains("/crop/");
                 _tillageExpanded = currentUrl.Contains("/tillage");
-                
+
                 // Set active menu based on URL
                 SetActiveMenuFromUrl(currentUrl);
             }
@@ -305,22 +297,22 @@
             }
         }
     }
-    
+
     private async Task LoadAccessibleFarms()
     {
         try
         {
             // Get the current user's ID
-            var userId = _user.FindFirstValue(ClaimTypes.NameIdentifier) ?? 
-                        _user.FindFirstValue("UserId");
-            
+            var userId = _user.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                         _user.FindFirstValue("UserId");
+
             if (!string.IsNullOrEmpty(userId))
             {
                 // Call the API with the userId parameter
                 var client = await ApiCall.GetHttpClient();
                 var response = await ApiCall.Get<Models.ApiResponse<List<FarmListViewModel>>>(
                     client, $"farmusers/getaccessiblefarms/{userId}");
-                
+
                 if (response?.Status == 200 && response.Result != null)
                 {
                     _accessibleFarms = response.Result;
@@ -344,20 +336,20 @@
             _accessibleFarms = new List<FarmListViewModel>();
         }
     }
-    
+
     private async Task CheckPermissions()
     {
         _hasFieldManagePermission = await FarmAccessService.HasPermission(Claims.FieldManage);
         _hasCropManagePermission = await FarmAccessService.HasPermission(Claims.CropManage);
-        
+
         Console.WriteLine($"NavMenu - Has Field Manage Permission: {_hasFieldManagePermission}");
         Console.WriteLine($"NavMenu - Has Crop Manage Permission: {_hasCropManagePermission}");
     }
-    
+
     private void SetActiveMenuFromUrl(string url)
     {
         ResetAllMenus();
-        
+
         if (url.Contains("/farm"))
         {
             ActivateFarms();
@@ -370,9 +362,9 @@
         {
             ActivateCrops();
         }
-        else if (url.Contains("/tillage"))
+        else if (url.Contains("/map"))
         {
-            ActivateTillage();
+            ActivateMap();
         }
         else if (url.Contains("/user"))
         {
@@ -392,7 +384,7 @@
         }
         else
         {
-            ActivateDashboard();
+            ActivateTillage();
         }
     }
 
@@ -412,10 +404,10 @@
         return isSystemAdmin || isAdmin || hasRoleClaim;
     }
 
-    private void ActivateDashboard()
+    private void ActivateMap()
     {
         ResetAllMenus();
-        DashboardActive = "active";
+        MapActive = "active";
     }
 
     private void ActivateStats()
@@ -426,11 +418,18 @@
 
     private void ActivateFarms()
     {
-        ResetAllMenus();
-        FarmsActive = "active";
-        _farmsExpanded = true;
+        if (_farmsExpanded && FarmsActive == "active")
+        {
+            _farmsExpanded = false;
+        }
+        else
+        {
+            ResetAllMenus();
+            FarmsActive = "active";
+            _farmsExpanded = true;
+        }
     }
-    
+
     private void ActivateFarm(string farmId)
     {
         ResetAllMenus();
@@ -444,19 +443,33 @@
         FieldsActive = "active";
         _fieldsExpanded = true;
     }
-    
+
     private void ActivateCrops()
     {
-        ResetAllMenus();
-        CropsActive = "active";
-        _cropsExpanded = true;
+        if (_cropsExpanded && CropsActive == "active")
+        {
+            _cropsExpanded = false;
+        }
+        else
+        {
+            ResetAllMenus();
+            CropsActive = "active";
+            _cropsExpanded = true;
+        }
     }
 
     private void ActivateTillage()
     {
-        ResetAllMenus();
-        TillageActive = "active";
-        _tillageExpanded = true;
+        if (_tillageExpanded && TillageActive == "active")
+        {
+            _tillageExpanded = false;
+        }
+        else
+        {
+            ResetAllMenus();
+            TillageActive = "active";
+            _tillageExpanded = true;
+        }
     }
 
     private void ActivateOwnership()
@@ -476,7 +489,7 @@
         ResetAllMenus();
         RolesActive = "active";
     }
-    
+
     private void ActivateFarmAssignments()
     {
         ResetAllMenus();
@@ -485,7 +498,7 @@
 
     private void ResetAllMenus()
     {
-        DashboardActive = "";
+        MapActive = "";
         StatsActive = "";
         FarmsActive = "";
         FieldsActive = "";
@@ -495,5 +508,10 @@
         RolesActive = "";
         TillageActive = "";
         FarmAssignmentsActive = "";
+
+        _farmsExpanded = false;
+        _fieldsExpanded = false;
+        _cropsExpanded = false;
+        _tillageExpanded = false;
     }
 }
