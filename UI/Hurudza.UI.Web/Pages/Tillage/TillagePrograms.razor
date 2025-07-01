@@ -499,6 +499,15 @@
         _selectedProgram = args.Data;
     }
     
+    private void RowDoubleClickHandler(RecordDoubleClickEventArgs<TillageProgramViewModel> args)
+    {
+        // Get the double-clicked program
+        var program = args.RowData;
+    
+        // Navigate to the tillage services page
+        ManageServices(program);
+    }
+    
     private void ShowAddProgramDialog()
     {
         _isEditing = false;

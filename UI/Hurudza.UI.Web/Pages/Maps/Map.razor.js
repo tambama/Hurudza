@@ -34,7 +34,7 @@ export function drawPolygon(map, id, coordinates, isField = false, name = 'Farm'
  */
 export function clearMap(map) {
     console.log("Clearing main map view");
-    return mapDrawing.clearMap(map);
+    return mapDrawing.clearMapLayers(map);
 }
 
 /**
@@ -295,9 +295,6 @@ export function addFilterButton(map, dotNetRef) {
         const filterControl = new FilterControl(dotNetRef);
         map.addControl(filterControl, 'top-right');
 
-        // Add fullscreen control after filter control
-        map.addControl(new mapboxgl.FullscreenControl(), 'top-right');
-
         // Add CSS for the filter button
         addFilterButtonStyles();
 
@@ -350,24 +347,41 @@ export function addFilterButtonStyles() {
 }
 
 /**
- * Initializes drawing controls on the map
+ * Initializes drawing controls on the map - using default MapboxDraw controls
  * @param {Object} map - The Mapbox map instance
+ * @param {Object} dotNetRef - Reference to .NET component
  * @returns {Object} The draw control
  */
-export function initializeDrawControls(map) {
-    console.log("Initializing draw controls for main map");
-    return mapDrawing.initializeDrawControls(map, null);
+export function initializeDrawControls(map, dotNetRef) {
+    console.log("Initializing default draw controls for main map");
+    return mapDrawing.initializeDrawControls(map, dotNetRef);
 }
 
 /**
- * Sets up the drawing mode with custom event handlers
+ * Sets up the drawing mode with event handlers - simplified version
  * @param {Object} map - The Mapbox map instance
  * @param {Object} draw - The drawing control
  * @param {Object} dotNetRef - Reference to .NET component
  */
-export function setupDrawingMode(map, draw, dotNetRef) {
-    console.log("Setting up drawing mode for main map");
-    return mapDrawing.setupDrawingEvents(map, draw, dotNetRef);
+export function setupDrawingEvents(map, draw, dotNetRef) {
+    try {
+        console.log("Setting up drawing events for main map");
+
+        // Set up standard drawing events using the imported mapDrawingModule function
+        mapDrawing.setupDrawingEvents(map, draw, dotNetRef);
+
+        // Return success object that matches the expected format
+        return {
+            Success: true,
+            Message: "Drawing controls setup successfully"
+        };
+    } catch (error) {
+        console.error("Error setting up drawing controls:", error);
+        return {
+            Success: false,
+            Message: error.message
+        };
+    }
 }
 
 /**
@@ -454,27 +468,7 @@ export async function calculateFieldSizeFromCoordinates(coordinates) {
     }
 }
 
-export function setupDrawingEvents(map, draw, dotNetRef) {
-    try {
-        // Set up standard drawing events using the imported mapDrawingModule function
-        mapDrawing.setupDrawingEvents(map, draw, dotNetRef);
-
-        // Return success object that matches the expected SetupResult format
-        return {
-            Success: true,
-            Message: "Drawing controls setup successfully"
-        };
-    } catch (error) {
-        console.error("Error setting up simple drawing controls:", error);
-        return {
-            Success: false,
-            Message: error.message
-        };
-    }
-}
-
 // Export other utility functions
 export const loadTurf = mapDrawing.loadTurf;
-export const toggleDrawButtonVisibility = mapDrawing.toggleDrawButtonVisibility;
 export const clearDrawnPolygons = mapDrawing.clearAllDrawings;
 export const clearAllDrawings = mapDrawing.clearAllDrawings;

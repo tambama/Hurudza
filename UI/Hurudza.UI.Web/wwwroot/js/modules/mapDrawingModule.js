@@ -1,4 +1,4 @@
-// Map Drawing Module - A standardized implementation for polygon drawing
+// Map Drawing Module - Simplified to use default MapboxDraw controls only
 // This module can be used by both Map.razor.js and CreateField.razor.js
 
 // Import Mapbox GL JS
@@ -10,10 +10,7 @@ import 'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.3.0/mapbox
 const mapboxToken = 'pk.eyJ1IjoicGVuaWVsdCIsImEiOiJjbGt3Y2gxM3YweWtrM3FwbW9jaWNkMWVyIn0.cDAgTWNXN-TVJROjgoWQiw';
 
 // Global variables to maintain state
-let drawButton = null;
-let deleteButton = null;
 let isDrawingModeActive = false;
-let originalCursor = '';
 
 // Store the .NET reference at module level to ensure it's available for all callbacks
 let dotNetReference = null;
@@ -74,26 +71,30 @@ export function initializeMap(element) {
 }
 
 /**
- * Initialize drawing controls
+ * Initialize drawing controls - using default MapboxDraw controls only
  * @param {Object} map - The Mapbox map instance
  * @param {Object} dotNetRef - Reference to .NET component
  * @returns {Object} - The drawing control instance
  */
 export function initializeDrawControls(map, dotNetRef) {
     try {
-        console.log("Initializing draw controls");
+        console.log("Initializing draw controls with default controls");
 
         // Store the .NET reference at module level
         dotNetReference = dotNetRef;
 
-        // Create Mapbox Draw instance with standardized options
+        // Create Mapbox Draw instance with default controls
         const draw = new MapboxDraw({
-            displayControlsDefault: false,
+            displayControlsDefault: true, // Use default controls
             controls: {
                 polygon: true,
-                trash: true
+                point: false,
+                line_string: false,
+                trash: true,
+                combine_features: false,
+                uncombine_features: false
             },
-            // Standardized styles for both implementations
+            // Standardized styles for polygons
             styles: [
                 // Polygon fill
                 {
@@ -144,163 +145,13 @@ export function initializeDrawControls(map, dotNetRef) {
         });
 
         // Add draw controls to map
-        map.addControl(draw);
+        map.addControl(draw, 'top-right');
 
-        // Create custom drawing and delete buttons
-        createCustomControls(map, draw);
-
-        console.log("Draw controls initialized");
+        console.log("Default draw controls initialized");
         return draw;
     } catch (error) {
         console.error("Error initializing draw controls:", error);
         throw error;
-    }
-}
-
-/**
- * Create custom drawing and delete buttons
- * @param {Object} map - The Mapbox map instance
- * @param {Object} draw - The MapboxDraw instance
- * @returns {Object} - References to the created buttons
- */
-function createCustomControls(map, draw) {
-    try {
-        // Create a container for custom controls
-        const controlContainer = document.createElement('div');
-        controlContainer.className = 'mapboxgl-ctrl-top-right';
-        controlContainer.style.marginTop = '80px'; // Position below fullscreen control
-        map.getContainer().appendChild(controlContainer);
-
-        // Create the drawing button
-        drawButton = document.createElement('button');
-        drawButton.id = 'custom-draw-button';
-        drawButton.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
-        drawButton.innerHTML = '<span class="mapboxgl-ctrl-icon" style="display:flex;align-items:center;justify-content:center;height:100%;"><i class="fas fa-draw-polygon"></i></span>';
-        drawButton.title = 'Draw Field Boundary';
-        drawButton.style.cursor = 'pointer';
-        controlContainer.appendChild(drawButton);
-
-        // Create the delete button
-        deleteButton = document.createElement('button');
-        deleteButton.id = 'custom-delete-button';
-        deleteButton.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
-        deleteButton.innerHTML = '<span class="mapboxgl-ctrl-icon" style="display:flex;align-items:center;justify-content:center;height:100%;color:#dc3545;"><i class="fas fa-trash-alt"></i></span>';
-        deleteButton.title = 'Delete Field Boundary';
-        deleteButton.style.cursor = 'pointer';
-        deleteButton.style.marginTop = '10px';
-        deleteButton.style.display = 'none'; // Initially hidden
-        controlContainer.appendChild(deleteButton);
-
-        // Drawing button click handler
-        drawButton.addEventListener('click', () => {
-            toggleDrawingMode(map, draw);
-        });
-
-        // Delete button click handler
-        deleteButton.addEventListener('click', () => {
-            // Delete all drawings
-            draw.deleteAll();
-
-            // Hide delete button
-            deleteButton.style.display = 'none';
-
-            // Turn off drawing mode
-            isDrawingModeActive = false;
-            updateDrawButtonState();
-
-            // Reset drawing cursor
-            map.getCanvas().style.cursor = originalCursor || '';
-
-            // Notify .NET - use module level reference
-            if (dotNetReference) {
-                dotNetReference.invokeMethodAsync('OnDrawingDeleted')
-                    .catch(error => {
-                        console.warn("Error notifying .NET of drawing deletion:", error);
-                    });
-            }
-        });
-
-        console.log("Custom controls created");
-        return { drawButton, deleteButton };
-    } catch (error) {
-        console.error("Error creating custom controls:", error);
-        return null;
-    }
-}
-
-/**
- * Toggle drawing mode
- * @param {Object} map - The Mapbox map instance
- * @param {Object} draw - The MapboxDraw instance
- * @returns {boolean} - Success indicator
- */
-function toggleDrawingMode(map, draw) {
-    try {
-        // Toggle state
-        isDrawingModeActive = !isDrawingModeActive;
-
-        // Update button appearance
-        updateDrawButtonState();
-
-        if (isDrawingModeActive) {
-            // When activating drawing mode:
-
-            // Store original cursor
-            originalCursor = map.getCanvas().style.cursor;
-
-            // 1. Set cursor to crosshair
-            map.getCanvas().style.cursor = 'crosshair';
-
-            // 2. Enter drawing mode
-            draw.changeMode('draw_polygon');
-
-            // 3. Remove any popups
-            const popups = document.querySelectorAll('.mapboxgl-popup');
-            popups.forEach(popup => popup.remove());
-
-            console.log("Drawing mode activated");
-        } else {
-            // When deactivating drawing mode:
-
-            // 1. Reset cursor
-            map.getCanvas().style.cursor = originalCursor || '';
-
-            // 2. Switch to selection mode
-            draw.changeMode('simple_select');
-
-            console.log("Drawing mode deactivated");
-        }
-
-        // Notify .NET of drawing mode change using module-level reference
-        if (dotNetReference) {
-            console.log("Notifying .NET of drawing mode change");
-            dotNetReference.invokeMethodAsync('SetDrawingMode', isDrawingModeActive)
-                .catch(error => {
-                    console.warn("Error notifying .NET of drawing mode change:", error);
-                });
-        } else {
-            console.warn("dotNetReference is null, cannot notify .NET of drawing mode change");
-        }
-
-        return true;
-    } catch (error) {
-        console.error("Error toggling drawing mode:", error);
-        return false;
-    }
-}
-
-/**
- * Update draw button appearance based on active state
- */
-function updateDrawButtonState() {
-    if (!drawButton) return;
-
-    if (isDrawingModeActive) {
-        drawButton.style.background = '#ff5500';
-        drawButton.querySelector('.mapboxgl-ctrl-icon').style.color = 'white';
-    } else {
-        drawButton.style.background = '';
-        drawButton.querySelector('.mapboxgl-ctrl-icon').style.color = '';
     }
 }
 
@@ -362,17 +213,7 @@ export async function setupDrawingEvents(map, draw, dotNetRef) {
 
         // Handle create events
         map.on('draw.create', function(e) {
-            // Show delete button when a polygon is created
-            if (deleteButton) {
-                deleteButton.style.display = 'block';
-            }
-
-            // Turn off drawing mode after creation
-            isDrawingModeActive = false;
-            updateDrawButtonState();
-
-            // Reset cursor
-            map.getCanvas().style.cursor = originalCursor || '';
+            console.log("Draw create event triggered");
 
             // Process the drawn polygon
             if (e.features && e.features.length > 0) {
@@ -383,6 +224,8 @@ export async function setupDrawingEvents(map, draw, dotNetRef) {
 
         // Handle update events
         map.on('draw.update', function(e) {
+            console.log("Draw update event triggered");
+
             // Process the updated polygon
             if (e.features && e.features.length > 0) {
                 const polygon = e.features[0];
@@ -392,11 +235,7 @@ export async function setupDrawingEvents(map, draw, dotNetRef) {
 
         // Handle delete events
         map.on('draw.delete', function(e) {
-            // Hide delete button when all polygons are deleted
-            const data = draw.getAll();
-            if (data.features.length === 0 && deleteButton) {
-                deleteButton.style.display = 'none';
-            }
+            console.log("Draw delete event triggered");
 
             // Notify .NET that the drawing was deleted
             if (dotNetReference) {
@@ -407,20 +246,20 @@ export async function setupDrawingEvents(map, draw, dotNetRef) {
             }
         });
 
-        // Add mouse blocking during draw mode to prevent unwanted interactions
-        map.on('click', function(e) {
-            if (isDrawingModeActive) {
-                // For Mapbox events, we use originalEvent to access the DOM event
-                if (e.originalEvent) {
-                    e.originalEvent.preventDefault();
-                    e.originalEvent.stopPropagation();
-                }
+        // Handle mode change events (optional - for debugging)
+        map.on('draw.modechange', function(e) {
+            const newMode = e.mode;
+            isDrawingModeActive = (newMode === 'draw_polygon');
+            console.log("Draw mode changed to:", newMode, "- Drawing active:", isDrawingModeActive);
 
-                // Remove any popups that might have appeared
-                const popups = document.querySelectorAll('.mapboxgl-popup');
-                popups.forEach(popup => popup.remove());
+            // Optionally notify .NET of mode changes
+            if (dotNetReference) {
+                dotNetReference.invokeMethodAsync('SetDrawingMode', isDrawingModeActive)
+                    .catch(error => {
+                        console.warn("Error notifying .NET of drawing mode change:", error);
+                    });
             }
-        }, true); // Use capturing phase to intercept before other handlers
+        });
 
         console.log("Drawing event handlers set up successfully");
     } catch (error) {
@@ -469,7 +308,7 @@ function processDrawnPolygon(polygon) {
 }
 
 /**
- * Clear existing polygons and hide the delete button
+ * Clear existing polygons
  * @param {Object} draw - The MapboxDraw instance
  */
 export function clearAllDrawings(draw) {
@@ -478,12 +317,6 @@ export function clearAllDrawings(draw) {
             draw.deleteAll();
             console.log("All drawings cleared");
         }
-
-        // Hide delete button
-        if (deleteButton) {
-            deleteButton.style.display = 'none';
-        }
-
         return true;
     } catch (error) {
         console.error("Error clearing drawings:", error);
@@ -531,11 +364,6 @@ export function loadPolygonForEditing(map, draw, coordinates) {
         const ids = draw.add(polygonFeature);
 
         if (ids && ids.length > 0) {
-            // Show delete button
-            if (deleteButton) {
-                deleteButton.style.display = 'block';
-            }
-
             // Switch to direct select mode for the added polygon
             draw.changeMode('direct_select', { featureId: ids[0] });
 
@@ -619,7 +447,7 @@ export function drawPolygon(map, id, polygons, isField = false, name = 'Farm', c
         const outlineColor = isField ? '#ff5500' : '#40b7d5';
         const outlineWidth = isField ? 2 : 3;
         const fillColor = isField ? (cropData ? '#74c476' : '#ff9966') : '#40b7d5';
-        const fillOpacity = isField ? 0.3 : 0.2;
+        const fillOpacity = isField ? 0.0 : 0.0;
 
         // Add fill layer (visible)
         map.addLayer({
@@ -668,14 +496,30 @@ export function drawPolygon(map, id, polygons, isField = false, name = 'Farm', c
             const properties = feature.properties;
             const isFieldProp = properties.isField;
             const entityName = properties.name;
-            const entityCropData = properties.cropData;
+
+            // Handle crop data - it might be a JSON string or already an object
+            let entityCropData = null;
+            try {
+                if (properties.cropData) {
+                    // If it's a string, parse it as JSON
+                    if (typeof properties.cropData === 'string') {
+                        entityCropData = JSON.parse(properties.cropData);
+                    } else {
+                        // If it's already an object, use it directly
+                        entityCropData = properties.cropData;
+                    }
+                }
+            } catch (error) {
+                console.warn('Error parsing crop data:', error);
+                entityCropData = null;
+            }
 
             // Build popup content
             let popupContent = `<div class="popup-content" style="max-width: 250px; word-wrap: break-word;">
                                     <h4 style="margin-bottom: 5px;">${entityName}</h4>`;
 
             if (isFieldProp) {
-                if (entityCropData && Object.keys(entityCropData).length > 0) {
+                if (entityCropData && typeof entityCropData === 'object' && Object.keys(entityCropData).length > 0) {
                     // Add crop information to popup if available
                     const plantedDate = entityCropData.plantedDate ?
                         new Date(entityCropData.plantedDate).toLocaleDateString() : 'Not set';
@@ -683,8 +527,8 @@ export function drawPolygon(map, id, polygons, isField = false, name = 'Farm', c
                         new Date(entityCropData.harvestDate).toLocaleDateString() : 'Not set';
 
                     popupContent += `
-                        <p style="margin-bottom: 5px; font-size: 12px;"><strong>Current Crop:</strong> ${entityCropData.crop}</p>
-                        <p style="margin-bottom: 5px; font-size: 12px;"><strong>Area Planted:</strong> ${entityCropData.size} ha</p>
+                        <p style="margin-bottom: 5px; font-size: 12px;"><strong>Current Crop:</strong> ${entityCropData.crop || 'Unknown'}</p>
+                        <p style="margin-bottom: 5px; font-size: 12px;"><strong>Area Planted:</strong> ${entityCropData.size || 0} ha</p>
                         <p style="margin-bottom: 5px; font-size: 12px;"><strong>Planted:</strong> ${plantedDate}</p>
                         <p style="margin-bottom: 5px; font-size: 12px;"><strong>Expected Harvest:</strong> ${harvestDate}</p>
                         <p style="margin-bottom: 0; font-size: 12px;"><strong>Irrigation:</strong> ${entityCropData.irrigation ? 'Yes' : 'No'}</p>
@@ -692,19 +536,29 @@ export function drawPolygon(map, id, polygons, isField = false, name = 'Farm', c
                 } else {
                     popupContent += `<p>No crops currently planted</p>`;
                 }
+
+                // Create and display the popup
+                new mapboxgl.Popup({
+                    closeButton: true,
+                    closeOnClick: true,
+                    maxWidth: '300px'
+                })
+                    .setLngLat(coordinates)
+                    .setHTML(popupContent)
+                    .addTo(map);
             }
 
             popupContent += `</div>`;
 
             // Create and display the popup
-            new mapboxgl.Popup({
-                closeButton: true,
-                closeOnClick: true,
-                maxWidth: '300px'
-            })
-                .setLngLat(coordinates)
-                .setHTML(popupContent)
-                .addTo(map);
+            // new mapboxgl.Popup({
+            //     closeButton: true,
+            //     closeOnClick: true,
+            //     maxWidth: '300px'
+            // })
+            //     .setLngLat(coordinates)
+            //     .setHTML(popupContent)
+            //     .addTo(map);
         });
 
         // Add mouse interaction handlers for hover effects
@@ -951,48 +805,6 @@ export function fitMapToBounds(map, minLat, minLng, maxLat, maxLng) {
         return true;
     } catch (error) {
         console.error("Error fitting map to bounds:", error);
-        return false;
-    }
-}
-
-/**
- * Highlight the draw button to guide users
- * @returns {boolean} - Success indicator
- */
-export function highlightDrawTool() {
-    if (!drawButton) return false;
-
-    try {
-        // Add pulsing animation class
-        drawButton.classList.add('pulse-animation');
-
-        // Remove animation after 5 seconds
-        setTimeout(() => {
-            drawButton.classList.remove('pulse-animation');
-        }, 5000);
-
-        return true;
-    } catch (error) {
-        console.error("Error highlighting draw tool:", error);
-        return false;
-    }
-}
-
-/**
- * Toggle drawing tool button visibility
- * @param {boolean} show - Whether to show the button
- * @returns {boolean} - Success indicator
- */
-export function toggleDrawButtonVisibility(show = true) {
-    try {
-        if (drawButton) {
-            drawButton.style.display = show ? 'block' : 'none';
-            console.log(`Draw button visibility set to ${show ? 'visible' : 'hidden'}`);
-            return true;
-        }
-        return false;
-    } catch (error) {
-        console.error("Error toggling draw button visibility:", error);
         return false;
     }
 }

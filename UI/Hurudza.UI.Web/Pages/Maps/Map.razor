@@ -1058,7 +1058,6 @@
             else
             {
                 // Update existing field
-                // Convert CreateFieldViewModel to FieldViewModel for update
                 var updateField = new FieldViewModel
                 {
                     Id = _fieldEdit.Id,
@@ -1091,14 +1090,11 @@
                 // Reset drawn coordinates
                 _drawnCoordinates = new List<List<double>>();
 
-                // Clear any drawings on the map
+                // Clear any drawings on the map using default controls
                 if (_drawControl != null)
                 {
-                    await _mapModule.InvokeVoidAsync("clearDrawnPolygons", _drawControl);
+                    await _mapModule.InvokeVoidAsync("clearAllDrawings", _drawControl);
                 }
-
-                // Hide drawing button
-                await _mapModule.InvokeVoidAsync("toggleDrawButtonVisibility", false);
 
                 // Refresh field list
                 await LoadFields(_farm.Id);
@@ -1434,6 +1430,8 @@
                 // First clear the map completely
                 await _mapModule.InvokeVoidAsync("clearMap", _mapInstance).AsTask();
 
+                Logger.LogInformation("Hatisati ta drawer farm racho");
+
                 // Draw the farm boundary if available
                 if (farmMap.IsPolygon)
                 {
@@ -1444,7 +1442,7 @@
                         false, // Not a field
                         farm.Name,
                         null, // No crop data for farm
-                        true // Clear existing layers
+                        false // Clear existing layers
                     ).AsTask();
                 }
 
@@ -2346,7 +2344,7 @@
                             false, // Not a field
                             _farm.Name,
                             null, // No crop data for farm
-                            true // Clear existing layers
+                            false // Clear existing layers
                         ).AsTask();
                     }
 
@@ -2445,10 +2443,10 @@
             // Reset drawn coordinates for new field
             _drawnCoordinates = new List<List<double>>();
 
-            // Clear any existing drawings
+            // Clear any existing drawings using default MapboxDraw controls
             if (_drawControl != null)
             {
-                await _mapModule.InvokeVoidAsync("clearAllDrawings", _drawControl, DELETE_BUTTON_ID);
+                await _mapModule.InvokeVoidAsync("clearAllDrawings", _drawControl);
             }
 
             _showSchools = "panel-hidden";
@@ -2457,11 +2455,10 @@
             _showFieldEdit = "";
             _showFieldDetails = "panel-hidden";
 
-            // Show drawing button when entering field edit mode
-            await _mapModule.InvokeVoidAsync("toggleDrawButtonVisibility", true);
+            // The drawing controls are always visible with default MapboxDraw
+            // Users can click the polygon tool to start drawing
 
-            // For new fields, log that we're in creation mode
-            Logger.LogInformation("Ready to create new field");
+            Logger.LogInformation("Ready to create new field with default drawing controls");
         }
         catch (Exception ex)
         {
@@ -2496,7 +2493,7 @@
             // Clear any existing drawings
             if (_drawControl != null)
             {
-                await _mapModule.InvokeVoidAsync("clearAllDrawings", _drawControl, DELETE_BUTTON_ID);
+                await _mapModule.InvokeVoidAsync("clearAllDrawings", _drawControl);
             }
 
             // Load existing coordinates for editing
@@ -2508,39 +2505,15 @@
                     .Select(l => new List<double> { l.Longitude, l.Latitude, l.Altitude })
                     .ToList();
 
-                // Log the coordinates being loaded for editing
                 Logger.LogInformation($"Loading {_drawnCoordinates.Count} coordinates for field editing");
 
-                // Calculate field size from existing coordinates if size is zero or very small 
-                // (indicating it might not have been properly calculated before)
-                if (_fieldEdit.Size < 0.01 && _field.Locations.Count >= 3)
-                {
-                    try
-                    {
-                        // Use global JS function to calculate the field size
-                        Logger.LogInformation("Calculating field size from existing coordinates");
-
-                        // Call the globally registered function
-                        await JS.InvokeVoidAsync("calculateAndUpdateFieldSize",
-                            _field.Locations.ToArray(),
-                            _dotNetRef);
-
-                        Logger.LogInformation("Field size calculation initiated");
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogError(ex, "Error calculating field size from coordinates");
-                    }
-                }
-
-                // Add the existing polygon to the drawing tool
+                // Add the existing polygon to the drawing tool for editing
                 if (_mapModule != null && _drawControl != null && _drawnCoordinates.Count > 0)
                 {
                     await _mapModule.InvokeVoidAsync("loadPolygonForEditing",
                         _mapInstance,
                         _drawControl,
-                        _drawnCoordinates,
-                        DELETE_BUTTON_ID);
+                        _drawnCoordinates);
                 }
             }
 
@@ -2548,15 +2521,12 @@
             _showSchools = "panel-hidden";
             _showAddSchool = "panel-hidden";
             _showSchoolDetails = "panel-hidden";
-            _showFieldEdit = ""; // Show the edit form
+            _showFieldEdit = "";
             _showFieldDetails = "panel-hidden";
-
-            // Show drawing button when entering field edit mode
-            await _mapModule.InvokeVoidAsync("toggleDrawButtonVisibility", true);
 
             // Force UI refresh
             StateHasChanged();
-            Logger.LogInformation("Field edit form displayed");
+            Logger.LogInformation("Field edit form displayed with default drawing controls");
         }
         catch (Exception ex)
         {
@@ -2935,21 +2905,20 @@
                     // Add filter button to map with .NET reference
                     await _mapModule.InvokeVoidAsync("addFilterButton", _mapInstance, _dotNetRef);
 
-                    // Initialize drawing controls
+                    // Initialize drawing controls - this will add the default MapboxDraw controls
                     _drawControl = await _mapModule.InvokeAsync<IJSObjectReference>(
-                        "initializeDrawControls", _mapInstance);
+                        "initializeDrawControls", _mapInstance, _dotNetRef);
 
-                    // Set up the simplified drawing controls
+                    // Set up drawing event handlers
                     if (_drawControl is not null)
                     {
-                        // Call setup function - now returns simple success/message object
                         await _mapModule.InvokeVoidAsync(
                             "setupDrawingEvents", _mapInstance, _drawControl, _dotNetRef);
 
-                        Logger.LogInformation("Drawing controls setup completed");
+                        Logger.LogInformation("Default drawing controls setup completed");
                     }
 
-                    // Important: Only load clusters once after initialization
+                    // Load clusters on the map
                     await LoadClusters();
                 }
             }
