@@ -15,4 +15,5 @@ public interface IApiCall
     Task<T> Remove<T>(HttpClient client, string url, long id);
     Task<T> Remove<T>(HttpClient client, string url, Guid id);
     Task<T> Remove<T>(HttpClient client, string url, string id);
+    Task<byte[]> AddWithBlobResponse<TRequest>(HttpClient httpClient, string endpoint, TRequest request);
 }

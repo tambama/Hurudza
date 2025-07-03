@@ -1,5 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 using Blazored.LocalStorage;
 using Hurudza.Common.Utils.Extensions;
 using Hurudza.UI.Shared.Api.Interfaces;
@@ -306,6 +308,43 @@ public class ApiCall : IApiCall
             Log.Error(ex.Message, ex);
             return default;
         }
+    }
+    
+    public async Task<byte[]> AddWithBlobResponse<TRequest>(HttpClient httpClient, string endpoint, TRequest request)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(request);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            
+            var response = await httpClient.PostAsync($"api/v1/{endpoint}", content);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsByteArrayAsync();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Error downloading file: {response.StatusCode} - {errorContent}");
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error in AddWithBlobResponse: {ex.Message}", ex);
+        }
+    }
+    
+    // Alternative implementation if you prefer to return the HttpResponseMessage
+    public async Task<HttpResponseMessage> GetBlobResponse<TRequest>(HttpClient httpClient, string endpoint, TRequest request)
+    {
+        var json = JsonSerializer.Serialize(request);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        
+        var response = await httpClient.PostAsync($"api/v1/{endpoint}", content);
+        response.EnsureSuccessStatusCode();
+        
+        return response;
     }
 
     #endregion

@@ -21,6 +21,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OfficeOpenXml;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -181,6 +182,8 @@ try
     // Sms Service
     builder.Services.Configure<SmsSettings>(options => builder.Configuration.GetSection(SmsSettings.Settings).Bind(options));
     builder.Services.AddTransient<ISmsService, ClickatellSmsService>();
+    
+    ExcelPackage.License.SetNonCommercialPersonal("Peniel Tambama");
 
     var app = builder.Build();
 

@@ -1,0 +1,571 @@
+@page "/tillage-reports"
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels
+@using Hurudza.Data.UI.Models.ViewModels.Reports
+@using Hurudza.UI.Web.Components
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@using Microsoft.AspNetCore.Authorization
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Spinner
+@using Syncfusion.Blazor.Navigations
+
+@attribute [Authorize]
+@inject IApiCall ApiCall
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<Toast @ref="Alert" />
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1">Tillage Reports</h4>
+                        <p class="text-sm mb-0">Generate comprehensive reports on tillage services and programs</p>
+                    </div>
+                    <div>
+                        @if (HasPermission(Claims.ReportExport))
+                        {
+                            <SfButton CssClass="e-success" IconCss="fas fa-file-excel" 
+                                      @onclick="ExportToExcel" Disabled="@_loading">
+                                Export to Excel
+                            </SfButton>
+                        }
+                    </div>
+                </div>
+                
+                <!-- Filter Section -->
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="accordion" id="filterAccordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="filterHeading">
+                                        <button class="accordion-button @(_showFilters ? "" : "collapsed")" 
+                                                type="button" @onclick="ToggleFilters">
+                                            <i class="fas fa-filter me-2"></i> Report Filters
+                                        </button>
+                                    </h2>
+                                    <div class="accordion-collapse collapse @(_showFilters ? "show" : "")" 
+                                         id="filterCollapse">
+                                        <div class="accordion-body">
+                                            <div class="row g-3">
+                                                <!-- Location Filters -->
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Province</label>
+                                                    <SfDropDownList TValue="string" TItem="ProvinceViewModel"
+                                                                    @bind-Value="@_filter.ProvinceId"
+                                                                    DataSource="@_provinces"
+                                                                    Placeholder="Select Province">
+                                                        <DropDownListFieldSettings Value="Id" Text="Name"/>
+                                                        <DropDownListEvents TValue="string" TItem="ProvinceViewModel"
+                                                                            ValueChange="@OnProvinceChange"/>
+                                                    </SfDropDownList>
+                                                </div>
+                                                
+                                                <div class="col-md-3">
+                                                    <label class="form-label">District</label>
+                                                    <SfDropDownList TValue="string" TItem="DistrictViewModel"
+                                                                    @bind-Value="@_filter.DistrictId"
+                                                                    DataSource="@_districts"
+                                                                    Placeholder="Select District"
+                                                                    Enabled="@(!string.IsNullOrEmpty(_filter.ProvinceId))">
+                                                        <DropDownListFieldSettings Value="Id" Text="Name"/>
+                                                        <DropDownListEvents TValue="string" TItem="DistrictViewModel"
+                                                                            ValueChange="@OnDistrictChange"/>
+                                                    </SfDropDownList>
+                                                </div>
+                                                
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Conference</label>
+                                                    <SfDropDownList TValue="Conference?" TItem="string"
+                                                                    @bind-Value="@_filter.Conference"
+                                                                    DataSource="@_conferences"
+                                                                    Placeholder="Select Conference">
+                                                    </SfDropDownList>
+                                                </div>
+                                                
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Region</label>
+                                                    <SfDropDownList TValue="Region?" TItem="string"
+                                                                    @bind-Value="@_filter.Region"
+                                                                    DataSource="@_regions"
+                                                                    Placeholder="Select Region">
+                                                    </SfDropDownList>
+                                                </div>
+                                                
+                                                <!-- Service Filters -->
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Tillage Type</label>
+                                                    <SfDropDownList TValue="TillageType?" TItem="string"
+                                                                    @bind-Value="@_filter.TillageType"
+                                                                    DataSource="@_tillageTypes"
+                                                                    Placeholder="All Types">
+                                                    </SfDropDownList>
+                                                </div>
+                                                
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Service Status</label>
+                                                    <SfDropDownList TValue="bool?" TItem="StatusItem"
+                                                                    @bind-Value="@_filter.IsCompleted"
+                                                                    DataSource="@_statusOptions"
+                                                                    Placeholder="All Statuses">
+                                                        <DropDownListFieldSettings Value="Value" Text="Text"/>
+                                                    </SfDropDownList>
+                                                </div>
+                                                
+                                                <!-- Date Range -->
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Start Date</label>
+                                                    <SfDatePicker TValue="DateTime?" @bind-Value="@_filter.StartDate"
+                                                                  Placeholder="From Date" Format="yyyy-MM-dd">
+                                                    </SfDatePicker>
+                                                </div>
+                                                
+                                                <div class="col-md-3">
+                                                    <label class="form-label">End Date</label>
+                                                    <SfDatePicker TValue="DateTime?" @bind-Value="@_filter.EndDate"
+                                                                  Placeholder="To Date" Format="yyyy-MM-dd">
+                                                    </SfDatePicker>
+                                                </div>
+                                                
+                                                <!-- Financial Filters -->
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Min Income</label>
+                                                    <input type="number" class="form-control" 
+                                                           @bind="@_filter.MinIncome" 
+                                                           placeholder="Minimum income">
+                                                </div>
+                                                
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Max Income</label>
+                                                    <input type="number" class="form-control" 
+                                                           @bind="@_filter.MaxIncome" 
+                                                           placeholder="Maximum income">
+                                                </div>
+                                                
+                                                <!-- Action Buttons -->
+                                                <div class="col-12 mt-3">
+                                                    <SfButton CssClass="e-primary" IconCss="fas fa-search" 
+                                                              @onclick="ApplyFilters">
+                                                        Generate Report
+                                                    </SfButton>
+                                                    <SfButton CssClass="e-flat ms-2" IconCss="fas fa-undo" 
+                                                              @onclick="ResetFilters">
+                                                        Reset Filters
+                                                    </SfButton>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Summary Cards -->
+                    @if (_reportSummary != null && _reportSummary.Totals != null)
+                    {
+                        <div class="row mb-4">
+                            <div class="col-xl-3 col-sm-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="numbers">
+                                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Farms</p>
+                                                    <h5 class="font-weight-bolder mb-0">
+                                                        @_reportSummary.Totals.TotalFarms
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 text-end">
+                                                <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                                                    <i class="ni ni-building text-lg opacity-10" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-xl-3 col-sm-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="numbers">
+                                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Completion Rate</p>
+                                                    <h5 class="font-weight-bolder mb-0">
+                                                        @_reportSummary.Totals.OverallCompletionPercentage.ToString("F1")%
+                                                    </h5>
+                                                    <span class="text-xs">
+                                                        @_reportSummary.Totals.TotalCompletedHectares.ToString("N0") / 
+                                                        @_reportSummary.Totals.TotalTargetedHectares.ToString("N0") ha
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 text-end">
+                                                <div class="icon icon-shape bg-gradient-success shadow text-center border-radius-md">
+                                                    <i class="ni ni-check-bold text-lg opacity-10" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-xl-3 col-sm-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="numbers">
+                                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Revenue</p>
+                                                    <h5 class="font-weight-bolder mb-0">
+                                                        @_reportSummary.Totals.TotalActualIncome.ToString("C0")
+                                                    </h5>
+                                                    <span class="text-xs text-success">
+                                                        <i class="fa fa-arrow-up"></i>
+                                                        @((_reportSummary.Totals.TotalActualIncome / _reportSummary.Totals.TotalExpectedIncome * 100).ToString("F0"))% of target
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 text-end">
+                                                <div class="icon icon-shape bg-gradient-warning shadow text-center border-radius-md">
+                                                    <i class="ni ni-money-coins text-lg opacity-10" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-xl-3 col-sm-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="numbers">
+                                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Services</p>
+                                                    <h5 class="font-weight-bolder mb-0">
+                                                        @_reportSummary.Totals.TotalCompletedServices / @_reportSummary.Totals.TotalServices
+                                                    </h5>
+                                                    <span class="text-xs">Completed</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 text-end">
+                                                <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                                                    <i class="ni ni-settings text-lg opacity-10" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    
+                    <!-- Report Grid -->
+                    <div class="row">
+                        <div class="col-12">
+                            @if (_loading)
+                            {
+                                <div class="text-center p-5">
+                                    <SfSpinner Visible="true" Label="Generating report..." Type="SpinnerType.Bootstrap4"/>
+                                </div>
+                            }
+                            else if (_reportData != null && _reportData.Any())
+                            {
+                                <SfGrid DataSource="@_reportData" AllowPaging="true" AllowSorting="true" 
+                                        AllowFiltering="true" AllowExcelExport="true" @ref="_grid">
+                                    <GridPageSettings PageSize="20" PageSizes="true"/>
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"/>
+                                    <GridColumns>
+                                        <GridColumn Field=@nameof(TillageReportViewModel.FarmName) 
+                                                    HeaderText="Farm" Width="200" ClipMode="ClipMode.EllipsisWithTooltip"/>
+                                        <GridColumn Field=@nameof(TillageReportViewModel.Province) 
+                                                    HeaderText="Province" Width="120"/>
+                                        <GridColumn Field=@nameof(TillageReportViewModel.District) 
+                                                    HeaderText="District" Width="120"/>
+                                        <GridColumn Field=@nameof(TillageReportViewModel.Conference) 
+                                                    HeaderText="Conference" Width="100"/>
+                                        <GridColumn Field=@nameof(TillageReportViewModel.TargetedHectarage) 
+                                                    HeaderText="Target (Ha)" Width="100" Format="N2" TextAlign="TextAlign.Right"/>
+                                        <GridColumn Field=@nameof(TillageReportViewModel.CompletedHectarage) 
+                                                    HeaderText="Completed (Ha)" Width="120" Format="N2" TextAlign="TextAlign.Right"/>
+                                        <GridColumn Field=@nameof(TillageReportViewModel.CompletionPercentage) 
+                                                    HeaderText="Completion %" Width="120" TextAlign="TextAlign.Center">
+                                            <Template>
+                                                @{
+                                                    var report = (context as TillageReportViewModel);
+                                                    @*<div class="d-flex align-items-center">
+                                                        <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                                                            <div class="progress-bar bg-gradient-success" 
+                                                                 role="progressbar" 
+                                                                 style="width: @report.CompletionPercentage%">
+                                                                @report.CompletionPercentage.ToString("F1")%
+                                                            </div>
+                                                        </div>
+                                                    </div>*@
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="progress w-100 me-2" style="height: 6px;">
+                                                            <div class="progress-bar bg-gradient-success" role="progressbar" style="width: @(report.CompletionPercentage)%"></div>
+                                                        </div>
+                                                        <span class="text-sm">@report.CompletionPercentage.ToString("F1")%</span>
+                                                    </div>
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field=@nameof(TillageReportViewModel.NumberOfFarmsTargeted) 
+                                                    HeaderText="Farms" Width="80" TextAlign="TextAlign.Center"/>
+                                        <GridColumn Field=@nameof(TillageReportViewModel.ExpectedIncome) 
+                                                    HeaderText="Expected Income" Width="130" Format="C2" TextAlign="TextAlign.Right"/>
+                                        <GridColumn Field=@nameof(TillageReportViewModel.ActualIncome) 
+                                                    HeaderText="Actual Income" Width="120" Format="C2" TextAlign="TextAlign.Right"/>
+                                        <GridColumn Field=@nameof(TillageReportViewModel.TotalServices) 
+                                                    HeaderText="Services" Width="100" TextAlign="TextAlign.Center">
+                                            <Template>
+                                                @{
+                                                    var report = (context as TillageReportViewModel);
+                                                    <span class="badge badge-sm bg-gradient-info">
+                                                        @report.CompletedServices / @report.TotalServices
+                                                    </span>
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn HeaderText="Actions" Width="100" TextAlign="TextAlign.Center">
+                                            <Template>
+                                                @{
+                                                    var report = (context as TillageReportViewModel);
+                                                    <SfButton CssClass="e-flat e-small" IconCss="fas fa-eye" 
+                                                              @onclick="() => ViewDetails(report)">
+                                                    </SfButton>
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info">
+                                    <h6 class="alert-heading">No Data Available</h6>
+                                    <p class="mb-0">Apply filters and click "Generate Report" to view tillage service data.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    
+                    <!-- Province Breakdown Chart -->
+                    @if (_reportSummary?.ProvinceBreakdown?.Any() == true)
+                    {
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Province Breakdown</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <SfChart Title="Hectares by Province">
+                                            <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"/>
+                                            <ChartPrimaryYAxis Title="Hectares"/>
+                                            <ChartSeriesCollection>
+                                                <ChartSeries DataSource="@_reportSummary.ProvinceBreakdown" 
+                                                             XName="ProvinceName" YName="TotalHectares" 
+                                                             Type="ChartSeriesType.Column">
+                                                </ChartSeries>
+                                            </ChartSeriesCollection>
+                                        </SfChart>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Toast Alert;
+    private bool _loading = false;
+    private bool _showFilters = true;
+    private SfGrid<TillageReportViewModel> _grid;
+    
+    private TillageReportFilterModel _filter = new();
+    private TillageReportSummary _reportSummary;
+    private List<TillageReportViewModel> _reportData = new();
+    
+    // Dropdown data sources
+    private List<ProvinceViewModel> _provinces = new();
+    private List<DistrictViewModel> _districts = new();
+    private List<string> _conferences = Enum.GetNames(typeof(Conference)).ToList();
+    private List<string> _regions = Enum.GetNames(typeof(Region)).ToList();
+    private List<string> _tillageTypes = Enum.GetNames(typeof(TillageType)).ToList();
+    
+    private List<StatusItem> _statusOptions = new()
+    {
+        new StatusItem { Value = null, Text = "All Statuses" },
+        new StatusItem { Value = true, Text = "Completed" },
+        new StatusItem { Value = false, Text = "Pending" }
+    };
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLookupData();
+        await ApplyFilters(); // Load initial report
+    }
+    
+    private async Task LoadLookupData()
+    {
+        try
+        {
+            // Load provinces
+            var provinceResponse = await ApiCall.Get<ApiResponse<List<ProvinceViewModel>>>(
+                await ApiCall.GetHttpClient(), "Provinces/GetProvinces");
+            
+            if (provinceResponse.Status == (int)HttpStatusCode.OK)
+            {
+                _provinces = provinceResponse.Result ?? new List<ProvinceViewModel>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading lookup data: {ex.Message}", toastType: ToastType.Danger);
+        }
+    }
+    
+    private async Task OnProvinceChange(ChangeEventArgs<string, ProvinceViewModel> args)
+    {
+        if (!string.IsNullOrEmpty(args.Value))
+        {
+            await LoadDistricts(args.Value);
+        }
+        else
+        {
+            _districts = new List<DistrictViewModel>();
+            _filter.DistrictId = null;
+        }
+    }
+    
+    private async Task LoadDistricts(string provinceId)
+    {
+        try
+        {
+            var districtResponse = await ApiCall.Get<ApiResponse<List<DistrictViewModel>>>(
+                await ApiCall.GetHttpClient(), $"Districts/GetDistrictsByProvince/{provinceId}");
+            
+            if (districtResponse.Status == (int)HttpStatusCode.OK)
+            {
+                _districts = districtResponse.Result ?? new List<DistrictViewModel>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading districts: {ex.Message}", toastType: ToastType.Danger);
+        }
+    }
+    
+    private Task OnDistrictChange(ChangeEventArgs<string, DistrictViewModel> args)
+    {
+        // Additional logic if needed when district changes
+        return Task.CompletedTask;
+    }
+    
+    private async Task ApplyFilters()
+    {
+        try
+        {
+            _loading = true;
+            StateHasChanged();
+            
+            var response = await ApiCall.Add<ApiResponse<TillageReportSummary>, TillageReportFilterModel>(
+                await ApiCall.GetHttpClient(), "TillageReports/GetTillageReport", _filter);
+            
+            if (response.Status == (int)HttpStatusCode.OK && response.Result != null)
+            {
+                _reportSummary = response.Result;
+                _reportData = response.Result.Reports ?? new List<TillageReportViewModel>();
+            }
+            else
+            {
+                Alert.Show(response.Title ?? "Error generating report", toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error generating report: {ex.Message}", toastType: ToastType.Danger);
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+    
+    private void ResetFilters()
+    {
+        _filter = new TillageReportFilterModel();
+        _districts = new List<DistrictViewModel>();
+        StateHasChanged();
+    }
+    
+    private void ToggleFilters()
+    {
+        _showFilters = !_showFilters;
+    }
+    
+    private async Task ExportToExcel()
+    {
+        try
+        {
+            _loading = true;
+            StateHasChanged();
+            
+            var response = await ApiCall.AddWithBlobResponse<TillageReportFilterModel>(
+                await ApiCall.GetHttpClient(), "TillageReports/ExportTillageReport", _filter);
+            
+            if (response != null)
+            {
+                // Download the file
+                var fileName = $"TillageReport_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                await JS.InvokeVoidAsync("saveAsFile", fileName, Convert.ToBase64String(response));
+                Alert.Show("Report exported successfully", toastType: ToastType.Success);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error exporting report: {ex.Message}", toastType: ToastType.Danger);
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+    
+    private void ViewDetails(TillageReportViewModel report)
+    {
+        Navigation.NavigateTo($"/farm/{report.FarmId}/tillage-programs");
+    }
+    
+    private bool HasPermission(string claim)
+    {
+        // Check if user has the specified permission
+        return true; // Implement actual permission check
+    }
+    
+    private class StatusItem
+    {
+        public bool? Value { get; set; }
+        public string Text { get; set; }
+    }
+}
