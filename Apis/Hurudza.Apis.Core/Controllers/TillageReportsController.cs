@@ -95,7 +95,7 @@ namespace Hurudza.Apis.Core.Controllers
                 var worksheet = package.Workbook.Worksheets.Add("Tillage Report");
                 
                 // Add header
-                AddReportHeader(worksheet, filter);
+                await AddReportHeader(worksheet, filter);
                 
                 // Add column headers
                 var currentRow = AddColumnHeaders(worksheet, 5);
@@ -250,25 +250,42 @@ namespace Hurudza.Apis.Core.Controllers
             return breakdown;
         }
         
-        private void AddReportHeader(ExcelWorksheet worksheet, TillageReportFilterModel filter)
+        private async Task AddReportHeader(ExcelWorksheet worksheet, TillageReportFilterModel filter)
         {
             worksheet.Cells["A1:L1"].Merge = true;
             worksheet.Cells["A1"].Value = "TILLAGE SERVICES REPORT";
             worksheet.Cells["A1"].Style.Font.Size = 16;
             worksheet.Cells["A1"].Style.Font.Bold = true;
             worksheet.Cells["A1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            
+    
             worksheet.Cells["A2:L2"].Merge = true;
             worksheet.Cells["A2"].Value = $"Generated on: {DateTime.Now:yyyy-MM-dd HH:mm}";
             worksheet.Cells["A2"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            
-            // Add filter information
+    
+            // Add filter information with proper names lookup
             var filterInfo = "Filters: ";
-            if (!string.IsNullOrEmpty(filter.ProvinceId)) filterInfo += $"Province: {filter.ProvinceId}, ";
-            if (!string.IsNullOrEmpty(filter.DistrictId)) filterInfo += $"District: {filter.DistrictId}, ";
-            if (filter.StartDate.HasValue) filterInfo += $"From: {filter.StartDate:yyyy-MM-dd}, ";
-            if (filter.EndDate.HasValue) filterInfo += $"To: {filter.EndDate:yyyy-MM-dd}";
-            
+    
+            // Look up Province name if ProvinceId is provided
+            if (!string.IsNullOrEmpty(filter.ProvinceId))
+            {
+                var province = await _context.Provinces
+                    .FirstOrDefaultAsync(p => p.Id == filter.ProvinceId);
+                filterInfo += $"Province: {province?.Name ?? filter.ProvinceId}, ";
+            }
+    
+            // Look up District name if DistrictId is provided
+            if (!string.IsNullOrEmpty(filter.DistrictId))
+            {
+                var district = await _context.Districts
+                    .FirstOrDefaultAsync(d => d.Id == filter.DistrictId);
+                filterInfo += $"District: {district?.Name ?? filter.DistrictId}, ";
+            }
+    
+            if (filter.StartDate.HasValue) 
+                filterInfo += $"From: {filter.StartDate:yyyy-MM-dd}, ";
+            if (filter.EndDate.HasValue) 
+                filterInfo += $"To: {filter.EndDate:yyyy-MM-dd}";
+    
             worksheet.Cells["A3:L3"].Merge = true;
             worksheet.Cells["A3"].Value = filterInfo.TrimEnd(',', ' ');
             worksheet.Cells["A3"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
@@ -299,36 +316,39 @@ namespace Hurudza.Apis.Core.Controllers
         private int AddDataRows(ExcelWorksheet worksheet, List<TillageReportViewModel> reports, int startRow)
         {
             var currentRow = startRow;
-            
+    
             foreach (var report in reports)
             {
                 worksheet.Cells[currentRow, 1].Value = report.FarmName;
-                worksheet.Cells[currentRow, 2].Value = report.Province;
-                worksheet.Cells[currentRow, 3].Value = report.District;
+                worksheet.Cells[currentRow, 2].Value = report.Province ?? "";
+                worksheet.Cells[currentRow, 3].Value = report.District ?? "";
                 worksheet.Cells[currentRow, 4].Value = report.Conference?.ToString() ?? "";
                 worksheet.Cells[currentRow, 5].Value = report.Region?.ToString() ?? "";
                 worksheet.Cells[currentRow, 6].Value = report.TargetedHectarage;
                 worksheet.Cells[currentRow, 6].Style.Numberformat.Format = "#,##0.00";
                 worksheet.Cells[currentRow, 7].Value = report.CompletedHectarage;
                 worksheet.Cells[currentRow, 7].Style.Numberformat.Format = "#,##0.00";
-                worksheet.Cells[currentRow, 8].Value = report.CompletionPercentage;
+        
+                // Fix: Divide by 100 because CompletionPercentage is already a percentage value
+                worksheet.Cells[currentRow, 8].Value = report.CompletionPercentage / 100;
                 worksheet.Cells[currentRow, 8].Style.Numberformat.Format = "0.0%";
+        
                 worksheet.Cells[currentRow, 9].Value = report.NumberOfFarmsTargeted;
                 worksheet.Cells[currentRow, 10].Value = report.ExpectedIncome;
                 worksheet.Cells[currentRow, 10].Style.Numberformat.Format = "$#,##0.00";
                 worksheet.Cells[currentRow, 11].Value = report.ActualIncome;
                 worksheet.Cells[currentRow, 11].Style.Numberformat.Format = "$#,##0.00";
                 worksheet.Cells[currentRow, 12].Value = $"{report.CompletedServices}/{report.TotalServices}";
-                
+        
                 // Add borders
                 for (int i = 1; i <= 12; i++)
                 {
                     worksheet.Cells[currentRow, i].Style.Border.BorderAround(ExcelBorderStyle.Thin);
                 }
-                
+        
                 currentRow++;
             }
-            
+    
             return currentRow - 1;
         }
         
