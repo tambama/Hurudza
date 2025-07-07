@@ -317,7 +317,7 @@ public class ApiCall : IApiCall
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             
-            var response = await httpClient.PostAsync($"api/v1/{endpoint}", content);
+            var response = await httpClient.PostAsync($"{endpoint}?api-version={ApiVersion}", content);
             
             if (response.IsSuccessStatusCode)
             {
@@ -341,7 +341,7 @@ public class ApiCall : IApiCall
         var json = JsonSerializer.Serialize(request);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         
-        var response = await httpClient.PostAsync($"api/v1/{endpoint}", content);
+        var response = await httpClient.PostAsync($"{endpoint}?api-version={ApiVersion}", content);
         response.EnsureSuccessStatusCode();
         
         return response;

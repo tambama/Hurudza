@@ -31,7 +31,7 @@ public class DistrictsController : Controller
         return Ok(districts);
     }
     
-    [HttpGet("{id:int}", Name = nameof(GetDistrictsByProvinceId))]
+    [HttpGet("{id}", Name = nameof(GetDistrictsByProvinceId))]
     public async Task<IActionResult> GetDistrictsByProvinceId(string id)
     {
         var districts = await _context.Districts.Where(d => d.ProvinceId == id).ToListAsync().ConfigureAwait(false);

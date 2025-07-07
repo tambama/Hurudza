@@ -429,13 +429,8 @@
         try
         {
             // Load provinces
-            var provinceResponse = await ApiCall.Get<ApiResponse<List<ProvinceViewModel>>>(
+            _provinces = await ApiCall.Get<List<ProvinceViewModel>>(
                 await ApiCall.GetHttpClient(), "Provinces/GetProvinces");
-            
-            if (provinceResponse.Status == (int)HttpStatusCode.OK)
-            {
-                _provinces = provinceResponse.Result ?? new List<ProvinceViewModel>();
-            }
         }
         catch (Exception ex)
         {
@@ -460,13 +455,8 @@
     {
         try
         {
-            var districtResponse = await ApiCall.Get<ApiResponse<List<DistrictViewModel>>>(
-                await ApiCall.GetHttpClient(), $"Districts/GetDistrictsByProvince/{provinceId}");
-            
-            if (districtResponse.Status == (int)HttpStatusCode.OK)
-            {
-                _districts = districtResponse.Result ?? new List<DistrictViewModel>();
-            }
+            _districts = await ApiCall.Get<List<DistrictViewModel>>(
+                await ApiCall.GetHttpClient(), $"Districts/GetDistrictsByProvinceId/{provinceId}");
         }
         catch (Exception ex)
         {
@@ -554,7 +544,7 @@
     
     private void ViewDetails(TillageReportViewModel report)
     {
-        Navigation.NavigateTo($"/farm/{report.FarmId}/tillage-programs");
+        Navigation.NavigateTo($"farm/{report.FarmId}/tillage-programs");
     }
     
     private bool HasPermission(string claim)
