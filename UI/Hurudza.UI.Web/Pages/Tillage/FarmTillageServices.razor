@@ -1,0 +1,193 @@
+@page "/farm/{farmId}/tillage-services"
+@attribute [Authorize]
+
+@using Hurudza.Data.UI.Models.ViewModels.Tillage
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@using Hurudza.UI.Web.Services
+@inject IApiCall ApiCall
+@inject NavigationManager Navigation
+@inject FarmAccessService FarmAccessService
+
+<Toast @ref="Alert"/>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <div class="row">
+                    <div class="col-md-1 text-start">
+                        <a href="javascript:;" @onclick="GoBack">
+                            <i class="fas fa-arrow-left text-secondary text-sm" data-bs-toggle="tooltip"
+                               data-bs-placement="top" aria-hidden="true" aria-label="Go Back"
+                               data-bs-original-title="Go Back"></i><span class="sr-only">Go Back</span>
+                        </a>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-center">
+                        <h6 class="mb-0">All Tillage Services for @_farmName</h6>
+                    </div>
+                    <div class="col-md-5 text-end">
+                        <button class="btn btn-sm btn-primary" @onclick="LoadData">
+                            <i class="fas fa-sync-alt me-1"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body px-2 pt-0 pb-2">
+                @if (_loading)
+                {
+                    <div class="text-center py-5">
+                        <SfSpinner></SfSpinner>
+                        <p class="mt-3">Loading tillage services...</p>
+                    </div>
+                }
+                else if (_tillageServices == null || !_tillageServices.Any())
+                {
+                    <div class="text-center py-5">
+                        <div class="alert alert-info">
+                            <p class="mb-0">No tillage services found for this farm.</p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Program Filter -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <SfDropDownList TValue="string" TItem="TillageProgramViewModel" 
+                                          Placeholder="Filter by Program" 
+                                          DataSource="@_programs"
+                                          @bind-Value="@_selectedProgramId">
+                                <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+                                <DropDownListEvents TValue="string" TItem="TillageProgramViewModel" 
+                                                  ValueChange="@OnProgramFilterChange"></DropDownListEvents>
+                            </SfDropDownList>
+                        </div>
+                    </div>
+                    
+                    <SfGrid DataSource="@_filteredServices" AllowPaging="true" AllowSorting="true" AllowFiltering="true">
+                        <GridPageSettings PageSize="15"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn Field=@nameof(TillageServiceViewModel.TillageProgram) HeaderText="Program" Width="150"></GridColumn>
+                            <GridColumn Field=@nameof(TillageServiceViewModel.RecipientFarm) HeaderText="Recipient Farm" Width="150"></GridColumn>
+                            <GridColumn Field=@nameof(TillageServiceViewModel.TillageTypeName) HeaderText="Service Type" Width="120"></GridColumn>
+                            <GridColumn Field=@nameof(TillageServiceViewModel.Hectares) HeaderText="Hectares" Width="100" Format="N2"></GridColumn>
+                            <GridColumn Field=@nameof(TillageServiceViewModel.ServiceDate) HeaderText="Service Date" Width="120" Format="d"></GridColumn>
+                            <GridColumn Field=@nameof(TillageServiceViewModel.ServiceCost) HeaderText="Cost" Width="100" Format="C2"></GridColumn>
+                            <GridColumn Field=@nameof(TillageServiceViewModel.IsCompleted) HeaderText="Status" Width="100">
+                                <Template>
+                                    @{
+                                        var service = (context as TillageServiceViewModel);
+                                        if (service.IsCompleted)
+                                        {
+                                            <span class="badge badge-sm bg-gradient-success">Completed</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-sm bg-gradient-warning">Pending</span>
+                                        }
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string FarmId { get; set; }
+    
+    private Toast Alert;
+    private bool _loading = true;
+    private string _farmName = string.Empty;
+    private List<TillageServiceViewModel> _tillageServices = new();
+    private List<TillageServiceViewModel> _filteredServices = new();
+    private List<TillageProgramViewModel> _programs = new();
+    private string _selectedProgramId = "";
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+    
+    private async Task LoadData()
+    {
+        try
+        {
+            _loading = true;
+            StateHasChanged();
+            
+            // Check farm access
+            if (!await FarmAccessService.CanAccessFarm(FarmId))
+            {
+                Alert.Show("You don't have access to this farm", toastType: ToastType.Warning);
+                Navigation.NavigateTo("/tillage-reports");
+                return;
+            }
+            
+            // Load farm details
+            var farmResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<FarmViewModel>>(
+                await ApiCall.GetHttpClient(), "farms/getfarm", FarmId);
+                
+            if (farmResponse.Status == (int)HttpStatusCode.OK && farmResponse.Result != null)
+            {
+                _farmName = farmResponse.Result.Name;
+            }
+            
+            // Load all programs for this farm
+            _programs = (await ApiCall.Get<IEnumerable<TillageProgramViewModel>>(
+                await ApiCall.GetHttpClient(), $"TillagePrograms/GetFarmTillagePrograms/{FarmId}")).ToList();
+            
+            // Load all services for all programs
+            _tillageServices = new List<TillageServiceViewModel>();
+            foreach (var program in _programs)
+            {
+                var services = await ApiCall.Get<IEnumerable<TillageServiceViewModel>>(
+                    await ApiCall.GetHttpClient(), $"TillageServices/GetProgramTillageServices/{program.Id}");
+                
+                if (services != null)
+                {
+                    // Add program name to each service for display
+                    foreach (var service in services)
+                    {
+                        service.TillageProgram = program.Name;
+                    }
+                    _tillageServices.AddRange(services);
+                }
+            }
+            
+            _filteredServices = _tillageServices;
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading data: {ex.Message}", toastType: ToastType.Danger);
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+    
+    private void OnProgramFilterChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, TillageProgramViewModel> args)
+    {
+        if (string.IsNullOrEmpty(args.Value))
+        {
+            _filteredServices = _tillageServices;
+        }
+        else
+        {
+            var selectedProgram = _programs.FirstOrDefault(p => p.Id == args.Value);
+            _filteredServices = _tillageServices.Where(s => s.TillageProgram == selectedProgram?.Name).ToList();
+        }
+        StateHasChanged();
+    }
+    
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/tillage-reports");
+    }
+}

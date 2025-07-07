@@ -2,6 +2,7 @@
 @using Hurudza.Data.Enums.Enums
 @using Hurudza.Data.UI.Models.ViewModels
 @using Hurudza.Data.UI.Models.ViewModels.Reports
+@using Hurudza.Data.UI.Models.ViewModels.Tillage
 @using Hurudza.UI.Web.Components
 @using Hurudza.UI.Web.Services
 @using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
@@ -305,15 +306,6 @@
                                             <Template>
                                                 @{
                                                     var report = (context as TillageReportViewModel);
-                                                    @*<div class="d-flex align-items-center">
-                                                        <div class="progress flex-grow-1 me-2" style="height: 20px;">
-                                                            <div class="progress-bar bg-gradient-success" 
-                                                                 role="progressbar" 
-                                                                 style="width: @report.CompletionPercentage%">
-                                                                @report.CompletionPercentage.ToString("F1")%
-                                                            </div>
-                                                        </div>
-                                                    </div>*@
                                                     <div class="d-flex align-items-center">
                                                         <div class="progress w-100 me-2" style="height: 6px;">
                                                             <div class="progress-bar bg-gradient-success" role="progressbar" style="width: @(report.CompletionPercentage)%"></div>
@@ -340,13 +332,20 @@
                                                 }
                                             </Template>
                                         </GridColumn>
-                                        <GridColumn HeaderText="Actions" Width="100" TextAlign="TextAlign.Center">
+                                        <GridColumn HeaderText="Actions" Width="150" TextAlign="TextAlign.Center">
                                             <Template>
                                                 @{
                                                     var report = (context as TillageReportViewModel);
-                                                    <SfButton CssClass="e-flat e-small" IconCss="fas fa-eye" 
-                                                              @onclick="() => ViewDetails(report)">
-                                                    </SfButton>
+                                                    <div class="d-flex justify-content-center gap-1">
+                                                        <SfButton CssClass="e-flat e-small" IconCss="fas fa-eye" 
+                                                                  Title="View Details"
+                                                                  @onclick="() => ViewDetails(report)">
+                                                        </SfButton>
+                                                        <SfButton CssClass="e-flat e-small e-primary" IconCss="fas fa-cogs" 
+                                                                  Title="View Services"
+                                                                  @onclick="() => ViewServices(report)">
+                                                        </SfButton>
+                                                    </div>
                                                 }
                                             </Template>
                                         </GridColumn>
@@ -545,6 +544,39 @@
     private void ViewDetails(TillageReportViewModel report)
     {
         Navigation.NavigateTo($"farm/{report.FarmId}/tillage-programs");
+    }
+    
+    private async Task ViewServices(TillageReportViewModel report)
+    {
+        try
+        {
+            // Fetch the farm's tillage programs
+            var programs = await ApiCall.Get<IEnumerable<TillageProgramViewModel>>(
+                await ApiCall.GetHttpClient(), $"TillagePrograms/GetFarmTillagePrograms/{report.FarmId}");
+        
+            var activePrograms = programs?.Where(p => p.IsActive).ToList();
+        
+            if (activePrograms == null || !activePrograms.Any())
+            {
+                Alert.Show("No active tillage programs found for this farm", toastType: ToastType.Info);
+                return;
+            }
+        
+            if (activePrograms.Count == 1)
+            {
+                // Single active program - navigate directly to its services
+                Navigation.NavigateTo($"/tillage-program/{activePrograms.First().Id}/services");
+            }
+            else
+            {
+                // Multiple programs - navigate to programs page
+                Navigation.NavigateTo($"/farm/{report.FarmId}/tillage-programs");
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading programs: {ex.Message}", toastType: ToastType.Danger);
+        }
     }
     
     private bool HasPermission(string claim)
