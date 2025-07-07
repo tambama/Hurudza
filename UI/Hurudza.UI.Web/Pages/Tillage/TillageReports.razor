@@ -234,7 +234,7 @@
                                                     </h5>
                                                     <span class="text-xs text-success">
                                                         <i class="fa fa-arrow-up"></i>
-                                                        @((_reportSummary.Totals.TotalActualIncome / _reportSummary.Totals.TotalExpectedIncome * 100).ToString("F0"))% of target
+                                                        @((_reportSummary.Totals.TotalExpectedIncome > 0 ? _reportSummary.Totals.TotalActualIncome / _reportSummary.Totals.TotalExpectedIncome * 100 : 0).ToString("F0"))% of target
                                                     </span>
                                                 </div>
                                             </div>
