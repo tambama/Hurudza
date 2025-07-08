@@ -75,6 +75,16 @@ public class FarmViewModel : BaseViewModel
     public string? LocalAuthority { get; set; }
     public string? District { get; set; }
     public string? Province { get; set; }
+    
+    public FarmType FarmType { get; set; } = FarmType.School;
+    public string? ParentSchoolId { get; set; }
+    public string? ParentSchoolName { get; set; }
+    public bool RequiresTillageService { get; set; }
+    public string? TillageRequirements { get; set; }
+    public DateTime? LastTillageDate { get; set; }
+    public string? CropRotationPlan { get; set; }
+    
+    public List<FarmViewModel> ManagedFarms { get; set; } = new List<FarmViewModel>();
 }
 
 public class CreateFarmViewModel : BaseViewModel

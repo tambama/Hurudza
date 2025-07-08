@@ -1,8 +1,10 @@
 ﻿@page "/map"
 @implements IAsyncDisposable
 @using System.Collections.ObjectModel
+@using Hurudza.UI.Web.Services
 @using Microsoft.Extensions.Logging
 @using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject FarmAccessService FarmAccessService
 @attribute [Authorize]
 
 @inject AuthenticationStateProvider AuthStateProvider
@@ -142,6 +144,46 @@
     .field-item:hover {
         background-color: #f8f9fa;
         border-color: #dee2e6;
+    }
+
+    /* Add to your site CSS or component styles */
+    .custom-marker {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease;
+    }
+
+    .custom-marker:hover {
+        transform: scale(1.1);
+    }
+
+    .temp-marker {
+        animation: pulse 1.5s infinite;
+    }
+
+    @@keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(255, 107, 107, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
+        }
+    }
+
+    /* Mapbox popup styling for farms */
+    .mapboxgl-popup-content h6 {
+        margin: 0 0 5px 0;
+        font-weight: bold;
+    }
+
+    .mapboxgl-popup-content p {
+        margin: 0;
+        font-size: 12px;
+        color: #666;
     }
 </style>
 
@@ -325,6 +367,34 @@
                         </div>
                     }
                 </div>
+                
+                @if (_farm.FarmType == FarmType.School && (_user.IsInRole(ApiRoles.Administrator) || _user.IsInRole(ApiRoles.FarmAdministrator)))
+                {
+                    <div class="school-admin-section mt-4">
+                        <h5>Managed Farms (@_managedFarms.Count)</h5>
+                        <button class="btn btn-primary btn-sm" @onclick="ShowAddFarmDialog">
+                            <i class="fas fa-plus"></i> Add New Farm
+                        </button>
+        
+                        @if (_managedFarms.Any())
+                        {
+                            <div class="managed-farms-list mt-3">
+                                @foreach (var managedFarm in _managedFarms)
+                                {
+                                    <div class="farm-item border rounded p-2 mb-2">
+                                        <h6>@managedFarm.Name</h6>
+                                        <p class="mb-1">Size: @managedFarm.Size ha | Arable: @managedFarm.Arable ha</p>
+                                        <p class="mb-1">Tillage Required: @(managedFarm.RequiresTillageService ? "Yes" : "No")</p>
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                @onclick="() => ViewFarmDetails(managedFarm)">
+                                            View Details
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -897,6 +967,88 @@
             </Content>
         </DialogTemplates>
     </SfDialog>
+    
+    @if (_showAddFarmDialog)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Farm</h5>
+                    <button type="button" class="btn-close" @onclick="() => _showAddFarmDialog = false"></button>
+                </div>
+                <EditForm Model="_newFarm" OnValidSubmit="SaveNewFarm">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <ValidationSummary />
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Farm Name</label>
+                            <InputText @bind-Value="_newFarm.Name" class="form-control" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <InputText @bind-Value="_newFarm.Address" class="form-control" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Contact Person</label>
+                            <InputText @bind-Value="_newFarm.ContactPerson" class="form-control" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <InputText @bind-Value="_newFarm.PhoneNumber" class="form-control" />
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Size (ha)</label>
+                                <InputNumber @bind-Value="_newFarm.Size" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Arable Land (ha)</label>
+                                <InputNumber @bind-Value="_newFarm.Arable" class="form-control" />
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <InputCheckbox @bind-Value="_newFarm.RequiresTillageService" />
+                                Requires Tillage Service
+                            </label>
+                        </div>
+                        
+                        @if (_newFarm.RequiresTillageService)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Tillage Requirements</label>
+                                <InputTextArea @bind-Value="_newFarm.TillageRequirements" 
+                                               class="form-control" rows="3" />
+                            </div>
+                        }
+                        
+                        <div class="mb-3">
+                            <p class="text-muted">Location: @(_newFarm.Latitude == 0 ? "Not set" : $"{_newFarm.Latitude:F6}, {_newFarm.Longitude:F6}")</p>
+                            <button type="button" class="btn btn-secondary btn-sm" 
+                                    @onclick="EnableMapClickForLocation">
+                                Set Location on Map
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" 
+                                @onclick="() => _showAddFarmDialog = false">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            Save Farm
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
 
     <SfSpinner @ref="_spinnerRef" Size="40" Type="SpinnerType.Bootstrap" CssClass="global-spinner"
                Visible="false"></SfSpinner>
@@ -935,6 +1087,11 @@
     private FieldLocationViewModel _fieldLocation = new FieldLocationViewModel();
     private FileViewModel _kml = new();
     private string _currentCrop = string.Empty;
+    private bool _isSchoolUser = false;
+    private List<FarmViewModel> _managedFarms = new List<FarmViewModel>();
+    private bool _showAddFarmDialog = false;
+    private AddFarmViewModel _newFarm = new AddFarmViewModel();
+    private ClaimsPrincipal _user;
 
     // Filter-related properties
     private bool _isCurrentlyFiltering = false;
@@ -1023,6 +1180,36 @@
         {
             _alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
             Logger.LogError(ex, "Error saving farm");
+        }
+        finally
+        {
+            await HideSpinner();
+        }
+    }
+    
+    async Task SaveNewFarm()
+    {
+        try
+        {
+            await ShowSpinner();
+        
+            var response = await ApiCall.Add<ApiResponse<FarmViewModel>, AddFarmViewModel>(
+                await ApiCall.GetHttpClient(),
+                $"farms/school/{_farm.Id}/add-farm",
+                _newFarm);
+            
+            if (response?.Status == (int)HttpStatusCode.OK)
+            {
+                _alert.Show("Farm added successfully!", showTitle: true, toastType: ToastType.Success);
+                _showAddFarmDialog = false;
+            
+                // Reload farm details to show new farm
+                await OnFarmSelect(_farm);
+            }
+            else
+            {
+                _alert.Show(response?.Title ?? "Failed to add farm", showTitle: true, toastType: ToastType.Danger);
+            }
         }
         finally
         {
@@ -1394,6 +1581,15 @@
             await HideSpinner();
         }
     }
+    
+    void ShowAddFarmDialog()
+    {
+        _newFarm = new AddFarmViewModel
+        {
+            ParentSchoolId = _farm.Id
+        };
+        _showAddFarmDialog = true;
+    }
 
     #endregion
 
@@ -1406,6 +1602,22 @@
         {
             await ShowSpinner();
             _farm = farm;
+            
+            // Check if this is a school
+            if (_farm.FarmType == FarmType.School)
+            {
+                _isSchoolUser = true;
+            
+                // Load managed farms
+                var response = await ApiCall.Get<ApiResponse<List<FarmViewModel>>>(
+                    await ApiCall.GetHttpClient(), 
+                    $"farms/school/{_farm.Id}/farms");
+                
+                if (response?.Status == (int)HttpStatusCode.OK && response?.Result != null)
+                {
+                    _managedFarms = response.Result;
+                }
+            }
 
             // Get detailed farm information with field data
             var farmMap = await ApiCall.Get<FarmMapViewModel>(
@@ -1480,6 +1692,15 @@
                         farmMap.Longitude,
                         zoomLevel
                     ).AsTask();
+                }
+            }
+            
+            // Draw managed farms on the map
+            if (_isSchoolUser && _managedFarms.Any())
+            {
+                foreach (var managedFarm in _managedFarms)
+                {
+                    await DrawFarmOnMap(managedFarm, true);
                 }
             }
         }
@@ -2065,12 +2286,47 @@
             Logger.LogError(ex, $"Error unhighlighting field {field.Id}");
         }
     }
+    
+    async Task DrawFarmOnMap(FarmViewModel farm, bool isManagedFarm = false)
+    {
+        if (_mapModule != null && farm.Latitude != 0 && farm.Longitude != 0)
+        {
+            // Draw farm marker with different color for managed farms
+            var color = isManagedFarm ? "#FF6B6B" : "#4ECDC4"; // Red for farms, teal for schools
+        
+            await _mapModule.InvokeVoidAsync("addMarker",
+                _mapInstance,
+                farm.Id,
+                farm.Latitude,
+                farm.Longitude,
+                farm.Name,
+                color,
+                isManagedFarm ? "farm" : "school"
+            );
+        }
+    }
 
     [JSInvokable]
     public void SetDrawingMode(bool isDrawing)
     {
         _isInDrawingMode = isDrawing;
         StateHasChanged();
+    }
+    
+    [JSInvokable]
+    public void SetFarmLocation(double lat, double lng)
+    {
+        _newFarm.Latitude = lat;
+        _newFarm.Longitude = lng;
+        StateHasChanged();
+    }
+
+    async Task EnableMapClickForLocation()
+    {
+        if (_mapModule != null)
+        {
+            await _mapModule.InvokeVoidAsync("enableLocationPicker", _mapInstance, "SetFarmLocation");
+        }
     }
 
     [JSInvokable]
@@ -2588,6 +2844,11 @@
         _showUploadFieldsDialog = false;
         _loadedKmlFile = null;
     }
+    
+    async Task ViewFarmDetails(FarmViewModel farm)
+    {
+        await OnFarmSelect(farm);
+    }
 
     #endregion
 
@@ -2860,6 +3121,9 @@
 
             // Load reference data
             await LoadReferenceData();
+            
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            _user = authState.User;
 
             // Load farms data
             await LoadFarms();

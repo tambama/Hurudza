@@ -32,6 +32,7 @@ public static class ApplicationRoles
                 RoleClass = RoleClass.System,
                 RoleClaims = new List<ApplicationRoleClaim>
                 {
+                    new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FarmCreate},
                     new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FarmDelete},
                     new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FarmManage},
 

@@ -260,6 +260,12 @@ public class HurudzaDbContext :
                 .HasForeignKey(l => l.FarmId)
                 .IsRequired(true)
                 .OnDelete(DeleteBehavior.NoAction);
+            
+            b.HasOne(f => f.ParentSchool)
+                .WithMany(f => f.ManagedFarms)
+                .HasForeignKey(f => f.ParentSchoolId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
         builder.Entity<Field>(b =>

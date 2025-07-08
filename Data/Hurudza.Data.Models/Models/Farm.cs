@@ -65,6 +65,18 @@ public class Farm : BaseEntity
     public double Longitude { get; set; }
     public double Elevation { get; set; }
     public string? Buildings { get; set; }
+    
+    // properties for farm classification
+    public FarmType FarmType { get; set; } = FarmType.School;
+    public string? ParentSchoolId { get; set; }
+    public virtual Farm? ParentSchool { get; set; }
+    public virtual ICollection<Farm> ManagedFarms { get; set; }
+    
+    // Tillage-specific properties for farms
+    public bool RequiresTillageService { get; set; }
+    public string? TillageRequirements { get; set; }
+    public DateTime? LastTillageDate { get; set; }
+    public string? CropRotationPlan { get; set; }
 
     public virtual Ward? Ward { get; set; }
     public virtual LocalAuthority? LocalAuthority { get; set; }
@@ -75,4 +87,5 @@ public class Farm : BaseEntity
     public virtual ICollection<FieldLocation> FieldLocations { get; set; }
     
     public virtual ICollection<FarmOwner> Owners { get; set; }
+    
 }

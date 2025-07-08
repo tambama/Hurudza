@@ -7,6 +7,7 @@ namespace Hurudza.Data.Data
     {
         // Farm Permissions
         public const string FarmView = "Farm.View";
+        public const string FarmAdd = "Farm.Add";
         public const string FarmCreate = "Farm.Create";
         public const string FarmUpdate = "Farm.Update";
         public const string FarmManage = "Farm.Manage";

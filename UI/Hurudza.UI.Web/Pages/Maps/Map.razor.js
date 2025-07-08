@@ -56,7 +56,7 @@ export function setMapCenter(map, latitude, longitude, zoom = 14) {
  */
 export function loadFarms(map, farms) {
     try {
-        console.log("Loading farms as clusters on main map");
+        console.log("Loading farms with classification on main map");
 
         if (!map) {
             console.error("Map instance is not initialized");
@@ -64,184 +64,225 @@ export function loadFarms(map, farms) {
         }
 
         if (!farms || !farms.features || farms.features.length === 0) {
-            console.warn("No farm data provided for clusters");
+            console.log("No farm data to display");
             return false;
         }
 
-        // Clean up existing sources and layers
-        if (map.getSource('farms')) {
-            // Remove layers first
-            if (map.getLayer('clusters'))
-                map.removeLayer('clusters');
-
-            if (map.getLayer('cluster-count'))
-                map.removeLayer('cluster-count');
-
-            if (map.getLayer('unclustered-point'))
-                map.removeLayer('unclustered-point');
-
-            // Then remove source
-            map.removeSource('farms');
-        }
-
-        // Add new source with farm data
-        map.addSource('farms', {
-            type: 'geojson',
-            data: farms,
-            cluster: true,
-            clusterMaxZoom: 14, // Max zoom level for clusters
-            clusterRadius: 50,  // Cluster radius
-            clusterProperties: {
-                'count': ['+', ['get', 'count']]
+        // Function to add sources and layers
+        const addSourcesAndLayers = () => {
+            // First, clean up any existing sources
+            try {
+                if (map.getSource('farms-data')) {
+                    map.removeLayer('clusters');
+                    map.removeLayer('cluster-count');
+                    map.removeLayer('unclustered-point');
+                    map.removeSource('farms-data');
+                }
+            } catch (e) {
+                // Source doesn't exist, which is fine
             }
-        });
 
-        // Add layer for clusters
-        map.addLayer({
-            id: 'clusters',
-            type: 'circle',
-            source: 'farms',
-            filter: ['has', 'point_count'],
-            paint: {
-                // Color circles by size using step expression
-                'circle-color': [
-                    'step',
-                    ['get', 'point_count'],
-                    '#51bbd6', // Small clusters
-                    10,
-                    '#f1f075', // Medium clusters
-                    25,
-                    '#f28cb1'  // Large clusters
-                ],
-                'circle-radius': [
-                    'step',
-                    ['get', 'point_count'],
-                    20, // Radius for small clusters
-                    10,
-                    30, // Radius for medium clusters
-                    25,
-                    40  // Radius for large clusters
-                ],
-                'circle-stroke-width': 1,
-                'circle-stroke-color': '#fff'
-            }
-        });
-
-        // Add layer for cluster counts
-        map.addLayer({
-            id: 'cluster-count',
-            type: 'symbol',
-            source: 'farms',
-            filter: ['has', 'point_count'],
-            layout: {
-                'text-field': '{point_count_abbreviated}',
-                'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-                'text-size': 12
-            },
-            paint: {
-                'text-color': '#ffffff'
-            }
-        });
-
-        // Add layer for individual points
-        map.addLayer({
-            id: 'unclustered-point',
-            type: 'circle',
-            source: 'farms',
-            filter: ['!', ['has', 'point_count']],
-            paint: {
-                'circle-color': '#11b4da',
-                'circle-radius': 8,
-                'circle-stroke-width': 1,
-                'circle-stroke-color': '#fff'
-            }
-        });
-
-        // Add click handler for clusters
-        map.on('click', 'clusters', (e) => {
-            // Skip if in drawing mode
-            if (mapDrawing.isDrawingModeActive) return;
-
-            const features = map.queryRenderedFeatures(e.point, {
-                layers: ['clusters']
+            // For now, use the existing pattern from your codebase
+            // Just add all farms/schools as before, without classification
+            map.addSource('farms-data', {
+                type: 'geojson',
+                data: farms,
+                cluster: true,
+                clusterMaxZoom: 14,
+                clusterRadius: 50
             });
 
-            const clusterId = features[0].properties.cluster_id;
-
-            // Zoom in to expand cluster
-            map.getSource('farms').getClusterExpansionZoom(
-                clusterId,
-                (err, zoom) => {
-                    if (err) return;
-
-                    map.easeTo({
-                        center: features[0].geometry.coordinates,
-                        zoom: zoom
-                    });
+            // Cluster layer
+            map.addLayer({
+                id: 'clusters',
+                type: 'circle',
+                source: 'farms-data',
+                filter: ['has', 'point_count'],
+                paint: {
+                    'circle-color': [
+                        'step',
+                        ['get', 'point_count'],
+                        '#51bbd6',
+                        10,
+                        '#f1f075',
+                        20,
+                        '#f28cb1'
+                    ],
+                    'circle-radius': [
+                        'step',
+                        ['get', 'point_count'],
+                        20,
+                        10,
+                        30,
+                        20,
+                        40
+                    ]
                 }
-            );
-        });
+            });
 
-        // Add click handler for individual points
-        map.on('click', 'unclustered-point', (e) => {
-            // Skip if in drawing mode
-            if (mapDrawing.isDrawingModeActive) return;
+            // Cluster count layer
+            map.addLayer({
+                id: 'cluster-count',
+                type: 'symbol',
+                source: 'farms-data',
+                filter: ['has', 'point_count'],
+                layout: {
+                    'text-field': '{point_count_abbreviated}',
+                    'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                    'text-size': 12
+                }
+            });
 
-            const coordinates = e.features[0].geometry.coordinates.slice();
-            const props = e.features[0].properties;
-            const name = props.name;
-            const size = props.size || 'N/A';
+            // Individual points layer
+            map.addLayer({
+                id: 'unclustered-point',
+                type: 'circle',
+                source: 'farms-data',
+                filter: ['!', ['has', 'point_count']],
+                paint: {
+                    'circle-color': '#11b4da',
+                    'circle-radius': 6,
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': '#fff'
+                }
+            });
 
-            // Ensure popup appears over the copy being clicked
-            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-            }
+            // Add click handlers for clusters and points
+            map.on('click', 'clusters', (e) => {
+                const features = map.queryRenderedFeatures(e.point, {
+                    layers: ['clusters']
+                });
+                const clusterId = features[0].properties.cluster_id;
+                map.getSource('farms-data').getClusterExpansionZoom(
+                    clusterId,
+                    (err, zoom) => {
+                        if (err) return;
 
-            // Create and display popup
-            new mapboxgl.Popup({
-                closeButton: true,
-                closeOnClick: true,
-                maxWidth: '300px'
-            })
-                .setLngLat(coordinates)
-                .setHTML(`
-                    <div style="max-width: 250px; word-wrap: break-word;">
-                        <h4 style="margin-bottom: 5px;">${name}</h4>
-                        <p style="margin-bottom: 0; font-size: 12px;">Size: ${size} ha</p>
-                    </div>
-                `)
-                .addTo(map);
-        });
+                        map.easeTo({
+                            center: features[0].geometry.coordinates,
+                            zoom: zoom
+                        });
+                    }
+                );
+            });
 
-        // Add hover effects
-        map.on('mouseenter', 'clusters', () => {
-            if (!mapDrawing.isDrawingModeActive) {
+            // Change cursor on hover
+            map.on('mouseenter', 'clusters', () => {
                 map.getCanvas().style.cursor = 'pointer';
-            }
-        });
-
-        map.on('mouseenter', 'unclustered-point', () => {
-            if (!mapDrawing.isDrawingModeActive) {
-                map.getCanvas().style.cursor = 'pointer';
-            }
-        });
-
-        map.on('mouseleave', 'clusters', () => {
-            if (!mapDrawing.isDrawingModeActive) {
+            });
+            map.on('mouseleave', 'clusters', () => {
                 map.getCanvas().style.cursor = '';
-            }
-        });
+            });
 
-        map.on('mouseleave', 'unclustered-point', () => {
-            if (!mapDrawing.isDrawingModeActive) {
-                map.getCanvas().style.cursor = '';
-            }
-        });
+            console.log(`Loaded ${farms.features.length} farms on map`);
+        };
 
-        console.log('Farms loaded successfully');
+        // Check if the map is loaded
+        if (map.loaded()) {
+            addSourcesAndLayers();
+        } else {
+            // Wait for the map to load
+            map.once('load', addSourcesAndLayers);
+        }
+
+        return true;
+
+    } catch (error) {
+        console.error("Error loading farms:", error);
+        return false;
+    }
+}
+
+/**
+ * Adds a custom marker to the map for schools or farms
+ * @param {Object} map - The Mapbox map instance
+ * @param {string} id - Unique identifier for the marker
+ * @param {number} lat - Latitude coordinate
+ * @param {number} lng - Longitude coordinate
+ * @param {string} name - Name to display in the popup
+ * @param {string} color - Hex color for the marker (e.g., '#FF6B6B')
+ * @param {string} type - Type of marker ('school' or 'farm')
+ * @returns {boolean} Success indicator
+ */
+export function addMarker(map, id, lat, lng, name, color, type) {
+    try {
+        // Create a custom marker element
+        const el = document.createElement('div');
+        el.className = 'custom-marker';
+        el.style.backgroundColor = color;
+        el.style.width = '30px';
+        el.style.height = '30px';
+        el.style.borderRadius = type === 'school' ? '50%' : '5px';
+        el.style.border = '2px solid white';
+        el.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+        el.style.cursor = 'pointer';
+
+        // Add marker to map
+        const marker = new mapboxgl.Marker(el)
+            .setLngLat([lng, lat])
+            .setPopup(new mapboxgl.Popup().setHTML(`
+                <h6>${name}</h6>
+                <p>Type: ${type === 'school' ? 'School' : 'Farm'}</p>
+            `))
+            .addTo(map);
+
+        // Store marker reference
+        if (!window.mapMarkers) {
+            window.mapMarkers = {};
+        }
+        window.mapMarkers[id] = marker;
+
         return true;
     } catch (error) {
-        console.error('Error loading farms:', error);
+        console.error('Error adding marker:', error);
+        return false;
+    }
+}
+
+/**
+ * Enables click-to-add location functionality on the map
+ * @param {Object} map - The Mapbox map instance
+ * @param {string} callbackMethodName - Name of the C# method to invoke
+ * @returns {boolean} Success indicator
+ */
+export function enableLocationPicker(map, callbackMethodName) {
+    try {
+        map.getCanvas().style.cursor = 'crosshair';
+
+        const clickHandler = (e) => {
+            const { lng, lat } = e.lngLat;
+
+            // Add temporary marker
+            const el = document.createElement('div');
+            el.className = 'temp-marker';
+            el.style.backgroundColor = '#FF6B6B';
+            el.style.width = '20px';
+            el.style.height = '20px';
+            el.style.borderRadius = '50%';
+            el.style.border = '2px solid white';
+            el.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+
+            if (window.tempMarker) {
+                window.tempMarker.remove();
+            }
+
+            window.tempMarker = new mapboxgl.Marker(el)
+                .setLngLat([lng, lat])
+                .addTo(map);
+
+            // Invoke callback with coordinates
+            DotNet.invokeMethodAsync('Hurudza.UI.Web', callbackMethodName, lat, lng);
+
+            // Reset cursor and remove handler
+            map.getCanvas().style.cursor = '';
+            map.off('click', clickHandler);
+        };
+
+        map.on('click', clickHandler);
+
+        return true;
+    } catch (error) {
+        console.error('Error enabling location picker:', error);
         return false;
     }
 }

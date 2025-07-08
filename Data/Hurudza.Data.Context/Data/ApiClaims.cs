@@ -32,6 +32,7 @@ public static class ApiClaims
         {
             // Farm permissions
             new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FarmView },
+            new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FarmAdd },
             new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FarmCreate },
             new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FarmUpdate },
             new() { ClaimType = ApiClaimTypes.Farm.ToString("G"), ClaimValue = Claims.FarmDelete },
@@ -133,6 +134,7 @@ public static class ApiClaims
             Claims.FarmView => "View farm details",
             Claims.FarmViewAll => "View all farms in the system",
             Claims.FarmCreate => "Create new farms",
+            Claims.FarmAdd => "Add new farms under schools",
             Claims.FarmUpdate => "Update farm details",
             Claims.FarmDelete => "Delete farms",
             Claims.FarmManage => "Manage all farm details and settings",
