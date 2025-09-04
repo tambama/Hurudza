@@ -281,14 +281,24 @@
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         _user = authState.User;
         
-        // Get current user's farm context
-        currentFarmId = await FarmAccessService.GetCurrentFarmId();
-        currentFarmName = await FarmAccessService.GetCurrentFarmName();
+        // Check if user is administrator or system administrator (can view all equipment)
+        bool isAdministrator = _user.IsInRole("Administrator") || _user.IsInRole("SystemAdministrator");
         
-        if (string.IsNullOrEmpty(currentFarmId))
+        if (!isAdministrator)
         {
-            Alert.Show("No farm context found. Please select a farm profile.", showTitle: true, toastType: ToastType.Danger);
-            return;
+            // Get current user's farm context for non-administrators
+            currentFarmId = await FarmAccessService.GetCurrentFarmId();
+            currentFarmName = await FarmAccessService.GetCurrentFarmName();
+            
+            if (string.IsNullOrEmpty(currentFarmId))
+            {
+                Alert.Show("No farm context found. Please select a farm profile.", showTitle: true, toastType: ToastType.Danger);
+                return;
+            }
+        }
+        else
+        {
+            currentFarmName = "All Farms";
         }
         
         // Check if user is Farm Manager or Administrator for current farm
@@ -308,9 +318,23 @@
         {
             isLoading = true;
             
-            // Get equipment for the current farm only
-            var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<EquipmentListViewModel>>>(
-                await ApiCall.GetHttpClient(), "Equipment/GetEquipmentByFarm", currentFarmId);
+            // Check if user is administrator to determine which endpoint to call
+            bool isAdministrator = _user.IsInRole("Administrator") || _user.IsInRole("SystemAdministrator");
+            
+            UI.Shared.Models.ApiResponse<List<EquipmentListViewModel>> response;
+            
+            if (isAdministrator)
+            {
+                // Get all equipment across all farms for administrators
+                response = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<EquipmentListViewModel>>>(
+                    await ApiCall.GetHttpClient(), "Equipment/GetEquipment");
+            }
+            else
+            {
+                // Get equipment for the current farm only
+                response = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<EquipmentListViewModel>>>(
+                    await ApiCall.GetHttpClient(), "Equipment/GetEquipmentByFarm", currentFarmId);
+            }
                 
             if (response.Status == (int)HttpStatusCode.OK)
             {
