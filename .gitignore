@@ -362,3 +362,85 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Application-specific ignores
+
+# Log files
+*.log
+Logs/
+**/Logs/**
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Archive files
+*.zip
+*.rar
+*.tar
+*.tar.gz
+*.7z
+
+# Generated documentation
+docs/api/
+
+# Package manager files
+package-lock.json
+yarn.lock
+
+# Entity Framework
+**/Migrations/
+
+# ASP.NET Core
+wwwroot/dist/
+wwwroot/lib/
+
+# Build outputs
+build/
+dist/
+
+# Backup files
+*.bak
+*.backup
+
+# Certificate files
+*.p12
+*.cer
+*.crt
+*.pem
+
+# Connection strings and secrets
+ConnectionStrings.json
+secrets.json
