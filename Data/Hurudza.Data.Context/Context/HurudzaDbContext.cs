@@ -67,6 +67,10 @@ public class HurudzaDbContext :
     // Tillage
     public DbSet<TillageProgram> TillagePrograms { get; set; }
     public DbSet<TillageService> TillageServices { get; set; }
+    
+    // Equipment
+    public DbSet<Equipment> Equipment { get; set; }
+    public DbSet<EquipmentMaintenance> EquipmentMaintenance { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
@@ -363,6 +367,34 @@ public class HurudzaDbContext :
                 .HasForeignKey(ts => ts.FieldId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        builder.Entity<Equipment>(b =>
+        {
+            b.Property(e => e.Id).ValueGeneratedOnAdd();
+
+            b.HasOne(e => e.Farm)
+                .WithMany()
+                .HasForeignKey(e => e.FarmId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            b.HasMany(e => e.MaintenanceRecords)
+                .WithOne(m => m.Equipment)
+                .HasForeignKey(m => m.EquipmentId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<EquipmentMaintenance>(b =>
+        {
+            b.Property(em => em.Id).ValueGeneratedOnAdd();
+
+            b.HasOne(em => em.Equipment)
+                .WithMany(e => e.MaintenanceRecords)
+                .HasForeignKey(em => em.EquipmentId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

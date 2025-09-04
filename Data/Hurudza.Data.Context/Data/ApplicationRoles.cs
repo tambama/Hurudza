@@ -41,6 +41,13 @@ public static class ApplicationRoles
 
                     new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = Claims.FieldDelete},
                     new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = Claims.FieldManage},
+                    
+                    new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentCreate},
+                    new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentUpdate},
+                    new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentEdit},
+                    new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentDelete},
+                    new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentManage},
+                    new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentViewAll},
                 }
             },
             new()
@@ -71,7 +78,14 @@ public static class ApplicationRoles
                     new() { ClaimType = ApiClaimTypes.User.ToString("G"), ClaimValue = Claims.UserManage},
 
                     new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = Claims.FieldDelete}, 
-                    new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = Claims.FieldManage}, 
+                    new() { ClaimType = ApiClaimTypes.Field.ToString("G"), ClaimValue = Claims.FieldManage},
+                    
+                    new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentCreate},
+                    new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentUpdate},
+                    new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentEdit},
+                    new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentDelete},
+                    new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentManage},
+                    new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentView},
                 }
             },
         };

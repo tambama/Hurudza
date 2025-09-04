@@ -1,0 +1,932 @@
+2025-04-15T08:21:47.9139410+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - null null
+2025-04-15T08:21:47.9534910+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:21:47.9545820+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - 204 null null 66.6106ms
+2025-04-15T08:21:48.0421170+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - null null
+2025-04-15T08:21:48.0505700+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:21:48.1359310+02:00 [INF] (Hurudza.Services.Core) Failed to validate the token.
+Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException: IDX10223: Lifetime validation failed. The token is expired. ValidTo (UTC): '3/24/2025 4:51:08 PM', Current time (UTC): '4/15/2025 6:21:48 AM'.
+   at Microsoft.IdentityModel.Tokens.Validators.ValidateLifetime(Nullable`1 notBefore, Nullable`1 expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateTokenPayloadAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateJWSAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+2025-04-15T08:21:48.1456420+02:00 [INF] (Hurudza.Services.Core) "Bearer" was not authenticated. Failure message: "IDX10223: Lifetime validation failed. The token is expired. ValidTo (UTC): '3/24/2025 4:51:08 PM', Current time (UTC): '4/15/2025 6:21:48 AM'."
+2025-04-15T08:21:48.1488470+02:00 [INF] (Hurudza.Services.Core) Authorization failed. "These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user."
+2025-04-15T08:21:48.1521680+02:00 [INF] (Hurudza.Services.Core) AuthenticationScheme: "Bearer" was challenged.
+2025-04-15T08:21:48.1525870+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - 401 0 null 110.5052ms
+2025-04-15T08:21:57.3658200+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/authentication/login""?api-version=1.0" - null null
+2025-04-15T08:21:57.3669730+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:21:57.3674020+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/authentication/login""?api-version=1.0" - 204 null null 24.9896ms
+2025-04-15T08:21:57.3717000+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "POST" "https"://"localhost:7148""""/api/authentication/login""?api-version=1.0" - "application/json; charset=utf-8" 82
+2025-04-15T08:21:57.3725530+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:21:57.3819040+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.AuthenticationController.Login (Hurudza.Apis.Core)"'
+2025-04-15T08:21:57.4091080+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"Login\", controller = \"Authentication\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(Hurudza.Data.UI.Models.ViewModels.UserManagement.LoginViewModel)" on controller "Hurudza.Apis.Core.Controllers.AuthenticationController" ("Hurudza.Apis.Core").
+2025-04-15T08:21:57.5972160+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.AuthenticationController.Login (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:21:57.6845870+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("9"ms) [Parameters=["@__normalizedUserName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"AccessFailedCount\", a.\"ConcurrencyStamp\", a.\"CreatedDate\", a.\"CreatorId\", a.\"Email\", a.\"EmailConfirmed\", a.\"Firstname\", a.\"IsActive\", a.\"IsArchived\", a.\"IsDeleted\", a.\"LockoutEnabled\", a.\"LockoutEnd\", a.\"ModifiedBy\", a.\"ModifiedDate\", a.\"NormalizedEmail\", a.\"NormalizedUserName\", a.\"PasswordHash\", a.\"PhoneNumber\", a.\"PhoneNumberConfirmed\", a.\"RegistrationToken\", a.\"SecurityStamp\", a.\"Surname\", a.\"TokenValidity\", a.\"TwoFactorEnabled\", a.\"UserName\"
+FROM \"AspNetUsers\" AS a
+WHERE a.\"NormalizedUserName\" = @__normalizedUserName_0
+LIMIT 1"
+2025-04-15T08:21:57.8754800+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("47"ms) [Parameters=["@__user_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT u.\"UserId\", u.\"FarmId\", u.\"Role\", f.\"Id\", f.\"Address\", f.\"Arable\", f.\"AverageExamScores\", f.\"BoardingScholars\", f.\"Buildings\", f.\"Classrooms\", f.\"Cleared\", f.\"CommunityPrograms\", f.\"Conference\", f.\"ContactPerson\", f.\"CreatedDate\", f.\"CreatorId\", f.\"DayScholars\", f.\"Deleted\", f.\"Description\", f.\"DistrictId\", f.\"Elevation\", f.\"Email\", f.\"Equipment\", f.\"ExtraCurricularAchievements\", f.\"FemaleStudents\", f.\"FemaleTeachers\", f.\"FoundingMembers\", f.\"Irrigated\", f.\"IsActive\", f.\"IsArchived\", f.\"KeyMilestones\", f.\"Laboratories\", f.\"LandManagementPractice\", f.\"Latitude\", f.\"Library\", f.\"LocalAuthorityId\", f.\"Longitude\", f.\"MaleStudents\", f.\"MaleTeachers\", f.\"Mission\", f.\"ModifiedBy\", f.\"Name\", f.\"NonTeachingStaff\", f.\"Partnerships\", f.\"PastCrops\", f.\"Personnel\", f.\"PhoneNumber\", f.\"Problems\", f.\"ProvinceId\", f.\"Recommendations\", f.\"Region\", f.\"RoadAccess\", f.\"SecurityMeasures\", f.\"Size\", f.\"SoilType\", f.\"SportsFacilities\", f.\"StudentDemographics\", f.\"Terrain\", f.\"UpdatedAt\", f.\"Version\", f.\"Vision\", f.\"WardId\", f.\"WaterAvailability\", f.\"WaterSource\", f.\"Website\", f.\"Year\", u.\"Id\", u.\"UpdatedAt\", u.\"Deleted\", u.\"CreatedDate\", u.\"CreatorId\", u.\"ModifiedBy\", u.\"IsArchived\", u.\"IsActive\", a.\"Id\", a.\"AccessFailedCount\", a.\"ConcurrencyStamp\", a.\"CreatedDate\", a.\"CreatorId\", a.\"Email\", a.\"EmailConfirmed\", a.\"Firstname\", a.\"IsActive\", a.\"IsArchived\", a.\"IsDeleted\", a.\"LockoutEnabled\", a.\"LockoutEnd\", a.\"ModifiedBy\", a.\"ModifiedDate\", a.\"NormalizedEmail\", a.\"NormalizedUserName\", a.\"PasswordHash\", a.\"PhoneNumber\", a.\"PhoneNumberConfirmed\", a.\"RegistrationToken\", a.\"SecurityStamp\", a.\"Surname\", a.\"TokenValidity\", a.\"TwoFactorEnabled\", a.\"UserName\"
+FROM \"UserProfiles\" AS u
+INNER JOIN \"Farms\" AS f ON u.\"FarmId\" = f.\"Id\"
+INNER JOIN \"AspNetUsers\" AS a ON u.\"UserId\" = a.\"Id\"
+WHERE u.\"UserId\" = @__user_Id_0"
+2025-04-15T08:21:57.8864250+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("4"ms) [Parameters=["@__userId_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a0.\"Name\"
+FROM \"AspNetUserRoles\" AS a
+INNER JOIN \"AspNetRoles\" AS a0 ON a.\"RoleId\" = a0.\"Id\"
+WHERE a.\"UserId\" = @__userId_0"
+2025-04-15T08:21:57.9122490+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("22"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-04-15T08:21:57.9165010+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-04-15T08:21:57.9263810+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__userId_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a0.\"Name\"
+FROM \"AspNetUserRoles\" AS a
+INNER JOIN \"AspNetRoles\" AS a0 ON a.\"RoleId\" = a0.\"Id\"
+WHERE a.\"UserId\" = @__userId_0"
+2025-04-15T08:21:57.9281490+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-04-15T08:21:57.9296160+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-04-15T08:21:58.0157780+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("55"ms) [Parameters=["@__user_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ClaimType\", a.\"ClaimValue\", a.\"UserId\"
+FROM \"AspNetUserClaims\" AS a
+WHERE a.\"UserId\" = @__user_Id_0"
+2025-04-15T08:21:58.0224990+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.AuthenticationController.Login (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 423.0793ms.
+2025-04-15T08:21:58.0283630+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"Hurudza.Apis.Base.Models.ApiOkResponse"'.
+2025-04-15T08:21:58.0908080+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.AuthenticationController.Login (Hurudza.Apis.Core)" in 678.7585ms
+2025-04-15T08:21:58.0914760+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.AuthenticationController.Login (Hurudza.Apis.Core)"'
+2025-04-15T08:21:58.0988330+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "POST" "https"://"localhost:7148""""/api/authentication/login""?api-version=1.0" - 200 1854 "application/json; charset=utf-8" 727.1627ms
+2025-04-15T08:22:00.6688940+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - null null
+2025-04-15T08:22:00.6694150+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:22:00.6696080+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - 204 null null 23.1761ms
+2025-04-15T08:22:00.6707290+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - null null
+2025-04-15T08:22:00.6714020+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:22:00.6829480+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)"'
+2025-04-15T08:22:00.6845390+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetLoggedInProfile\", controller = \"Authentication\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetLoggedInProfile()" on controller "Hurudza.Apis.Core.Controllers.AuthenticationController" ("Hurudza.Apis.Core").
+2025-04-15T08:22:00.6878310+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:22:00.7450670+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__p_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"AccessFailedCount\", a.\"ConcurrencyStamp\", a.\"CreatedDate\", a.\"CreatorId\", a.\"Email\", a.\"EmailConfirmed\", a.\"Firstname\", a.\"IsActive\", a.\"IsArchived\", a.\"IsDeleted\", a.\"LockoutEnabled\", a.\"LockoutEnd\", a.\"ModifiedBy\", a.\"ModifiedDate\", a.\"NormalizedEmail\", a.\"NormalizedUserName\", a.\"PasswordHash\", a.\"PhoneNumber\", a.\"PhoneNumberConfirmed\", a.\"RegistrationToken\", a.\"SecurityStamp\", a.\"Surname\", a.\"TokenValidity\", a.\"TwoFactorEnabled\", a.\"UserName\"
+FROM \"AspNetUsers\" AS a
+WHERE a.\"Id\" = @__p_0
+LIMIT 1"
+2025-04-15T08:22:00.7988570+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=["@__user_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT u.\"UserId\", u.\"FarmId\", u.\"Role\", f.\"Id\", f.\"Address\", f.\"Arable\", f.\"AverageExamScores\", f.\"BoardingScholars\", f.\"Buildings\", f.\"Classrooms\", f.\"Cleared\", f.\"CommunityPrograms\", f.\"Conference\", f.\"ContactPerson\", f.\"CreatedDate\", f.\"CreatorId\", f.\"DayScholars\", f.\"Deleted\", f.\"Description\", f.\"DistrictId\", f.\"Elevation\", f.\"Email\", f.\"Equipment\", f.\"ExtraCurricularAchievements\", f.\"FemaleStudents\", f.\"FemaleTeachers\", f.\"FoundingMembers\", f.\"Irrigated\", f.\"IsActive\", f.\"IsArchived\", f.\"KeyMilestones\", f.\"Laboratories\", f.\"LandManagementPractice\", f.\"Latitude\", f.\"Library\", f.\"LocalAuthorityId\", f.\"Longitude\", f.\"MaleStudents\", f.\"MaleTeachers\", f.\"Mission\", f.\"ModifiedBy\", f.\"Name\", f.\"NonTeachingStaff\", f.\"Partnerships\", f.\"PastCrops\", f.\"Personnel\", f.\"PhoneNumber\", f.\"Problems\", f.\"ProvinceId\", f.\"Recommendations\", f.\"Region\", f.\"RoadAccess\", f.\"SecurityMeasures\", f.\"Size\", f.\"SoilType\", f.\"SportsFacilities\", f.\"StudentDemographics\", f.\"Terrain\", f.\"UpdatedAt\", f.\"Version\", f.\"Vision\", f.\"WardId\", f.\"WaterAvailability\", f.\"WaterSource\", f.\"Website\", f.\"Year\", u.\"Id\", u.\"UpdatedAt\", u.\"Deleted\", u.\"CreatedDate\", u.\"CreatorId\", u.\"ModifiedBy\", u.\"IsArchived\", u.\"IsActive\", a.\"Id\", a.\"AccessFailedCount\", a.\"ConcurrencyStamp\", a.\"CreatedDate\", a.\"CreatorId\", a.\"Email\", a.\"EmailConfirmed\", a.\"Firstname\", a.\"IsActive\", a.\"IsArchived\", a.\"IsDeleted\", a.\"LockoutEnabled\", a.\"LockoutEnd\", a.\"ModifiedBy\", a.\"ModifiedDate\", a.\"NormalizedEmail\", a.\"NormalizedUserName\", a.\"PasswordHash\", a.\"PhoneNumber\", a.\"PhoneNumberConfirmed\", a.\"RegistrationToken\", a.\"SecurityStamp\", a.\"Surname\", a.\"TokenValidity\", a.\"TwoFactorEnabled\", a.\"UserName\"
+FROM \"UserProfiles\" AS u
+INNER JOIN \"Farms\" AS f ON u.\"FarmId\" = f.\"Id\"
+INNER JOIN \"AspNetUsers\" AS a ON u.\"UserId\" = a.\"Id\"
+WHERE u.\"UserId\" = @__user_Id_0"
+2025-04-15T08:22:00.8240280+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__userId_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a0.\"Name\"
+FROM \"AspNetUserRoles\" AS a
+INNER JOIN \"AspNetRoles\" AS a0 ON a.\"RoleId\" = a0.\"Id\"
+WHERE a.\"UserId\" = @__userId_0"
+2025-04-15T08:22:00.8257830+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-04-15T08:22:00.8774410+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-04-15T08:22:00.8796780+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__userId_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a0.\"Name\"
+FROM \"AspNetUserRoles\" AS a
+INNER JOIN \"AspNetRoles\" AS a0 ON a.\"RoleId\" = a0.\"Id\"
+WHERE a.\"UserId\" = @__userId_0"
+2025-04-15T08:22:00.8810550+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-04-15T08:22:00.8825790+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-04-15T08:22:00.8841220+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__user_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ClaimType\", a.\"ClaimValue\", a.\"UserId\"
+FROM \"AspNetUserClaims\" AS a
+WHERE a.\"UserId\" = @__user_Id_0"
+2025-04-15T08:22:00.8850640+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 197.1257ms.
+2025-04-15T08:22:00.8854260+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"Hurudza.Apis.Base.Models.ApiOkResponse"'.
+2025-04-15T08:22:00.8860380+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)" in 201.3901ms
+2025-04-15T08:22:00.8861280+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)"'
+2025-04-15T08:22:00.8862490+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - 200 1856 "application/json; charset=utf-8" 215.529ms
+2025-04-15T08:22:04.6737190+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - null null
+2025-04-15T08:22:04.7029030+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:22:04.7034500+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - 204 null null 53.04ms
+2025-04-15T08:22:04.7522170+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - null null
+2025-04-15T08:22:04.7561410+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:22:04.7626140+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)"'
+2025-04-15T08:22:04.7728210+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetProvinces\", controller = \"Provinces\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetProvinces()" on controller "Hurudza.Apis.Core.Controllers.ProvincesController" ("Hurudza.Apis.Core").
+2025-04-15T08:22:04.7810070+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:22:04.8684420+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("48"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT p.\"Id\", p.\"CreatedDate\", p.\"CreatorId\", p.\"Deleted\", p.\"IsActive\", p.\"IsArchived\", p.\"ModifiedBy\", p.\"Name\", p.\"UpdatedAt\", p.\"Version\"
+FROM \"Provinces\" AS p
+ORDER BY p.\"Name\""
+2025-04-15T08:22:04.9281550+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 146.8166ms.
+2025-04-15T08:22:04.9296440+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.Province, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:22:04.9409550+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)" in 167.5768ms
+2025-04-15T08:22:04.9410960+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)"'
+2025-04-15T08:22:04.9412720+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - 200 3048 "application/json; charset=utf-8" 214.2189ms
+2025-04-15T08:22:04.9813320+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - null null
+2025-04-15T08:22:05.0068750+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:22:05.0070670+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - 204 null null 47.303ms
+2025-04-15T08:22:05.0545680+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - null null
+2025-04-15T08:22:05.0561570+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:22:05.0570470+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)"'
+2025-04-15T08:22:05.0597440+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetDistricts\", controller = \"Districts\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetDistricts()" on controller "Hurudza.Apis.Core.Controllers.DistrictsController" ("Hurudza.Apis.Core").
+2025-04-15T08:22:05.0606730+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:22:05.1007590+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("9"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT d.\"Id\", d.\"CreatedDate\", d.\"CreatorId\", d.\"Deleted\", d.\"IsActive\", d.\"IsArchived\", d.\"ModifiedBy\", d.\"Name\", d.\"ProvinceId\", d.\"UpdatedAt\", d.\"Version\"
+FROM \"Districts\" AS d"
+2025-04-15T08:22:05.2716640+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 210.8529ms.
+2025-04-15T08:22:05.2719450+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.District, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:22:05.2925900+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)" in 232.6884ms
+2025-04-15T08:22:05.2928340+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)"'
+2025-04-15T08:22:05.2929680+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - 200 23432 "application/json; charset=utf-8" 238.556ms
+2025-04-15T08:22:05.3689480+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - null null
+2025-04-15T08:22:05.3693890+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:22:05.3694910+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - 204 null null 23.0462ms
+2025-04-15T08:22:05.3912580+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - null null
+2025-04-15T08:22:05.3920340+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:22:05.3923820+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)"'
+2025-04-15T08:22:05.3936360+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetLocalAuthorities\", controller = \"LocalAuthorities\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetLocalAuthorities()" on controller "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController" ("Hurudza.Apis.Core").
+2025-04-15T08:22:05.3942790+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:22:05.4706340+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("73"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT l.\"Id\", l.\"CreatedDate\", l.\"CreatorId\", l.\"Deleted\", l.\"DistrictId\", l.\"IsActive\", l.\"IsArchived\", l.\"ModifiedBy\", l.\"Name\", l.\"UpdatedAt\", l.\"Version\"
+FROM \"LocalAuthorities\" AS l"
+2025-04-15T08:22:05.6049900+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 210.6174ms.
+2025-04-15T08:22:05.6052270+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.LocalAuthority, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:22:05.6226250+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)" in 228.8307ms
+2025-04-15T08:22:05.6227710+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)"'
+2025-04-15T08:22:05.6229210+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - 200 31587 "application/json; charset=utf-8" 231.7918ms
+2025-04-15T08:22:05.6795710+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - null null
+2025-04-15T08:22:05.6800920+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:22:05.6802060+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - 204 null null 0.8386ms
+2025-04-15T08:22:05.6811320+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - null null
+2025-04-15T08:22:05.6821680+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:22:05.6824650+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)"'
+2025-04-15T08:22:05.6835830+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetWards\", controller = \"Wards\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetWards()" on controller "Hurudza.Apis.Core.Controllers.WardsController" ("Hurudza.Apis.Core").
+2025-04-15T08:22:05.6840330+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:22:05.6895170+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT w.\"Id\", w.\"CreatedDate\", w.\"CreatorId\", w.\"Deleted\", w.\"DistrictId\", w.\"IsActive\", w.\"IsArchived\", w.\"LocalAuthorityId\", w.\"ModifiedBy\", w.\"Name\", w.\"ProvinceId\", w.\"UpdatedAt\", w.\"Version\"
+FROM \"Wards\" AS w"
+2025-04-15T08:22:05.7087690+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 24.6684ms.
+2025-04-15T08:22:05.7089680+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.Ward, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:22:05.8915840+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)" in 207.907ms
+2025-04-15T08:22:05.8917160+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)"'
+2025-04-15T08:22:05.8918560+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - 200 796356 "application/json; charset=utf-8" 210.7135ms
+2025-04-15T08:22:06.4469010+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - null null
+2025-04-15T08:22:06.4479130+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:22:06.4481620+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - 204 null null 21.7433ms
+2025-04-15T08:22:06.4498300+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - null null
+2025-04-15T08:22:06.4513090+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:22:06.4519760+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)"'
+2025-04-15T08:22:06.4533280+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetFarms\", controller = \"Farms\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetFarms()" on controller "Hurudza.Apis.Core.Controllers.FarmsController" ("Hurudza.Apis.Core").
+2025-04-15T08:22:06.4538420+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:22:06.4785390+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("7"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT f.\"Name\", f.\"Address\", f.\"ContactPerson\", f.\"PhoneNumber\", f.\"Email\", f.\"Description\", f.\"Vision\", f.\"Mission\", f.\"Website\", f.\"Year\", f.\"FoundingMembers\", f.\"KeyMilestones\", f.\"Size\", f.\"Arable\", f.\"Cleared\", f.\"Terrain\", f.\"Latitude\", f.\"Longitude\", f.\"Elevation\", f.\"PastCrops\", f.\"LandManagementPractice\", f.\"SecurityMeasures\", f.\"WaterSource\", f.\"WaterAvailability\", f.\"Irrigated\", f.\"Equipment\", f.\"SoilType\", f.\"RoadAccess\", f.\"Problems\", f.\"Personnel\", f.\"Recommendations\", f.\"WardId\", f.\"LocalAuthorityId\", f.\"DistrictId\", f.\"ProvinceId\", f.\"Region\", f.\"Conference\", f.\"CommunityPrograms\", f.\"Partnerships\", f.\"Classrooms\", f.\"Laboratories\", f.\"SportsFacilities\", f.\"Library\", f.\"AverageExamScores\", f.\"ExtraCurricularAchievements\", f.\"MaleTeachers\", f.\"FemaleTeachers\", f.\"MaleStudents\", f.\"FemaleStudents\", f.\"StudentDemographics\", f.\"DayScholars\", f.\"BoardingScholars\", f.\"NonTeachingStaff\", f.\"Buildings\", w.\"Name\" AS \"Ward\", l.\"Name\" AS \"LocalAuthority\", d.\"Name\" AS \"District\", p.\"Name\" AS \"Province\", f.\"Id\", f.\"UpdatedAt\", f.\"Deleted\", f.\"CreatedDate\", f.\"CreatorId\", f.\"ModifiedBy\", f.\"IsArchived\", f.\"IsActive\"
+FROM \"Farms\" AS f
+LEFT JOIN \"Wards\" AS w ON f.\"WardId\" = w.\"Id\"
+LEFT JOIN \"LocalAuthorities\" AS l ON f.\"LocalAuthorityId\" = l.\"Id\"
+LEFT JOIN \"Districts\" AS d ON f.\"DistrictId\" = d.\"Id\"
+INNER JOIN \"Provinces\" AS p ON f.\"ProvinceId\" = p.\"Id\"
+WHERE f.\"IsActive\""
+2025-04-15T08:22:06.4906970+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 36.7834ms.
+2025-04-15T08:22:06.4909180+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.UI.Models.ViewModels.Core.FarmViewModel, Hurudza.Data.UI.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:22:06.5453120+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)" in 91.8806ms
+2025-04-15T08:22:06.5454610+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)"'
+2025-04-15T08:22:06.5455840+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - 200 14286 "application/json; charset=utf-8" 95.9317ms
+2025-04-15T08:25:20.5016180+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillageServices/GetTillageStatistics""?api-version=1.0" - null null
+2025-04-15T08:25:20.5335090+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:25:20.5347720+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillageServices/GetTillageStatistics""?api-version=1.0" - 204 null null 34.4073ms
+2025-04-15T08:25:20.6212150+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillageServices/GetTillageStatistics""?api-version=1.0" - null null
+2025-04-15T08:25:20.6513020+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:25:20.6560100+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)"'
+2025-04-15T08:25:20.6686630+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetTillageStatistics\", controller = \"TillageServices\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetTillageStatistics()" on controller "Hurudza.Apis.Core.Controllers.TillageServicesController" ("Hurudza.Apis.Core").
+2025-04-15T08:25:20.6853820+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:25:20.7575990+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("27"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT count(*)::int
+FROM \"TillagePrograms\" AS t
+WHERE t.\"IsActive\""
+2025-04-15T08:25:21.1109880+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("96"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT count(*)::int
+FROM \"TillageServices\" AS t
+WHERE NOT (t.\"Deleted\")"
+2025-04-15T08:25:21.2029800+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("50"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT count(*)::int
+FROM \"TillageServices\" AS t
+WHERE NOT (t.\"Deleted\") AND t.\"IsCompleted\""
+2025-04-15T08:25:21.3134230+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("75"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT COALESCE(sum(t.\"TotalHectares\"), 0)
+FROM \"TillagePrograms\" AS t
+WHERE t.\"IsActive\""
+2025-04-15T08:25:21.3553330+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT COALESCE(sum(t.\"TilledHectares\"), 0)
+FROM \"TillagePrograms\" AS t
+WHERE t.\"IsActive\""
+2025-04-15T08:25:21.3903670+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("5"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT COALESCE(sum(COALESCE(t.\"ServiceCost\", 0.0)), 0.0)
+FROM \"TillageServices\" AS t
+WHERE NOT (t.\"Deleted\")"
+2025-04-15T08:25:21.4002560+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 714.58ms.
+2025-04-15T08:25:21.4006260+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"<>f__AnonymousType10`6[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Single, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Single, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Decimal, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"'.
+2025-04-15T08:25:21.4064000+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)" in 735.5699ms
+2025-04-15T08:25:21.4064970+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)"'
+2025-04-15T08:25:21.4066070+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillageServices/GetTillageStatistics""?api-version=1.0" - 200 131 "application/json; charset=utf-8" 785.7234ms
+2025-04-15T08:25:21.4215580+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - null null
+2025-04-15T08:25:21.4471890+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:25:21.4473450+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - 204 null null 25.7875ms
+2025-04-15T08:25:21.4487160+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - null null
+2025-04-15T08:25:21.4508070+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:25:21.4512780+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)"'
+2025-04-15T08:25:21.4530050+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetTillageSummary\", controller = \"TillagePrograms\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetTillageSummary()" on controller "Hurudza.Apis.Core.Controllers.TillageProgramsController" ("Hurudza.Apis.Core").
+2025-04-15T08:25:21.4536780+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:25:21.4928970+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("4"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT t.\"FarmId\", (
+    SELECT f.\"Name\"
+    FROM \"TillagePrograms\" AS t0
+    INNER JOIN \"Farms\" AS f ON t0.\"FarmId\" = f.\"Id\"
+    WHERE t0.\"IsActive\" AND t.\"FarmId\" = t0.\"FarmId\"
+    LIMIT 1) AS \"FarmName\", COALESCE(sum(t.\"TotalHectares\"), 0) AS \"TotalPlanned\", COALESCE(sum(t.\"TilledHectares\"), 0) AS \"TotalTilled\", COALESCE(sum((
+    SELECT count(*)::int
+    FROM \"TillageServices\" AS t1
+    WHERE t.\"Id\" = t1.\"TillageProgramId\")), 0)::int AS \"TotalServices\", COALESCE(sum((
+    SELECT count(*)::int
+    FROM \"TillageServices\" AS t2
+    WHERE t.\"Id\" = t2.\"TillageProgramId\" AND t2.\"IsCompleted\")), 0)::int AS \"CompletedServices\", COALESCE(sum((
+    SELECT COALESCE(sum(COALESCE(t3.\"ServiceCost\", 0.0)), 0.0)
+    FROM \"TillageServices\" AS t3
+    WHERE t.\"Id\" = t3.\"TillageProgramId\")), 0.0) AS \"TotalRevenue\"
+FROM \"TillagePrograms\" AS t
+WHERE t.\"IsActive\"
+GROUP BY t.\"FarmId\""
+2025-04-15T08:25:21.4933890+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 39.6104ms.
+2025-04-15T08:25:21.4935570+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.UI.Models.ViewModels.Tillage.TillageSummaryViewModel, Hurudza.Data.UI.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:25:21.4947140+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)" in 41.5595ms
+2025-04-15T08:25:21.4947840+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)"'
+2025-04-15T08:25:21.4948590+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - 200 2 "application/json; charset=utf-8" 46.2713ms
+2025-04-15T08:36:27.0732080+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - null null
+2025-04-15T08:36:27.0750120+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:27.0753390+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - 204 null null 49.8111ms
+2025-04-15T08:36:27.2449250+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - null null
+2025-04-15T08:36:27.3671280+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:27.4079850+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)"'
+2025-04-15T08:36:27.4107520+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetLoggedInProfile\", controller = \"Authentication\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetLoggedInProfile()" on controller "Hurudza.Apis.Core.Controllers.AuthenticationController" ("Hurudza.Apis.Core").
+2025-04-15T08:36:27.4152250+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:36:27.6531140+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=["@__p_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"AccessFailedCount\", a.\"ConcurrencyStamp\", a.\"CreatedDate\", a.\"CreatorId\", a.\"Email\", a.\"EmailConfirmed\", a.\"Firstname\", a.\"IsActive\", a.\"IsArchived\", a.\"IsDeleted\", a.\"LockoutEnabled\", a.\"LockoutEnd\", a.\"ModifiedBy\", a.\"ModifiedDate\", a.\"NormalizedEmail\", a.\"NormalizedUserName\", a.\"PasswordHash\", a.\"PhoneNumber\", a.\"PhoneNumberConfirmed\", a.\"RegistrationToken\", a.\"SecurityStamp\", a.\"Surname\", a.\"TokenValidity\", a.\"TwoFactorEnabled\", a.\"UserName\"
+FROM \"AspNetUsers\" AS a
+WHERE a.\"Id\" = @__p_0
+LIMIT 1"
+2025-04-15T08:36:27.6599890+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("4"ms) [Parameters=["@__user_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT u.\"UserId\", u.\"FarmId\", u.\"Role\", f.\"Id\", f.\"Address\", f.\"Arable\", f.\"AverageExamScores\", f.\"BoardingScholars\", f.\"Buildings\", f.\"Classrooms\", f.\"Cleared\", f.\"CommunityPrograms\", f.\"Conference\", f.\"ContactPerson\", f.\"CreatedDate\", f.\"CreatorId\", f.\"DayScholars\", f.\"Deleted\", f.\"Description\", f.\"DistrictId\", f.\"Elevation\", f.\"Email\", f.\"Equipment\", f.\"ExtraCurricularAchievements\", f.\"FemaleStudents\", f.\"FemaleTeachers\", f.\"FoundingMembers\", f.\"Irrigated\", f.\"IsActive\", f.\"IsArchived\", f.\"KeyMilestones\", f.\"Laboratories\", f.\"LandManagementPractice\", f.\"Latitude\", f.\"Library\", f.\"LocalAuthorityId\", f.\"Longitude\", f.\"MaleStudents\", f.\"MaleTeachers\", f.\"Mission\", f.\"ModifiedBy\", f.\"Name\", f.\"NonTeachingStaff\", f.\"Partnerships\", f.\"PastCrops\", f.\"Personnel\", f.\"PhoneNumber\", f.\"Problems\", f.\"ProvinceId\", f.\"Recommendations\", f.\"Region\", f.\"RoadAccess\", f.\"SecurityMeasures\", f.\"Size\", f.\"SoilType\", f.\"SportsFacilities\", f.\"StudentDemographics\", f.\"Terrain\", f.\"UpdatedAt\", f.\"Version\", f.\"Vision\", f.\"WardId\", f.\"WaterAvailability\", f.\"WaterSource\", f.\"Website\", f.\"Year\", u.\"Id\", u.\"UpdatedAt\", u.\"Deleted\", u.\"CreatedDate\", u.\"CreatorId\", u.\"ModifiedBy\", u.\"IsArchived\", u.\"IsActive\", a.\"Id\", a.\"AccessFailedCount\", a.\"ConcurrencyStamp\", a.\"CreatedDate\", a.\"CreatorId\", a.\"Email\", a.\"EmailConfirmed\", a.\"Firstname\", a.\"IsActive\", a.\"IsArchived\", a.\"IsDeleted\", a.\"LockoutEnabled\", a.\"LockoutEnd\", a.\"ModifiedBy\", a.\"ModifiedDate\", a.\"NormalizedEmail\", a.\"NormalizedUserName\", a.\"PasswordHash\", a.\"PhoneNumber\", a.\"PhoneNumberConfirmed\", a.\"RegistrationToken\", a.\"SecurityStamp\", a.\"Surname\", a.\"TokenValidity\", a.\"TwoFactorEnabled\", a.\"UserName\"
+FROM \"UserProfiles\" AS u
+INNER JOIN \"Farms\" AS f ON u.\"FarmId\" = f.\"Id\"
+INNER JOIN \"AspNetUsers\" AS a ON u.\"UserId\" = a.\"Id\"
+WHERE u.\"UserId\" = @__user_Id_0"
+2025-04-15T08:36:27.6639440+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__userId_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a0.\"Name\"
+FROM \"AspNetUserRoles\" AS a
+INNER JOIN \"AspNetRoles\" AS a0 ON a.\"RoleId\" = a0.\"Id\"
+WHERE a.\"UserId\" = @__userId_0"
+2025-04-15T08:36:27.6655970+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-04-15T08:36:27.6685870+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-04-15T08:36:27.6707570+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__userId_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a0.\"Name\"
+FROM \"AspNetUserRoles\" AS a
+INNER JOIN \"AspNetRoles\" AS a0 ON a.\"RoleId\" = a0.\"Id\"
+WHERE a.\"UserId\" = @__userId_0"
+2025-04-15T08:36:27.6979870+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-04-15T08:36:27.6998000+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-04-15T08:36:27.7026870+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__user_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ClaimType\", a.\"ClaimValue\", a.\"UserId\"
+FROM \"AspNetUserClaims\" AS a
+WHERE a.\"UserId\" = @__user_Id_0"
+2025-04-15T08:36:27.7042390+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 288.5845ms.
+2025-04-15T08:36:27.7055610+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"Hurudza.Apis.Base.Models.ApiOkResponse"'.
+2025-04-15T08:36:27.7066100+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)" in 295.463ms
+2025-04-15T08:36:27.7067220+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)"'
+2025-04-15T08:36:27.7068840+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - 200 1856 "application/json; charset=utf-8" 487.1648ms
+2025-04-15T08:36:30.4251270+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - null null
+2025-04-15T08:36:30.4255970+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:30.4257190+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - 204 null null 25.9485ms
+2025-04-15T08:36:30.4267370+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - null null
+2025-04-15T08:36:30.4273190+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:30.4279440+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)"'
+2025-04-15T08:36:30.4281440+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetProvinces\", controller = \"Provinces\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetProvinces()" on controller "Hurudza.Apis.Core.Controllers.ProvincesController" ("Hurudza.Apis.Core").
+2025-04-15T08:36:30.4285710+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:36:30.4560460+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT p.\"Id\", p.\"CreatedDate\", p.\"CreatorId\", p.\"Deleted\", p.\"IsActive\", p.\"IsArchived\", p.\"ModifiedBy\", p.\"Name\", p.\"UpdatedAt\", p.\"Version\"
+FROM \"Provinces\" AS p
+ORDER BY p.\"Name\""
+2025-04-15T08:36:30.4811210+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 52.4792ms.
+2025-04-15T08:36:30.4813800+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.Province, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:36:30.4817930+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)" in 53.5503ms
+2025-04-15T08:36:30.4818580+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)"'
+2025-04-15T08:36:30.4819470+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - 200 3048 "application/json; charset=utf-8" 55.3146ms
+2025-04-15T08:36:30.6053480+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - null null
+2025-04-15T08:36:30.6060600+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:30.6063060+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - 204 null null 26.1247ms
+2025-04-15T08:36:30.6320040+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - null null
+2025-04-15T08:36:30.6332070+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:30.6343020+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)"'
+2025-04-15T08:36:30.6345520+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetDistricts\", controller = \"Districts\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetDistricts()" on controller "Hurudza.Apis.Core.Controllers.DistrictsController" ("Hurudza.Apis.Core").
+2025-04-15T08:36:30.6351950+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:36:30.6661250+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("28"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT d.\"Id\", d.\"CreatedDate\", d.\"CreatorId\", d.\"Deleted\", d.\"IsActive\", d.\"IsArchived\", d.\"ModifiedBy\", d.\"Name\", d.\"ProvinceId\", d.\"UpdatedAt\", d.\"Version\"
+FROM \"Districts\" AS d"
+2025-04-15T08:36:30.6682440+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 32.3437ms.
+2025-04-15T08:36:30.6684660+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.District, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:36:30.8994950+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)" in 264.8365ms
+2025-04-15T08:36:30.8996390+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)"'
+2025-04-15T08:36:30.8997490+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - 200 23432 "application/json; charset=utf-8" 267.7969ms
+2025-04-15T08:36:31.0233660+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - null null
+2025-04-15T08:36:31.0239850+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:31.0242940+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - 204 null null 48.6787ms
+2025-04-15T08:36:31.0266540+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - null null
+2025-04-15T08:36:31.0271420+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:31.0283280+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)"'
+2025-04-15T08:36:31.0286620+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetLocalAuthorities\", controller = \"LocalAuthorities\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetLocalAuthorities()" on controller "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController" ("Hurudza.Apis.Core").
+2025-04-15T08:36:31.0294060+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:36:31.1079240+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT l.\"Id\", l.\"CreatedDate\", l.\"CreatorId\", l.\"Deleted\", l.\"DistrictId\", l.\"IsActive\", l.\"IsArchived\", l.\"ModifiedBy\", l.\"Name\", l.\"UpdatedAt\", l.\"Version\"
+FROM \"LocalAuthorities\" AS l"
+2025-04-15T08:36:31.1638210+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 134.2625ms.
+2025-04-15T08:36:31.1644270+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.LocalAuthority, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:36:31.1987770+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)" in 169.929ms
+2025-04-15T08:36:31.1990680+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)"'
+2025-04-15T08:36:31.1992940+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - 200 31587 "application/json; charset=utf-8" 172.6427ms
+2025-04-15T08:36:31.2870320+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - null null
+2025-04-15T08:36:31.2880720+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:31.2883570+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - 204 null null 1.3697ms
+2025-04-15T08:36:31.2932340+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - null null
+2025-04-15T08:36:31.2941600+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:31.2952800+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)"'
+2025-04-15T08:36:31.2956290+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetWards\", controller = \"Wards\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetWards()" on controller "Hurudza.Apis.Core.Controllers.WardsController" ("Hurudza.Apis.Core").
+2025-04-15T08:36:31.2967580+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:36:31.3058720+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("7"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT w.\"Id\", w.\"CreatedDate\", w.\"CreatorId\", w.\"Deleted\", w.\"DistrictId\", w.\"IsActive\", w.\"IsArchived\", w.\"LocalAuthorityId\", w.\"ModifiedBy\", w.\"Name\", w.\"ProvinceId\", w.\"UpdatedAt\", w.\"Version\"
+FROM \"Wards\" AS w"
+2025-04-15T08:36:31.3234630+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 26.4921ms.
+2025-04-15T08:36:31.3237810+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.Ward, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:36:31.4749550+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)" in 179.1467ms
+2025-04-15T08:36:31.4750790+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)"'
+2025-04-15T08:36:31.4751940+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - 200 796356 "application/json; charset=utf-8" 182.0554ms
+2025-04-15T08:36:31.9785420+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - null null
+2025-04-15T08:36:31.9790200+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:31.9791820+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - 204 null null 0.6686ms
+2025-04-15T08:36:32.0028360+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - null null
+2025-04-15T08:36:32.0036350+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:32.0042520+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)"'
+2025-04-15T08:36:32.0045710+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetFarms\", controller = \"Farms\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetFarms()" on controller "Hurudza.Apis.Core.Controllers.FarmsController" ("Hurudza.Apis.Core").
+2025-04-15T08:36:32.0060210+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:36:32.0818180+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("27"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT f.\"Name\", f.\"Address\", f.\"ContactPerson\", f.\"PhoneNumber\", f.\"Email\", f.\"Description\", f.\"Vision\", f.\"Mission\", f.\"Website\", f.\"Year\", f.\"FoundingMembers\", f.\"KeyMilestones\", f.\"Size\", f.\"Arable\", f.\"Cleared\", f.\"Terrain\", f.\"Latitude\", f.\"Longitude\", f.\"Elevation\", f.\"PastCrops\", f.\"LandManagementPractice\", f.\"SecurityMeasures\", f.\"WaterSource\", f.\"WaterAvailability\", f.\"Irrigated\", f.\"Equipment\", f.\"SoilType\", f.\"RoadAccess\", f.\"Problems\", f.\"Personnel\", f.\"Recommendations\", f.\"WardId\", f.\"LocalAuthorityId\", f.\"DistrictId\", f.\"ProvinceId\", f.\"Region\", f.\"Conference\", f.\"CommunityPrograms\", f.\"Partnerships\", f.\"Classrooms\", f.\"Laboratories\", f.\"SportsFacilities\", f.\"Library\", f.\"AverageExamScores\", f.\"ExtraCurricularAchievements\", f.\"MaleTeachers\", f.\"FemaleTeachers\", f.\"MaleStudents\", f.\"FemaleStudents\", f.\"StudentDemographics\", f.\"DayScholars\", f.\"BoardingScholars\", f.\"NonTeachingStaff\", f.\"Buildings\", w.\"Name\" AS \"Ward\", l.\"Name\" AS \"LocalAuthority\", d.\"Name\" AS \"District\", p.\"Name\" AS \"Province\", f.\"Id\", f.\"UpdatedAt\", f.\"Deleted\", f.\"CreatedDate\", f.\"CreatorId\", f.\"ModifiedBy\", f.\"IsArchived\", f.\"IsActive\"
+FROM \"Farms\" AS f
+LEFT JOIN \"Wards\" AS w ON f.\"WardId\" = w.\"Id\"
+LEFT JOIN \"LocalAuthorities\" AS l ON f.\"LocalAuthorityId\" = l.\"Id\"
+LEFT JOIN \"Districts\" AS d ON f.\"DistrictId\" = d.\"Id\"
+INNER JOIN \"Provinces\" AS p ON f.\"ProvinceId\" = p.\"Id\"
+WHERE f.\"IsActive\""
+2025-04-15T08:36:32.1111500+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 104.6794ms.
+2025-04-15T08:36:32.1117780+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.UI.Models.ViewModels.Core.FarmViewModel, Hurudza.Data.UI.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:36:32.1847740+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)" in 179.7985ms
+2025-04-15T08:36:32.1852890+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)"'
+2025-04-15T08:36:32.1864320+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - 200 14286 "application/json; charset=utf-8" 183.725ms
+2025-04-15T08:36:37.8178250+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillageServices/GetTillageStatistics""?api-version=1.0" - null null
+2025-04-15T08:36:37.8194430+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:37.8198330+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillageServices/GetTillageStatistics""?api-version=1.0" - 204 null null 2.4572ms
+2025-04-15T08:36:37.8237110+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillageServices/GetTillageStatistics""?api-version=1.0" - null null
+2025-04-15T08:36:37.8246420+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:37.8255790+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)"'
+2025-04-15T08:36:37.8259330+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetTillageStatistics\", controller = \"TillageServices\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetTillageStatistics()" on controller "Hurudza.Apis.Core.Controllers.TillageServicesController" ("Hurudza.Apis.Core").
+2025-04-15T08:36:37.8271350+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:36:37.9025940+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("24"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT count(*)::int
+FROM \"TillagePrograms\" AS t
+WHERE t.\"IsActive\""
+2025-04-15T08:36:37.9858020+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("31"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT count(*)::int
+FROM \"TillageServices\" AS t
+WHERE NOT (t.\"Deleted\")"
+2025-04-15T08:36:38.0413360+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT count(*)::int
+FROM \"TillageServices\" AS t
+WHERE NOT (t.\"Deleted\") AND t.\"IsCompleted\""
+2025-04-15T08:36:38.0951510+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT COALESCE(sum(t.\"TotalHectares\"), 0)
+FROM \"TillagePrograms\" AS t
+WHERE t.\"IsActive\""
+2025-04-15T08:36:38.1213900+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("24"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT COALESCE(sum(t.\"TilledHectares\"), 0)
+FROM \"TillagePrograms\" AS t
+WHERE t.\"IsActive\""
+2025-04-15T08:36:38.1766920+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("27"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT COALESCE(sum(COALESCE(t.\"ServiceCost\", 0.0)), 0.0)
+FROM \"TillageServices\" AS t
+WHERE NOT (t.\"Deleted\")"
+2025-04-15T08:36:38.2021140+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 374.7344ms.
+2025-04-15T08:36:38.2025630+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"<>f__AnonymousType10`6[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Single, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Single, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Decimal, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"'.
+2025-04-15T08:36:38.2031630+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)" in 376.9825ms
+2025-04-15T08:36:38.2032810+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)"'
+2025-04-15T08:36:38.2034710+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillageServices/GetTillageStatistics""?api-version=1.0" - 200 131 "application/json; charset=utf-8" 380.0942ms
+2025-04-15T08:36:38.2272510+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - null null
+2025-04-15T08:36:38.2276030+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:38.2276950+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - 204 null null 0.6748ms
+2025-04-15T08:36:38.2286250+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - null null
+2025-04-15T08:36:38.2291020+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:36:38.2296650+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)"'
+2025-04-15T08:36:38.2298390+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetTillageSummary\", controller = \"TillagePrograms\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetTillageSummary()" on controller "Hurudza.Apis.Core.Controllers.TillageProgramsController" ("Hurudza.Apis.Core").
+2025-04-15T08:36:38.2303450+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:36:38.2342860+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT t.\"FarmId\", (
+    SELECT f.\"Name\"
+    FROM \"TillagePrograms\" AS t0
+    INNER JOIN \"Farms\" AS f ON t0.\"FarmId\" = f.\"Id\"
+    WHERE t0.\"IsActive\" AND t.\"FarmId\" = t0.\"FarmId\"
+    LIMIT 1) AS \"FarmName\", COALESCE(sum(t.\"TotalHectares\"), 0) AS \"TotalPlanned\", COALESCE(sum(t.\"TilledHectares\"), 0) AS \"TotalTilled\", COALESCE(sum((
+    SELECT count(*)::int
+    FROM \"TillageServices\" AS t1
+    WHERE t.\"Id\" = t1.\"TillageProgramId\")), 0)::int AS \"TotalServices\", COALESCE(sum((
+    SELECT count(*)::int
+    FROM \"TillageServices\" AS t2
+    WHERE t.\"Id\" = t2.\"TillageProgramId\" AND t2.\"IsCompleted\")), 0)::int AS \"CompletedServices\", COALESCE(sum((
+    SELECT COALESCE(sum(COALESCE(t3.\"ServiceCost\", 0.0)), 0.0)
+    FROM \"TillageServices\" AS t3
+    WHERE t.\"Id\" = t3.\"TillageProgramId\")), 0.0) AS \"TotalRevenue\"
+FROM \"TillagePrograms\" AS t
+WHERE t.\"IsActive\"
+GROUP BY t.\"FarmId\""
+2025-04-15T08:36:38.2351310+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 4.714ms.
+2025-04-15T08:36:38.2352980+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.UI.Models.ViewModels.Tillage.TillageSummaryViewModel, Hurudza.Data.UI.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:36:38.2354530+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)" in 5.527ms
+2025-04-15T08:36:38.2355160+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)"'
+2025-04-15T08:36:38.2355930+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - 200 2 "application/json; charset=utf-8" 7.1842ms
+2025-04-15T08:37:51.8413190+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - null null
+2025-04-15T08:37:51.9042940+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:37:51.9051630+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - 204 null null 64.2463ms
+2025-04-15T08:37:51.9161900+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - null null
+2025-04-15T08:37:51.9170470+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:37:51.9499390+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)"'
+2025-04-15T08:37:51.9522780+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetProvinces\", controller = \"Provinces\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetProvinces()" on controller "Hurudza.Apis.Core.Controllers.ProvincesController" ("Hurudza.Apis.Core").
+2025-04-15T08:37:51.9539900+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:37:52.0665320+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("82"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT p.\"Id\", p.\"CreatedDate\", p.\"CreatorId\", p.\"Deleted\", p.\"IsActive\", p.\"IsArchived\", p.\"ModifiedBy\", p.\"Name\", p.\"UpdatedAt\", p.\"Version\"
+FROM \"Provinces\" AS p
+ORDER BY p.\"Name\""
+2025-04-15T08:37:52.1197210+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 165.514ms.
+2025-04-15T08:37:52.1201420+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.Province, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:37:52.1208350+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)" in 168.3646ms
+2025-04-15T08:37:52.1209090+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)"'
+2025-04-15T08:37:52.1210180+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - 200 3048 "application/json; charset=utf-8" 204.8592ms
+2025-04-15T08:37:52.1834450+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - null null
+2025-04-15T08:37:52.1845010+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:37:52.1848390+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - 204 null null 25.9333ms
+2025-04-15T08:37:52.1875900+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - null null
+2025-04-15T08:37:52.1887780+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:37:52.1894200+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)"'
+2025-04-15T08:37:52.1897720+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetDistricts\", controller = \"Districts\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetDistricts()" on controller "Hurudza.Apis.Core.Controllers.DistrictsController" ("Hurudza.Apis.Core").
+2025-04-15T08:37:52.1906320+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:37:52.2384210+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT d.\"Id\", d.\"CreatedDate\", d.\"CreatorId\", d.\"Deleted\", d.\"IsActive\", d.\"IsArchived\", d.\"ModifiedBy\", d.\"Name\", d.\"ProvinceId\", d.\"UpdatedAt\", d.\"Version\"
+FROM \"Districts\" AS d"
+2025-04-15T08:37:52.4807880+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 289.972ms.
+2025-04-15T08:37:52.4811870+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.District, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:37:52.5599270+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)" in 369.9009ms
+2025-04-15T08:37:52.5602290+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)"'
+2025-04-15T08:37:52.5604920+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - 200 23432 "application/json; charset=utf-8" 372.9025ms
+2025-04-15T08:37:52.6910020+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - null null
+2025-04-15T08:37:52.6921370+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:37:52.6925460+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - 204 null null 47.2473ms
+2025-04-15T08:37:52.7463800+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - null null
+2025-04-15T08:37:52.7475890+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:37:52.7488100+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)"'
+2025-04-15T08:37:52.7493250+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetLocalAuthorities\", controller = \"LocalAuthorities\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetLocalAuthorities()" on controller "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController" ("Hurudza.Apis.Core").
+2025-04-15T08:37:52.7508900+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:37:52.8462950+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("47"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT l.\"Id\", l.\"CreatedDate\", l.\"CreatorId\", l.\"Deleted\", l.\"DistrictId\", l.\"IsActive\", l.\"IsArchived\", l.\"ModifiedBy\", l.\"Name\", l.\"UpdatedAt\", l.\"Version\"
+FROM \"LocalAuthorities\" AS l"
+2025-04-15T08:37:53.1194120+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 367.9506ms.
+2025-04-15T08:37:53.1205920+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.LocalAuthority, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:37:53.1586920+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)" in 409.0695ms
+2025-04-15T08:37:53.1592960+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)"'
+2025-04-15T08:37:53.1599940+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - 200 31587 "application/json; charset=utf-8" 413.6767ms
+2025-04-15T08:37:53.2596600+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - null null
+2025-04-15T08:37:53.2606210+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:37:53.2609480+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - 204 null null 1.6762ms
+2025-04-15T08:37:53.2633830+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - null null
+2025-04-15T08:37:53.2643910+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:37:53.2657300+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)"'
+2025-04-15T08:37:53.2662180+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetWards\", controller = \"Wards\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetWards()" on controller "Hurudza.Apis.Core.Controllers.WardsController" ("Hurudza.Apis.Core").
+2025-04-15T08:37:53.2678810+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:37:53.3452850+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("27"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT w.\"Id\", w.\"CreatedDate\", w.\"CreatorId\", w.\"Deleted\", w.\"DistrictId\", w.\"IsActive\", w.\"IsArchived\", w.\"LocalAuthorityId\", w.\"ModifiedBy\", w.\"Name\", w.\"ProvinceId\", w.\"UpdatedAt\", w.\"Version\"
+FROM \"Wards\" AS w"
+2025-04-15T08:37:53.4524300+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 184.1323ms.
+2025-04-15T08:37:53.4527730+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.Ward, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:37:53.6364370+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)" in 369.9704ms
+2025-04-15T08:37:53.6365880+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)"'
+2025-04-15T08:37:53.6367220+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - 200 796356 "application/json; charset=utf-8" 373.3755ms
+2025-04-15T08:37:54.1319130+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - null null
+2025-04-15T08:37:54.1328820+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:37:54.1332670+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - 204 null null 1.7043ms
+2025-04-15T08:37:54.1626710+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - null null
+2025-04-15T08:37:54.1637430+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:37:54.1647610+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)"'
+2025-04-15T08:37:54.1654710+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetFarms\", controller = \"Farms\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetFarms()" on controller "Hurudza.Apis.Core.Controllers.FarmsController" ("Hurudza.Apis.Core").
+2025-04-15T08:37:54.1673990+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:37:54.2271600+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT f.\"Name\", f.\"Address\", f.\"ContactPerson\", f.\"PhoneNumber\", f.\"Email\", f.\"Description\", f.\"Vision\", f.\"Mission\", f.\"Website\", f.\"Year\", f.\"FoundingMembers\", f.\"KeyMilestones\", f.\"Size\", f.\"Arable\", f.\"Cleared\", f.\"Terrain\", f.\"Latitude\", f.\"Longitude\", f.\"Elevation\", f.\"PastCrops\", f.\"LandManagementPractice\", f.\"SecurityMeasures\", f.\"WaterSource\", f.\"WaterAvailability\", f.\"Irrigated\", f.\"Equipment\", f.\"SoilType\", f.\"RoadAccess\", f.\"Problems\", f.\"Personnel\", f.\"Recommendations\", f.\"WardId\", f.\"LocalAuthorityId\", f.\"DistrictId\", f.\"ProvinceId\", f.\"Region\", f.\"Conference\", f.\"CommunityPrograms\", f.\"Partnerships\", f.\"Classrooms\", f.\"Laboratories\", f.\"SportsFacilities\", f.\"Library\", f.\"AverageExamScores\", f.\"ExtraCurricularAchievements\", f.\"MaleTeachers\", f.\"FemaleTeachers\", f.\"MaleStudents\", f.\"FemaleStudents\", f.\"StudentDemographics\", f.\"DayScholars\", f.\"BoardingScholars\", f.\"NonTeachingStaff\", f.\"Buildings\", w.\"Name\" AS \"Ward\", l.\"Name\" AS \"LocalAuthority\", d.\"Name\" AS \"District\", p.\"Name\" AS \"Province\", f.\"Id\", f.\"UpdatedAt\", f.\"Deleted\", f.\"CreatedDate\", f.\"CreatorId\", f.\"ModifiedBy\", f.\"IsArchived\", f.\"IsActive\"
+FROM \"Farms\" AS f
+LEFT JOIN \"Wards\" AS w ON f.\"WardId\" = w.\"Id\"
+LEFT JOIN \"LocalAuthorities\" AS l ON f.\"LocalAuthorityId\" = l.\"Id\"
+LEFT JOIN \"Districts\" AS d ON f.\"DistrictId\" = d.\"Id\"
+INNER JOIN \"Provinces\" AS p ON f.\"ProvinceId\" = p.\"Id\"
+WHERE f.\"IsActive\""
+2025-04-15T08:37:54.2572370+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 89.4702ms.
+2025-04-15T08:37:54.2583190+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.UI.Models.ViewModels.Core.FarmViewModel, Hurudza.Data.UI.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:37:54.4355250+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)" in 269.5997ms
+2025-04-15T08:37:54.4362670+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)"'
+2025-04-15T08:37:54.4369120+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - 200 14286 "application/json; charset=utf-8" 274.3573ms
+2025-04-15T08:38:55.3999140+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillagePrograms/GetTillagePrograms""?api-version=1.0" - null null
+2025-04-15T08:38:55.4047900+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:38:55.4056930+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillagePrograms/GetTillagePrograms""?api-version=1.0" - 204 null null 55.5652ms
+2025-04-15T08:38:55.5566340+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillagePrograms/GetTillagePrograms""?api-version=1.0" - null null
+2025-04-15T08:38:55.5586410+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:38:55.5627590+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillagePrograms (Hurudza.Apis.Core)"'
+2025-04-15T08:38:55.5836720+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetTillagePrograms\", controller = \"TillagePrograms\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetTillagePrograms()" on controller "Hurudza.Apis.Core.Controllers.TillageProgramsController" ("Hurudza.Apis.Core").
+2025-04-15T08:38:55.5870460+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillagePrograms (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:38:55.7445690+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("27"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT t.\"Name\", t.\"Description\", t.\"StartDate\", t.\"EndDate\", t.\"FarmId\", f.\"Name\" AS \"Farm\", t.\"TotalHectares\", t.\"TilledHectares\", t.\"IsActive\", t.\"Id\", t.\"UpdatedAt\", t.\"Deleted\", t.\"CreatedDate\", t.\"CreatorId\", t.\"ModifiedBy\", t.\"IsArchived\"
+FROM \"TillagePrograms\" AS t
+INNER JOIN \"Farms\" AS f ON t.\"FarmId\" = f.\"Id\"
+WHERE t.\"IsActive\""
+2025-04-15T08:38:55.7468740+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillagePrograms (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 159.5424ms.
+2025-04-15T08:38:55.7482600+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.UI.Models.ViewModels.Tillage.TillageProgramViewModel, Hurudza.Data.UI.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:38:55.7534100+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillagePrograms (Hurudza.Apis.Core)" in 169.3827ms
+2025-04-15T08:38:55.7535130+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillagePrograms (Hurudza.Apis.Core)"'
+2025-04-15T08:38:55.7536390+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillagePrograms/GetTillagePrograms""?api-version=1.0" - 200 2 "application/json; charset=utf-8" 197.3527ms
+2025-04-15T08:38:55.7766160+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/Farms/getFarms""?api-version=1.0" - null null
+2025-04-15T08:38:55.7768890+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:38:55.7769770+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/Farms/getFarms""?api-version=1.0" - 204 null null 0.4115ms
+2025-04-15T08:38:55.7777230+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/Farms/getFarms""?api-version=1.0" - null null
+2025-04-15T08:38:55.7783940+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:38:55.7787330+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)"'
+2025-04-15T08:38:55.7788630+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetFarms\", controller = \"Farms\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetFarms()" on controller "Hurudza.Apis.Core.Controllers.FarmsController" ("Hurudza.Apis.Core").
+2025-04-15T08:38:55.7794750+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:38:55.8560710+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT f.\"Name\", f.\"Address\", f.\"ContactPerson\", f.\"PhoneNumber\", f.\"Email\", f.\"Description\", f.\"Vision\", f.\"Mission\", f.\"Website\", f.\"Year\", f.\"FoundingMembers\", f.\"KeyMilestones\", f.\"Size\", f.\"Arable\", f.\"Cleared\", f.\"Terrain\", f.\"Latitude\", f.\"Longitude\", f.\"Elevation\", f.\"PastCrops\", f.\"LandManagementPractice\", f.\"SecurityMeasures\", f.\"WaterSource\", f.\"WaterAvailability\", f.\"Irrigated\", f.\"Equipment\", f.\"SoilType\", f.\"RoadAccess\", f.\"Problems\", f.\"Personnel\", f.\"Recommendations\", f.\"WardId\", f.\"LocalAuthorityId\", f.\"DistrictId\", f.\"ProvinceId\", f.\"Region\", f.\"Conference\", f.\"CommunityPrograms\", f.\"Partnerships\", f.\"Classrooms\", f.\"Laboratories\", f.\"SportsFacilities\", f.\"Library\", f.\"AverageExamScores\", f.\"ExtraCurricularAchievements\", f.\"MaleTeachers\", f.\"FemaleTeachers\", f.\"MaleStudents\", f.\"FemaleStudents\", f.\"StudentDemographics\", f.\"DayScholars\", f.\"BoardingScholars\", f.\"NonTeachingStaff\", f.\"Buildings\", w.\"Name\" AS \"Ward\", l.\"Name\" AS \"LocalAuthority\", d.\"Name\" AS \"District\", p.\"Name\" AS \"Province\", f.\"Id\", f.\"UpdatedAt\", f.\"Deleted\", f.\"CreatedDate\", f.\"CreatorId\", f.\"ModifiedBy\", f.\"IsArchived\", f.\"IsActive\"
+FROM \"Farms\" AS f
+LEFT JOIN \"Wards\" AS w ON f.\"WardId\" = w.\"Id\"
+LEFT JOIN \"LocalAuthorities\" AS l ON f.\"LocalAuthorityId\" = l.\"Id\"
+LEFT JOIN \"Districts\" AS d ON f.\"DistrictId\" = d.\"Id\"
+INNER JOIN \"Provinces\" AS p ON f.\"ProvinceId\" = p.\"Id\"
+WHERE f.\"IsActive\""
+2025-04-15T08:38:55.8571420+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 77.5883ms.
+2025-04-15T08:38:55.8573830+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.UI.Models.ViewModels.Core.FarmViewModel, Hurudza.Data.UI.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:38:55.9351350+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)" in 155.9663ms
+2025-04-15T08:38:55.9352830+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)"'
+2025-04-15T08:38:55.9354140+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/Farms/getFarms""?api-version=1.0" - 200 14286 "application/json; charset=utf-8" 157.6821ms
+2025-04-15T08:38:55.9887390+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - null null
+2025-04-15T08:38:55.9891310+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:38:55.9892640+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - 204 null null 0.623ms
+2025-04-15T08:38:56.0377980+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - null null
+2025-04-15T08:38:56.0386830+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:38:56.0396270+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)"'
+2025-04-15T08:38:56.0400140+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetTillageSummary\", controller = \"TillagePrograms\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetTillageSummary()" on controller "Hurudza.Apis.Core.Controllers.TillageProgramsController" ("Hurudza.Apis.Core").
+2025-04-15T08:38:56.0413220+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:38:56.1300840+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("38"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT t.\"FarmId\", (
+    SELECT f.\"Name\"
+    FROM \"TillagePrograms\" AS t0
+    INNER JOIN \"Farms\" AS f ON t0.\"FarmId\" = f.\"Id\"
+    WHERE t0.\"IsActive\" AND t.\"FarmId\" = t0.\"FarmId\"
+    LIMIT 1) AS \"FarmName\", COALESCE(sum(t.\"TotalHectares\"), 0) AS \"TotalPlanned\", COALESCE(sum(t.\"TilledHectares\"), 0) AS \"TotalTilled\", COALESCE(sum((
+    SELECT count(*)::int
+    FROM \"TillageServices\" AS t1
+    WHERE t.\"Id\" = t1.\"TillageProgramId\")), 0)::int AS \"TotalServices\", COALESCE(sum((
+    SELECT count(*)::int
+    FROM \"TillageServices\" AS t2
+    WHERE t.\"Id\" = t2.\"TillageProgramId\" AND t2.\"IsCompleted\")), 0)::int AS \"CompletedServices\", COALESCE(sum((
+    SELECT COALESCE(sum(COALESCE(t3.\"ServiceCost\", 0.0)), 0.0)
+    FROM \"TillageServices\" AS t3
+    WHERE t.\"Id\" = t3.\"TillageProgramId\")), 0.0) AS \"TotalRevenue\"
+FROM \"TillagePrograms\" AS t
+WHERE t.\"IsActive\"
+GROUP BY t.\"FarmId\""
+2025-04-15T08:38:56.2080030+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 166.3586ms.
+2025-04-15T08:38:56.2091650+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.UI.Models.ViewModels.Tillage.TillageSummaryViewModel, Hurudza.Data.UI.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:38:56.2107810+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)" in 170.4798ms
+2025-04-15T08:38:56.2111370+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)"'
+2025-04-15T08:38:56.2116350+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - 200 2 "application/json; charset=utf-8" 173.8892ms
+2025-04-15T08:40:24.4052100+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillagePrograms/GetTillagePrograms""?api-version=1.0" - null null
+2025-04-15T08:40:24.4315770+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:40:24.4348340+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillagePrograms/GetTillagePrograms""?api-version=1.0" - 204 null null 29.6709ms
+2025-04-15T08:40:24.5411350+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillagePrograms/GetTillagePrograms""?api-version=1.0" - null null
+2025-04-15T08:40:24.5670680+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:40:24.5692020+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillagePrograms (Hurudza.Apis.Core)"'
+2025-04-15T08:40:24.5697190+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetTillagePrograms\", controller = \"TillagePrograms\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetTillagePrograms()" on controller "Hurudza.Apis.Core.Controllers.TillageProgramsController" ("Hurudza.Apis.Core").
+2025-04-15T08:40:24.5709830+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillagePrograms (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:40:24.6514190+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("51"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT t.\"Name\", t.\"Description\", t.\"StartDate\", t.\"EndDate\", t.\"FarmId\", f.\"Name\" AS \"Farm\", t.\"TotalHectares\", t.\"TilledHectares\", t.\"IsActive\", t.\"Id\", t.\"UpdatedAt\", t.\"Deleted\", t.\"CreatedDate\", t.\"CreatorId\", t.\"ModifiedBy\", t.\"IsArchived\"
+FROM \"TillagePrograms\" AS t
+INNER JOIN \"Farms\" AS f ON t.\"FarmId\" = f.\"Id\"
+WHERE t.\"IsActive\""
+2025-04-15T08:40:24.6787470+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillagePrograms (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 107.5585ms.
+2025-04-15T08:40:24.6789860+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.UI.Models.ViewModels.Tillage.TillageProgramViewModel, Hurudza.Data.UI.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:40:24.6792180+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillagePrograms (Hurudza.Apis.Core)" in 109.2829ms
+2025-04-15T08:40:24.6792880+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillagePrograms (Hurudza.Apis.Core)"'
+2025-04-15T08:40:24.6793820+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillagePrograms/GetTillagePrograms""?api-version=1.0" - 200 2 "application/json; charset=utf-8" 163.3325ms
+2025-04-15T08:40:24.6884220+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/Farms/getFarms""?api-version=1.0" - null null
+2025-04-15T08:40:24.6886630+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:40:24.6887540+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/Farms/getFarms""?api-version=1.0" - 204 null null 0.4758ms
+2025-04-15T08:40:24.6893560+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/Farms/getFarms""?api-version=1.0" - null null
+2025-04-15T08:40:24.6897900+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:40:24.6906620+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)"'
+2025-04-15T08:40:24.6908000+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetFarms\", controller = \"Farms\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetFarms()" on controller "Hurudza.Apis.Core.Controllers.FarmsController" ("Hurudza.Apis.Core").
+2025-04-15T08:40:24.6911650+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:40:24.7188670+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT f.\"Name\", f.\"Address\", f.\"ContactPerson\", f.\"PhoneNumber\", f.\"Email\", f.\"Description\", f.\"Vision\", f.\"Mission\", f.\"Website\", f.\"Year\", f.\"FoundingMembers\", f.\"KeyMilestones\", f.\"Size\", f.\"Arable\", f.\"Cleared\", f.\"Terrain\", f.\"Latitude\", f.\"Longitude\", f.\"Elevation\", f.\"PastCrops\", f.\"LandManagementPractice\", f.\"SecurityMeasures\", f.\"WaterSource\", f.\"WaterAvailability\", f.\"Irrigated\", f.\"Equipment\", f.\"SoilType\", f.\"RoadAccess\", f.\"Problems\", f.\"Personnel\", f.\"Recommendations\", f.\"WardId\", f.\"LocalAuthorityId\", f.\"DistrictId\", f.\"ProvinceId\", f.\"Region\", f.\"Conference\", f.\"CommunityPrograms\", f.\"Partnerships\", f.\"Classrooms\", f.\"Laboratories\", f.\"SportsFacilities\", f.\"Library\", f.\"AverageExamScores\", f.\"ExtraCurricularAchievements\", f.\"MaleTeachers\", f.\"FemaleTeachers\", f.\"MaleStudents\", f.\"FemaleStudents\", f.\"StudentDemographics\", f.\"DayScholars\", f.\"BoardingScholars\", f.\"NonTeachingStaff\", f.\"Buildings\", w.\"Name\" AS \"Ward\", l.\"Name\" AS \"LocalAuthority\", d.\"Name\" AS \"District\", p.\"Name\" AS \"Province\", f.\"Id\", f.\"UpdatedAt\", f.\"Deleted\", f.\"CreatedDate\", f.\"CreatorId\", f.\"ModifiedBy\", f.\"IsArchived\", f.\"IsActive\"
+FROM \"Farms\" AS f
+LEFT JOIN \"Wards\" AS w ON f.\"WardId\" = w.\"Id\"
+LEFT JOIN \"LocalAuthorities\" AS l ON f.\"LocalAuthorityId\" = l.\"Id\"
+LEFT JOIN \"Districts\" AS d ON f.\"DistrictId\" = d.\"Id\"
+INNER JOIN \"Provinces\" AS p ON f.\"ProvinceId\" = p.\"Id\"
+WHERE f.\"IsActive\""
+2025-04-15T08:40:24.7203190+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 29.0883ms.
+2025-04-15T08:40:24.7204920+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.UI.Models.ViewModels.Core.FarmViewModel, Hurudza.Data.UI.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:40:24.7694270+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)" in 78.5473ms
+2025-04-15T08:40:24.7695310+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)"'
+2025-04-15T08:40:24.7709400+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/Farms/getFarms""?api-version=1.0" - 200 14286 "application/json; charset=utf-8" 81.5703ms
+2025-04-15T08:40:24.7960200+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - null null
+2025-04-15T08:40:24.7964980+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:40:24.7966200+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - 204 null null 0.7004ms
+2025-04-15T08:40:24.7978420+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - null null
+2025-04-15T08:40:24.7984150+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:40:24.7987600+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)"'
+2025-04-15T08:40:24.7988970+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetTillageSummary\", controller = \"TillagePrograms\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetTillageSummary()" on controller "Hurudza.Apis.Core.Controllers.TillageProgramsController" ("Hurudza.Apis.Core").
+2025-04-15T08:40:24.7993450+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:40:24.8249430+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT t.\"FarmId\", (
+    SELECT f.\"Name\"
+    FROM \"TillagePrograms\" AS t0
+    INNER JOIN \"Farms\" AS f ON t0.\"FarmId\" = f.\"Id\"
+    WHERE t0.\"IsActive\" AND t.\"FarmId\" = t0.\"FarmId\"
+    LIMIT 1) AS \"FarmName\", COALESCE(sum(t.\"TotalHectares\"), 0) AS \"TotalPlanned\", COALESCE(sum(t.\"TilledHectares\"), 0) AS \"TotalTilled\", COALESCE(sum((
+    SELECT count(*)::int
+    FROM \"TillageServices\" AS t1
+    WHERE t.\"Id\" = t1.\"TillageProgramId\")), 0)::int AS \"TotalServices\", COALESCE(sum((
+    SELECT count(*)::int
+    FROM \"TillageServices\" AS t2
+    WHERE t.\"Id\" = t2.\"TillageProgramId\" AND t2.\"IsCompleted\")), 0)::int AS \"CompletedServices\", COALESCE(sum((
+    SELECT COALESCE(sum(COALESCE(t3.\"ServiceCost\", 0.0)), 0.0)
+    FROM \"TillageServices\" AS t3
+    WHERE t.\"Id\" = t3.\"TillageProgramId\")), 0.0) AS \"TotalRevenue\"
+FROM \"TillagePrograms\" AS t
+WHERE t.\"IsActive\"
+GROUP BY t.\"FarmId\""
+2025-04-15T08:40:24.8277250+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 28.2779ms.
+2025-04-15T08:40:24.8279460+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.UI.Models.ViewModels.Tillage.TillageSummaryViewModel, Hurudza.Data.UI.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:40:24.8281330+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)" in 29.1167ms
+2025-04-15T08:40:24.8282220+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)"'
+2025-04-15T08:40:24.8283220+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - 200 2 "application/json; charset=utf-8" 30.6187ms
+2025-04-15T08:41:43.9104620+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillageServices/GetTillageStatistics""?api-version=1.0" - null null
+2025-04-15T08:41:43.9152320+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:41:43.9160810+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillageServices/GetTillageStatistics""?api-version=1.0" - 204 null null 30.8853ms
+2025-04-15T08:41:43.9893920+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillageServices/GetTillageStatistics""?api-version=1.0" - null null
+2025-04-15T08:41:44.0170890+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:41:44.0212660+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)"'
+2025-04-15T08:41:44.0227300+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetTillageStatistics\", controller = \"TillageServices\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetTillageStatistics()" on controller "Hurudza.Apis.Core.Controllers.TillageServicesController" ("Hurudza.Apis.Core").
+2025-04-15T08:41:44.0288460+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:41:44.2429920+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("3"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT count(*)::int
+FROM \"TillagePrograms\" AS t
+WHERE t.\"IsActive\""
+2025-04-15T08:41:44.2463260+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT count(*)::int
+FROM \"TillageServices\" AS t
+WHERE NOT (t.\"Deleted\")"
+2025-04-15T08:41:44.2494250+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT count(*)::int
+FROM \"TillageServices\" AS t
+WHERE NOT (t.\"Deleted\") AND t.\"IsCompleted\""
+2025-04-15T08:41:44.2523280+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT COALESCE(sum(t.\"TotalHectares\"), 0)
+FROM \"TillagePrograms\" AS t
+WHERE t.\"IsActive\""
+2025-04-15T08:41:44.2547520+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT COALESCE(sum(t.\"TilledHectares\"), 0)
+FROM \"TillagePrograms\" AS t
+WHERE t.\"IsActive\""
+2025-04-15T08:41:44.2566880+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT COALESCE(sum(COALESCE(t.\"ServiceCost\", 0.0)), 0.0)
+FROM \"TillageServices\" AS t
+WHERE NOT (t.\"Deleted\")"
+2025-04-15T08:41:44.2575710+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 228.3655ms.
+2025-04-15T08:41:44.2580100+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"<>f__AnonymousType10`6[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Single, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Single, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Decimal, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"'.
+2025-04-15T08:41:44.2588020+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)" in 235.6003ms
+2025-04-15T08:41:44.2589250+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.TillageServicesController.GetTillageStatistics (Hurudza.Apis.Core)"'
+2025-04-15T08:41:44.2592640+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillageServices/GetTillageStatistics""?api-version=1.0" - 200 131 "application/json; charset=utf-8" 269.9079ms
+2025-04-15T08:41:44.2976260+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - null null
+2025-04-15T08:41:44.2979140+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:41:44.2980130+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - 204 null null 0.5647ms
+2025-04-15T08:41:44.2992030+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - null null
+2025-04-15T08:41:44.2995590+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:41:44.2999180+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)"'
+2025-04-15T08:41:44.3000520+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetTillageSummary\", controller = \"TillagePrograms\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetTillageSummary()" on controller "Hurudza.Apis.Core.Controllers.TillageProgramsController" ("Hurudza.Apis.Core").
+2025-04-15T08:41:44.3028710+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:41:44.3062440+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT t.\"FarmId\", (
+    SELECT f.\"Name\"
+    FROM \"TillagePrograms\" AS t0
+    INNER JOIN \"Farms\" AS f ON t0.\"FarmId\" = f.\"Id\"
+    WHERE t0.\"IsActive\" AND t.\"FarmId\" = t0.\"FarmId\"
+    LIMIT 1) AS \"FarmName\", COALESCE(sum(t.\"TotalHectares\"), 0) AS \"TotalPlanned\", COALESCE(sum(t.\"TilledHectares\"), 0) AS \"TotalTilled\", COALESCE(sum((
+    SELECT count(*)::int
+    FROM \"TillageServices\" AS t1
+    WHERE t.\"Id\" = t1.\"TillageProgramId\")), 0)::int AS \"TotalServices\", COALESCE(sum((
+    SELECT count(*)::int
+    FROM \"TillageServices\" AS t2
+    WHERE t.\"Id\" = t2.\"TillageProgramId\" AND t2.\"IsCompleted\")), 0)::int AS \"CompletedServices\", COALESCE(sum((
+    SELECT COALESCE(sum(COALESCE(t3.\"ServiceCost\", 0.0)), 0.0)
+    FROM \"TillageServices\" AS t3
+    WHERE t.\"Id\" = t3.\"TillageProgramId\")), 0.0) AS \"TotalRevenue\"
+FROM \"TillagePrograms\" AS t
+WHERE t.\"IsActive\"
+GROUP BY t.\"FarmId\""
+2025-04-15T08:41:44.3065690+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 3.6119ms.
+2025-04-15T08:41:44.3067220+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.UI.Models.ViewModels.Tillage.TillageSummaryViewModel, Hurudza.Data.UI.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:41:44.3068700+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)" in 6.7477ms
+2025-04-15T08:41:44.3069300+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.TillageProgramsController.GetTillageSummary (Hurudza.Apis.Core)"'
+2025-04-15T08:41:44.3069990+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/TillagePrograms/GetTillageSummary""?api-version=1.0" - 200 2 "application/json; charset=utf-8" 7.8675ms
+2025-04-15T08:46:53.2205150+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - null null
+2025-04-15T08:46:53.2232660+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:46:53.2236310+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - 204 null null 27.5083ms
+2025-04-15T08:46:53.2437730+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - null null
+2025-04-15T08:46:53.2701760+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:46:53.2718120+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)"'
+2025-04-15T08:46:53.2723860+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetLoggedInProfile\", controller = \"Authentication\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetLoggedInProfile()" on controller "Hurudza.Apis.Core.Controllers.AuthenticationController" ("Hurudza.Apis.Core").
+2025-04-15T08:46:53.2740240+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:46:53.3546650+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("3"ms) [Parameters=["@__p_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"AccessFailedCount\", a.\"ConcurrencyStamp\", a.\"CreatedDate\", a.\"CreatorId\", a.\"Email\", a.\"EmailConfirmed\", a.\"Firstname\", a.\"IsActive\", a.\"IsArchived\", a.\"IsDeleted\", a.\"LockoutEnabled\", a.\"LockoutEnd\", a.\"ModifiedBy\", a.\"ModifiedDate\", a.\"NormalizedEmail\", a.\"NormalizedUserName\", a.\"PasswordHash\", a.\"PhoneNumber\", a.\"PhoneNumberConfirmed\", a.\"RegistrationToken\", a.\"SecurityStamp\", a.\"Surname\", a.\"TokenValidity\", a.\"TwoFactorEnabled\", a.\"UserName\"
+FROM \"AspNetUsers\" AS a
+WHERE a.\"Id\" = @__p_0
+LIMIT 1"
+2025-04-15T08:46:53.3654810+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("4"ms) [Parameters=["@__user_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT u.\"UserId\", u.\"FarmId\", u.\"Role\", f.\"Id\", f.\"Address\", f.\"Arable\", f.\"AverageExamScores\", f.\"BoardingScholars\", f.\"Buildings\", f.\"Classrooms\", f.\"Cleared\", f.\"CommunityPrograms\", f.\"Conference\", f.\"ContactPerson\", f.\"CreatedDate\", f.\"CreatorId\", f.\"DayScholars\", f.\"Deleted\", f.\"Description\", f.\"DistrictId\", f.\"Elevation\", f.\"Email\", f.\"Equipment\", f.\"ExtraCurricularAchievements\", f.\"FemaleStudents\", f.\"FemaleTeachers\", f.\"FoundingMembers\", f.\"Irrigated\", f.\"IsActive\", f.\"IsArchived\", f.\"KeyMilestones\", f.\"Laboratories\", f.\"LandManagementPractice\", f.\"Latitude\", f.\"Library\", f.\"LocalAuthorityId\", f.\"Longitude\", f.\"MaleStudents\", f.\"MaleTeachers\", f.\"Mission\", f.\"ModifiedBy\", f.\"Name\", f.\"NonTeachingStaff\", f.\"Partnerships\", f.\"PastCrops\", f.\"Personnel\", f.\"PhoneNumber\", f.\"Problems\", f.\"ProvinceId\", f.\"Recommendations\", f.\"Region\", f.\"RoadAccess\", f.\"SecurityMeasures\", f.\"Size\", f.\"SoilType\", f.\"SportsFacilities\", f.\"StudentDemographics\", f.\"Terrain\", f.\"UpdatedAt\", f.\"Version\", f.\"Vision\", f.\"WardId\", f.\"WaterAvailability\", f.\"WaterSource\", f.\"Website\", f.\"Year\", u.\"Id\", u.\"UpdatedAt\", u.\"Deleted\", u.\"CreatedDate\", u.\"CreatorId\", u.\"ModifiedBy\", u.\"IsArchived\", u.\"IsActive\", a.\"Id\", a.\"AccessFailedCount\", a.\"ConcurrencyStamp\", a.\"CreatedDate\", a.\"CreatorId\", a.\"Email\", a.\"EmailConfirmed\", a.\"Firstname\", a.\"IsActive\", a.\"IsArchived\", a.\"IsDeleted\", a.\"LockoutEnabled\", a.\"LockoutEnd\", a.\"ModifiedBy\", a.\"ModifiedDate\", a.\"NormalizedEmail\", a.\"NormalizedUserName\", a.\"PasswordHash\", a.\"PhoneNumber\", a.\"PhoneNumberConfirmed\", a.\"RegistrationToken\", a.\"SecurityStamp\", a.\"Surname\", a.\"TokenValidity\", a.\"TwoFactorEnabled\", a.\"UserName\"
+FROM \"UserProfiles\" AS u
+INNER JOIN \"Farms\" AS f ON u.\"FarmId\" = f.\"Id\"
+INNER JOIN \"AspNetUsers\" AS a ON u.\"UserId\" = a.\"Id\"
+WHERE u.\"UserId\" = @__user_Id_0"
+2025-04-15T08:46:53.4438970+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("47"ms) [Parameters=["@__userId_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a0.\"Name\"
+FROM \"AspNetUserRoles\" AS a
+INNER JOIN \"AspNetRoles\" AS a0 ON a.\"RoleId\" = a0.\"Id\"
+WHERE a.\"UserId\" = @__userId_0"
+2025-04-15T08:46:53.4483270+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("3"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-04-15T08:46:53.4508850+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-04-15T08:46:53.4537900+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__userId_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a0.\"Name\"
+FROM \"AspNetUserRoles\" AS a
+INNER JOIN \"AspNetRoles\" AS a0 ON a.\"RoleId\" = a0.\"Id\"
+WHERE a.\"UserId\" = @__userId_0"
+2025-04-15T08:46:53.5298090+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-04-15T08:46:53.5795130+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-04-15T08:46:53.5828680+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=["@__user_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ClaimType\", a.\"ClaimValue\", a.\"UserId\"
+FROM \"AspNetUserClaims\" AS a
+WHERE a.\"UserId\" = @__user_Id_0"
+2025-04-15T08:46:53.5836310+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 309.5063ms.
+2025-04-15T08:46:53.5840440+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"Hurudza.Apis.Base.Models.ApiOkResponse"'.
+2025-04-15T08:46:53.5849580+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)" in 312.4502ms
+2025-04-15T08:46:53.5850630+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.AuthenticationController.GetLoggedInProfile (Hurudza.Apis.Core)"'
+2025-04-15T08:46:53.5852430+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/authentication/getloggedinprofile/""?api-version=1.0" - 200 1856 "application/json; charset=utf-8" 341.5092ms
+2025-04-15T08:46:55.9470370+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - null null
+2025-04-15T08:46:55.9703810+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:46:55.9704930+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - 204 null null 23.5191ms
+2025-04-15T08:46:55.9715050+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - null null
+2025-04-15T08:46:55.9719610+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:46:55.9722610+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)"'
+2025-04-15T08:46:55.9723800+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetProvinces\", controller = \"Provinces\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetProvinces()" on controller "Hurudza.Apis.Core.Controllers.ProvincesController" ("Hurudza.Apis.Core").
+2025-04-15T08:46:55.9732090+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:46:55.9954900+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT p.\"Id\", p.\"CreatedDate\", p.\"CreatorId\", p.\"Deleted\", p.\"IsActive\", p.\"IsArchived\", p.\"ModifiedBy\", p.\"Name\", p.\"UpdatedAt\", p.\"Version\"
+FROM \"Provinces\" AS p
+ORDER BY p.\"Name\""
+2025-04-15T08:46:56.2250800+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 251.7836ms.
+2025-04-15T08:46:56.2254570+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.Province, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:46:56.2258430+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)" in 253.3874ms
+2025-04-15T08:46:56.2259330+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.ProvincesController.GetProvinces (Hurudza.Apis.Core)"'
+2025-04-15T08:46:56.2260930+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/provinces/getprovinces""?api-version=1.0" - 200 3048 "application/json; charset=utf-8" 254.677ms
+2025-04-15T08:46:56.2816140+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - null null
+2025-04-15T08:46:56.2821120+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:46:56.2822310+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - 204 null null 21.5212ms
+2025-04-15T08:46:56.2834720+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - null null
+2025-04-15T08:46:56.2844250+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:46:56.2847370+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)"'
+2025-04-15T08:46:56.2849560+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetDistricts\", controller = \"Districts\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetDistricts()" on controller "Hurudza.Apis.Core.Controllers.DistrictsController" ("Hurudza.Apis.Core").
+2025-04-15T08:46:56.2853120+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:46:56.3594240+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("52"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT d.\"Id\", d.\"CreatedDate\", d.\"CreatorId\", d.\"Deleted\", d.\"IsActive\", d.\"IsArchived\", d.\"ModifiedBy\", d.\"Name\", d.\"ProvinceId\", d.\"UpdatedAt\", d.\"Version\"
+FROM \"Districts\" AS d"
+2025-04-15T08:46:56.5767850+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 291.366ms.
+2025-04-15T08:46:56.5771630+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.District, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:46:56.6279660+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)" in 342.9285ms
+2025-04-15T08:46:56.6281200+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.DistrictsController.GetDistricts (Hurudza.Apis.Core)"'
+2025-04-15T08:46:56.6282790+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/districts/getdistricts""?api-version=1.0" - 200 23432 "application/json; charset=utf-8" 344.7992ms
+2025-04-15T08:46:56.7060450+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - null null
+2025-04-15T08:46:56.7067630+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:46:56.7070390+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - 204 null null 1.2689ms
+2025-04-15T08:46:56.7093620+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - null null
+2025-04-15T08:46:56.7098210+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:46:56.7104350+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)"'
+2025-04-15T08:46:56.7106980+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetLocalAuthorities\", controller = \"LocalAuthorities\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetLocalAuthorities()" on controller "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController" ("Hurudza.Apis.Core").
+2025-04-15T08:46:56.7116350+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:46:56.7388650+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT l.\"Id\", l.\"CreatedDate\", l.\"CreatorId\", l.\"Deleted\", l.\"DistrictId\", l.\"IsActive\", l.\"IsArchived\", l.\"ModifiedBy\", l.\"Name\", l.\"UpdatedAt\", l.\"Version\"
+FROM \"LocalAuthorities\" AS l"
+2025-04-15T08:46:56.7897920+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 78.0078ms.
+2025-04-15T08:46:56.7901410+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.LocalAuthority, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:46:56.8177350+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)" in 106.8639ms
+2025-04-15T08:46:56.8178700+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.LocalAuthoritiesController.GetLocalAuthorities (Hurudza.Apis.Core)"'
+2025-04-15T08:46:56.8180270+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/localAuthorities/getLocalAuthorities""?api-version=1.0" - 200 31587 "application/json; charset=utf-8" 108.698ms
+2025-04-15T08:46:56.9026260+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - null null
+2025-04-15T08:46:56.9030170+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:46:56.9031240+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - 204 null null 22.661ms
+2025-04-15T08:46:56.9040610+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - null null
+2025-04-15T08:46:56.9045800+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:46:56.9049020+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)"'
+2025-04-15T08:46:56.9052780+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetWards\", controller = \"Wards\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetWards()" on controller "Hurudza.Apis.Core.Controllers.WardsController" ("Hurudza.Apis.Core").
+2025-04-15T08:46:56.9057160+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:46:56.9535300+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT w.\"Id\", w.\"CreatedDate\", w.\"CreatorId\", w.\"Deleted\", w.\"DistrictId\", w.\"IsActive\", w.\"IsArchived\", w.\"LocalAuthorityId\", w.\"ModifiedBy\", w.\"Name\", w.\"ProvinceId\", w.\"UpdatedAt\", w.\"Version\"
+FROM \"Wards\" AS w"
+2025-04-15T08:46:57.0027000+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 96.8967ms.
+2025-04-15T08:46:57.0029820+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.Models.Models.Ward, Hurudza.Data.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:46:57.1886380+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)" in 283.2471ms
+2025-04-15T08:46:57.1888110+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.WardsController.GetWards (Hurudza.Apis.Core)"'
+2025-04-15T08:46:57.1889660+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/wards/getWards""?api-version=1.0" - 200 796356 "application/json; charset=utf-8" 284.9501ms
+2025-04-15T08:46:57.7035560+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - null null
+2025-04-15T08:46:57.7476100+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:46:57.7481710+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "OPTIONS" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - 204 null null 44.6087ms
+2025-04-15T08:46:57.7504770+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - null null
+2025-04-15T08:46:57.7538190+02:00 [INF] (Hurudza.Services.Core) CORS policy execution successful.
+2025-04-15T08:46:57.7550390+02:00 [INF] (Hurudza.Services.Core) Executing endpoint '"Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)"'
+2025-04-15T08:46:57.7554740+02:00 [INF] (Hurudza.Services.Core) Route matched with "{action = \"GetFarms\", controller = \"Farms\"}". Executing controller action with signature "System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetFarms()" on controller "Hurudza.Apis.Core.Controllers.FarmsController" ("Hurudza.Apis.Core").
+2025-04-15T08:46:57.7568110+02:00 [INF] (Hurudza.Services.Core) Executing action method "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)" - Validation state: Valid
+2025-04-15T08:46:57.7875080+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("4"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT f.\"Name\", f.\"Address\", f.\"ContactPerson\", f.\"PhoneNumber\", f.\"Email\", f.\"Description\", f.\"Vision\", f.\"Mission\", f.\"Website\", f.\"Year\", f.\"FoundingMembers\", f.\"KeyMilestones\", f.\"Size\", f.\"Arable\", f.\"Cleared\", f.\"Terrain\", f.\"Latitude\", f.\"Longitude\", f.\"Elevation\", f.\"PastCrops\", f.\"LandManagementPractice\", f.\"SecurityMeasures\", f.\"WaterSource\", f.\"WaterAvailability\", f.\"Irrigated\", f.\"Equipment\", f.\"SoilType\", f.\"RoadAccess\", f.\"Problems\", f.\"Personnel\", f.\"Recommendations\", f.\"WardId\", f.\"LocalAuthorityId\", f.\"DistrictId\", f.\"ProvinceId\", f.\"Region\", f.\"Conference\", f.\"CommunityPrograms\", f.\"Partnerships\", f.\"Classrooms\", f.\"Laboratories\", f.\"SportsFacilities\", f.\"Library\", f.\"AverageExamScores\", f.\"ExtraCurricularAchievements\", f.\"MaleTeachers\", f.\"FemaleTeachers\", f.\"MaleStudents\", f.\"FemaleStudents\", f.\"StudentDemographics\", f.\"DayScholars\", f.\"BoardingScholars\", f.\"NonTeachingStaff\", f.\"Buildings\", w.\"Name\" AS \"Ward\", l.\"Name\" AS \"LocalAuthority\", d.\"Name\" AS \"District\", p.\"Name\" AS \"Province\", f.\"Id\", f.\"UpdatedAt\", f.\"Deleted\", f.\"CreatedDate\", f.\"CreatorId\", f.\"ModifiedBy\", f.\"IsArchived\", f.\"IsActive\"
+FROM \"Farms\" AS f
+LEFT JOIN \"Wards\" AS w ON f.\"WardId\" = w.\"Id\"
+LEFT JOIN \"LocalAuthorities\" AS l ON f.\"LocalAuthorityId\" = l.\"Id\"
+LEFT JOIN \"Districts\" AS d ON f.\"DistrictId\" = d.\"Id\"
+INNER JOIN \"Provinces\" AS p ON f.\"ProvinceId\" = p.\"Id\"
+WHERE f.\"IsActive\""
+2025-04-15T08:46:57.8613060+02:00 [INF] (Hurudza.Services.Core) Executed action method "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)", returned result "Microsoft.AspNetCore.Mvc.OkObjectResult" in 104.219ms.
+2025-04-15T08:46:57.8618620+02:00 [INF] (Hurudza.Services.Core) Executing "OkObjectResult", writing value of type '"System.Collections.Generic.List`1[[Hurudza.Data.UI.Models.ViewModels.Core.FarmViewModel, Hurudza.Data.UI.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"'.
+2025-04-15T08:46:57.9624470+02:00 [INF] (Hurudza.Services.Core) Executed action "Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)" in 206.641ms
+2025-04-15T08:46:57.9626290+02:00 [INF] (Hurudza.Services.Core) Executed endpoint '"Hurudza.Apis.Core.Controllers.FarmsController.GetFarms (Hurudza.Apis.Core)"'
+2025-04-15T08:46:57.9627840+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/api/Farms/getFarms/""?api-version=1.0" - 200 14286 "application/json; charset=utf-8" 212.3335ms

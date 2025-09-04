@@ -99,6 +99,7 @@ try
     // Register application services
     builder.Services.AddScoped<IFarmUserManagerService, FarmUserManagerService>();
     builder.Services.AddScoped<IFarmUserAssignmentService, FarmUserAssignmentService>();
+    builder.Services.AddScoped<IEquipmentService, EquipmentService>();
     builder.Services.AddSingleton<RoleInitializerService>();
 
     // Add hosted service for role initialization

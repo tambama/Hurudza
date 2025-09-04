@@ -301,6 +301,15 @@ public class FarmsController : Controller
             return Forbid();
         }
 
+        // Get the parent school to inherit properties
+        var parentSchool = await _context.Farms
+            .FirstOrDefaultAsync(f => f.Id == schoolId && f.FarmType == FarmType.School);
+
+        if (parentSchool == null)
+        {
+            return NotFound(new ApiResponse((int)HttpStatusCode.NotFound, "Parent school not found"));
+        }
+
         var farm = new Farm
         {
             Name = model.Name,
@@ -317,11 +326,19 @@ public class FarmsController : Controller
             TillageRequirements = model.TillageRequirements,
             CropRotationPlan = model.CropRotationPlan,
             Email = $"farm_{Guid.NewGuid().ToString().Substring(0, 8)}@tillage.local",
+            
+            // Inherit properties from parent school
+            ProvinceId = parentSchool.ProvinceId,
+            DistrictId = parentSchool.DistrictId,
+            LocalAuthorityId = parentSchool.LocalAuthorityId,
+            WardId = parentSchool.WardId,
+            Region = parentSchool.Region,
+            Conference = parentSchool.Conference,
+            
+            // Set reasonable defaults for farm-specific properties
             WaterAvailability = WaterAvailability.Seasonal,
             RoadAccess = RoadAccess.Dust,
-            Terrain = Terrain.Flat,
-            Region = Region.I,
-            Conference = Conference.East
+            Terrain = Terrain.Flat
         };
 
         await _context.Farms.AddAsync(farm);

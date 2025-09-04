@@ -85,6 +85,7 @@ public class FarmViewModel : BaseViewModel
     public string? CropRotationPlan { get; set; }
     
     public List<FarmViewModel> ManagedFarms { get; set; } = new List<FarmViewModel>();
+    public List<FarmLocationViewModel> Locations { get; set; } = new List<FarmLocationViewModel>();
 }
 
 public class CreateFarmViewModel : BaseViewModel

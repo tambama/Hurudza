@@ -1,0 +1,446 @@
+@page "/equipment"
+@attribute [Authorize]
+
+@using System.Net
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
+@inject IJSRuntime JSRuntime
+
+<Toast @ref="Alert" />
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <div class="d-flex justify-content-between flex-wrap align-items-center">
+                    <div>
+                        <h6 class="mb-0">Equipment Management</h6>
+                        <p class="text-sm mb-0">Manage farm equipment including tractors, irrigation systems, and other machinery</p>
+                        @if (!string.IsNullOrEmpty(currentFarmName))
+                        {
+                            <span class="badge bg-info mt-2">Farm: @currentFarmName</span>
+                        }
+                    </div>
+                    <div class="d-flex">
+                        @if (_hasEquipmentManagePermission)
+                        {
+                            <button type="button" class="btn btn-primary btn-sm ms-auto" @onclick="NavigateToNewEquipment">
+                                <i class="fas fa-plus me-2"></i>Add New Equipment
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+                <!-- Filters -->
+                <div class="px-3 py-3">
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <div class="input-group input-group-outline">
+                                <SfTextBox @bind-Value="searchText" Placeholder="Search equipment..." @oninput="ApplyFilters"></SfTextBox>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <SfDropDownList TValue="EquipmentType?" TItem="EquipmentTypeModel" DataSource="@equipmentTypeItems" @bind-Value="selectedType" 
+                                            Placeholder="All Types" AllowFiltering="true">
+                                <DropDownListEvents TValue="EquipmentType?" TItem="EquipmentTypeModel" ValueChange="ApplyFilters"></DropDownListEvents>
+                                <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                        </div>
+                        <div class="col-md-2">
+                            <SfDropDownList TValue="EquipmentStatus?" TItem="EquipmentStatusModel" DataSource="@equipmentStatusItems" @bind-Value="selectedStatus" 
+                                            Placeholder="All Statuses" AllowFiltering="true">
+                                <DropDownListEvents TValue="EquipmentStatus?" TItem="EquipmentStatusModel" ValueChange="ApplyFilters"></DropDownListEvents>
+                                <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                        </div>
+                        <div class="col-md-2">
+                            <SfDropDownList TValue="EquipmentCondition?" TItem="EquipmentConditionModel" DataSource="@equipmentConditionItems" @bind-Value="selectedCondition" 
+                                            Placeholder="All Conditions" AllowFiltering="true">
+                                <DropDownListEvents TValue="EquipmentCondition?" TItem="EquipmentConditionModel" ValueChange="ApplyFilters"></DropDownListEvents>
+                                <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
+                                <i class="fas fa-sync-alt me-1"></i>Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading indicator -->
+                @if (isLoading)
+                {
+                    <div class="d-flex justify-content-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                }
+                else if (filteredEquipment == null || !filteredEquipment.Any())
+                {
+                    <div class="text-center p-4">
+                        <div class="alert alert-info">
+                            <p class="mb-0">No equipment found.</p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Equipment Grid -->
+                    <div style="height: calc(100vh - 350px); width: 100%;">
+                        <SfGrid DataSource="@filteredEquipment"
+                                @ref="Grid"
+                                AllowPaging="true"
+                                AllowExcelExport="true"
+                                AllowSorting="true"
+                                AllowMultiSorting="true"
+                                EnableStickyHeader="true"
+                                AllowResizing="true"
+                                AllowSelection="true"
+                                EnableVirtualization="true"
+                                EnableHover="true"
+                                Height="100%"
+                                Width="100%"
+                                Toolbar="@(new List<string>() { "ExcelExport", "Print", "Search" })"
+                                ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                            <GridPageSettings PageSize="15"></GridPageSettings>
+                            <GridFilterSettings Type="FilterType.Menu" Mode="FilterBarMode.Immediate"></GridFilterSettings>
+                            <GridEvents RowSelected="RowSelectHandler" TValue="EquipmentListViewModel"></GridEvents>
+                            
+                            <GridColumns>
+                                <GridColumn Field=@nameof(EquipmentListViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                <GridColumn Field=@nameof(EquipmentListViewModel.Name) HeaderText="Equipment Name" TextAlign="TextAlign.Left" Width="160" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                                <GridColumn Field=@nameof(EquipmentListViewModel.FarmName) HeaderText="Farm" TextAlign="TextAlign.Left" Width="140"></GridColumn>
+                                <GridColumn Field=@nameof(EquipmentListViewModel.Type) HeaderText="Type" TextAlign="TextAlign.Left" Width="120">
+                                    <Template>
+                                        @{
+                                            var equipment = (context as EquipmentListViewModel);
+                                            <span>@equipment.Type.ToString("G").Replace("_", " ")</span>
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field=@nameof(EquipmentListViewModel.Brand) HeaderText="Brand" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                <GridColumn Field=@nameof(EquipmentListViewModel.Model) HeaderText="Model" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                <GridColumn Field=@nameof(EquipmentListViewModel.Status) HeaderText="Status" TextAlign="TextAlign.Center" Width="110">
+                                    <Template>
+                                        @{
+                                            var equipment = (context as EquipmentListViewModel);
+                                            var badgeClass = equipment.Status switch
+                                            {
+                                                EquipmentStatus.Active => "bg-success",
+                                                EquipmentStatus.Under_Maintenance => "bg-warning text-dark",
+                                                EquipmentStatus.Out_of_Service => "bg-danger",
+                                                EquipmentStatus.Disposed => "bg-secondary",
+                                                _ => "bg-secondary"
+                                            };
+                                            <span class='badge @badgeClass'>@equipment.Status.ToString("G").Replace("_", " ")</span>
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field=@nameof(EquipmentListViewModel.Condition) HeaderText="Condition" TextAlign="TextAlign.Center" Width="100">
+                                    <Template>
+                                        @{
+                                            var equipment = (context as EquipmentListViewModel);
+                                            var badgeClass = equipment.Condition switch
+                                            {
+                                                EquipmentCondition.Excellent => "bg-success",
+                                                EquipmentCondition.Good => "bg-info",
+                                                EquipmentCondition.Fair => "bg-warning text-dark",
+                                                EquipmentCondition.Poor => "bg-danger",
+                                                EquipmentCondition.Needs_Repair => "bg-dark",
+                                                _ => "bg-secondary"
+                                            };
+                                            <span class='badge @badgeClass'>@equipment.Condition.ToString("G").Replace("_", " ")</span>
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field=@nameof(EquipmentListViewModel.OperatingHours) HeaderText="Hours" TextAlign="TextAlign.Right" Width="80" Format="N0"></GridColumn>
+                                <GridColumn Field=@nameof(EquipmentListViewModel.LastMaintenanceDate) HeaderText="Last Maintenance" TextAlign="TextAlign.Center" Width="130" Type="ColumnType.Date" Format="MM/dd/yyyy">
+                                    <Template>
+                                        @{
+                                            var equipment = (context as EquipmentListViewModel);
+                                            if (equipment.LastMaintenanceDate.HasValue)
+                                            {
+                                                var daysSinceMaintenance = (DateTime.Now - equipment.LastMaintenanceDate.Value).Days;
+                                                var badgeClass = daysSinceMaintenance > 180 ? "bg-warning text-dark" : 
+                                                               daysSinceMaintenance > 365 ? "bg-danger" : "bg-success";
+                                                <span class='badge @badgeClass'>
+                                                    @equipment.LastMaintenanceDate.Value.ToString("MM/dd/yyyy")
+                                                    <small class="d-block">@daysSinceMaintenance days ago</small>
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class='badge bg-secondary'>No Record</span>
+                                            }
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn HeaderText="Actions" Width="120" TextAlign="TextAlign.Center">
+                                    <Template>
+                                        @{
+                                            var equipment = (context as EquipmentListViewModel);
+                                            <div class="btn-group">
+                                                <a href="/equipment/@equipment.Id" class="btn btn-link text-primary p-1" @onclick:stopPropagation="true" data-bs-toggle="tooltip" data-bs-title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                @if (_hasEquipmentManagePermission)
+                                                {
+                                                    <a href="/equipment/@equipment.Id/edit" class="btn btn-link text-info p-1" @onclick:stopPropagation="true" data-bs-toggle="tooltip" data-bs-title="Edit Equipment">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button class="btn btn-link text-danger p-1" @onclick="() => OpenDeleteConfirmation(equipment)" @onclick:stopPropagation="true" data-bs-toggle="tooltip" data-bs-title="Delete Equipment">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                }
+                                            </div>
+                                        }
+                                    </Template>
+                                </GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Dialog -->
+<SfDialog @bind-Visible="isDeleteDialogVisible" Width="400px" IsModal="true" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>Confirm Deletion</Header>
+        <Content>
+            @if (selectedEquipment != null)
+            {
+                <div>
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <p class="mb-0">Are you sure you want to delete the equipment <strong>@selectedEquipment.Name</strong>?</p>
+                    </div>
+                    <p>This action cannot be undone and will remove all equipment data including maintenance history.</p>
+                    
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="button" class="btn btn-secondary me-2" @onclick="() => isDeleteDialogVisible = false">Cancel</button>
+                        <button type="button" class="btn btn-danger" @onclick="DeleteSelectedEquipment" disabled="@isDeleting">
+                            @if (isDeleting)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                <span>Deleting...</span>
+                            }
+                            else
+                            {
+                                <span>Delete Equipment</span>
+                            }
+                        </button>
+                    </div>
+                </div>
+            }
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+    // References
+    private SfGrid<EquipmentListViewModel> Grid;
+    private Toast Alert;
+    
+    // Data
+    private List<EquipmentListViewModel> equipment = new();
+    private List<EquipmentListViewModel> filteredEquipment = new();
+    private EquipmentListViewModel selectedEquipment;
+    
+    // Filters
+    private string searchText = "";
+    private EquipmentType? selectedType = null;
+    private EquipmentStatus? selectedStatus = null;
+    private EquipmentCondition? selectedCondition = null;
+    private List<EquipmentTypeModel> equipmentTypeItems = new();
+    private List<EquipmentStatusModel> equipmentStatusItems = new();
+    private List<EquipmentConditionModel> equipmentConditionItems = new();
+    
+    // State
+    private bool isLoading = true;
+    private bool isDeleteDialogVisible = false;
+    private bool isDeleting = false;
+    private bool _hasEquipmentManagePermission = false;
+    private ClaimsPrincipal _user;
+    private string currentFarmId = string.Empty;
+    private string currentFarmName = string.Empty;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+        
+        // Get current user's farm context
+        currentFarmId = await FarmAccessService.GetCurrentFarmId();
+        currentFarmName = await FarmAccessService.GetCurrentFarmName();
+        
+        if (string.IsNullOrEmpty(currentFarmId))
+        {
+            Alert.Show("No farm context found. Please select a farm profile.", showTitle: true, toastType: ToastType.Danger);
+            return;
+        }
+        
+        // Check if user is Farm Manager or Administrator for current farm
+        _hasEquipmentManagePermission = _user.IsInRole("FarmManager") || _user.IsInRole("Administrator") || _user.IsInRole("SystemAdministrator");
+        
+        // Initialize filter dropdowns
+        equipmentTypeItems = Enum.GetValues<EquipmentType>().Select(x => new EquipmentTypeModel(x)).ToList();
+        equipmentStatusItems = Enum.GetValues<EquipmentStatus>().Select(x => new EquipmentStatusModel(x)).ToList();
+        equipmentConditionItems = Enum.GetValues<EquipmentCondition>().Select(x => new EquipmentConditionModel(x)).ToList();
+        
+        await LoadEquipment();
+    }
+    
+    private async Task LoadEquipment()
+    {
+        try
+        {
+            isLoading = true;
+            
+            // Get equipment for the current farm only
+            var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<EquipmentListViewModel>>>(
+                await ApiCall.GetHttpClient(), "Equipment/GetEquipmentByFarm", currentFarmId);
+                
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                equipment = response.Result;
+                
+                // Apply filters
+                ApplyFilters();
+            }
+            else
+            {
+                equipment = new List<EquipmentListViewModel>();
+                filteredEquipment = new List<EquipmentListViewModel>();
+                Alert.Show("Error loading equipment data. Please try again later.", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            equipment = new List<EquipmentListViewModel>();
+            filteredEquipment = new List<EquipmentListViewModel>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    
+    private void ApplyFilters()
+    {
+        filteredEquipment = equipment;
+        
+        // Apply type filter
+        if (selectedType.HasValue)
+        {
+            filteredEquipment = filteredEquipment
+                .Where(e => e.Type == selectedType.Value)
+                .ToList();
+        }
+        
+        // Apply status filter
+        if (selectedStatus.HasValue)
+        {
+            filteredEquipment = filteredEquipment
+                .Where(e => e.Status == selectedStatus.Value)
+                .ToList();
+        }
+        
+        // Apply condition filter
+        if (selectedCondition.HasValue)
+        {
+            filteredEquipment = filteredEquipment
+                .Where(e => e.Condition == selectedCondition.Value)
+                .ToList();
+        }
+        
+        // Apply search filter
+        if (!string.IsNullOrEmpty(searchText))
+        {
+            var search = searchText.ToLower();
+            filteredEquipment = filteredEquipment
+                .Where(e => 
+                    (e.Name?.ToLower().Contains(search) ?? false) ||
+                    (e.Brand?.ToLower().Contains(search) ?? false) ||
+                    (e.Model?.ToLower().Contains(search) ?? false) ||
+                    (e.FarmName?.ToLower().Contains(search) ?? false)
+                )
+                .ToList();
+        }
+    }
+    
+    private void ClearFilters()
+    {
+        searchText = "";
+        selectedType = null;
+        selectedStatus = null;
+        selectedCondition = null;
+        ApplyFilters();
+    }
+    
+    private void RowSelectHandler(RowSelectEventArgs<EquipmentListViewModel> args)
+    {
+        selectedEquipment = args.Data;
+        NavigationManager.NavigateTo($"/equipment/{selectedEquipment.Id}");
+    }
+    
+    private void OpenDeleteConfirmation(EquipmentListViewModel equipmentItem)
+    {
+        selectedEquipment = equipmentItem;
+        isDeleteDialogVisible = true;
+    }
+    
+    private async Task DeleteSelectedEquipment()
+    {
+        if (selectedEquipment == null) return;
+        
+        try
+        {
+            isDeleting = true;
+            
+            // Call API to delete equipment
+            var response = await ApiCall.Remove<UI.Shared.Models.ApiResponse<object>>(
+                await ApiCall.GetHttpClient(), "Equipment/DeleteEquipment", selectedEquipment.Id);
+                
+            if (response?.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show($"Equipment '{selectedEquipment.Name}' deleted successfully", showTitle: true, toastType: ToastType.Success);
+                
+                // Refresh equipment list
+                await LoadEquipment();
+                
+                // Close dialog
+                isDeleteDialogVisible = false;
+            }
+            else
+            {
+                Alert.Show(response?.Title ?? "Error deleting equipment", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+    
+    private void NavigateToNewEquipment()
+    {
+        NavigationManager.NavigateTo("/equipment/new");
+    }
+}

@@ -1,0 +1,3 @@
+2025-07-11T08:44:36.8985720+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/swagger/swagger-ui-bundle.js""" - null null
+2025-07-11T08:44:37.1602570+02:00 [INF] (Hurudza.Services.Core) Sending file. Request path: '"/swagger-ui-bundle.js"'. Physical path: '"N/A"'
+2025-07-11T08:44:37.1609470+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/swagger/swagger-ui-bundle.js""" - 200 1061536 "text/javascript" 311.7265ms

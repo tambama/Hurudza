@@ -556,7 +556,8 @@ public class FarmUsersController : ControllerBase
                         Longitude = f.Longitude,
                         Elevation = f.Elevation,
                         Region = f.Region,
-                        Conference = f.Conference
+                        Conference = f.Conference,
+                        FarmType = f.FarmType
                     })
                     .ToListAsync();
 
@@ -598,7 +599,8 @@ public class FarmUsersController : ControllerBase
                             Longitude = f.Longitude,
                             Elevation = f.Elevation,
                             Region = f.Region,
-                            Conference = f.Conference
+                            Conference = f.Conference,
+                            FarmType = f.FarmType
                         })
                         .ToListAsync();
 

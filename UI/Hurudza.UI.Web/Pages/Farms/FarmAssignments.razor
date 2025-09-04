@@ -449,8 +449,9 @@
     {
         try
         {
+            // Use the Update overload without ID parameter since the API endpoint doesn't expect ID in the route
             var response = await ApiCall.Update<ApiResponse<UserProfileViewModel>, UpdateFarmUserViewModel>(
-                await ApiCall.GetHttpClient(), "farmusers/updateuserfarmrole", editAssignmentModel.ProfileId, editAssignmentModel);
+                await ApiCall.GetHttpClient(), "farmusers/UpdateUserFarmRole", editAssignmentModel);
 
             if (response?.Status == (int)HttpStatusCode.OK)
             {

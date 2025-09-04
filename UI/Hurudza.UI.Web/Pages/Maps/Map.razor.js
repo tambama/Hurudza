@@ -37,6 +37,7 @@ export function clearMap(map) {
     return mapDrawing.clearMapLayers(map);
 }
 
+
 /**
  * Set the map's center and zoom level
  * @param {Object} map - The Mapbox map instance
@@ -49,6 +50,23 @@ export function setMapCenter(map, latitude, longitude, zoom = 14) {
     return mapDrawing.centerMap(map, latitude, longitude, zoom);
 }
 
+
+/**
+ * Global function to handle school selection from popup
+ * @param {string} schoolId - The school/farm ID
+ * @param {string} schoolName - The school/farm name
+ */
+window.selectAndOpenSchool = function(schoolId, schoolName) {
+    console.log(`Opening school details for: ${schoolName} (${schoolId})`);
+    
+    // Call the C# method via DotNet interop
+    if (window.mapDotNetRef) {
+        window.mapDotNetRef.invokeMethodAsync('OnSchoolSelectedFromMap', schoolId, schoolName);
+    } else {
+        console.error('DotNet reference not available for school selection');
+    }
+};
+
 /**
  * Load farms data as clustered points on the map
  * @param {Object} map - The Mapbox map instance
@@ -56,31 +74,40 @@ export function setMapCenter(map, latitude, longitude, zoom = 14) {
  */
 export function loadFarms(map, farms) {
     try {
-        console.log("Loading farms with classification on main map");
-
         if (!map) {
             console.error("Map instance is not initialized");
             return false;
         }
 
         if (!farms || !farms.features || farms.features.length === 0) {
-            console.log("No farm data to display");
             return false;
         }
 
         // Function to add sources and layers
         const addSourcesAndLayers = () => {
-            // First, clean up any existing sources
             try {
-                if (map.getSource('farms-data')) {
-                    map.removeLayer('clusters');
-                    map.removeLayer('cluster-count');
-                    map.removeLayer('unclustered-point');
-                    map.removeSource('farms-data');
+                // First, clean up any existing sources and layers
+                try {
+                    // Remove layers first (only if they exist)
+                    if (map.getLayer('clusters')) {
+                        map.removeLayer('clusters');
+                    }
+                    if (map.getLayer('cluster-count')) {
+                        map.removeLayer('cluster-count');
+                    }
+                    if (map.getLayer('unclustered-point')) {
+                        map.removeLayer('unclustered-point');
+                    }
+                    // Remove source after layers
+                    if (map.getSource('farms-data')) {
+                        map.removeSource('farms-data');
+                    }
+                } catch (e) {
+                    // Layers/sources don't exist, which is fine
+                    console.log('Layer cleanup skipped:', e.message);
                 }
-            } catch (e) {
-                // Source doesn't exist, which is fine
-            }
+                
+                // Cache-buster: Updated with layer existence checks - v2024-01
 
             // For now, use the existing pattern from your codebase
             // Just add all farms/schools as before, without classification
@@ -166,7 +193,42 @@ export function loadFarms(map, farms) {
                 );
             });
 
-            // Change cursor on hover
+            // Add click handler for individual unclustered points
+            map.on('click', 'unclustered-point', (e) => {
+                const coordinates = e.features[0].geometry.coordinates.slice();
+                const properties = e.features[0].properties;
+                
+                // Ensure that if the map is zoomed out such that multiple copies of the feature are visible,
+                // the popup appears over the copy being pointed to.
+                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                }
+
+                // Create a more detailed popup with farm/school info
+                const popupContent = `
+                    <div class="farm-popup-card">
+                        <div class="popup-header">
+                            <h6 class="mb-1">${properties.name}</h6>
+                        </div>
+                        <div class="popup-body">
+                            ${properties.size ? `<p class="mb-1 small"><strong>Size:</strong> ${properties.size} ha</p>` : ''}
+                            ${properties.address ? `<p class="mb-2 small"><strong>Address:</strong> ${properties.address}</p>` : ''}
+                        </div>
+                        <div class="popup-footer">
+                            <button class="btn btn-primary btn-sm w-100" onclick="window.selectAndOpenSchool('${properties.id}', '${properties.name}')">
+                                <i class="fas fa-external-link-alt me-1"></i>Open School Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                new mapboxgl.Popup({closeOnClick: true, closeButton: true})
+                    .setLngLat(coordinates)
+                    .setHTML(popupContent)
+                    .addTo(map);
+            });
+
+            // Change cursor on hover for clusters
             map.on('mouseenter', 'clusters', () => {
                 map.getCanvas().style.cursor = 'pointer';
             });
@@ -174,15 +236,36 @@ export function loadFarms(map, farms) {
                 map.getCanvas().style.cursor = '';
             });
 
-            console.log(`Loaded ${farms.features.length} farms on map`);
+            // Change cursor on hover for unclustered points
+            map.on('mouseenter', 'unclustered-point', () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+            map.on('mouseleave', 'unclustered-point', () => {
+                map.getCanvas().style.cursor = '';
+            });
+            
+            } catch (error) {
+                console.error('Error in addSourcesAndLayers function:', error);
+                throw error;
+            }
         };
 
         // Check if the map is loaded
         if (map.loaded()) {
-            addSourcesAndLayers();
+            try {
+                addSourcesAndLayers();
+            } catch (err) {
+                console.error('Error in addSourcesAndLayers:', err);
+            }
         } else {
             // Wait for the map to load
-            map.once('load', addSourcesAndLayers);
+            map.once('load', () => {
+                try {
+                    addSourcesAndLayers();
+                } catch (err) {
+                    console.error('Error in addSourcesAndLayers:', err);
+                }
+            });
         }
 
         return true;
@@ -202,9 +285,11 @@ export function loadFarms(map, farms) {
  * @param {string} name - Name to display in the popup
  * @param {string} color - Hex color for the marker (e.g., '#FF6B6B')
  * @param {string} type - Type of marker ('school' or 'farm')
+ * @param {number} size - Size of Farm ('Hectares')
+ * @param {string} address - Size of Farm ('Hectares')
  * @returns {boolean} Success indicator
  */
-export function addMarker(map, id, lat, lng, name, color, type) {
+export function addMarker(map, id, lat, lng, name, color, type, size, address) {
     try {
         // Create a custom marker element
         const el = document.createElement('div');
@@ -217,12 +302,25 @@ export function addMarker(map, id, lat, lng, name, color, type) {
         el.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
         el.style.cursor = 'pointer';
 
+        let typeName = type === 'school' ? 'School' : 'Farm';
         // Add marker to map
         const marker = new mapboxgl.Marker(el)
             .setLngLat([lng, lat])
             .setPopup(new mapboxgl.Popup().setHTML(`
-                <h6>${name}</h6>
-                <p>Type: ${type === 'school' ? 'School' : 'Farm'}</p>
+                <div class="farm-popup-card">
+                        <div class="popup-header">
+                            <h6 class="mb-1">${name}</h6>
+                        </div>
+                        <div class="popup-body">
+                            ${size > 0 ? `<p class="mb-1 small"><strong>Size:</strong> ${size} ha</p>` : ''}
+                            ${address ? `<p class="mb-2 small"><strong>Address:</strong> ${address}</p>` : ''}
+                        </div>
+                        <div class="popup-footer">
+                            <button class="btn btn-primary btn-sm w-100" onclick="window.selectAndOpenSchool('${id}', '${name}')">
+                                <i class="fas fa-external-link-alt me-1"></i>Open ${typeName} Details
+                            </button>
+                        </div>
+                    </div>
             `))
             .addTo(map);
 
@@ -242,10 +340,11 @@ export function addMarker(map, id, lat, lng, name, color, type) {
 /**
  * Enables click-to-add location functionality on the map
  * @param {Object} map - The Mapbox map instance
+ * @param {Object} dotNetRef - Reference to .NET component
  * @param {string} callbackMethodName - Name of the C# method to invoke
  * @returns {boolean} Success indicator
  */
-export function enableLocationPicker(map, callbackMethodName) {
+export function enableLocationPicker(map, dotNetRef, callbackMethodName) {
     try {
         map.getCanvas().style.cursor = 'crosshair';
 
@@ -270,8 +369,10 @@ export function enableLocationPicker(map, callbackMethodName) {
                 .setLngLat([lng, lat])
                 .addTo(map);
 
-            // Invoke callback with coordinates
-            DotNet.invokeMethodAsync('Hurudza.UI.Web', callbackMethodName, lat, lng);
+            // Invoke callback with coordinates using DotNetObjectReference
+            if (dotNetRef) {
+                dotNetRef.invokeMethodAsync(callbackMethodName, lat, lng);
+            }
 
             // Reset cursor and remove handler
             map.getCanvas().style.cursor = '';

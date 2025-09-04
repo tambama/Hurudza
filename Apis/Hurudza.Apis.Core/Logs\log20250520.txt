@@ -1,0 +1,2396 @@
+2025-05-20T10:30:56.6183510+02:00 [INF] (Hurudza.Services.Core) User profile is available. Using '"/Users/peniel/.aspnet/DataProtection-Keys"' as key repository; keys will not be encrypted at rest.
+2025-05-20T10:30:57.2318200+02:00 [WRN] (Hurudza.Services.Core) The '"Region"' property '"Region"' on entity type '"Farm"' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value '"0"', since this is the CLR default for the '"Region"' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+2025-05-20T10:30:57.5806480+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("42"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)"
+2025-05-20T10:30:57.5930370+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("3"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT \"MigrationId\", \"ProductVersion\"
+FROM \"__EFMigrationsHistory\"
+ORDER BY \"MigrationId\";"
+2025-05-20T10:30:57.6204660+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)"
+2025-05-20T10:30:57.6350070+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("0"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)"
+2025-05-20T10:30:57.6354200+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("0"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT \"MigrationId\", \"ProductVersion\"
+FROM \"__EFMigrationsHistory\"
+ORDER BY \"MigrationId\";"
+2025-05-20T10:30:57.6431100+02:00 [INF] (Hurudza.Services.Core) No migrations were applied. The database is already up to date.
+2025-05-20T10:30:57.6497050+02:00 [INF] (Hurudza.Services.Core) Initializing permissions...
+2025-05-20T10:30:57.7667860+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("8"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT c.\"Id\", c.\"ClaimType\", c.\"ClaimValue\"
+FROM \"Claims\" AS c"
+2025-05-20T10:30:57.7980710+02:00 [INF] (Hurudza.Services.Core) All permissions already exist
+2025-05-20T10:30:57.7989130+02:00 [INF] (Hurudza.Services.Core) Initializing roles...
+2025-05-20T10:30:57.8735440+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("11"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:57.8876710+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:57.9132460+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:57.9160220+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.0349260+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("68"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.1365280+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("75"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.2078480+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.2584200+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("24"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.2827690+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.2841570+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.2849020+02:00 [INF] (Hurudza.Services.Core) Added 0 new roles
+2025-05-20T10:30:58.2863230+02:00 [INF] (Hurudza.Services.Core) Assigning default permissions to roles...
+2025-05-20T10:30:58.3373480+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.3743230+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:30:58.4765680+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.5535890+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:30:58.6252010+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("22"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.6766610+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:30:58.6783220+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.6795650+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:30:58.7516040+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.7986060+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("46"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:30:58.8948960+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("50"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.9218480+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:30:58.9480700+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.9495470+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:30:58.9510100+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.9522400+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:30:58.9536310+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:58.9549740+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:30:59.0253780+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("21"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:59.0268280+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:30:59.0272950+02:00 [INF] (Hurudza.Services.Core) Assigned 0 permissions to roles
+2025-05-20T10:30:59.0273570+02:00 [INF] (Hurudza.Services.Core) Roles and permissions initialized successfully
+2025-05-20T10:30:59.0367380+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("0"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT c.\"Id\", c.\"ClaimType\", c.\"ClaimValue\"
+FROM \"Claims\" AS c"
+2025-05-20T10:30:59.1328610+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("10"ms) [Parameters=["@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Int32), @p3='?' (DbType = Int32), @p4='?' (DbType = Int32), @p5='?' (DbType = Int32), @p6='?' (DbType = Int32), @p7='?' (DbType = Int32), @p8='?' (DbType = Int32), @p9='?' (DbType = Int32), @p10='?' (DbType = Int32), @p11='?' (DbType = Int32), @p12='?' (DbType = Int32), @p13='?' (DbType = Int32), @p14='?' (DbType = Int32), @p15='?' (DbType = Int32), @p16='?' (DbType = Int32), @p17='?' (DbType = Int32), @p18='?' (DbType = Int32), @p19='?' (DbType = Int32), @p20='?' (DbType = Int32), @p21='?' (DbType = Int32), @p22='?' (DbType = Int32), @p23='?' (DbType = Int32), @p24='?' (DbType = Int32), @p25='?' (DbType = Int32), @p26='?' (DbType = Int32), @p27='?' (DbType = Int32), @p28='?' (DbType = Int32), @p29='?' (DbType = Int32), @p30='?' (DbType = Int32), @p31='?' (DbType = Int32), @p32='?' (DbType = Int32), @p33='?' (DbType = Int32), @p34='?' (DbType = Int32), @p35='?' (DbType = Int32), @p36='?' (DbType = Int32), @p37='?' (DbType = Int32), @p38='?' (DbType = Int32), @p39='?' (DbType = Int32), @p40='?' (DbType = Int32), @p41='?' (DbType = Int32), @p42='?' (DbType = Int32), @p43='?' (DbType = Int32), @p44='?' (DbType = Int32), @p45='?' (DbType = Int32), @p46='?' (DbType = Int32), @p47='?' (DbType = Int32), @p48='?' (DbType = Int32), @p49='?' (DbType = Int32), @p50='?' (DbType = Int32), @p51='?' (DbType = Int32), @p52='?' (DbType = Int32), @p53='?' (DbType = Int32), @p54='?' (DbType = Int32), @p55='?' (DbType = Int32), @p56='?' (DbType = Int32), @p57='?' (DbType = Int32), @p58='?' (DbType = Int32), @p59='?' (DbType = Int32), @p60='?' (DbType = Int32), @p61='?' (DbType = Int32), @p62='?' (DbType = Int32), @p63='?' (DbType = Int32), @p64='?' (DbType = Int32), @p65='?' (DbType = Int32), @p66='?' (DbType = Int32), @p67='?' (DbType = Int32), @p68='?' (DbType = Int32), @p69='?' (DbType = Int32), @p70='?' (DbType = Int32), @p71='?' (DbType = Int32), @p72='?' (DbType = Int32), @p73='?' (DbType = Int32), @p74='?' (DbType = Int32), @p75='?' (DbType = Int32), @p76='?' (DbType = Int32), @p77='?' (DbType = Int32), @p78='?' (DbType = Int32), @p79='?' (DbType = Int32), @p80='?', @p81='?', @p82='?', @p83='?', @p84='?', @p85='?', @p86='?', @p87='?', @p88='?', @p89='?', @p90='?', @p91='?', @p92='?', @p93='?', @p94='?', @p95='?', @p96='?', @p97='?', @p98='?', @p99='?', @p100='?', @p101='?', @p102='?', @p103='?', @p104='?', @p105='?', @p106='?', @p107='?', @p108='?', @p109='?', @p110='?', @p111='?', @p112='?', @p113='?', @p114='?', @p115='?', @p116='?', @p117='?', @p118='?', @p119='?', @p120='?', @p121='?', @p122='?', @p123='?', @p124='?', @p125='?', @p126='?', @p127='?', @p128='?', @p129='?', @p130='?', @p131='?', @p132='?', @p133='?', @p134='?', @p135='?', @p136='?', @p137='?', @p138='?', @p139='?', @p140='?', @p141='?', @p142='?', @p143='?', @p144='?', @p145='?', @p146='?', @p147='?', @p148='?', @p149='?', @p150='?', @p151='?', @p152='?', @p153='?', @p154='?', @p155='?', @p156='?', @p157='?', @p158='?', @p159='?'"], CommandType='Text', CommandTimeout='30']"
+""DELETE FROM \"Claims\"
+WHERE \"Id\" = @p0;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p1;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p2;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p3;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p4;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p5;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p6;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p7;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p8;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p9;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p10;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p11;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p12;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p13;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p14;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p15;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p16;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p17;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p18;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p19;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p20;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p21;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p22;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p23;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p24;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p25;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p26;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p27;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p28;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p29;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p30;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p31;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p32;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p33;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p34;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p35;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p36;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p37;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p38;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p39;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p40;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p41;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p42;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p43;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p44;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p45;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p46;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p47;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p48;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p49;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p50;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p51;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p52;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p53;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p54;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p55;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p56;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p57;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p58;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p59;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p60;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p61;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p62;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p63;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p64;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p65;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p66;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p67;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p68;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p69;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p70;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p71;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p72;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p73;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p74;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p75;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p76;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p77;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p78;
+DELETE FROM \"Claims\"
+WHERE \"Id\" = @p79;
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p80, @p81)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p82, @p83)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p84, @p85)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p86, @p87)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p88, @p89)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p90, @p91)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p92, @p93)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p94, @p95)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p96, @p97)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p98, @p99)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p100, @p101)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p102, @p103)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p104, @p105)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p106, @p107)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p108, @p109)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p110, @p111)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p112, @p113)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p114, @p115)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p116, @p117)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p118, @p119)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p120, @p121)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p122, @p123)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p124, @p125)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p126, @p127)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p128, @p129)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p130, @p131)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p132, @p133)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p134, @p135)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p136, @p137)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p138, @p139)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p140, @p141)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p142, @p143)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p144, @p145)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p146, @p147)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p148, @p149)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p150, @p151)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p152, @p153)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p154, @p155)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p156, @p157)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p158, @p159)
+RETURNING \"Id\";"
+2025-05-20T10:30:59.2436780+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("50"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:59.2472130+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__r_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ClaimType\", a.\"ClaimValue\", a.\"RoleId\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__r_Id_0"
+2025-05-20T10:30:59.2645570+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("4"ms) [Parameters=["@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Int32), @p3='?' (DbType = Int32), @p4='?' (DbType = Int32), @p5='?' (DbType = Int32), @p6='?' (DbType = Int32), @p7='?' (DbType = Int32), @p8='?' (DbType = Int32), @p9='?' (DbType = Int32), @p10='?' (DbType = Int32), @p11='?' (DbType = Int32), @p12='?' (DbType = Int32), @p13='?' (DbType = Int32), @p14='?' (DbType = Int32), @p15='?' (DbType = Int32), @p16='?' (DbType = Int32), @p17='?' (DbType = Int32), @p18='?' (DbType = Int32), @p19='?' (DbType = Int32), @p20='?' (DbType = Int32), @p21='?' (DbType = Int32), @p22='?' (DbType = Int32), @p23='?' (DbType = Int32), @p24='?' (DbType = Int32), @p25='?' (DbType = Int32), @p26='?' (DbType = Int32), @p27='?' (DbType = Int32), @p28='?' (DbType = Int32), @p29='?' (DbType = Int32), @p30='?' (DbType = Int32), @p31='?' (DbType = Int32), @p32='?' (DbType = Int32), @p33='?' (DbType = Int32), @p34='?' (DbType = Int32), @p35='?' (DbType = Int32), @p36='?' (DbType = Int32), @p37='?' (DbType = Int32), @p38='?' (DbType = Int32), @p39='?' (DbType = Int32), @p40='?' (DbType = Int32), @p41='?' (DbType = Int32), @p42='?' (DbType = Int32), @p43='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p0;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p1;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p2;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p3;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p4;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p5;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p6;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p7;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p8;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p9;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p10;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p11;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p12;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p13;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p14;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p15;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p16;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p17;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p18;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p19;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p20;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p21;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p22;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p23;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p24;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p25;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p26;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p27;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p28;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p29;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p30;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p31;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p32;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p33;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p34;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p35;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p36;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p37;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p38;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p39;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p40;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p41;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p42;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p43;"
+2025-05-20T10:30:59.2816240+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:59.3054500+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("3"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:30:59.3157620+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:59.3179540+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:30:59.3202400+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:59.3222310+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:30:59.4694790+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:59.4970610+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:30:59.4994640+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:59.5026870+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("0"ms) [Parameters=["@__r_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ClaimType\", a.\"ClaimValue\", a.\"RoleId\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__r_Id_0"
+2025-05-20T10:30:59.5087480+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("5"ms) [Parameters=["@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Int32), @p3='?' (DbType = Int32), @p4='?' (DbType = Int32), @p5='?' (DbType = Int32), @p6='?' (DbType = Int32), @p7='?' (DbType = Int32), @p8='?' (DbType = Int32), @p9='?' (DbType = Int32), @p10='?' (DbType = Int32), @p11='?' (DbType = Int32), @p12='?' (DbType = Int32), @p13='?' (DbType = Int32), @p14='?' (DbType = Int32), @p15='?' (DbType = Int32), @p16='?' (DbType = Int32), @p17='?' (DbType = Int32), @p18='?' (DbType = Int32), @p19='?' (DbType = Int32), @p20='?' (DbType = Int32), @p21='?' (DbType = Int32), @p22='?' (DbType = Int32), @p23='?' (DbType = Int32), @p24='?' (DbType = Int32), @p25='?' (DbType = Int32), @p26='?' (DbType = Int32), @p27='?' (DbType = Int32), @p28='?' (DbType = Int32), @p29='?' (DbType = Int32), @p30='?' (DbType = Int32), @p31='?' (DbType = Int32), @p32='?' (DbType = Int32), @p33='?' (DbType = Int32), @p34='?' (DbType = Int32), @p35='?' (DbType = Int32), @p36='?' (DbType = Int32), @p37='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p0;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p1;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p2;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p3;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p4;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p5;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p6;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p7;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p8;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p9;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p10;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p11;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p12;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p13;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p14;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p15;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p16;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p17;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p18;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p19;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p20;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p21;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p22;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p23;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p24;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p25;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p26;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p27;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p28;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p29;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p30;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p31;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p32;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p33;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p34;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p35;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p36;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p37;"
+2025-05-20T10:30:59.5852380+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:59.6342150+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:30:59.6613340+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:59.8092950+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("48"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:30:59.8593200+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("23"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:59.8716490+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("10"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:30:59.8773070+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:30:59.9284610+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:30:59.9987210+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("24"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:00.0060160+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("5"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:00.0094780+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:00.0116270+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:00.0132180+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:00.0143770+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("0"ms) [Parameters=["@__r_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ClaimType\", a.\"ClaimValue\", a.\"RoleId\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__r_Id_0"
+2025-05-20T10:31:00.0163640+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Int32), @p3='?' (DbType = Int32), @p4='?' (DbType = Int32), @p5='?' (DbType = Int32), @p6='?' (DbType = Int32), @p7='?' (DbType = Int32), @p8='?' (DbType = Int32), @p9='?' (DbType = Int32), @p10='?' (DbType = Int32), @p11='?' (DbType = Int32), @p12='?' (DbType = Int32), @p13='?' (DbType = Int32), @p14='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p0;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p1;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p2;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p3;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p4;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p5;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p6;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p7;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p8;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p9;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p10;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p11;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p12;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p13;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p14;"
+2025-05-20T10:31:00.0180240+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:00.0199660+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("0"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:00.0909200+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:00.1841200+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("48"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:00.1873150+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:00.2424530+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("3"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:00.2929590+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:00.4120580+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("46"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:00.4363230+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("22"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:00.4632240+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__r_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ClaimType\", a.\"ClaimValue\", a.\"RoleId\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__r_Id_0"
+2025-05-20T10:31:00.4655260+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Int32), @p3='?' (DbType = Int32), @p4='?' (DbType = Int32), @p5='?' (DbType = Int32), @p6='?' (DbType = Int32), @p7='?' (DbType = Int32), @p8='?' (DbType = Int32), @p9='?' (DbType = Int32), @p10='?' (DbType = Int32), @p11='?' (DbType = Int32), @p12='?' (DbType = Int32), @p13='?' (DbType = Int32), @p14='?' (DbType = Int32), @p15='?' (DbType = Int32), @p16='?' (DbType = Int32), @p17='?' (DbType = Int32), @p18='?' (DbType = Int32), @p19='?' (DbType = Int32), @p20='?' (DbType = Int32), @p21='?' (DbType = Int32), @p22='?' (DbType = Int32), @p23='?' (DbType = Int32), @p24='?' (DbType = Int32), @p25='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p0;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p1;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p2;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p3;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p4;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p5;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p6;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p7;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p8;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p9;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p10;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p11;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p12;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p13;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p14;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p15;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p16;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p17;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p18;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p19;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p20;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p21;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p22;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p23;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p24;
+DELETE FROM \"AspNetRoleClaims\"
+WHERE \"Id\" = @p25;"
+2025-05-20T10:31:00.4673920+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:00.4696080+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:00.5181800+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("22"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:00.5205520+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:00.5227440+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:00.6678140+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("51"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:00.7225070+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:00.7245820+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:00.7273580+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:00.8521600+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:00.8950900+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT count(*)::int
+FROM \"SendGridTemplates\" AS s"
+2025-05-20T10:31:00.9074580+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT EXISTS (
+    SELECT 1
+    FROM \"AspNetUsers\" AS a
+    WHERE a.\"UserName\" = 'admin@hurudza.co.zw')"
+2025-05-20T10:31:00.9117180+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT c.\"Id\", c.\"CreatedDate\", c.\"CreatorId\", c.\"Deleted\", c.\"IsActive\", c.\"IsArchived\", c.\"ModifiedBy\", c.\"Name\", c.\"UpdatedAt\", c.\"Version\"
+FROM \"Crops\" AS c"
+2025-05-20T10:31:01.0472880+02:00 [INF] (Hurudza.Services.Core) Initializing permissions...
+2025-05-20T10:31:01.0498990+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT c.\"Id\", c.\"ClaimType\", c.\"ClaimValue\"
+FROM \"Claims\" AS c"
+2025-05-20T10:31:01.1801910+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("50"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p3='?', @p4='?', @p5='?', @p6='?', @p7='?', @p8='?', @p9='?', @p10='?', @p11='?', @p12='?', @p13='?', @p14='?', @p15='?', @p16='?', @p17='?', @p18='?', @p19='?', @p20='?', @p21='?', @p22='?', @p23='?', @p24='?', @p25='?', @p26='?', @p27='?', @p28='?', @p29='?', @p30='?', @p31='?', @p32='?', @p33='?', @p34='?', @p35='?', @p36='?', @p37='?', @p38='?', @p39='?', @p40='?', @p41='?', @p42='?', @p43='?', @p44='?', @p45='?', @p46='?', @p47='?', @p48='?', @p49='?', @p50='?', @p51='?', @p52='?', @p53='?', @p54='?', @p55='?', @p56='?', @p57='?', @p58='?', @p59='?', @p60='?', @p61='?', @p62='?', @p63='?', @p64='?', @p65='?', @p66='?', @p67='?', @p68='?', @p69='?', @p70='?', @p71='?', @p72='?', @p73='?', @p74='?', @p75='?', @p76='?', @p77='?', @p78='?', @p79='?'"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p0, @p1)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p2, @p3)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p4, @p5)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p6, @p7)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p8, @p9)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p10, @p11)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p12, @p13)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p14, @p15)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p16, @p17)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p18, @p19)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p20, @p21)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p22, @p23)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p24, @p25)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p26, @p27)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p28, @p29)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p30, @p31)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p32, @p33)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p34, @p35)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p36, @p37)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p38, @p39)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p40, @p41)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p42, @p43)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p44, @p45)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p46, @p47)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p48, @p49)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p50, @p51)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p52, @p53)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p54, @p55)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p56, @p57)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p58, @p59)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p60, @p61)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p62, @p63)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p64, @p65)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p66, @p67)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p68, @p69)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p70, @p71)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p72, @p73)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p74, @p75)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p76, @p77)
+RETURNING \"Id\";
+INSERT INTO \"Claims\" (\"ClaimType\", \"ClaimValue\")
+VALUES (@p78, @p79)
+RETURNING \"Id\";"
+2025-05-20T10:31:01.1823420+02:00 [INF] (Hurudza.Services.Core) Added 40 new permission claims
+2025-05-20T10:31:01.1824050+02:00 [INF] (Hurudza.Services.Core) Initializing roles...
+2025-05-20T10:31:01.2049110+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:01.2545620+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:01.3245570+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("48"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:01.3759980+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:01.3776720+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:01.4287660+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:01.4517180+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("21"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:01.5264550+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:01.5784900+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:01.6040800+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:01.6046840+02:00 [INF] (Hurudza.Services.Core) Added 0 new roles
+2025-05-20T10:31:01.6047870+02:00 [INF] (Hurudza.Services.Core) Assigning default permissions to roles...
+2025-05-20T10:31:01.6799800+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("50"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:01.7598470+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:31:01.7829830+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:01.8347800+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:01.8383510+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:01.8908400+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:02.0092460+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("48"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:02.0118310+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:02.0139540+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:02.0161050+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:02.1154620+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:02.1913320+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:02.2646940+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("23"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:02.2684610+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:02.3659080+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:02.4628580+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:02.5170160+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:02.5218190+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:02.5250990+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:02.5540660+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:02.6059780+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("24"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:02.6563500+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:02.7296230+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("24"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:02.7331220+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:02.8314750+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("24"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:02.8566360+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("23"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:02.8598580+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:02.8842430+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("22"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:03.0346450+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("75"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:03.1319810+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("48"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:03.2029380+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("22"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:03.2557970+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:03.3290640+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:03.4233760+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:03.4929930+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:03.4967230+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:03.5210920+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("23"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:03.5241380+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:03.6244970+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:03.6516230+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:03.6552660+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:03.6592800+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:03.7092790+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("23"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:03.7348880+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:03.7373150+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:03.7400800+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:03.7418360+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:03.7441190+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:03.7459680+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:03.7919430+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:03.8450280+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:03.8480050+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:03.9226340+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("23"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:04.0174580+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:04.0443270+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:04.0475300+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:04.0494010+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:04.1245580+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:04.2261800+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:04.3230790+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:04.3264600+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:04.3296990+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:04.3576360+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:04.3605140+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:04.3845310+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("23"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:04.3876030+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:04.3895970+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:04.3923670+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:04.3941860+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:04.4703660+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:04.5216740+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:04.5251500+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:04.6412990+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("47"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:04.6676400+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:04.7423050+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("24"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:04.8381990+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:04.8851490+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("24"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:04.9152650+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:05.6207780+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("48"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:05.6963420+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:05.7901770+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("49"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:05.8937160+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:05.9231140+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:05.9251990+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:31:06.0022520+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.0557880+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.0613000+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.0648980+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.0888280+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("22"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.0927300+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.1435710+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.1953590+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.2734630+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.2779730+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.2807130+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.2842030+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.3079820+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.4303780+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.4596310+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.5298990+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.5338900+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.5845820+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.5871150+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.5899980+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.5924950+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.5954410+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.6224510+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.6261290+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.6537950+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.6820870+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.7540530+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("21"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.7580530+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.8521410+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.9284180+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.9331690+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:06.9377170+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:06.9418860+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.0192710+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.0228650+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.0260730+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.0508490+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("23"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.0543690+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.0564900+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.0851640+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.1124560+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.1386940+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.1409880+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.1434220+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.1456470+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.1716610+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.1963930+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.2950170+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("24"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.3223990+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.3263360+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.3291710+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.3572970+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.3847810+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.3886740+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.3908920+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.3933300+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.4854290+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("21"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.4889510+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.4911750+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.4938310+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.4960240+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.4984960+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.5002400+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("0"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.5023920+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.5042030+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("0"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.5052430+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:31:07.5566410+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.6320110+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.6571120+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.7063460+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.7347560+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.7391910+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.7415610+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.7444460+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.7722780+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.8001570+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.8024700+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.8252450+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.8530670+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:07.9724570+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:07.9752830+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.0766910+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.1241310+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.1518560+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.1549770+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.1591170+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.1615420+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.1644960+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.2140410+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("23"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.3156350+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.3195610+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.3243800+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.3273580+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.3304130+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.3557990+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("23"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.3849270+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.4298180+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("22"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.4345450+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.4853840+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("24"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.5140640+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.5630930+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.6637100+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.6912030+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.6966000+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("2"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.6991020+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.7026130+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.7506840+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.7550160+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.7579640+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.7596270+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:31:08.7824960+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.7841130+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:31:08.7860310+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.7877670+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:31:08.7900370+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.7918050+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:31:08.8187180+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.8224330+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.8494020+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.8535590+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.8558340+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.9297560+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.9332930+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.9368330+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.9394190+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.9428890+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.9457520+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.9482990+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.9514290+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.9543480+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.9571710+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:08.9602850+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:08.9624830+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:09.0121430+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("24"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:09.0151290+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:09.0670370+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("25"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:09.0980500+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:09.1009220+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@p0='?', @p1='?', @p2='?', @p8='?', @p3='?', @p9='?', @p4='?', @p5='?', @p6='?', @p7='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""INSERT INTO \"AspNetRoleClaims\" (\"ClaimType\", \"ClaimValue\", \"RoleId\")
+VALUES (@p0, @p1, @p2)
+RETURNING \"Id\";
+UPDATE \"AspNetRoles\" SET \"ConcurrencyStamp\" = @p3, \"Description\" = @p4, \"Name\" = @p5, \"NormalizedName\" = @p6, \"RoleClass\" = @p7
+WHERE \"Id\" = @p8 AND \"ConcurrencyStamp\" = @p9;"
+2025-05-20T10:31:09.1028740+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:09.1040710+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:31:09.1052700+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:09.1063200+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:31:09.1572450+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("26"ms) [Parameters=["@__normalizedName_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"Id\", a.\"ConcurrencyStamp\", a.\"Description\", a.\"Name\", a.\"NormalizedName\", a.\"RoleClass\"
+FROM \"AspNetRoles\" AS a
+WHERE a.\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2025-05-20T10:31:09.1843180+02:00 [INF] (Hurudza.Services.Core) Executed DbCommand ("1"ms) [Parameters=["@__role_Id_0='?'"], CommandType='Text', CommandTimeout='30']"
+""SELECT a.\"ClaimType\", a.\"ClaimValue\"
+FROM \"AspNetRoleClaims\" AS a
+WHERE a.\"RoleId\" = @__role_Id_0"
+2025-05-20T10:31:09.1849710+02:00 [INF] (Hurudza.Services.Core) Assigned 104 permissions to roles
+2025-05-20T10:31:09.1851190+02:00 [INF] (Hurudza.Services.Core) Roles and permissions initialized successfully
+2025-05-20T10:31:09.4664290+02:00 [INF] (Hurudza.Services.Core) Now listening on: "https://localhost:7148"
+2025-05-20T10:31:09.4667590+02:00 [INF] (Hurudza.Services.Core) Now listening on: "http://localhost:5249"
+2025-05-20T10:31:09.4676640+02:00 [INF] (Hurudza.Services.Core) Application started. Press Ctrl+C to shut down.
+2025-05-20T10:31:09.4680140+02:00 [INF] (Hurudza.Services.Core) Hosting environment: "Development"
+2025-05-20T10:31:09.4680720+02:00 [INF] (Hurudza.Services.Core) Content root path: "/Users/peniel/Code/hurudza/Apis/Hurudza.Apis.Core"
+2025-05-20T10:31:36.1748090+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/swagger/index.html""" - null null
+2025-05-20T10:31:36.3209830+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/swagger/index.html""" - 200 null "text/html;charset=utf-8" 146.7395ms
+2025-05-20T10:31:36.3904880+02:00 [INF] (Hurudza.Services.Core) Request starting "HTTP/2" "GET" "https"://"localhost:7148""""/swagger/v1/swagger.json""" - null null
+2025-05-20T10:31:36.5187270+02:00 [INF] (Hurudza.Services.Core) Request finished "HTTP/2" "GET" "https"://"localhost:7148""""/swagger/v1/swagger.json""" - 200 null "application/json;charset=utf-8" 128.2386ms

@@ -46,8 +46,13 @@
 }
 
 .nav-item ::deep a:hover {
-    background-color: rgba(255,255,255,0.1);
-    color: white;
+    background-color: rgba(255,255,255,0.1) !important;
+    color: #344767 !important;
+}
+
+.nav-item ::deep a:hover .sidenav-normal,
+.nav-item ::deep a:hover .sidenav-mini-icon {
+    color: #344767 !important;
 }
 
 @media (min-width: 641px) {

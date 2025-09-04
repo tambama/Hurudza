@@ -14,6 +14,7 @@ public enum ApiClaimTypes
     User,
     Role,
     Tillage,
+    Equipment,
     Report,
     System
 }
@@ -76,6 +77,15 @@ public static class ApiClaims
             new() { ClaimType = ApiClaimTypes.Tillage.ToString("G"), ClaimValue = Claims.TillageUpdate },
             new() { ClaimType = ApiClaimTypes.Tillage.ToString("G"), ClaimValue = Claims.TillageDelete },
             new() { ClaimType = ApiClaimTypes.Tillage.ToString("G"), ClaimValue = Claims.TillageManage },
+            
+            // Equipment permissions
+            new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentView },
+            new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentCreate },
+            new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentUpdate },
+            new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentEdit },
+            new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentDelete },
+            new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentManage },
+            new() { ClaimType = ApiClaimTypes.Equipment.ToString("G"), ClaimValue = Claims.EquipmentViewAll },
             
             // Report permissions
             new() { ClaimType = ApiClaimTypes.Report.ToString("G"), ClaimValue = Claims.ReportView },
@@ -176,6 +186,15 @@ public static class ApiClaims
             Claims.TillageUpdate => "Update tillage details",
             Claims.TillageDelete => "Delete tillage programs",
             Claims.TillageManage => "Manage all tillage programs and services",
+            
+            // Equipment permissions
+            Claims.EquipmentView => "View equipment details",
+            Claims.EquipmentViewAll => "View all equipment across farms",
+            Claims.EquipmentCreate => "Create new equipment records",
+            Claims.EquipmentUpdate => "Update equipment details",
+            Claims.EquipmentEdit => "Edit equipment information",
+            Claims.EquipmentDelete => "Delete equipment records",
+            Claims.EquipmentManage => "Manage all equipment details and maintenance",
             
             // Report permissions
             Claims.ReportView => "View reports",

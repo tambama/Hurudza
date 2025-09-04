@@ -2,6 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using Hurudza.Data.UI.Models.ViewModels.Base;
+using Hurudza.Data.UI.Models.ViewModels.Core;
 
 public class AddFarmViewModel : BaseViewModel
 {
@@ -28,4 +29,6 @@ public class AddFarmViewModel : BaseViewModel
     
     // Hidden field to store the parent school ID
     public string ParentSchoolId { get; set; }
+    
+    public List<FarmLocationViewModel> Locations { get; set; } = new List<FarmLocationViewModel>();
 }

@@ -266,8 +266,9 @@ namespace Hurudza.UI.Web.Services
                     IsActive = isActive
                 };
 
+                // Use the Update overload without ID parameter since the API endpoint doesn't expect ID in the route
                 var response = await _apiCall.Update<ApiResponse<UserProfileViewModel>, UpdateFarmUserViewModel>(
-                    await _apiCall.GetHttpClient(), "farmusers/updateuserfarmrole", updateModel);
+                    await _apiCall.GetHttpClient(), "farmusers/UpdateUserFarmRole", updateModel);
 
                 if (response?.Status == (int)HttpStatusCode.OK)
                 {

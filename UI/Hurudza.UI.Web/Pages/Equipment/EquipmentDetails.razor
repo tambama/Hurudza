@@ -1,0 +1,424 @@
+@page "/equipment/{id}"
+@attribute [Authorize]
+
+@using System.Net
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
+@inject IJSRuntime JSRuntime
+
+<Toast @ref="Alert" />
+
+@if (isLoading)
+{
+    <div class="d-flex justify-content-center p-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (equipment == null)
+{
+    <div class="text-center p-4">
+        <div class="alert alert-warning">
+            <p class="mb-0">Equipment not found.</p>
+            <a href="/equipment" class="btn btn-primary mt-3">Back to Equipment List</a>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Equipment Details -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <div class="d-flex justify-content-between flex-wrap align-items-center">
+                        <div>
+                            <h6 class="mb-0">@equipment.Name</h6>
+                            <p class="text-sm mb-0">Equipment Details and Maintenance History</p>
+                        </div>
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-secondary btn-sm me-2" @onclick="NavigateToList">
+                                <i class="fas fa-arrow-left me-2"></i>Back to List
+                            </button>
+                            @if (_hasEquipmentManagePermission)
+                            {
+                                <button type="button" class="btn btn-info btn-sm me-2" @onclick="NavigateToEdit">
+                                    <i class="fas fa-edit me-2"></i>Edit
+                                </button>
+                                <button type="button" class="btn btn-success btn-sm" @onclick="NavigateToAddMaintenance">
+                                    <i class="fas fa-wrench me-2"></i>Add Maintenance
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Basic Information -->
+                        <div class="col-md-6">
+                            <h6 class="text-sm font-weight-bolder mb-3">Basic Information</h6>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Name:</strong></div>
+                                <div class="col-7">@equipment.Name</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Farm:</strong></div>
+                                <div class="col-7">@equipment.FarmName</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Type:</strong></div>
+                                <div class="col-7">@equipment.Type.ToString("G").Replace("_", " ")</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Brand:</strong></div>
+                                <div class="col-7">@(equipment.Brand ?? "N/A")</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Model:</strong></div>
+                                <div class="col-7">@(equipment.Model ?? "N/A")</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Serial Number:</strong></div>
+                                <div class="col-7">@(equipment.SerialNumber ?? "N/A")</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Location:</strong></div>
+                                <div class="col-7">@(equipment.Location ?? "N/A")</div>
+                            </div>
+                        </div>
+
+                        <!-- Status and Condition -->
+                        <div class="col-md-6">
+                            <h6 class="text-sm font-weight-bolder mb-3">Status & Condition</h6>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Status:</strong></div>
+                                <div class="col-7">
+                                    @{
+                                        var statusBadgeClass = equipment.Status switch
+                                        {
+                                            EquipmentStatus.Active => "bg-success",
+                                            EquipmentStatus.Under_Maintenance => "bg-warning text-dark",
+                                            EquipmentStatus.Out_of_Service => "bg-danger",
+                                            EquipmentStatus.Disposed => "bg-secondary",
+                                            _ => "bg-secondary"
+                                        };
+                                    }
+                                    <span class="badge @statusBadgeClass">@equipment.Status.ToString("G").Replace("_", " ")</span>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Condition:</strong></div>
+                                <div class="col-7">
+                                    @{
+                                        var conditionBadgeClass = equipment.Condition switch
+                                        {
+                                            EquipmentCondition.Excellent => "bg-success",
+                                            EquipmentCondition.Good => "bg-info",
+                                            EquipmentCondition.Fair => "bg-warning text-dark",
+                                            EquipmentCondition.Poor => "bg-danger",
+                                            EquipmentCondition.Needs_Repair => "bg-dark",
+                                            _ => "bg-secondary"
+                                        };
+                                    }
+                                    <span class="badge @conditionBadgeClass">@equipment.Condition.ToString("G").Replace("_", " ")</span>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Operating Hours:</strong></div>
+                                <div class="col-7">@(equipment.OperatingHours?.ToString("N0") ?? "N/A")</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Last Maintenance:</strong></div>
+                                <div class="col-7">@(equipment.LastMaintenanceDate?.ToString("MMM dd, yyyy") ?? "Never")</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Next Maintenance:</strong></div>
+                                <div class="col-7">
+                                    @if (equipment.NextMaintenanceDate.HasValue)
+                                    {
+                                        var isOverdue = equipment.NextMaintenanceDate.Value < DateTime.Now;
+                                        var nextMaintenanceBadgeClass = isOverdue ? "bg-danger" : "bg-info";
+                                        <span class="badge @nextMaintenanceBadgeClass">
+                                            @equipment.NextMaintenanceDate.Value.ToString("MMM dd, yyyy")
+                                            @if (isOverdue) { <small class="d-block">OVERDUE</small> }
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Not Scheduled</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Purchase Information -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h6 class="text-sm font-weight-bolder mb-3">Purchase Information</h6>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Purchase Date:</strong></div>
+                                <div class="col-7">@(equipment.PurchaseDate?.ToString("MMM dd, yyyy") ?? "N/A")</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Purchase Price:</strong></div>
+                                <div class="col-7">@(equipment.PurchasePrice?.ToString("C") ?? "N/A")</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Warranty Expiry:</strong></div>
+                                <div class="col-7">@(equipment.WarrantyExpiry?.ToString("MMM dd, yyyy") ?? "N/A")</div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="col-md-6">
+                            <h6 class="text-sm font-weight-bolder mb-3">Additional Information</h6>
+                            @if (!string.IsNullOrEmpty(equipment.Description))
+                            {
+                                <div class="row mb-2">
+                                    <div class="col-12"><strong>Description:</strong></div>
+                                    <div class="col-12">@equipment.Description</div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(equipment.Specifications))
+                            {
+                                <div class="row mb-2">
+                                    <div class="col-12"><strong>Specifications:</strong></div>
+                                    <div class="col-12">@equipment.Specifications</div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(equipment.MaintenanceNotes))
+                            {
+                                <div class="row mb-2">
+                                    <div class="col-12"><strong>Maintenance Notes:</strong></div>
+                                    <div class="col-12">@equipment.MaintenanceNotes</div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(equipment.Notes))
+                            {
+                                <div class="row mb-2">
+                                    <div class="col-12"><strong>Notes:</strong></div>
+                                    <div class="col-12">@equipment.Notes</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maintenance History -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <div class="d-flex justify-content-between flex-wrap align-items-center">
+                        <div>
+                            <h6 class="mb-0">Maintenance History</h6>
+                            <p class="text-sm mb-0">Complete maintenance record for this equipment</p>
+                        </div>
+                        @if (_hasEquipmentManagePermission)
+                        {
+                            <button type="button" class="btn btn-success btn-sm" @onclick="NavigateToAddMaintenance">
+                                <i class="fas fa-plus me-2"></i>Add Maintenance Record
+                            </button>
+                        }
+                    </div>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    @if (isLoadingMaintenance)
+                    {
+                        <div class="d-flex justify-content-center p-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading maintenance history...</span>
+                            </div>
+                        </div>
+                    }
+                    else if (maintenanceRecords == null || !maintenanceRecords.Any())
+                    {
+                        <div class="text-center p-4">
+                            <div class="alert alert-info">
+                                <p class="mb-0">No maintenance records found for this equipment.</p>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div style="height: 400px; width: 100%;">
+                            <SfGrid DataSource="@maintenanceRecords"
+                                    AllowPaging="true"
+                                    AllowSorting="true"
+                                    AllowResizing="true"
+                                    EnableHover="true"
+                                    Height="100%"
+                                    Width="100%">
+                                <GridPageSettings PageSize="10"></GridPageSettings>
+                                <GridSortSettings>
+                                    <GridSortColumns>
+                                        <GridSortColumn Field="MaintenanceDate" Direction="SortDirection.Descending"></GridSortColumn>
+                                    </GridSortColumns>
+                                </GridSortSettings>
+                                
+                                <GridColumns>
+                                    <GridColumn Field=@nameof(EquipmentMaintenanceListViewModel.MaintenanceDate) HeaderText="Date" TextAlign="TextAlign.Center" Width="100" Type="ColumnType.Date" Format="MM/dd/yyyy"></GridColumn>
+                                    <GridColumn Field=@nameof(EquipmentMaintenanceListViewModel.MaintenanceType) HeaderText="Type" TextAlign="TextAlign.Left" Width="140"></GridColumn>
+                                    <GridColumn Field=@nameof(EquipmentMaintenanceListViewModel.Description) HeaderText="Description" TextAlign="TextAlign.Left" Width="200" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                                    <GridColumn Field=@nameof(EquipmentMaintenanceListViewModel.Cost) HeaderText="Cost" TextAlign="TextAlign.Right" Width="100" Format="C2"></GridColumn>
+                                    <GridColumn Field=@nameof(EquipmentMaintenanceListViewModel.ServiceProvider) HeaderText="Service Provider" TextAlign="TextAlign.Left" Width="150"></GridColumn>
+                                    <GridColumn Field=@nameof(EquipmentMaintenanceListViewModel.IsCompleted) HeaderText="Status" TextAlign="TextAlign.Center" Width="100">
+                                        <Template>
+                                            @{
+                                                var maintenance = (context as EquipmentMaintenanceListViewModel);
+                                                if (maintenance.IsCompleted)
+                                                {
+                                                    <span class="badge bg-success">Completed</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark">Pending</span>
+                                                }
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn HeaderText="Actions" Width="80" TextAlign="TextAlign.Center">
+                                        <Template>
+                                            @{
+                                                var maintenance = (context as EquipmentMaintenanceListViewModel);
+                                                <div class="btn-group">
+                                                    @if (_hasEquipmentManagePermission)
+                                                    {
+                                                        <a href="/equipment/@equipment.Id/maintenance/@maintenance.Id/edit" class="btn btn-link text-info p-1" data-bs-toggle="tooltip" data-bs-title="Edit Maintenance">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    }
+                                                </div>
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string Id { get; set; }
+
+    // References
+    private Toast Alert;
+
+    // Data
+    private EquipmentViewModel equipment;
+    private List<EquipmentMaintenanceListViewModel> maintenanceRecords = new();
+
+    // State
+    private bool isLoading = true;
+    private bool isLoadingMaintenance = false;
+    private bool _hasEquipmentManagePermission = false;
+    private ClaimsPrincipal _user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+
+        // Check permissions for managing equipment
+        _hasEquipmentManagePermission = await FarmAccessService.HasPermission("Equipment.Manage") || 
+                                       await FarmAccessService.HasPermission("Equipment.Create");
+
+        await LoadEquipment();
+        await LoadMaintenanceHistory();
+    }
+
+    private async Task LoadEquipment()
+    {
+        try
+        {
+            isLoading = true;
+
+            var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<EquipmentViewModel>>(
+                await ApiCall.GetHttpClient(), "Equipment/GetEquipmentDetails", Id);
+
+            if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
+            {
+                equipment = response.Result;
+            }
+            else
+            {
+                Alert.Show(response?.Title ?? "Equipment not found", showTitle: true, toastType: ToastType.Danger);
+                equipment = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            equipment = null;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadMaintenanceHistory()
+    {
+        try
+        {
+            isLoadingMaintenance = true;
+
+            var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<EquipmentMaintenanceListViewModel>>>(
+                await ApiCall.GetHttpClient(), $"Equipment/{Id}/maintenance");
+
+            if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
+            {
+                maintenanceRecords = response.Result;
+            }
+            else
+            {
+                maintenanceRecords = new List<EquipmentMaintenanceListViewModel>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading maintenance history: {ex.Message}", showTitle: true, toastType: ToastType.Warning);
+            maintenanceRecords = new List<EquipmentMaintenanceListViewModel>();
+        }
+        finally
+        {
+            isLoadingMaintenance = false;
+        }
+    }
+
+    private void NavigateToEdit()
+    {
+        if (equipment?.Id != null)
+        {
+            NavigationManager.NavigateTo($"/equipment/{equipment.Id}/edit");
+        }
+    }
+
+    private void NavigateToAddMaintenance()
+    {
+        if (equipment?.Id != null)
+        {
+            NavigationManager.NavigateTo($"/equipment/{equipment.Id}/maintenance/new");
+        }
+    }
+
+    private void NavigateToList()
+    {
+        NavigationManager.NavigateTo("/equipment");
+    }
+}

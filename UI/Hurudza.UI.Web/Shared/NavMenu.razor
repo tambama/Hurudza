@@ -145,6 +145,16 @@
                         </ul>
                     </div>
                 </li>
+
+                <li class="nav-item">
+                    <a class="nav-link @EquipmentActive" href="/equipment" onclick="@ActivateEquipment">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-cogs text-lg opacity-10" aria-hidden="true"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Equipment</span>
+                    </a>
+                </li>
             }
 
             @* Admin Section *@
@@ -251,6 +261,7 @@
     private string UsersActive = "";
     private string RolesActive = "";
     private string CropsActive = "";
+    private string EquipmentActive = "";
     private string FarmAssignmentsActive = "";
     private CustomAuthStateProvider _authProvider;
     private ClaimsPrincipal _user;
@@ -367,6 +378,10 @@
         else if (url.Contains("/crop"))
         {
             ActivateCrops();
+        }
+        else if (url.Contains("/equipment"))
+        {
+            ActivateEquipment();
         }
         else if (url.Contains("/map"))
         {
@@ -496,6 +511,12 @@
         RolesActive = "active";
     }
 
+    private void ActivateEquipment()
+    {
+        ResetAllMenus();
+        EquipmentActive = "active";
+    }
+
     private void ActivateFarmAssignments()
     {
         ResetAllMenus();
@@ -509,6 +530,7 @@
         FarmsActive = "";
         FieldsActive = "";
         CropsActive = "";
+        EquipmentActive = "";
         OwnershipActive = "";
         UsersActive = "";
         RolesActive = "";

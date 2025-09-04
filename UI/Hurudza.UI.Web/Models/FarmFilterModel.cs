@@ -11,4 +11,5 @@ public class FarmFilterModel
     public Conference? Conference { get; set; }
     public float? MinSize { get; set; }
     public float? MaxSize { get; set; }
+    public FarmType? FarmType { get; set; }
 }

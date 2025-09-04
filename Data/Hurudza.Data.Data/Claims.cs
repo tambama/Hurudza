@@ -52,6 +52,15 @@ namespace Hurudza.Data.Data
         public const string TillageManage = "Tillage.Manage";
         public const string TillageDelete = "Tillage.Delete";
         
+        // Equipment Permissions
+        public const string EquipmentView = "Equipment.View";
+        public const string EquipmentCreate = "Equipment.Create";
+        public const string EquipmentUpdate = "Equipment.Update";
+        public const string EquipmentEdit = "Equipment.Edit";
+        public const string EquipmentManage = "Equipment.Manage";
+        public const string EquipmentDelete = "Equipment.Delete";
+        public const string EquipmentViewAll = "Equipment.ViewAll";
+        
         // Report Permissions (new)
         public const string ReportView = "Report.View";
         public const string ReportCreate = "Report.Create";
@@ -132,6 +141,18 @@ namespace Hurudza.Data.Data
                     }
                 },
                 {
+                    "Equipment", new List<string>
+                    {
+                        EquipmentView,
+                        EquipmentCreate,
+                        EquipmentUpdate,
+                        EquipmentEdit,
+                        EquipmentManage,
+                        EquipmentDelete,
+                        EquipmentViewAll
+                    }
+                },
+                {
                     "Report", new List<string>
                     {
                         ReportView,
@@ -161,6 +182,7 @@ namespace Hurudza.Data.Data
                 FieldView,
                 CropView,
                 TillageView,
+                EquipmentView,
                 ReportView
             };
         }
@@ -178,6 +200,7 @@ namespace Hurudza.Data.Data
                 UserManage,
                 RoleManage,
                 TillageManage,
+                EquipmentManage,
                 SystemSettings
             };
         }

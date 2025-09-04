@@ -105,6 +105,7 @@ public class FarmLocationsController : Controller
         return Ok(location);
     }
 
+    [HttpPost(Name = nameof(CreateFarmLocation))]
     public async Task<IActionResult> CreateFarmLocation([FromBody] FarmLocation model)
     {
         await _context.AddAsync(model).ConfigureAwait(false);

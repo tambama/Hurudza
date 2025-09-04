@@ -47,6 +47,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hurudza.Data.Data", "Data\H
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hurudza.Data.Services", "Data\Hurudza.Data.Services\Hurudza.Data.Services.csproj", "{B3FB66EE-6018-40A3-A36E-75CAFCC0E326}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{2A1B3C4D-5E6F-7890-ABCD-EF1234567890}"
+	ProjectSection(SolutionItems) = preProject
+		documentation\feature-suggestions.md = documentation\feature-suggestions.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

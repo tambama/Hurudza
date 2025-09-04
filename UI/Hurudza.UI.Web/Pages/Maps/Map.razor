@@ -33,6 +33,38 @@
         background-color: black;
     }
 
+    /* Farm/School popup card styles */
+    .farm-popup-card {
+        min-width: 200px;
+        max-width: 300px;
+    }
+
+    .farm-popup-card .popup-header {
+        padding-bottom: 8px;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 8px;
+    }
+
+    .farm-popup-card .popup-header h6 {
+        color: #333;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .farm-popup-card .popup-body {
+        padding: 4px 0;
+    }
+
+    .farm-popup-card .popup-footer {
+        padding-top: 8px;
+        border-top: 1px solid #eee;
+    }
+
+    .farm-popup-card .btn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
     #container .e-listview {
         box-shadow: 0 1px 4px #ddd;
         border-bottom: 1px solid #ddd;
@@ -194,10 +226,10 @@
     <div class="sidebar-container @_showSchools">
         <div class="sidebar-header">
             <div>
-                <h3>Schools</h3>
+                <h3>Farms & Schools</h3>
             </div>
             <div>
-                <button class="btn bg-white btn-icon-only me-2" @onclick="ToggleFiltersModal" title="Filter Schools">
+                <button class="btn bg-white btn-icon-only me-2" @onclick="ToggleFiltersModal" title="Filter Farms & Schools">
                     <i class="fa fa-filter"></i>
                 </button>
                 <button class="btn bg-white btn-icon-only" @onclick="ToggleSchools">
@@ -206,7 +238,7 @@
             </div>
         </div>
         <div class="search-box input-group">
-            <input type="text" class="form-control" placeholder="Search schools..." @bind-value="_searchTerm"
+            <input type="text" class="form-control" placeholder="Search farms & schools..." @bind-value="_searchTerm"
                    @bind-value:event="oninput" @onkeyup="FilterFarms">
             @if (!string.IsNullOrEmpty(_searchTerm))
             {
@@ -282,7 +314,7 @@
                         </a>
                     </div>
                     <div class="col-md-7 d-flex align-items-center">
-                        <h6 class="mb-0">School Details</h6>
+                        <h6 class="mb-0">@(_farm?.FarmType == FarmType.School ? "School Details" : "Farm Details")</h6>
                     </div>
                     <div class="col-md-4 text-end">
                         <a href="javascript:;" @onclick="ShowEdit">
@@ -294,34 +326,41 @@
                 </div>
             </div>
             <div class="card-body p-3">
-                <h5 class="mb-0">@_farm.Name</h5>
-                <p class="text-sm">
-                    @_farm.Description
-                </p>
-                <hr class="horizontal gray-light my-4">
-                @*<ul class="list-group">
-                    <li class="list-group-item border-0 ps-0 pt-0 text-sm">
-                        <strong class="text-dark">Address:</strong>
-                        <div style="word-wrap: break-word;">@_farm.Address</div>
-                    </li>
-                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Primary
-                            Contact:</strong> &nbsp; @_farm.ContactPerson</li>
-                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Mobile:</strong>
-                        &nbsp; @_farm.PhoneNumber</li>
-                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Email:</strong>
-                        &nbsp; @_farm.Email</li>
-                    <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Website:</strong>
-                        &nbsp; @_farm.Website</li>
-                </ul>*@
-                <hr class="horizontal gray-light my-2">
+                @if (_farm != null)
+                {
+                    <h5 class="mb-0">@_farm.Name</h5>
+                    <p class="text-sm">
+                        @_farm.Description
+                    </p>
+                    <hr class="horizontal gray-light my-4">
+                    @*<ul class="list-group">
+                        <li class="list-group-item border-0 ps-0 pt-0 text-sm">
+                            <strong class="text-dark">Address:</strong>
+                            <div style="word-wrap: break-word;">@_farm.Address</div>
+                        </li>
+                        <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">Primary
+                                Contact:</strong> &nbsp; @_farm.ContactPerson</li>
+                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Mobile:</strong>
+                            &nbsp; @_farm.PhoneNumber</li>
+                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Email:</strong>
+                            &nbsp; @_farm.Email</li>
+                        <li class="list-group-item border-0 ps-0 text-sm"><strong class="text-dark">Website:</strong>
+                            &nbsp; @_farm.Website</li>
+                    </ul>*@
+                    <hr class="horizontal gray-light my-2">
 
                 <!-- Fields Section - Integrated directly into school details -->
                 <div class="field-list">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="mb-0">Fields</h6>
-                        <button class="btn btn-sm btn-success" @onclick="ShowEditField">
-                            <i class="fas fa-plus me-1"></i> Add Field
-                        </button>
+                        <div>
+                            <button class="btn btn-sm btn-primary me-2" @onclick="ShowUploadFields">
+                                <i class="fas fa-upload me-1"></i> Upload KML
+                            </button>
+                            <button class="btn btn-sm btn-success" @onclick="ShowEditField">
+                                <i class="fas fa-plus me-1"></i> Add Field
+                            </button>
+                        </div>
                     </div>
 
                     @if (_fieldsLoading)
@@ -368,11 +407,11 @@
                     }
                 </div>
                 
-                @if (_farm.FarmType == FarmType.School && (_user.IsInRole(ApiRoles.Administrator) || _user.IsInRole(ApiRoles.FarmAdministrator)))
+                @if (_farm?.FarmType == FarmType.School && _user != null && (_user.IsInRole(ApiRoles.Administrator) || _user.IsInRole(ApiRoles.FarmAdministrator)))
                 {
                     <div class="school-admin-section mt-4">
                         <h5>Managed Farms (@_managedFarms.Count)</h5>
-                        <button class="btn btn-primary btn-sm" @onclick="ShowAddFarmDialog">
+                        <button class="btn btn-primary btn-sm" @onclick="ShowAddFarmForm">
                             <i class="fas fa-plus"></i> Add New Farm
                         </button>
         
@@ -394,6 +433,7 @@
                             </div>
                         }
                     </div>
+                }
                 }
             </div>
         </div>
@@ -424,7 +464,9 @@
                 </div>
             </div>
             <div class="card-body p-3">
-                <h5 class="mb-0">@_field.Name</h5>
+                @if (_field != null)
+                {
+                    <h5 class="mb-0">@_field.Name</h5>
                 <hr class="horizontal gray-light my-4">
                 <ul class="list-group">
                     <li class="list-group-item border-0 ps-0 pt-0 text-sm">
@@ -553,6 +595,7 @@
                         </AccordionItem>
                     </AccordionItems>
                 </SfAccordion>
+                }
             </div>
         </div>
     </div>
@@ -561,13 +604,13 @@
     <div class="sidebar-container @_showAddSchool">
         <div class="sidebar-header">
             <div>
-                @if (string.IsNullOrEmpty(_farm.Id))
+                @if (_farm == null || string.IsNullOrEmpty(_farm.Id))
                 {
                     <h5>Add New School</h5>
                 }
                 else
                 {
-                    <h5>Edit School</h5>
+                    <h5>@(_farm?.FarmType == FarmType.School ? "Edit School" : "Edit Farm")</h5>
                 }
             </div>
             <button class="btn bg-white btn-icon-only" @onclick="CancelEdit">
@@ -576,7 +619,9 @@
         </div>
 
         <div class="my-2">
-            <EditForm Model="@_farm" OnValidSubmit="@SaveFarm">
+            @if (_farm != null)
+            {
+                <EditForm Model="@_farm" OnValidSubmit="@SaveFarm">
                 <DataAnnotationsValidator/>
                 <ValidationSummary/>
 
@@ -631,6 +676,51 @@
                                       Decimals=7 Format="n7" Placeholder="e.g. 31.0530"></SfNumericTextBox>
                 </div>
 
+                <div class="form-group mb-3">
+                    <p class="text-muted">
+                        Current Location: @(_farm.Latitude == 0 && _farm.Longitude == 0 ? "Not set" : $"{_farm.Latitude:F6}, {_farm.Longitude:F6}")
+                    </p>
+                    <button type="button" class="btn btn-secondary btn-sm" 
+                            @onclick="EnableMapClickForEditLocation">
+                        Set Location on Map
+                    </button>
+                </div>
+
+                <!-- Farm/School boundary drawing instructions -->
+                <div class="alert alert-primary mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fa fa-draw-polygon me-2"></i>
+                        <div>
+                            <strong>Draw @(_farm.FarmType == Hurudza.Data.Enums.Enums.FarmType.School ? "School" : "Farm") Boundary</strong>
+                            <p class="mb-0">Use the draw tool <i class="fa fa-draw-polygon"></i> in the top-right corner
+                                of the map to draw the @(_farm.FarmType == Hurudza.Data.Enums.Enums.FarmType.School ? "school" : "farm") boundary.</p>
+                            <div class="mt-1 small">
+                                <p class="mb-0"><i class="fa fa-info-circle me-1"></i> The area will be
+                                    automatically calculated from the boundary.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Boundary status -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>@(_farm.FarmType == Hurudza.Data.Enums.Enums.FarmType.School ? "School" : "Farm") Boundary:</span>
+                        @if (_drawnSchoolCoordinates != null && _drawnSchoolCoordinates.Count > 0)
+                        {
+                            <span class="badge bg-success">
+                                <i class="fa fa-check me-1"></i> Drawn (@_drawnSchoolCoordinates.Count points)
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">
+                                <i class="fa fa-exclamation-triangle me-1"></i> Not Drawn
+                            </span>
+                        }
+                    </div>
+                </div>
+
                 <!-- Other form fields would go here -->
 
                 <div class="text-center mt-4">
@@ -639,6 +729,7 @@
                     </button>
                 </div>
             </EditForm>
+            }
         </div>
     </div>
 
@@ -646,7 +737,7 @@
     <div class="sidebar-container @_showFieldEdit">
         <div class="sidebar-header">
             <div>
-                @if (string.IsNullOrEmpty(_fieldEdit.Id))
+                @if (_fieldEdit == null || string.IsNullOrEmpty(_fieldEdit.Id))
                 {
                     <h5>Add New Field</h5>
                 }
@@ -759,6 +850,149 @@
         </div>
     </div>
 
+    <!-- Add New Farm Panel -->
+    <div class="sidebar-container @_showAddFarm">
+        <div class="sidebar-header">
+            <div>
+                <h5>Add New Farm</h5>
+            </div>
+            <button class="btn bg-white btn-icon-only" @onclick="CancelAddFarm">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+
+        <div class="my-2">
+            <EditForm Model="@_newFarm" OnValidSubmit="@SaveNewFarm">
+                <DataAnnotationsValidator/>
+                <ValidationSummary/>
+
+                <div class="form-group mb-3">
+                    <label>Farm Name *</label>
+                    <SfTextBox @bind-Value="_newFarm.Name" Placeholder="Enter farm name" ValidateOnInput="true"></SfTextBox>
+                    <ValidationMessage For="() => _newFarm.Name"/>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label>Address</label>
+                    <SfTextBox @bind-Value="_newFarm.Address" Placeholder="Enter address" Multiline="true"></SfTextBox>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label>Contact Person *</label>
+                    <SfTextBox @bind-Value="_newFarm.ContactPerson" Placeholder="Enter contact person" ValidateOnInput="true"></SfTextBox>
+                    <ValidationMessage For="() => _newFarm.ContactPerson"/>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label>Phone Number *</label>
+                    <SfTextBox @bind-Value="_newFarm.PhoneNumber" Placeholder="Enter phone number" ValidateOnInput="true"></SfTextBox>
+                    <ValidationMessage For="() => _newFarm.PhoneNumber"/>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>Size (ha)</label>
+                            <SfNumericTextBox @bind-Value="_newFarm.Size" Placeholder="Enter size" Format="N2"></SfNumericTextBox>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label>Arable Land (ha)</label>
+                            <SfNumericTextBox @bind-Value="_newFarm.Arable" Placeholder="Enter arable land" Format="N2"></SfNumericTextBox>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <SfCheckBox @bind-Checked="_newFarm.RequiresTillageService" Label="Requires Tillage Service"></SfCheckBox>
+                </div>
+                
+                @if (_newFarm.RequiresTillageService)
+                {
+                    <div class="form-group mb-3">
+                        <label>Tillage Requirements</label>
+                        <SfTextBox @bind-Value="_newFarm.TillageRequirements" Placeholder="Enter tillage requirements" Multiline="true"></SfTextBox>
+                    </div>
+                }
+
+                <!-- Location fields -->
+                <div class="form-group mb-3">
+                    <label>Latitude</label>
+                    <SfNumericTextBox ID="newFarmLatitude" TValue="double" @bind-Value="@_newFarm.Latitude"
+                                      Decimals=7 Format="n7" Placeholder="e.g. -17.8248"></SfNumericTextBox>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label>Longitude</label>
+                    <SfNumericTextBox ID="newFarmLongitude" TValue="double" @bind-Value="@_newFarm.Longitude"
+                                      Decimals=7 Format="n7" Placeholder="e.g. 31.0530"></SfNumericTextBox>
+                </div>
+
+                <div class="form-group mb-3">
+                    <p class="text-muted">
+                        Current Location: @(_newFarm.Latitude == 0 && _newFarm.Longitude == 0 ? "Not set" : $"{_newFarm.Latitude:F6}, {_newFarm.Longitude:F6}")
+                    </p>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-secondary btn-sm" 
+                                @onclick="EnableMapClickForNewFarmLocation">
+                            Set Location on Map
+                        </button>
+                        @if (_newFarm.Latitude != 0 || _newFarm.Longitude != 0)
+                        {
+                            <button type="button" class="btn btn-danger btn-sm" 
+                                    @onclick="ClearNewFarmLocation">
+                                <i class="fas fa-trash-alt"></i> Clear Location
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- Farm boundary drawing instructions -->
+                <div class="alert alert-primary mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fa fa-draw-polygon me-2"></i>
+                        <div>
+                            <strong>Draw Farm Boundary</strong>
+                            <p class="mb-0">Use the draw tool <i class="fa fa-draw-polygon"></i> in the top-right corner
+                                of the map to draw the farm boundary.</p>
+                            <div class="mt-1 small">
+                                <p class="mb-0"><i class="fa fa-info-circle me-1"></i> The farm size will be
+                                    automatically calculated from the boundary area.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Farm boundary status -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Farm Boundary:</span>
+                        @if (_drawnFarmCoordinates != null && _drawnFarmCoordinates.Count > 0)
+                        {
+                            <span class="badge bg-success">
+                                <i class="fa fa-check me-1"></i> Drawn (@_drawnFarmCoordinates.Count points)
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">
+                                <i class="fa fa-exclamation-triangle me-1"></i> Not Drawn
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-lg bg-gradient-success w-100 mb-3">Save</button>
+                    <button type="button" class="btn btn-lg bg-gradient-secondary w-100" @onclick="CancelAddFarm">
+                        Cancel
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+
     <!-- Main Map Container -->
     <div id="map" @ref="_mapElement" style="width:100%" class="min-height-vh-100"></div>
 
@@ -823,7 +1057,7 @@
     <!-- Filters Modal -->
     <SfDialog Width="500px" Height="600px" IsModal="true" ShowCloseIcon="true" @bind-Visible="@ShowFiltersModal">
         <DialogTemplates>
-            <Header>Filter Schools</Header>
+            <Header>Filter Farms & Schools</Header>
             <Content>
                 <div class="container">
                     <EditForm Model="@_filterModel" OnValidSubmit="@ApplyFilters">
@@ -863,6 +1097,18 @@
                                             AllowFiltering="true"
                                             Placeholder="Select Conference">
                                 <DropDownListFieldSettings Value="Conference" Text="Name"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                        </div>
+
+                        <!-- Farm Type Filter -->
+                        <div class="form-group mb-3">
+                            <label>Type</label>
+                            <SfDropDownList TValue="FarmType?" TItem="FarmTypeModel"
+                                            @bind-Value="@_filterModel.FarmType"
+                                            DataSource="@_farmTypes"
+                                            AllowFiltering="false"
+                                            Placeholder="All Types">
+                                <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
                             </SfDropDownList>
                         </div>
 
@@ -935,6 +1181,10 @@
                                     {
                                         <li>Conference: @_filterModel.Conference.Value</li>
                                     }
+                                    @if (_filterModel.FarmType.HasValue)
+                                    {
+                                        <li>Type: @_filterModel.FarmType.Value</li>
+                                    }
                                     @if (_filterModel.MinSize.HasValue || _filterModel.MaxSize.HasValue)
                                     {
                                         <li>Size:
@@ -968,87 +1218,6 @@
         </DialogTemplates>
     </SfDialog>
     
-    @if (_showAddFarmDialog)
-{
-    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add New Farm</h5>
-                    <button type="button" class="btn-close" @onclick="() => _showAddFarmDialog = false"></button>
-                </div>
-                <EditForm Model="_newFarm" OnValidSubmit="SaveNewFarm">
-                    <DataAnnotationsValidator />
-                    <div class="modal-body">
-                        <ValidationSummary />
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Farm Name</label>
-                            <InputText @bind-Value="_newFarm.Name" class="form-control" />
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Address</label>
-                            <InputText @bind-Value="_newFarm.Address" class="form-control" />
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Contact Person</label>
-                            <InputText @bind-Value="_newFarm.ContactPerson" class="form-control" />
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Phone Number</label>
-                            <InputText @bind-Value="_newFarm.PhoneNumber" class="form-control" />
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label class="form-label">Size (ha)</label>
-                                <InputNumber @bind-Value="_newFarm.Size" class="form-control" />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Arable Land (ha)</label>
-                                <InputNumber @bind-Value="_newFarm.Arable" class="form-control" />
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">
-                                <InputCheckbox @bind-Value="_newFarm.RequiresTillageService" />
-                                Requires Tillage Service
-                            </label>
-                        </div>
-                        
-                        @if (_newFarm.RequiresTillageService)
-                        {
-                            <div class="mb-3">
-                                <label class="form-label">Tillage Requirements</label>
-                                <InputTextArea @bind-Value="_newFarm.TillageRequirements" 
-                                               class="form-control" rows="3" />
-                            </div>
-                        }
-                        
-                        <div class="mb-3">
-                            <p class="text-muted">Location: @(_newFarm.Latitude == 0 ? "Not set" : $"{_newFarm.Latitude:F6}, {_newFarm.Longitude:F6}")</p>
-                            <button type="button" class="btn btn-secondary btn-sm" 
-                                    @onclick="EnableMapClickForLocation">
-                                Set Location on Map
-                            </button>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" 
-                                @onclick="() => _showAddFarmDialog = false">Cancel</button>
-                        <button type="submit" class="btn btn-primary">
-                            Save Farm
-                        </button>
-                    </div>
-                </EditForm>
-            </div>
-        </div>
-    </div>
-}
 
     <SfSpinner @ref="_spinnerRef" Size="40" Type="SpinnerType.Bootstrap" CssClass="global-spinner"
                Visible="false"></SfSpinner>
@@ -1089,7 +1258,7 @@
     private string _currentCrop = string.Empty;
     private bool _isSchoolUser = false;
     private List<FarmViewModel> _managedFarms = new List<FarmViewModel>();
-    private bool _showAddFarmDialog = false;
+    private string _showAddFarm = "panel-hidden";
     private AddFarmViewModel _newFarm = new AddFarmViewModel();
     private ClaimsPrincipal _user;
 
@@ -1099,6 +1268,8 @@
     private FarmFilterModel _filterModel = new FarmFilterModel();
     private List<FarmViewModel> _allFarms = new(); // Store all farms for filtering
     private List<List<double>> _drawnCoordinates = new List<List<double>>();
+    private List<List<double>> _drawnFarmCoordinates = new List<List<double>>();
+    private List<List<double>> _drawnSchoolCoordinates = new List<List<double>>();
 
     // UI state variables
     private bool _showDeleteCoordinateDialog = false;
@@ -1133,6 +1304,7 @@
     private List<WaterAvailabilityModel> _waterAvailabilities = Enum.GetValues<WaterAvailability>().Select(x => new WaterAvailabilityModel(x)).ToList();
     private List<RoadAccessModel> _roadAccess = Enum.GetValues<RoadAccess>().Select(x => new RoadAccessModel(x)).ToList();
     private List<SoilTypeModel> _soilTypes = Enum.GetValues<SoilType>().Select(x => new SoilTypeModel(x)).ToList();
+    private List<FarmTypeModel> _farmTypes = Enum.GetValues<FarmType>().Select(x => new FarmTypeModel(x)).ToList();
 
     #region Form Methods
 
@@ -1143,7 +1315,9 @@
             await ShowSpinner();
 
             UI.Shared.Models.ApiResponse<FarmViewModel> response;
-            if (string.IsNullOrEmpty(_farm.Id))
+            bool isNewFarm = string.IsNullOrEmpty(_farm.Id);
+            
+            if (isNewFarm)
             {
                 response = await ApiCall.Add<UI.Shared.Models.ApiResponse<FarmViewModel>, FarmViewModel>(
                     await ApiCall.GetHttpClient(), "farms/createfarm", _farm);
@@ -1160,6 +1334,19 @@
             }
             else if (response.Status == (int)HttpStatusCode.OK)
             {
+                string farmId = response.Result?.Id ?? _farm.Id;
+                
+                // Save farm boundary coordinates for both new and existing farms
+                if (_drawnSchoolCoordinates != null && _drawnSchoolCoordinates.Count > 0 && !string.IsNullOrEmpty(farmId))
+                {
+                    // For existing farms, clear old boundaries first
+                    if (!isNewFarm)
+                    {
+                        await DeleteExistingFarmBoundaries(farmId);
+                    }
+                    await SaveFarmBoundaryCoordinates(farmId, _drawnSchoolCoordinates, isNewCoordinates: true);
+                }
+                
                 _alert.Show(response.Title, showTitle: true, toastType: ToastType.Success);
 
                 // Refresh farm list and select the saved farm
@@ -1195,13 +1382,21 @@
         
             var response = await ApiCall.Add<ApiResponse<FarmViewModel>, AddFarmViewModel>(
                 await ApiCall.GetHttpClient(),
-                $"farms/school/{_farm.Id}/add-farm",
+                $"farms/AddFarmToSchool/school/{_farm.Id}/add-farm",
                 _newFarm);
             
-            if (response?.Status == (int)HttpStatusCode.OK)
+            if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
             {
+                string farmId = response.Result.Id;
+                
+                // If we have drawn farm boundary coordinates, save them as locations
+                if (_drawnFarmCoordinates != null && _drawnFarmCoordinates.Count > 0)
+                {
+                    await SaveFarmBoundaryCoordinates(farmId, _drawnFarmCoordinates, isNewCoordinates: true);
+                }
+                
                 _alert.Show("Farm added successfully!", showTitle: true, toastType: ToastType.Success);
-                _showAddFarmDialog = false;
+                CancelAddFarm();
             
                 // Reload farm details to show new farm
                 await OnFarmSelect(_farm);
@@ -1582,18 +1777,207 @@
         }
     }
     
-    void ShowAddFarmDialog()
+    void ShowAddFarmForm()
     {
         _newFarm = new AddFarmViewModel
         {
             ParentSchoolId = _farm.Id
         };
-        _showAddFarmDialog = true;
+        
+        // Reset drawn coordinates for new farm
+        _drawnFarmCoordinates = new List<List<double>>();
+        
+        // Update UI state to show the add farm form
+        _showSchools = "panel-hidden";
+        _showAddSchool = "panel-hidden";
+        _showSchoolDetails = "panel-hidden";
+        _showFieldEdit = "panel-hidden";
+        _showFieldDetails = "panel-hidden";
+        _showAddFarm = "";
+        
+        // Clear any existing drawings
+        if (_drawControl != null)
+        {
+            InvokeAsync(async () =>
+            {
+                await _mapModule.InvokeVoidAsync("clearAllDrawings", _drawControl);
+            });
+        }
+    }
+    
+    void CancelAddFarm()
+    {
+        _showAddFarm = "panel-hidden";
+        _showSchoolDetails = "";
+        
+        // Reset drawn farm coordinates
+        _drawnFarmCoordinates = new List<List<double>>();
+        
+        // Clear any drawings on the map using default controls
+        if (_drawControl != null)
+        {
+            InvokeAsync(async () =>
+            {
+                await _mapModule.InvokeVoidAsync("clearAllDrawings", _drawControl);
+            });
+        }
     }
 
     #endregion
 
     #region Event Handlers
+
+    async Task EnableMapClickForNewFarmLocation()
+    {
+        if (_mapModule != null && _dotNetRef != null)
+        {
+            await _mapModule.InvokeVoidAsync("enableLocationPicker", _mapInstance, _dotNetRef, "SetNewFarmLocation");
+        }
+    }
+    
+    [JSInvokable]
+    public void SetNewFarmLocation(double lat, double lng)
+    {
+        if (_newFarm != null)
+        {
+            _newFarm.Latitude = lat;
+            _newFarm.Longitude = lng;
+            StateHasChanged();
+        }
+    }
+    
+    void ClearNewFarmLocation()
+    {
+        if (_newFarm != null)
+        {
+            _newFarm.Latitude = 0;
+            _newFarm.Longitude = 0;
+            StateHasChanged();
+        }
+    }
+    
+    async Task CalculateFarmAreaFromBoundary(FarmViewModel farm, List<List<double>> coordinates)
+    {
+        try
+        {
+            if (coordinates != null && coordinates.Count >= 3 && _mapModule != null)
+            {
+                // Calculate area using Turf.js through the JavaScript module
+                var area = await _mapModule.InvokeAsync<double>("calculatePolygonArea", coordinates);
+                
+                // Convert from square meters to hectares
+                var hectares = (float)(area / 10000);
+                
+                Logger.LogInformation($"Calculated area: {area} m² = {hectares:F2} hectares");
+                
+                // Update the farm size
+                farm.Size = hectares;
+                
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error calculating farm area from boundary");
+        }
+    }
+    
+    async Task CalculateFarmAreaFromBoundary(AddFarmViewModel farm, List<List<double>> coordinates)
+    {
+        try
+        {
+            if (coordinates != null && coordinates.Count >= 3 && _mapModule != null)
+            {
+                // Calculate area using Turf.js through the JavaScript module
+                var area = await _mapModule.InvokeAsync<double>("calculatePolygonArea", coordinates);
+                
+                // Convert from square meters to hectares
+                var hectares = (float)(area / 10000);
+                
+                Logger.LogInformation($"Calculated area: {area} m² = {hectares:F2} hectares");
+                
+                // Update the farm size
+                farm.Size = hectares;
+                
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error calculating farm area from boundary");
+        }
+    }
+    
+    async Task DeleteExistingFarmBoundaries(string farmId)
+    {
+        try
+        {
+            // Get existing farm locations
+            var existingLocations = await ApiCall.Get<IEnumerable<FarmLocationViewModel>>(
+                await ApiCall.GetHttpClient(), $"farmlocations/getfarmlocationsbyfarmid/{farmId}");
+            
+            if (existingLocations != null && existingLocations.Any())
+            {
+                // Delete each existing location
+                foreach (var location in existingLocations)
+                {
+                    if (!string.IsNullOrEmpty(location.Id))
+                    {
+                        var deleteResponse = await ApiCall.Remove<ApiResponse>(
+                            await ApiCall.GetHttpClient(), $"farmlocations/deleteFarmLocation", location.Id);
+                        
+                        if (deleteResponse?.Status != (int)HttpStatusCode.OK)
+                        {
+                            Logger.LogWarning($"Failed to delete farm location {location.Id}: {deleteResponse?.Title}");
+                        }
+                    }
+                }
+                Logger.LogInformation($"Deleted {existingLocations.Count()} existing farm boundary points");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error deleting existing farm boundaries");
+            // Continue with saving new boundaries even if deletion fails
+        }
+    }
+    
+    async Task SaveFarmBoundaryCoordinates(string farmId, List<List<double>> coordinates, bool isNewCoordinates)
+    {
+        try
+        {
+            // Convert drawn coordinates to farm locations
+            foreach (var coord in coordinates)
+            {
+                if (coord.Count >= 2)
+                {
+                    var farmLocation = new FarmLocationViewModel
+                    {
+                        FarmId = farmId,
+                        Longitude = coord[0],
+                        Latitude = coord[1],
+                        Altitude = coord.Count > 2 ? coord[2] : 0,
+                        Label = "Boundary Point"
+                    };
+
+                    var response = await ApiCall.Add<ApiResponse<FarmLocationViewModel>, FarmLocationViewModel>(
+                        await ApiCall.GetHttpClient(), "farmlocations/createfarmlocation", farmLocation);
+
+                    if (response?.Status != (int)HttpStatusCode.OK)
+                    {
+                        Logger.LogError($"Failed to save farm boundary coordinate: {response?.Title}");
+                    }
+                }
+            }
+
+            Logger.LogInformation($"Successfully saved {coordinates.Count} farm boundary coordinates");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving farm boundary coordinates");
+            _alert.Show("Warning: Farm boundary coordinates could not be saved", toastType: ToastType.Warning);
+        }
+    }
 
     // Farm selection handler
     async Task OnFarmSelect(FarmViewModel farm)
@@ -1611,7 +1995,7 @@
                 // Load managed farms
                 var response = await ApiCall.Get<ApiResponse<List<FarmViewModel>>>(
                     await ApiCall.GetHttpClient(), 
-                    $"farms/school/{_farm.Id}/farms");
+                    $"farms/GetSchoolFarms/school/{_farm.Id}/farms");
                 
                 if (response?.Status == (int)HttpStatusCode.OK && response?.Result != null)
                 {
@@ -1629,6 +2013,7 @@
             _showSchoolDetails = "";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "panel-hidden";
+            _showAddFarm = "panel-hidden";
 
             // Load fields for this farm
             await LoadFields(_farm.Id);
@@ -1750,6 +2135,7 @@
             _showSchoolDetails = "panel-hidden";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "";
+            _showAddFarm = "panel-hidden";
 
             // Ensure UI state is updated before map operations
             StateHasChanged();
@@ -1864,6 +2250,7 @@
         return !string.IsNullOrEmpty(_filterModel.ProvinceId) ||
                _filterModel.Region.HasValue ||
                _filterModel.Conference.HasValue ||
+               _filterModel.FarmType.HasValue ||
                _filterModel.MinSize.HasValue ||
                _filterModel.MaxSize.HasValue ||
                !string.IsNullOrEmpty(_filterModel.DistrictId) ||
@@ -1903,6 +2290,14 @@
             {
                 _filteredFarms = _filteredFarms
                     .Where(f => f.Conference == _filterModel.Conference.Value)
+                    .ToList();
+            }
+
+            // Apply FarmType filter
+            if (_filterModel.FarmType.HasValue)
+            {
+                _filteredFarms = _filteredFarms
+                    .Where(f => f.FarmType == _filterModel.FarmType.Value)
                     .ToList();
             }
 
@@ -1956,7 +2351,7 @@
                     // Create filtered GeoJSON for map
                     var validFarms = currentFilteredFarms.Where(f => f.Latitude != 0 && f.Longitude != 0).ToList();
 
-                    Logger.LogInformation($"Preparing to show {validFarms.Count} filtered schools on map");
+                    Logger.LogInformation($"Preparing to show {validFarms.Count} filtered farms/schools on map");
 
                     if (validFarms.Any())
                     {
@@ -1978,7 +2373,8 @@
                                 {
                                     id = f.Id,
                                     name = f.Name,
-                                    size = f.Size
+                                    size = f.Size,
+                                    address = f.Address
                                 },
                                 geometry = new
                                 {
@@ -2065,7 +2461,7 @@
             // Reset filter model
             _filterModel = new FarmFilterModel();
 
-            // Reset filtered farms to all farms (which are only the ones the user has access to)
+            // Reset filtered farms to all farms  
             _filteredFarms = _allFarms.ToList();
 
             // Reset map
@@ -2094,11 +2490,11 @@
     {
         if (string.IsNullOrWhiteSpace(_searchTerm))
         {
-            _filteredFarms = _farms.ToList();
+            _filteredFarms = _allFarms.ToList();
         }
         else
         {
-            _filteredFarms = _farms
+            _filteredFarms = _allFarms
                 .Where(f => f.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
                             (f.Address?.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ?? false))
                 .ToList();
@@ -2323,9 +2719,28 @@
 
     async Task EnableMapClickForLocation()
     {
-        if (_mapModule != null)
+        if (_mapModule != null && _dotNetRef != null)
         {
-            await _mapModule.InvokeVoidAsync("enableLocationPicker", _mapInstance, "SetFarmLocation");
+            await _mapModule.InvokeVoidAsync("enableLocationPicker", _mapInstance, _dotNetRef, "SetFarmLocation");
+        }
+    }
+    
+    [JSInvokable]
+    public void SetEditFarmLocation(double lat, double lng)
+    {
+        if (_farm != null)
+        {
+            _farm.Latitude = lat;
+            _farm.Longitude = lng;
+            StateHasChanged();
+        }
+    }
+    
+    async Task EnableMapClickForEditLocation()
+    {
+        if (_mapModule != null && _dotNetRef != null)
+        {
+            await _mapModule.InvokeVoidAsync("enableLocationPicker", _mapInstance, _dotNetRef, "SetEditFarmLocation");
         }
     }
 
@@ -2342,10 +2757,59 @@
 
             if (coordinates != null && coordinates.Count > 0)
             {
-                bool isExistingField = !string.IsNullOrEmpty(_fieldEdit.Id);
+                // Determine what context we're drawing in and store coordinates accordingly
+                if (_showFieldEdit != "panel-hidden")
+                {
+                    // Drawing field boundary
+                    bool isExistingField = !string.IsNullOrEmpty(_fieldEdit.Id);
+                    _drawnCoordinates = coordinates;
+                    Logger.LogInformation($"Stored coordinates for field boundary: {coordinates.Count} points");
+                    
+                    // Log a few coordinates for debugging if we have them
+                    if (coordinates.Count > 0)
+                    {
+                        // Log first coordinate point
+                        Logger.LogInformation($"First point: [{string.Join(", ", coordinates[0])}]");
 
-                // Store the drawn coordinates
-                _drawnCoordinates = coordinates;
+                        // Log last coordinate point if we have multiple
+                        if (coordinates.Count > 1)
+                        {
+                            Logger.LogInformation($"Last point: [{string.Join(", ", coordinates[coordinates.Count - 1])}]");
+                        }
+                    }
+
+                    // Different messaging based on whether this is a new field or editing an existing one
+                    if (isExistingField)
+                    {
+                        _alert.Show($"Field boundary updated with {coordinates.Count} points!", toastType: ToastType.Success);
+                    }
+                    else
+                    {
+                        _alert.Show($"Field boundary drawn successfully with {coordinates.Count} points!", toastType: ToastType.Success);
+                    }
+                }
+                else if (_showAddFarm != "panel-hidden")
+                {
+                    // Drawing new farm boundary
+                    _drawnFarmCoordinates = coordinates;
+                    Logger.LogInformation($"Stored coordinates for new farm boundary: {coordinates.Count} points");
+                    
+                    // Auto-calculate farm size from boundary if possible
+                    await CalculateFarmAreaFromBoundary(_newFarm, coordinates);
+                    
+                    _alert.Show($"Farm boundary drawn successfully with {coordinates.Count} points!", toastType: ToastType.Success);
+                }
+                else if (_showAddSchool != "panel-hidden")
+                {
+                    // Drawing school/farm boundary (edit mode)
+                    _drawnSchoolCoordinates = coordinates;
+                    Logger.LogInformation($"Stored coordinates for school/farm boundary: {coordinates.Count} points");
+                    
+                    // Auto-calculate area from boundary if possible
+                    await CalculateFarmAreaFromBoundary(_farm, coordinates);
+                    
+                    _alert.Show($"School/farm boundary drawn successfully with {coordinates.Count} points!", toastType: ToastType.Success);
+                }
 
                 // Log a few coordinates for debugging if we have them
                 if (coordinates.Count > 0)
@@ -2358,16 +2822,6 @@
                     {
                         Logger.LogInformation($"Last point: [{string.Join(", ", coordinates[coordinates.Count - 1])}]");
                     }
-                }
-
-                // Different messaging based on whether this is a new field or editing an existing one
-                if (isExistingField)
-                {
-                    _alert.Show($"Field boundary updated with {coordinates.Count} points!", toastType: ToastType.Success);
-                }
-                else
-                {
-                    _alert.Show($"Field boundary drawn successfully with {coordinates.Count} points!", toastType: ToastType.Success);
                 }
 
                 // Force UI refresh
@@ -2393,17 +2847,40 @@
         {
             Logger.LogInformation("OnDrawingDeleted invoked from JavaScript");
 
-            // Reset the drawn coordinates
-            _drawnCoordinates = new List<List<double>>();
-
-            // Reset the field size if in edit mode
-            if (!string.IsNullOrEmpty(_fieldEdit.Id) || _showFieldEdit != "panel-hidden")
+            // Determine what context we're deleting from and reset coordinates accordingly
+            if (_showFieldEdit != "panel-hidden")
             {
-                _fieldEdit.Size = 0;
+                // Deleting field boundary
+                _drawnCoordinates = new List<List<double>>();
+                
+                // Reset the field size if in edit mode
+                if (!string.IsNullOrEmpty(_fieldEdit.Id))
+                {
+                    _fieldEdit.Size = 0;
+                }
+                
+                _alert.Show("Field boundary drawing deleted", toastType: ToastType.Info);
             }
-
-            // Show notification
-            _alert.Show("Field boundary drawing deleted", toastType: ToastType.Info);
+            else if (_showAddFarm != "panel-hidden")
+            {
+                // Deleting new farm boundary
+                _drawnFarmCoordinates = new List<List<double>>();
+                
+                // Reset the farm size
+                _newFarm.Size = 0;
+                
+                _alert.Show("Farm boundary drawing deleted", toastType: ToastType.Info);
+            }
+            else if (_showAddSchool != "panel-hidden")
+            {
+                // Deleting school/farm boundary (edit mode)
+                _drawnSchoolCoordinates = new List<List<double>>();
+                
+                // Reset the farm size
+                _farm.Size = 0;
+                
+                _alert.Show($"{(_farm.FarmType == Hurudza.Data.Enums.Enums.FarmType.School ? "School" : "Farm")} boundary drawing deleted", toastType: ToastType.Info);
+            }
 
             // Force UI refresh
             StateHasChanged();
@@ -2522,6 +2999,7 @@
             _showSchoolDetails = "panel-hidden";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "panel-hidden";
+            _showAddFarm = "panel-hidden";
 
             // Reset farm model if adding new farm
             if (_farm != null && !string.IsNullOrEmpty(_farm.Id))
@@ -2541,21 +3019,65 @@
             _showSchoolDetails = "panel-hidden";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "panel-hidden";
+            _showAddFarm = "panel-hidden";
         }
     }
 
     async Task GoBackToList()
     {
-        _farm = new FarmViewModel();
-        _showSchools = "";
-        _showAddSchool = "panel-hidden";
-        _showSchoolDetails = "panel-hidden";
-        _showFieldEdit = "panel-hidden";
-        _showFieldDetails = "panel-hidden";
-
-        if (_mapModule != null)
+        try
         {
-            await ResetFilters();
+            await ShowSpinner();
+            
+            // Reset the current farm
+            _farm = new FarmViewModel();
+            
+            // Update UI state
+            _showSchools = "";
+            _showAddSchool = "panel-hidden";
+            _showSchoolDetails = "panel-hidden";
+            _showFieldEdit = "panel-hidden";
+            _showFieldDetails = "panel-hidden";
+            _showAddFarm = "panel-hidden";
+            
+            // Reset filtered farms to all farms to ensure clusters show all accessible farms
+            _filteredFarms = _allFarms.ToList();
+            
+            // Ensure UI state is updated
+            StateHasChanged();
+
+            if (_mapModule != null && _mapInstance != null)
+            {
+                // Check if we have valid farms to display
+                var hasValidFarms = _filteredFarms.Any(f => f.Latitude != 0 && f.Longitude != 0);
+                
+                if (hasValidFarms)
+                {
+                    Logger.LogInformation($"Reloading clusters for {_filteredFarms.Count} farms when returning to list");
+                    
+                    // Load clusters fresh - LoadClusters will handle clearing old clusters properly
+                    await LoadClusters();
+                    
+                    // Reset the map view to Zimbabwe's center with appropriate zoom for clusters
+                    // Zimbabwe's approximate center: -19.0154° S, 29.1549° E
+                    await _mapModule.InvokeVoidAsync("setMapCenter", _mapInstance, -19.0154, 29.1549, 7).AsTask();
+                    
+                    Logger.LogInformation("Successfully reloaded clusters and centered map");
+                }
+                else
+                {
+                    Logger.LogInformation("No valid farms to show clusters for");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error navigating back to farms list");
+            _alert.Show($"Error returning to list: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            await HideSpinner();
         }
     }
 
@@ -2572,6 +3094,7 @@
             _showSchoolDetails = "";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "panel-hidden";
+            _showAddFarm = "panel-hidden";
 
             // Ensure UI state is updated before map operations
             StateHasChanged();
@@ -2671,6 +3194,7 @@
             _showSchoolDetails = "";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "panel-hidden";
+            _showAddFarm = "panel-hidden";
         }
         else
         {
@@ -2680,6 +3204,7 @@
             _showSchoolDetails = "panel-hidden";
             _showFieldEdit = "panel-hidden";
             _showFieldDetails = "panel-hidden";
+            _showAddFarm = "panel-hidden";
         }
     }
 
@@ -2710,6 +3235,7 @@
             _showSchoolDetails = "panel-hidden";
             _showFieldEdit = "";
             _showFieldDetails = "panel-hidden";
+            _showAddFarm = "panel-hidden";
 
             // The drawing controls are always visible with default MapboxDraw
             // Users can click the polygon tool to start drawing
@@ -2779,6 +3305,7 @@
             _showSchoolDetails = "panel-hidden";
             _showFieldEdit = "";
             _showFieldDetails = "panel-hidden";
+            _showAddFarm = "panel-hidden";
 
             // Force UI refresh
             StateHasChanged();
@@ -2803,6 +3330,7 @@
         _showSchoolDetails = "";
         _showFieldEdit = "panel-hidden";
         _showFieldDetails = "panel-hidden";
+        _showAddFarm = "panel-hidden";
     }
 
     async Task AddCoordinate()
@@ -3012,7 +3540,8 @@
                                 {
                                     id = f.Id,
                                     name = f.Name,
-                                    size = f.Size
+                                    size = f.Size,
+                                    address = f.Address
                                 },
                                 geometry = new
                                 {
@@ -3111,6 +3640,48 @@
 
     #endregion
 
+    #region JavaScript Interop Callbacks
+
+    [JSInvokable]
+    public async Task OnSchoolSelectedFromMap(string schoolId, string schoolName)
+    {
+        try
+        {
+            Logger.LogInformation($"School selected from map: {schoolName} ({schoolId})");
+            
+            // Find the farm in our current list
+            var selectedFarm = _farms.FirstOrDefault(f => f.Id == schoolId);
+            if (selectedFarm != null)
+            {
+                // Use the existing OnFarmSelect method which handles all the logic
+                await OnFarmSelect(selectedFarm);
+            }
+            else
+            {
+                // If not in current list, fetch the farm details
+                Logger.LogInformation($"Farm not in current list, fetching details for {schoolId}");
+                var farmResponse = await ApiCall.Get<ApiResponse<FarmViewModel>>(
+                    await ApiCall.GetHttpClient(), $"farms/{schoolId}");
+                    
+                if (farmResponse?.Status == (int)HttpStatusCode.OK && farmResponse?.Result != null)
+                {
+                    await OnFarmSelect(farmResponse.Result);
+                }
+                else
+                {
+                    _alert.Show($"Could not load details for {schoolName}", showTitle: true, toastType: ToastType.Danger);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error handling school selection from map");
+            _alert.Show($"Error opening school details: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+
+    #endregion
+
     #region Page Lifecycle Methods
 
     protected override async Task OnInitializedAsync()
@@ -3165,6 +3736,10 @@
 
                     // Create a DotNetObjectReference for JS interop and store it for disposal
                     _dotNetRef = DotNetObjectReference.Create(this);
+
+                    // Make the DotNet reference available globally for popup callbacks
+                    await JS.InvokeAsync<object>("eval", "window.setMapDotNetRef = function(ref) { window.mapDotNetRef = ref; }; null;");
+                    await JS.InvokeVoidAsync("setMapDotNetRef", _dotNetRef);
 
                     // Add filter button to map with .NET reference
                     await _mapModule.InvokeVoidAsync("addFilterButton", _mapInstance, _dotNetRef);
