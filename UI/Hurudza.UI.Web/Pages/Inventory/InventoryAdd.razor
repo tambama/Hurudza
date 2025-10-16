@@ -1,0 +1,382 @@
+@page "/inventory/new"
+@attribute [Authorize]
+
+@using System.Net
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.Data.UI.Models.Models
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
+@inject IJSRuntime JSRuntime
+
+<Toast @ref="Alert" />
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-secondary me-3" @onclick="GoBack">
+                            <i class="fas fa-arrow-left me-1"></i>Back
+                        </button>
+                        <div>
+                            <h5 class="mb-0">Add New Inventory Item</h5>
+                            <p class="text-sm mb-0">Create a new inventory item for tracking</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (isLoading)
+                    {
+                        <div class="d-flex justify-content-center p-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="alert alert-danger" />
+
+                            <div class="row">
+                                <!-- Basic Information -->
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header pb-0">
+                                            <h6>Basic Information</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <SfTextBox @bind-Value="model.Name" FloatLabelType="FloatLabelType.Auto" Placeholder="Item Name"></SfTextBox>
+                                                <ValidationMessage For="@(() => model.Name)" />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfTextBox @bind-Value="model.Description" FloatLabelType="FloatLabelType.Auto" Placeholder="Description (Optional)" Multiline="true"></SfTextBox>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfDropDownList TValue="InventoryType" TItem="InventoryTypeModel" 
+                                                               DataSource="@inventoryTypeItems" @bind-Value="model.Type" 
+                                                               FloatLabelType="FloatLabelType.Auto" Placeholder="Inventory Type">
+                                                    <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+                                                </SfDropDownList>
+                                                <ValidationMessage For="@(() => model.Type)" />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfDropDownList TValue="string" TItem="FarmListViewModel" 
+                                                               DataSource="@availableFarms" @bind-Value="model.FarmId" 
+                                                               FloatLabelType="FloatLabelType.Auto" Placeholder="Select Farm">
+                                                    <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                                                </SfDropDownList>
+                                                <ValidationMessage For="@(() => model.FarmId)" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Product Details -->
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header pb-0">
+                                            <h6>Product Details</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <SfTextBox @bind-Value="model.SKU" FloatLabelType="FloatLabelType.Auto" Placeholder="SKU (Optional)"></SfTextBox>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfTextBox @bind-Value="model.Barcode" FloatLabelType="FloatLabelType.Auto" Placeholder="Barcode (Optional)"></SfTextBox>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfTextBox @bind-Value="model.Brand" FloatLabelType="FloatLabelType.Auto" Placeholder="Brand (Optional)"></SfTextBox>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfTextBox @bind-Value="model.Supplier" FloatLabelType="FloatLabelType.Auto" Placeholder="Supplier (Optional)"></SfTextBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <!-- Stock Information -->
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header pb-0">
+                                            <h6>Stock Information</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <SfNumericTextBox @bind-Value="model.InitialQuantity" FloatLabelType="FloatLabelType.Auto" 
+                                                                 Placeholder="Initial Quantity" Format="N2" Min="0" ShowSpinButton="false"></SfNumericTextBox>
+                                                <ValidationMessage For="@(() => model.InitialQuantity)" />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfDropDownList TValue="UnitOfMeasure" TItem="UnitOfMeasureModel" 
+                                                               DataSource="@unitOfMeasureItems" @bind-Value="model.UnitOfMeasure" 
+                                                               FloatLabelType="FloatLabelType.Auto" Placeholder="Unit of Measure">
+                                                    <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+                                                </SfDropDownList>
+                                                <ValidationMessage For="@(() => model.UnitOfMeasure)" />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfNumericTextBox @bind-Value="model.MinimumStockLevel" FloatLabelType="FloatLabelType.Auto" 
+                                                                 Placeholder="Minimum Stock Level (Optional)" Format="N2" Min="0" ShowSpinButton="false"></SfNumericTextBox>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfNumericTextBox @bind-Value="model.ReorderLevel" FloatLabelType="FloatLabelType.Auto" 
+                                                                 Placeholder="Reorder Level (Optional)" Format="N2" Min="0" ShowSpinButton="false"></SfNumericTextBox>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfNumericTextBox @bind-Value="model.ReorderQuantity" FloatLabelType="FloatLabelType.Auto" 
+                                                                 Placeholder="Reorder Quantity (Optional)" Format="N2" Min="0" ShowSpinButton="false"></SfNumericTextBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Cost & Storage -->
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header pb-0">
+                                            <h6>Cost & Storage</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <SfNumericTextBox @bind-Value="model.UnitCost" FloatLabelType="FloatLabelType.Auto" 
+                                                                 Placeholder="Unit Cost (Optional)" Format="C2" Min="0" ShowSpinButton="false"></SfNumericTextBox>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfNumericTextBox @bind-Value="model.SellingPrice" FloatLabelType="FloatLabelType.Auto" 
+                                                                 Placeholder="Selling Price (Optional)" Format="C2" Min="0" ShowSpinButton="false"></SfNumericTextBox>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfTextBox @bind-Value="model.StorageLocation" FloatLabelType="FloatLabelType.Auto" Placeholder="Storage Location (Optional)"></SfTextBox>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfTextBox @bind-Value="model.StorageConditions" FloatLabelType="FloatLabelType.Auto" 
+                                                          Placeholder="Storage Conditions (Optional)" Multiline="true"></SfTextBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <!-- Dates & Tracking -->
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header pb-0">
+                                            <h6>Dates & Tracking</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <SfDatePicker @bind-Value="model.ExpiryDate" FloatLabelType="FloatLabelType.Auto" 
+                                                             Placeholder="Expiry Date (Optional)" ShowClearButton="true"></SfDatePicker>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfDatePicker @bind-Value="model.ManufactureDate" FloatLabelType="FloatLabelType.Auto" 
+                                                             Placeholder="Manufacture Date (Optional)" ShowClearButton="true"></SfDatePicker>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfTextBox @bind-Value="model.BatchNumber" FloatLabelType="FloatLabelType.Auto" Placeholder="Batch Number (Optional)"></SfTextBox>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfCheckBox @bind-Checked="model.IsPerishable" Label="Perishable Item"></SfCheckBox>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfCheckBox @bind-Checked="model.RequiresSpecialHandling" Label="Requires Special Handling"></SfCheckBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Special Handling & Notes -->
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header pb-0">
+                                            <h6>Special Handling & Notes</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            @if (model.RequiresSpecialHandling)
+                                            {
+                                                <div class="form-group">
+                                                    <SfTextBox @bind-Value="model.SpecialHandlingInstructions" FloatLabelType="FloatLabelType.Auto" 
+                                                              Placeholder="Special Handling Instructions" Multiline="true"></SfTextBox>
+                                                </div>
+                                            }
+
+                                            <div class="form-group">
+                                                <SfTextBox @bind-Value="model.Notes" FloatLabelType="FloatLabelType.Auto" 
+                                                          Placeholder="Additional Notes (Optional)" Multiline="true"></SfTextBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-end">
+                                        <button type="button" class="btn btn-outline-secondary me-2" @onclick="GoBack">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                                            @if (isSaving)
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                                <span>Saving...</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-save me-1"></i>
+                                                <span>Save Inventory Item</span>
+                                            }
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Toast Alert;
+    private CreateInventoryViewModel model = new();
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private ClaimsPrincipal _user;
+
+    private List<InventoryTypeModel> inventoryTypeItems = new();
+    private List<UnitOfMeasureModel> unitOfMeasureItems = new();
+    private List<FarmListViewModel> availableFarms = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+        
+        // Initialize dropdowns
+        inventoryTypeItems = Enum.GetValues<InventoryType>().Select(x => new InventoryTypeModel(x)).ToList();
+        unitOfMeasureItems = Enum.GetValues<UnitOfMeasure>().Select(x => new UnitOfMeasureModel(x)).ToList();
+        
+        await LoadFarms();
+        
+        // Set default farm for non-administrators
+        bool isAdministrator = _user.IsInRole("Administrator") || _user.IsInRole("SystemAdministrator");
+        if (!isAdministrator)
+        {
+            var currentFarmId = await FarmAccessService.GetCurrentFarmId();
+            if (!string.IsNullOrEmpty(currentFarmId))
+            {
+                model.FarmId = currentFarmId;
+            }
+        }
+        
+        // Set defaults
+        model.UnitOfMeasure = UnitOfMeasure.Units;
+        model.Type = InventoryType.Other;
+        
+        isLoading = false;
+    }
+
+    private async Task LoadFarms()
+    {
+        try
+        {
+            bool isAdministrator = _user.IsInRole("Administrator") || _user.IsInRole("SystemAdministrator");
+            
+            if (isAdministrator)
+            {
+                // Load all farms for administrators
+                var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<FarmListViewModel>>>(
+                    await ApiCall.GetHttpClient(), "Farms/GetAllFarms");
+                    
+                if (response.Status == (int)HttpStatusCode.OK)
+                {
+                    availableFarms = response.Result;
+                }
+            }
+            else
+            {
+                // Load accessible farms for regular users
+                var userId = _user.FindFirstValue(ClaimTypes.NameIdentifier) ?? _user.FindFirstValue("UserId");
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<FarmListViewModel>>>(
+                        await ApiCall.GetHttpClient(), $"farmusers/getaccessiblefarms/{userId}");
+                        
+                    if (response.Status == (int)HttpStatusCode.OK)
+                    {
+                        availableFarms = response.Result;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading farms: {ex.Message}", showTitle: true, toastType: ToastType.Warning);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        isSaving = true;
+        
+        try
+        {
+            var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<InventoryViewModel>, CreateInventoryViewModel>(
+                await ApiCall.GetHttpClient(), "Inventory/CreateInventory", model);
+                
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show("Inventory item created successfully!", showTitle: true, toastType: ToastType.Success);
+                await Task.Delay(1500); // Show success message briefly
+                NavigationManager.NavigateTo("/inventory");
+            }
+            else
+            {
+                Alert.Show(response.Title ?? "Error creating inventory item", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/inventory");
+    }
+}

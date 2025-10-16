@@ -1,0 +1,347 @@
+@page "/harvest/schedule/add"
+@attribute [Authorize]
+
+@using System.Net
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.Data.UI.Models.Models
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
+
+<Toast @ref="Alert" />
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-secondary me-3" @onclick="GoBack">
+                            <i class="fas fa-arrow-left me-1"></i>Back
+                        </button>
+                        <div>
+                            <h5 class="mb-0">Schedule Harvest</h5>
+                            <p class="text-sm mb-0">Plan specific field harvest activities</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (isLoading)
+                    {
+                        <div class="d-flex justify-content-center p-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Harvest Plan <span class="text-danger">*</span></label>
+                                        <SfDropDownList TValue="string" TItem="HarvestPlanViewModel"
+                                                       @bind-Value="model.HarvestPlanId"
+                                                       DataSource="@availablePlans"
+                                                       Placeholder="Select Harvest Plan"
+                                                       FloatLabelType="FloatLabelType.Auto">
+                                            <DropDownListFieldSettings Value="Id" Text="Season"></DropDownListFieldSettings>
+                                            <DropDownListEvents TValue="string" TItem="HarvestPlanViewModel" ValueChange="OnPlanChanged"></DropDownListEvents>
+                                        </SfDropDownList>
+                                        <ValidationMessage For="@(() => model.HarvestPlanId)" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Field Crop <span class="text-danger">*</span></label>
+                                        <SfDropDownList TValue="string" TItem="FieldCropViewModel"
+                                                       @bind-Value="model.FieldCropId"
+                                                       DataSource="@availableFieldCrops"
+                                                       Placeholder="@(availableFieldCrops.Any() ? "Select Field Crop" : "No planted crops available for harvest")"
+                                                       FloatLabelType="FloatLabelType.Auto"
+                                                       Enabled="@(!string.IsNullOrEmpty(model.HarvestPlanId) && availableFieldCrops.Any())">
+                                            <DropDownListFieldSettings Value="Id" Text="@nameof(FieldCropViewModel.Field)"></DropDownListFieldSettings>
+                                            <DropDownListTemplates TItem="FieldCropViewModel">
+                                                <ItemTemplate Context="fieldCropContext">
+                                                    <div>
+                                                        <div class="fw-bold">@((fieldCropContext as FieldCropViewModel)?.Field)</div>
+                                                        <small class="text-muted">@((fieldCropContext as FieldCropViewModel)?.Crop)</small>
+                                                    </div>
+                                                </ItemTemplate>
+                                            </DropDownListTemplates>
+                                        </SfDropDownList>
+                                        <ValidationMessage For="@(() => model.FieldCropId)" />
+                                        @if (!string.IsNullOrEmpty(model.HarvestPlanId) && !availableFieldCrops.Any())
+                                        {
+                                            <small class="text-warning">No planted crops available. Please ensure crops have been planted and not yet harvested.</small>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Planned Date <span class="text-danger">*</span></label>
+                                        <SfDatePicker TValue="DateTime" @bind-Value="model.PlannedDate"
+                                                     FloatLabelType="FloatLabelType.Auto"></SfDatePicker>
+                                        <ValidationMessage For="@(() => model.PlannedDate)" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Priority</label>
+                                        <SfDropDownList TValue="HarvestPriority" TItem="HarvestPriorityModel"
+                                                       @bind-Value="model.Priority"
+                                                       DataSource="@priorityOptions"
+                                                       FloatLabelType="FloatLabelType.Auto">
+                                            <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+                                        </SfDropDownList>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Labor Requirements</label>
+                                        <SfNumericTextBox TValue="int" @bind-Value="model.LaborRequirements"
+                                                         FloatLabelType="FloatLabelType.Auto"
+                                                         Placeholder="Number of workers"
+                                                         Min="0" ShowSpinButton="true"></SfNumericTextBox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Estimated Yield <span class="text-danger">*</span></label>
+                                        <SfNumericTextBox TValue="decimal" @bind-Value="model.EstimatedYield"
+                                                         FloatLabelType="FloatLabelType.Auto"
+                                                         Placeholder="Expected yield"
+                                                         Min="0.01m" Format="N2" ShowSpinButton="false"></SfNumericTextBox>
+                                        <ValidationMessage For="@(() => model.EstimatedYield)" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Yield Unit</label>
+                                        <SfDropDownList TValue="YieldUnit" TItem="YieldUnitModel"
+                                                       @bind-Value="model.EstimatedYieldUnit"
+                                                       DataSource="@yieldUnitOptions"
+                                                       FloatLabelType="FloatLabelType.Auto">
+                                            <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+                                        </SfDropDownList>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Equipment Requirements</label>
+                                        <SfTextBox @bind-Value="model.EquipmentRequirements" FloatLabelType="FloatLabelType.Auto"
+                                                  Placeholder="Required equipment (e.g., Harvester, Tractor, etc.)" Multiline="true"></SfTextBox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Notes</label>
+                                        <SfTextBox @bind-Value="model.Notes" FloatLabelType="FloatLabelType.Auto"
+                                                  Placeholder="Additional notes or special instructions" Multiline="true"></SfTextBox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-outline-secondary me-2" @onclick="Cancel">Cancel</button>
+                                <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                                    @if (isSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        <span>Saving...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-save me-2"></i>
+                                        <span>Create Schedule</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Toast Alert;
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private ClaimsPrincipal _user;
+    private string currentFarmId = string.Empty;
+    private string currentFarmName = string.Empty;
+    private string? planIdFromQuery;
+
+    private CreateHarvestScheduleViewModel model = new();
+    private List<HarvestPlanViewModel> availablePlans = new();
+    private List<FieldCropViewModel> availableFieldCrops = new();
+
+    // Dropdown options
+    private List<HarvestPriorityModel> priorityOptions = HarvestPriorityModel.GetAll();
+    private List<YieldUnitModel> yieldUnitOptions = YieldUnitModel.GetAll();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+
+        // Check for planId query parameter
+        var uri = new Uri(NavigationManager.Uri);
+        var queryString = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        planIdFromQuery = queryString["planId"];
+
+        // Get current farm context
+        currentFarmId = await FarmAccessService.GetCurrentFarmId();
+        currentFarmName = await FarmAccessService.GetCurrentFarmName();
+
+        if (string.IsNullOrEmpty(currentFarmId))
+        {
+            Alert.Show("No farm context found. Please select a farm profile.", showTitle: true, toastType: ToastType.Danger);
+            NavigationManager.NavigateTo("/farms");
+            return;
+        }
+
+        // Initialize default values
+        model = new CreateHarvestScheduleViewModel
+        {
+            PlannedDate = DateTime.Today.AddDays(7),
+            Priority = HarvestPriority.Medium,
+            EstimatedYieldUnit = YieldUnit.Kilograms
+        };
+
+        // If coming from a specific plan, pre-select it
+        if (!string.IsNullOrEmpty(planIdFromQuery))
+        {
+            model.HarvestPlanId = planIdFromQuery;
+        }
+
+        await LoadData();
+        isLoading = false;
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            // Load available harvest plans for current farm only
+            availablePlans.Clear();
+            var farmPlans = await ApiCall.Get<List<HarvestPlanViewModel>>(
+                await ApiCall.GetHttpClient(), $"Harvest/GetHarvestPlansByFarm/{currentFarmId}");
+            if (farmPlans != null)
+                availablePlans = farmPlans.Where(p => p.Status == HarvestPlanStatus.Active || p.Status == HarvestPlanStatus.Draft).ToList();
+
+            // If plan was pre-selected, load field crops
+            if (!string.IsNullOrEmpty(model.HarvestPlanId))
+            {
+                await LoadFieldCropsForPlan(model.HarvestPlanId);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading data: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+
+    private async Task OnPlanChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, HarvestPlanViewModel> args)
+    {
+        if (!string.IsNullOrEmpty(args.Value))
+        {
+            await LoadFieldCropsForPlan(args.Value);
+        }
+        else
+        {
+            availableFieldCrops.Clear();
+        }
+        model.FieldCropId = null;
+    }
+
+    private async Task LoadFieldCropsForPlan(string planId)
+    {
+        try
+        {
+            // All plans are for the current farm, so use currentFarmId directly
+            var fieldCrops = await ApiCall.Get<List<FieldCropViewModel>>(
+                await ApiCall.GetHttpClient(), $"FieldCrops/GetFieldCropsByFarm/{currentFarmId}");
+
+            availableFieldCrops = fieldCrops ?? new List<FieldCropViewModel>();
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading field crops: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            availableFieldCrops.Clear();
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (isSaving) return;
+
+        isSaving = true;
+
+        try
+        {
+            var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<HarvestScheduleViewModel>, CreateHarvestScheduleViewModel>(
+                await ApiCall.GetHttpClient(), "Harvest/CreateHarvestSchedule", model);
+
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show("Harvest schedule created successfully!", showTitle: true, toastType: ToastType.Success);
+
+                // Navigate back to schedule list, preserving plan context if it exists
+                var returnUrl = "/harvest/schedule";
+                if (!string.IsNullOrEmpty(planIdFromQuery))
+                {
+                    returnUrl += $"?planId={planIdFromQuery}";
+                }
+                NavigationManager.NavigateTo(returnUrl);
+            }
+            else
+            {
+                Alert.Show(response.Title ?? "Failed to create harvest schedule", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error saving harvest schedule: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        var returnUrl = "/harvest/schedule";
+        if (!string.IsNullOrEmpty(planIdFromQuery))
+        {
+            returnUrl += $"?planId={planIdFromQuery}";
+        }
+        NavigationManager.NavigateTo(returnUrl);
+    }
+
+    private void GoBack()
+    {
+        Cancel();
+    }
+}

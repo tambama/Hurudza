@@ -155,6 +155,62 @@
                         <span class="nav-link-text ms-1">Equipment</span>
                     </a>
                 </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link @InventoryActive" href="/inventory" onclick="@ActivateInventory">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-boxes text-lg opacity-10" aria-hidden="true"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Inventory</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#harvestSection" class="nav-link @HarvestActive"
+                       aria-controls="harvestSection" role="button" aria-expanded="@(_harvestExpanded ? "true" : "false")"
+                       onclick="@ActivateHarvest">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-seedling text-lg opacity-10" aria-hidden="true"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Harvest</span>
+                    </a>
+                    <div class="collapse @(_harvestExpanded ? "show" : "hidden")" id="harvestSection">
+                        <ul class="nav ms-4 ps-3">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/harvest">
+                                    <span class="sidenav-mini-icon"> D </span>
+                                    <span class="sidenav-normal"> Dashboard </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/harvest/planning">
+                                    <span class="sidenav-mini-icon"> P </span>
+                                    <span class="sidenav-normal"> Planning </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/harvest/schedule">
+                                    <span class="sidenav-mini-icon"> S </span>
+                                    <span class="sidenav-normal"> Schedule </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/harvest/record">
+                                    <span class="sidenav-mini-icon"> R </span>
+                                    <span class="sidenav-normal"> Recording </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/harvest/analytics">
+                                    <span class="sidenav-mini-icon"> A </span>
+                                    <span class="sidenav-normal"> Analytics </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
             }
 
             @* Admin Section *@
@@ -262,6 +318,8 @@
     private string RolesActive = "";
     private string CropsActive = "";
     private string EquipmentActive = "";
+    private string InventoryActive = "";
+    private string HarvestActive = "";
     private string FarmAssignmentsActive = "";
     private CustomAuthStateProvider _authProvider;
     private ClaimsPrincipal _user;
@@ -276,6 +334,7 @@
     private bool _fieldsExpanded = false;
     private bool _cropsExpanded = false;
     private bool _tillageExpanded = false;
+    private bool _harvestExpanded = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -382,6 +441,14 @@
         else if (url.Contains("/equipment"))
         {
             ActivateEquipment();
+        }
+        else if (url.Contains("/inventory"))
+        {
+            ActivateInventory();
+        }
+        else if (url.Contains("/harvest"))
+        {
+            ActivateHarvest();
         }
         else if (url.Contains("/map"))
         {
@@ -522,6 +589,19 @@
         ResetAllMenus();
         FarmAssignmentsActive = "active";
     }
+    
+    private void ActivateInventory()
+    {
+        ResetAllMenus();
+        InventoryActive = "active";
+    }
+
+    private void ActivateHarvest()
+    {
+        ResetAllMenus();
+        HarvestActive = "active";
+        _harvestExpanded = true;
+    }
 
     private void ResetAllMenus()
     {
@@ -531,15 +611,18 @@
         FieldsActive = "";
         CropsActive = "";
         EquipmentActive = "";
+        InventoryActive = "";
         OwnershipActive = "";
         UsersActive = "";
         RolesActive = "";
         TillageActive = "";
+        HarvestActive = "";
         FarmAssignmentsActive = "";
 
         _farmsExpanded = false;
         _fieldsExpanded = false;
         _cropsExpanded = false;
         _tillageExpanded = false;
+        _harvestExpanded = false;
     }
 }

@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\..\Common\Hurudza.Common.Utils\Hurudza.Common.Utils.csproj" />
       <ProjectReference Include="..\..\Hurudza.Data.ViewModels\Hurudza.Data.UI.Models.csproj" />
       <ProjectReference Include="..\Hurudza.Data.Context\Hurudza.Data.Context.csproj" />

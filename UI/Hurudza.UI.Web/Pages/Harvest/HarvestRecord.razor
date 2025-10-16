@@ -1,0 +1,569 @@
+@page "/harvest/record"
+@page "/harvest/record/{ScheduleId}"
+@attribute [Authorize]
+
+@using System.Net
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.Data.UI.Models.Models
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
+
+<Toast @ref="Alert" />
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-secondary me-3" @onclick="GoBack">
+                            <i class="fas fa-arrow-left me-1"></i>Back
+                        </button>
+                        <div>
+                            <h5 class="mb-0">Record Harvest</h5>
+                            <p class="text-sm mb-0">@pageSubtitle</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (isLoading)
+                    {
+                        <div class="d-flex justify-content-center p-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else if (harvestSchedule != null)
+                    {
+                        <!-- Schedule Information Card -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card bg-gradient-light">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <h6 class="text-sm font-weight-bolder mb-0">Field</h6>
+                                                <p class="text-sm mb-0">@harvestSchedule.Field</p>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <h6 class="text-sm font-weight-bolder mb-0">Crop</h6>
+                                                <p class="text-sm mb-0">@harvestSchedule.Crop</p>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <h6 class="text-sm font-weight-bolder mb-0">Planned Date</h6>
+                                                <p class="text-sm mb-0">@harvestSchedule.PlannedDate.ToString("MMM dd, yyyy")</p>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <h6 class="text-sm font-weight-bolder mb-0">Estimated Yield</h6>
+                                                <p class="text-sm mb-0">@harvestSchedule.EstimatedYield.ToString("N1") @harvestSchedule.EstimatedYieldUnit.ToString("G").Replace("_", " ")</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Harvest Recording Form -->
+                        <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Harvest Date <span class="text-danger">*</span></label>
+                                        <SfDatePicker TValue="DateTime" @bind-Value="model.HarvestDate" 
+                                                     FloatLabelType="FloatLabelType.Auto" Max="DateTime.Today"></SfDatePicker>
+                                        <ValidationMessage For="@(() => model.HarvestDate)" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Quality Grade</label>
+                                        <SfDropDownList TValue="QualityGrade" TItem="QualityGradeModel" 
+                                                       @bind-Value="model.Quality" 
+                                                       DataSource="@qualityGradeOptions" 
+                                                       FloatLabelType="FloatLabelType.Auto">
+                                            <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+                                        </SfDropDownList>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Actual Yield <span class="text-danger">*</span></label>
+                                        <SfNumericTextBox TValue="decimal" @bind-Value="model.ActualYield" 
+                                                         FloatLabelType="FloatLabelType.Auto" 
+                                                         Placeholder="Actual harvested yield" 
+                                                         Min="0.01m" Format="N2" ShowSpinButton="false">
+                                            <NumericTextBoxEvents TValue="decimal" ValueChange="@((Syncfusion.Blazor.Inputs.ChangeEventArgs<decimal> args) => CalculateYieldVariance())"></NumericTextBoxEvents>
+                                        </SfNumericTextBox>
+                                        <ValidationMessage For="@(() => model.ActualYield)" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Yield Unit</label>
+                                        <SfDropDownList TValue="YieldUnit" TItem="YieldUnitModel" 
+                                                       @bind-Value="model.YieldUnit" 
+                                                       DataSource="@yieldUnitOptions" 
+                                                       FloatLabelType="FloatLabelType.Auto">
+                                            <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+                                        </SfDropDownList>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (showYieldVariance)
+                            {
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="alert @(yieldVarianceClass) alert-dismissible fade show" role="alert">
+                                            <strong>Yield Analysis:</strong>
+                                            @if (yieldVariance > 0)
+                                            {
+                                                <span>Exceeded estimate by @Math.Abs(yieldVariance).ToString("N1") units (@Math.Abs(yieldVariancePercentage).ToString("N1")% above target)</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Below estimate by @Math.Abs(yieldVariance).ToString("N1") units (@Math.Abs(yieldVariancePercentage).ToString("N1")% below target)</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Start Time</label>
+                                        <SfTimePicker TValue="TimeSpan?" @bind-Value="model.StartTime" 
+                                                     FloatLabelType="FloatLabelType.Auto" Format="HH:mm"></SfTimePicker>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">End Time</label>
+                                        <SfTimePicker TValue="TimeSpan?" @bind-Value="model.EndTime" 
+                                                     FloatLabelType="FloatLabelType.Auto" Format="HH:mm"></SfTimePicker>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Labor Hours</label>
+                                        <SfNumericTextBox TValue="decimal?" @bind-Value="model.LaborHours" 
+                                                         FloatLabelType="FloatLabelType.Auto" 
+                                                         Placeholder="Total labor hours" 
+                                                         Min="0" Format="N1" ShowSpinButton="false"></SfNumericTextBox>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Labor Cost</label>
+                                        <SfNumericTextBox TValue="decimal?" @bind-Value="model.LaborCost" 
+                                                         FloatLabelType="FloatLabelType.Auto" 
+                                                         Placeholder="Total labor cost" 
+                                                         Min="0" Format="C2" ShowSpinButton="false"></SfNumericTextBox>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Storage Location</label>
+                                        <SfTextBox @bind-Value="model.StorageLocation" FloatLabelType="FloatLabelType.Auto" 
+                                                  Placeholder="Where is the harvest stored?"></SfTextBox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Equipment Used</label>
+                                        <SfTextBox @bind-Value="model.EquipmentUsed" FloatLabelType="FloatLabelType.Auto" 
+                                                  Placeholder="Equipment used during harvest" Multiline="true"></SfTextBox>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Moisture (%)</label>
+                                        <SfNumericTextBox TValue="decimal?" @bind-Value="model.Moisture" 
+                                                         FloatLabelType="FloatLabelType.Auto" 
+                                                         Placeholder="Moisture content" 
+                                                         Min="0" Max="100" Format="N1" ShowSpinButton="false"></SfNumericTextBox>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Temperature (°C)</label>
+                                        <SfNumericTextBox TValue="decimal?" @bind-Value="model.Temperature" 
+                                                         FloatLabelType="FloatLabelType.Auto" 
+                                                         Placeholder="Temperature" 
+                                                         Format="N1" ShowSpinButton="false"></SfNumericTextBox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Notes</label>
+                                        <SfTextBox @bind-Value="model.Notes" FloatLabelType="FloatLabelType.Auto"
+                                                  Placeholder="Additional notes about the harvest" Multiline="true"></SfTextBox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="isCompleteHarvest"
+                                               @bind="model.IsCompleteHarvest">
+                                        <label class="form-check-label" for="isCompleteHarvest">
+                                            <strong>Mark this field crop as completely harvested</strong>
+                                        </label>
+                                        <p class="text-xs text-muted mb-0">
+                                            @if (model.IsCompleteHarvest)
+                                            {
+                                                <span>This harvest will be marked as <strong>completed</strong> and removed from upcoming harvests.</span>
+                                            }
+                                            else
+                                            {
+                                                <span>This will be recorded as a <strong>partial harvest</strong>. The schedule will remain active for recording additional harvests.</span>
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-outline-secondary me-2" @onclick="Cancel">Cancel</button>
+                                <button type="submit" class="btn btn-success" disabled="@isSaving">
+                                    @if (isSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        <span>Recording...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-seedling me-2"></i>
+                                        <span>Record Harvest</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+                    }
+                    else if (availableSchedules.Any())
+                    {
+                        <!-- Select Schedule View -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="mb-3">Select a harvest schedule to record:</h6>
+                                <div class="table-responsive">
+                                    <table class="table align-items-center mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Field/Crop</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Planned Date</th>
+                                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Priority</th>
+                                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Est. Yield</th>
+                                                <th class="text-secondary opacity-7">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var schedule in availableSchedules.OrderBy(s => s.PlannedDate))
+                                            {
+                                                <tr class="@(schedule.IsOverdue ? "bg-light-warning" : "")">
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                <h6 class="mb-0 text-sm">@schedule.Field</h6>
+                                                                <p class="text-xs text-secondary mb-0">@schedule.Crop</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <p class="text-xs font-weight-bold mb-0">@schedule.PlannedDate.ToString("MMM dd, yyyy")</p>
+                                                        @if (schedule.IsOverdue)
+                                                        {
+                                                            <small class="text-warning">
+                                                                <i class="fas fa-clock me-1"></i>
+                                                                @Math.Abs(schedule.DaysFromPlanned) days overdue
+                                                            </small>
+                                                        }
+                                                    </td>
+                                                    <td class="align-middle text-center text-sm">
+                                                        <span class="badge badge-sm bg-gradient-@(GetPriorityColor(schedule.Priority))">
+                                                            @schedule.Priority.ToString("G")
+                                                        </span>
+                                                    </td>
+                                                    <td class="align-middle text-center">
+                                                        <span class="text-secondary text-xs font-weight-bold">
+                                                            @schedule.EstimatedYield.ToString("N1") @schedule.EstimatedYieldUnit.ToString("G").Replace("_", " ")
+                                                        </span>
+                                                    </td>
+                                                    <td class="align-middle">
+                                                        <button class="btn btn-success btn-sm" @onclick="(() => SelectSchedule(schedule.Id))">
+                                                            <i class="fas fa-seedling me-1"></i>Record Harvest
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center p-4">
+                            <i class="fas fa-calendar-times fa-3x text-secondary mb-3"></i>
+                            <h5 class="text-secondary">No harvest schedules available</h5>
+                            <p class="text-muted mb-3">There are no planned harvests ready for recording.</p>
+                            <button class="btn btn-primary" @onclick="GoToSchedule">
+                                <i class="fas fa-calendar-plus me-2"></i>View Schedule
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? ScheduleId { get; set; }
+
+    private Toast Alert;
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private ClaimsPrincipal _user;
+    private string currentFarmId = string.Empty;
+    private string currentFarmName = string.Empty;
+
+    private CreateHarvestRecordViewModel model = new();
+    private HarvestScheduleViewModel? harvestSchedule;
+    private List<HarvestScheduleViewModel> availableSchedules = new();
+
+    // Dropdown options
+    private List<QualityGradeModel> qualityGradeOptions = QualityGradeModel.GetAll();
+    private List<YieldUnitModel> yieldUnitOptions = YieldUnitModel.GetAll();
+
+    // Yield variance calculations
+    private bool showYieldVariance = false;
+    private decimal yieldVariance = 0;
+    private decimal yieldVariancePercentage = 0;
+    private string yieldVarianceClass = "alert-info";
+
+    private string pageSubtitle => harvestSchedule != null 
+        ? $"Recording harvest for {harvestSchedule.Field} - {harvestSchedule.Crop}" 
+        : "Select a harvest schedule to record harvest data";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+
+        // Get current farm context
+        currentFarmId = await FarmAccessService.GetCurrentFarmId();
+        currentFarmName = await FarmAccessService.GetCurrentFarmName();
+
+        if (string.IsNullOrEmpty(currentFarmId))
+        {
+            Alert.Show("No farm context found. Please select a farm profile.", showTitle: true, toastType: ToastType.Danger);
+            NavigationManager.NavigateTo("/farms");
+            return;
+        }
+
+        // Initialize default values
+        model.HarvestDate = DateTime.Today;
+        model.Quality = QualityGrade.Grade1;
+        model.YieldUnit = YieldUnit.Kilograms;
+        model.IsCompleteHarvest = true;
+
+        await LoadData();
+        isLoading = false;
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            // Check if a specific schedule was provided
+            if (!string.IsNullOrEmpty(ScheduleId))
+            {
+                await LoadSpecificSchedule(ScheduleId);
+            }
+            else
+            {
+                // Check query parameters
+                var uri = new Uri(NavigationManager.Uri);
+                var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+                var scheduleId = query["scheduleId"];
+                
+                if (!string.IsNullOrEmpty(scheduleId))
+                {
+                    await LoadSpecificSchedule(scheduleId);
+                }
+                else
+                {
+                    await LoadAvailableSchedules();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading data: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+
+    private async Task LoadSpecificSchedule(string scheduleId)
+    {
+        try
+        {
+            var schedule = await ApiCall.Get<UI.Shared.Models.ApiResponse<HarvestScheduleViewModel>>(
+                await ApiCall.GetHttpClient(), $"Harvest/GetHarvestScheduleDetails/{scheduleId}");
+
+            if (schedule.Status == (int)HttpStatusCode.OK && schedule.Result != null)
+            {
+                harvestSchedule = schedule.Result;
+                model.HarvestScheduleId = scheduleId;
+                model.YieldUnit = harvestSchedule.EstimatedYieldUnit;
+                CalculateYieldVariance();
+            }
+            else
+            {
+                Alert.Show("Harvest schedule not found", showTitle: true, toastType: ToastType.Danger);
+                await LoadAvailableSchedules();
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading harvest schedule: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            await LoadAvailableSchedules();
+        }
+    }
+
+    private async Task LoadAvailableSchedules()
+    {
+        try
+        {
+            availableSchedules.Clear();
+            var farmSchedules = await ApiCall.Get<List<HarvestScheduleViewModel>>(
+                await ApiCall.GetHttpClient(), $"Harvest/GetHarvestSchedulesByFarm/{currentFarmId}");
+            if (farmSchedules != null)
+            {
+                // Show planned and in-progress schedules (allow recording partial harvests)
+                // Exclude only completed or cancelled schedules
+                availableSchedules = farmSchedules.Where(s =>
+                    s.Status == HarvestStatus.Planned ||
+                    s.Status == HarvestStatus.InProgress).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading available schedules: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+
+    private void CalculateYieldVariance()
+    {
+        if (harvestSchedule != null && model.ActualYield > 0)
+        {
+            yieldVariance = model.ActualYield - harvestSchedule.EstimatedYield;
+            yieldVariancePercentage = harvestSchedule.EstimatedYield > 0 
+                ? (yieldVariance / harvestSchedule.EstimatedYield) * 100 
+                : 0;
+
+            yieldVarianceClass = yieldVariance >= 0 ? "alert-success" : "alert-warning";
+            showYieldVariance = true;
+        }
+        else
+        {
+            showYieldVariance = false;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (isSaving) return;
+
+        isSaving = true;
+        
+        try
+        {
+            var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<HarvestRecordViewModel>, CreateHarvestRecordViewModel>(
+                await ApiCall.GetHttpClient(), "Harvest/CreateHarvestRecord", model);
+                
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show("Harvest recorded successfully!", showTitle: true, toastType: ToastType.Success);
+                NavigationManager.NavigateTo("/harvest/schedule");
+            }
+            else
+            {
+                Alert.Show(response.Title ?? "Failed to record harvest", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error recording harvest: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private string GetPriorityColor(HarvestPriority priority)
+    {
+        return priority switch
+        {
+            HarvestPriority.Critical => "danger",
+            HarvestPriority.High => "warning",
+            HarvestPriority.Medium => "info",
+            HarvestPriority.Low => "success",
+            _ => "secondary"
+        };
+    }
+
+    private void SelectSchedule(string? scheduleId)
+    {
+        if (!string.IsNullOrEmpty(scheduleId))
+        {
+            NavigationManager.NavigateTo($"/harvest/record/{scheduleId}");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/harvest/schedule");
+    }
+
+    private void GoBack()
+    {
+        if (harvestSchedule != null)
+        {
+            NavigationManager.NavigateTo("/harvest/schedule");
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/harvest");
+        }
+    }
+
+    private void GoToSchedule()
+    {
+        NavigationManager.NavigateTo("/harvest/schedule");
+    }
+}

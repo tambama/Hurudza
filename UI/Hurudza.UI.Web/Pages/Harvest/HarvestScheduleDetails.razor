@@ -1,0 +1,416 @@
+@page "/harvest/schedule/details/{Id}"
+@attribute [Authorize]
+
+@using System.Net
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.Data.UI.Models.Models
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
+
+<Toast @ref="Alert" />
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-secondary me-3" @onclick="GoBack">
+                            <i class="fas fa-arrow-left me-1"></i>Back
+                        </button>
+                        <div>
+                            <h5 class="mb-0">Harvest Schedule Details</h5>
+                            <p class="text-sm mb-0">View complete harvest schedule information</p>
+                        </div>
+                        <div class="ms-auto">
+                            @if (schedule != null && schedule.Status == HarvestStatus.Planned)
+                            {
+                                <button class="btn btn-success btn-sm me-2" @onclick="RecordHarvest">
+                                    <i class="fas fa-seedling me-1"></i>Record Harvest
+                                </button>
+                            }
+                            <button class="btn btn-primary btn-sm" @onclick="EditSchedule">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (isLoading)
+                    {
+                        <div class="d-flex justify-content-center p-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else if (schedule != null)
+                    {
+                        <!-- Status Overview -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card bg-gradient-@(GetStatusGradient(schedule.Status))">
+                                    <div class="card-body p-3">
+                                        <p class="text-sm text-white opacity-8 mb-0">Status</p>
+                                        <h5 class="text-white font-weight-bolder mb-0">@schedule.Status.ToString("G").Replace("_", " ")</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-gradient-@(GetPriorityGradient(schedule.Priority))">
+                                    <div class="card-body p-3">
+                                        <p class="text-sm text-white opacity-8 mb-0">Priority</p>
+                                        <h5 class="text-white font-weight-bolder mb-0">@schedule.Priority.ToString("G")</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card @(schedule.IsOverdue && schedule.Status == HarvestStatus.Planned ? "bg-gradient-danger" : "bg-gradient-light")">
+                                    <div class="card-body p-3">
+                                        <p class="text-sm @(schedule.IsOverdue && schedule.Status == HarvestStatus.Planned ? "text-white opacity-8" : "text-secondary") mb-0">Planned Date</p>
+                                        <h5 class="@(schedule.IsOverdue && schedule.Status == HarvestStatus.Planned ? "text-white" : "text-dark") font-weight-bolder mb-0">
+                                            @schedule.PlannedDate.ToString("MMM dd, yyyy")
+                                        </h5>
+                                        @if (schedule.IsOverdue && schedule.Status == HarvestStatus.Planned)
+                                        {
+                                            <small class="text-white">@Math.Abs(schedule.DaysFromPlanned) days overdue</small>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-gradient-light">
+                                    <div class="card-body p-3">
+                                        <p class="text-sm text-secondary mb-0">Estimated Yield</p>
+                                        <h5 class="text-dark font-weight-bolder mb-0">
+                                            @schedule.EstimatedYield.ToString("N1") @schedule.EstimatedYieldUnit.ToString("G").Replace("_", " ")
+                                        </h5>
+                                        @if (schedule.ActualYield > 0)
+                                        {
+                                            <small class="text-success">Actual: @schedule.ActualYield.ToString("N1")</small>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Information -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header pb-0">
+                                        <h6 class="mb-0">Field & Crop Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-5 text-secondary">Farm:</div>
+                                            <div class="col-7 font-weight-bold">@schedule.Farm</div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-5 text-secondary">Field:</div>
+                                            <div class="col-7 font-weight-bold">@schedule.Field</div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-5 text-secondary">Crop:</div>
+                                            <div class="col-7 font-weight-bold">@schedule.Crop</div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-5 text-secondary">Harvest Plan:</div>
+                                            <div class="col-7 font-weight-bold">@schedule.HarvestPlan</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header pb-0">
+                                        <h6 class="mb-0">Schedule Details</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-5 text-secondary">Planned Date:</div>
+                                            <div class="col-7 font-weight-bold">
+                                                @schedule.PlannedDate.ToString("MMMM dd, yyyy")
+                                            </div>
+                                        </div>
+                                        @if (schedule.ActualDate.HasValue)
+                                        {
+                                            <div class="row mb-3">
+                                                <div class="col-5 text-secondary">Actual Date:</div>
+                                                <div class="col-7 font-weight-bold text-success">
+                                                    @schedule.ActualDate.Value.ToString("MMMM dd, yyyy")
+                                                </div>
+                                            </div>
+                                        }
+                                        @if (schedule.StartDate.HasValue)
+                                        {
+                                            <div class="row mb-3">
+                                                <div class="col-5 text-secondary">Started:</div>
+                                                <div class="col-7 font-weight-bold">
+                                                    @schedule.StartDate.Value.ToString("MMM dd, yyyy HH:mm")
+                                                </div>
+                                            </div>
+                                        }
+                                        @if (schedule.EndDate.HasValue)
+                                        {
+                                            <div class="row mb-3">
+                                                <div class="col-5 text-secondary">Completed:</div>
+                                                <div class="col-7 font-weight-bold">
+                                                    @schedule.EndDate.Value.ToString("MMM dd, yyyy HH:mm")
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resources & Requirements -->
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header pb-0">
+                                        <h6 class="mb-0">Labor Requirements</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        @if (schedule.LaborRequirements > 0)
+                                        {
+                                            <p class="mb-0">
+                                                <i class="fas fa-users text-primary me-2"></i>
+                                                <strong>@schedule.LaborRequirements</strong> workers required
+                                            </p>
+                                        }
+                                        else
+                                        {
+                                            <p class="text-muted mb-0">No specific labor requirements specified</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header pb-0">
+                                        <h6 class="mb-0">Equipment Requirements</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        @if (!string.IsNullOrWhiteSpace(schedule.EquipmentRequirements))
+                                        {
+                                            <p class="mb-0">
+                                                <i class="fas fa-tools text-warning me-2"></i>
+                                                @schedule.EquipmentRequirements
+                                            </p>
+                                        }
+                                        else
+                                        {
+                                            <p class="text-muted mb-0">No specific equipment requirements specified</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Yield Information -->
+                        @if (schedule.ActualYield > 0)
+                        {
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header pb-0">
+                                            <h6 class="mb-0">Harvest Results</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <p class="text-sm text-secondary mb-0">Estimated Yield</p>
+                                                    <h5 class="font-weight-bolder">@schedule.EstimatedYield.ToString("N1") @schedule.EstimatedYieldUnit.ToString("G").Replace("_", " ")</h5>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <p class="text-sm text-secondary mb-0">Actual Yield</p>
+                                                    <h5 class="font-weight-bolder text-success">@schedule.ActualYield.ToString("N1") @schedule.EstimatedYieldUnit.ToString("G").Replace("_", " ")</h5>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <p class="text-sm text-secondary mb-0">Variance</p>
+                                                    @{
+                                                        var variance = schedule.ActualYield - schedule.EstimatedYield;
+                                                        var variancePercent = schedule.EstimatedYield > 0 ? (variance / schedule.EstimatedYield) * 100 : 0;
+                                                    }
+                                                    <h5 class="font-weight-bolder @(variance >= 0 ? "text-success" : "text-warning")">
+                                                        @(variance >= 0 ? "+" : "")@variance.ToString("N1") (@variancePercent.ToString("N1")%)
+                                                    </h5>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <p class="text-sm text-secondary mb-0">Harvested On</p>
+                                                    <h5 class="font-weight-bolder">@(schedule.ActualDate?.ToString("MMM dd, yyyy") ?? "-")</h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Notes -->
+                        @if (!string.IsNullOrWhiteSpace(schedule.Notes))
+                        {
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header pb-0">
+                                            <h6 class="mb-0">Notes</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="mb-0">@schedule.Notes</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Audit Information -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header pb-0">
+                                        <h6 class="mb-0">Record Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <small class="text-muted">Created: @schedule.CreatedDate.ToString("MMM dd, yyyy HH:mm") by @(schedule.CreatedBy ?? "System")</small>
+                                            </div>
+                                            @if (schedule.ModifiedDate.HasValue)
+                                            {
+                                                <div class="col-md-6">
+                                                    <small class="text-muted">Modified: @schedule.ModifiedDate.Value.ToString("MMM dd, yyyy HH:mm") by @(schedule.ModifiedBy ?? "System")</small>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center p-4">
+                            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                            <h5 class="text-secondary">Schedule not found</h5>
+                            <p class="text-muted mb-3">The requested harvest schedule could not be found.</p>
+                            <button class="btn btn-primary" @onclick="GoBack">
+                                <i class="fas fa-arrow-left me-2"></i>Go Back
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Id { get; set; }
+
+    private Toast Alert;
+    private bool isLoading = true;
+    private ClaimsPrincipal _user;
+    private string currentFarmId = string.Empty;
+    private string currentFarmName = string.Empty;
+
+    private HarvestScheduleViewModel? schedule;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+
+        // Get current farm context
+        currentFarmId = await FarmAccessService.GetCurrentFarmId();
+        currentFarmName = await FarmAccessService.GetCurrentFarmName();
+
+        if (string.IsNullOrEmpty(currentFarmId))
+        {
+            Alert.Show("No farm context found. Please select a farm profile.", showTitle: true, toastType: ToastType.Danger);
+            NavigationManager.NavigateTo("/farms");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(Id))
+        {
+            Alert.Show("Invalid schedule ID", showTitle: true, toastType: ToastType.Danger);
+            NavigationManager.NavigateTo("/harvest/schedule");
+            return;
+        }
+
+        await LoadScheduleDetails();
+        isLoading = false;
+    }
+
+    private async Task LoadScheduleDetails()
+    {
+        try
+        {
+            var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<HarvestScheduleViewModel>>(
+                await ApiCall.GetHttpClient(), $"Harvest/GetHarvestScheduleDetails/{Id}");
+
+            if (response.Status == (int)HttpStatusCode.OK && response.Result != null)
+            {
+                schedule = response.Result;
+            }
+            else
+            {
+                Alert.Show("Harvest schedule not found", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading harvest schedule: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+    }
+
+    private string GetStatusGradient(HarvestStatus status)
+    {
+        return status switch
+        {
+            HarvestStatus.Planned => "primary",
+            HarvestStatus.InProgress => "info",
+            HarvestStatus.Completed => "success",
+            HarvestStatus.Delayed => "warning",
+            HarvestStatus.Cancelled => "danger",
+            _ => "secondary"
+        };
+    }
+
+    private string GetPriorityGradient(HarvestPriority priority)
+    {
+        return priority switch
+        {
+            HarvestPriority.Critical => "danger",
+            HarvestPriority.High => "warning",
+            HarvestPriority.Medium => "info",
+            HarvestPriority.Low => "success",
+            _ => "secondary"
+        };
+    }
+
+    private void EditSchedule()
+    {
+        NavigationManager.NavigateTo($"/harvest/schedule/edit/{Id}");
+    }
+
+    private void RecordHarvest()
+    {
+        NavigationManager.NavigateTo($"/harvest/record/{Id}");
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/harvest/schedule");
+    }
+}

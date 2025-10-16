@@ -1,0 +1,304 @@
+@page "/equipment/{equipmentId}/maintenance/new"
+@attribute [Authorize]
+
+@using System.Net
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Add Maintenance Record - Hurudza Farm Management</PageTitle>
+
+<Toast @ref="Alert" />
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <div class="d-flex flex-row justify-content-between">
+                    <div>
+                        <h5 class="mb-0">Add Maintenance Record</h5>
+                        <p class="text-sm mb-0">Record maintenance activities for equipment</p>
+                        @if (!string.IsNullOrEmpty(equipmentName))
+                        {
+                            <span class="badge bg-info">@equipmentName</span>
+                        }
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary" @onclick="NavigateBack">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Equipment
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (isLoading)
+                {
+                    <div class="d-flex justify-content-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <EditForm Model="@maintenanceModel" OnValidSubmit="@CreateMaintenance">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
+                        <div class="row">
+                            <!-- Maintenance Details -->
+                            <div class="col-md-6">
+                                <h6 class="text-sm font-weight-bolder mb-3">Maintenance Details</h6>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <label class="form-label">Maintenance Date *</label>
+                                        <SfDatePicker TValue="DateTime" @bind-Value="maintenanceModel.MaintenanceDate" Format="MM/dd/yyyy"></SfDatePicker>
+                                        <ValidationMessage For="@(() => maintenanceModel.MaintenanceDate)" class="text-danger" />
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <SfDropDownList TValue="string" TItem="string" DataSource="@maintenanceTypes" @bind-Value="maintenanceModel.MaintenanceType" 
+                                                        Placeholder="Select Maintenance Type *" AllowFiltering="true">
+                                        </SfDropDownList>
+                                        <ValidationMessage For="@(() => maintenanceModel.MaintenanceType)" class="text-danger" />
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="input-group input-group-outline">
+                                            <SfTextBox @bind-Value="maintenanceModel.Description" Placeholder="Description" Multiline="true" FloatLabelType="FloatLabelType.Auto"></SfTextBox>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="input-group input-group-outline">
+                                            <SfTextBox @bind-Value="maintenanceModel.PartsReplaced" Placeholder="Parts Replaced" Multiline="true" FloatLabelType="FloatLabelType.Auto"></SfTextBox>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="input-group input-group-outline">
+                                            <SfNumericTextBox TValue="decimal?" @bind-Value="maintenanceModel.Cost" Placeholder="Cost" Format="c2" FloatLabelType="FloatLabelType.Auto"></SfNumericTextBox>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Service Information -->
+                            <div class="col-md-6">
+                                <h6 class="text-sm font-weight-bolder mb-3">Service Information</h6>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="input-group input-group-outline">
+                                            <SfTextBox @bind-Value="maintenanceModel.ServiceProvider" Placeholder="Service Provider" FloatLabelType="FloatLabelType.Auto"></SfTextBox>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="input-group input-group-outline">
+                                            <SfTextBox @bind-Value="maintenanceModel.TechnicianName" Placeholder="Technician Name" FloatLabelType="FloatLabelType.Auto"></SfTextBox>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="input-group input-group-outline">
+                                            <SfNumericTextBox TValue="int?" @bind-Value="maintenanceModel.OperatingHoursAtMaintenance" Placeholder="Operating Hours at Maintenance" Min="0" FloatLabelType="FloatLabelType.Auto"></SfNumericTextBox>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <label class="form-label">Next Scheduled Maintenance</label>
+                                        <SfDatePicker TValue="DateTime?" @bind-Value="maintenanceModel.NextScheduledMaintenance" Placeholder="Select Date" Format="MM/dd/yyyy"></SfDatePicker>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <SfCheckBox @bind-Checked="maintenanceModel.IsCompleted"></SfCheckBox>
+                                            <label class="form-check-label ms-2">
+                                                Maintenance Completed
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Notes -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6 class="text-sm font-weight-bolder mb-3">Additional Notes</h6>
+                                <div class="input-group input-group-outline">
+                                    <SfTextBox @bind-Value="maintenanceModel.Notes" Placeholder="Additional notes about the maintenance" Multiline="true" FloatLabelType="FloatLabelType.Auto"></SfTextBox>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-secondary me-2" @onclick="NavigateBack">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                                        @if (isSubmitting)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                            <span>Creating...</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-plus me-2"></i>
+                                            <span>Create Maintenance Record</span>
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </EditForm>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string EquipmentId { get; set; }
+
+    // References
+    private Toast Alert;
+
+    // Data models
+    private CreateEquipmentMaintenanceViewModel maintenanceModel = new();
+    private List<string> maintenanceTypes = new()
+    {
+        "Preventive Maintenance",
+        "Corrective Maintenance", 
+        "Predictive Maintenance",
+        "Emergency Repair",
+        "Oil Change",
+        "Filter Replacement",
+        "Belt Replacement",
+        "Hydraulic Service",
+        "Engine Service",
+        "Transmission Service",
+        "Electrical Repair",
+        "Tire Replacement",
+        "Brake Service",
+        "Cooling System Service",
+        "Fuel System Service",
+        "Calibration",
+        "Inspection",
+        "Cleaning",
+        "Lubrication",
+        "Other"
+    };
+
+    // State
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+    private bool _hasEquipmentManagePermission = false;
+    private string equipmentName = string.Empty;
+    private ClaimsPrincipal _user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+
+        // Check permissions for managing equipment
+        _hasEquipmentManagePermission = await FarmAccessService.HasPermission("Equipment.Manage") || 
+                                       await FarmAccessService.HasPermission("Equipment.Create");
+
+        if (!_hasEquipmentManagePermission)
+        {
+            Alert.Show("You don't have permission to add maintenance records", showTitle: true, toastType: ToastType.Danger);
+            NavigateBack();
+            return;
+        }
+
+        // Set the equipment ID in the model
+        maintenanceModel.EquipmentId = EquipmentId;
+
+        await LoadEquipmentInfo();
+        isLoading = false;
+    }
+
+    private async Task LoadEquipmentInfo()
+    {
+        try
+        {
+            // Load equipment name for display
+            var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<EquipmentViewModel>>(
+                await ApiCall.GetHttpClient(), "Equipment/GetEquipmentDetails", EquipmentId);
+
+            if (response?.Status == (int)HttpStatusCode.OK && response.Result != null)
+            {
+                equipmentName = response.Result.Name;
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading equipment information: {ex.Message}", showTitle: true, toastType: ToastType.Warning);
+        }
+    }
+
+    private async Task CreateMaintenance()
+    {
+        try
+        {
+            isSubmitting = true;
+
+            var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<EquipmentMaintenanceViewModel>, CreateEquipmentMaintenanceViewModel>(
+                await ApiCall.GetHttpClient(), "Equipment/CreateMaintenance", maintenanceModel);
+
+            if (response?.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show("Maintenance record created successfully!", showTitle: true, toastType: ToastType.Success);
+                
+                // Navigate back to equipment details
+                NavigateBack();
+            }
+            else
+            {
+                Alert.Show(response?.Title ?? "Failed to create maintenance record", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error creating maintenance record: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo($"/equipment/{EquipmentId}");
+    }
+}

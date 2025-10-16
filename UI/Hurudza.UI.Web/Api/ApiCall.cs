@@ -76,7 +76,8 @@ public class ApiCall : IApiCall
         {
             using (client)
             {
-                var response = await client.GetAsync($"{url}?api-version={ApiVersion}");
+                var separator = url.Contains("?") ? "&" : "?";
+                var response = await client.GetAsync($"{url}{separator}api-version={ApiVersion}");
 
                 var result = await response.Content.ReadAsAsync<T>();
 
@@ -96,7 +97,9 @@ public class ApiCall : IApiCall
         {
             using (client)
             {
-                var apiUrl = $"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}?api-version={ApiVersion}";
+                var baseUrl = $"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}";
+                var separator = baseUrl.Contains("?") ? "&" : "?";
+                var apiUrl = $"{baseUrl}{separator}api-version={ApiVersion}";
                 var response = await client.GetAsync(apiUrl);
 
                 var result = await response.Content.ReadAsAsync<T>();
@@ -117,7 +120,9 @@ public class ApiCall : IApiCall
         {
             using (client)
             {
-                var response = await client.GetAsync($"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}?api-version={ApiVersion}");
+                var baseUrl = $"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}";
+                var separator = baseUrl.Contains("?") ? "&" : "?";
+                var response = await client.GetAsync($"{baseUrl}{separator}api-version={ApiVersion}");
                 var result = await response.Content.ReadAsAsync<T>();
 
                 return result;
@@ -136,7 +141,9 @@ public class ApiCall : IApiCall
         {
             using (client)
             {
-                var response = await client.GetAsync($"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}?api-version={ApiVersion}");
+                var baseUrl = $"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}";
+                var separator = baseUrl.Contains("?") ? "&" : "?";
+                var response = await client.GetAsync($"{baseUrl}{separator}api-version={ApiVersion}");
 
                 var result = await response.Content.ReadAsAsync<T>();
 
@@ -156,7 +163,9 @@ public class ApiCall : IApiCall
         {
             using (client)
             {
-                var response = await client.GetAsync($"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}?api-version={ApiVersion}");
+                var baseUrl = $"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}";
+                var separator = baseUrl.Contains("?") ? "&" : "?";
+                var response = await client.GetAsync($"{baseUrl}{separator}api-version={ApiVersion}");
 
                 var result = await response.Content.ReadAsAsync<T>();
 
@@ -176,7 +185,8 @@ public class ApiCall : IApiCall
         {
             using (client)
             {
-                var response = await client.PostAsJsonAsync($"{url}?api-version={ApiVersion}", entity);
+                var separator = url.Contains("?") ? "&" : "?";
+                var response = await client.PostAsJsonAsync($"{url}{separator}api-version={ApiVersion}", entity);
 
                 var result = await response.Content.ReadAsAsync<T>();
 
@@ -196,7 +206,8 @@ public class ApiCall : IApiCall
         {
             using (client)
             {
-                var response = await client.PutAsJsonAsync($"{url}?api-version={ApiVersion}", entity);
+                var separator = url.Contains("?") ? "&" : "?";
+                var response = await client.PutAsJsonAsync($"{url}{separator}api-version={ApiVersion}", entity);
 
                 var result = await response.Content.ReadAsAsync<T>();
 
@@ -216,7 +227,9 @@ public class ApiCall : IApiCall
         {
             using (client)
             {
-                var response = await client.PutAsJsonAsync($"{url}/{id}?api-version={ApiVersion}", entity);
+                var baseUrl = $"{url}/{id}";
+                var separator = baseUrl.Contains("?") ? "&" : "?";
+                var response = await client.PutAsJsonAsync($"{baseUrl}{separator}api-version={ApiVersion}", entity);
 
                 var result = await response.Content.ReadAsAsync<T>();
 
@@ -236,7 +249,9 @@ public class ApiCall : IApiCall
         {
             using (client)
             {
-                var response = await client.DeleteAsync($"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}?api-version={ApiVersion}");
+                var baseUrl = $"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}";
+                var separator = baseUrl.Contains("?") ? "&" : "?";
+                var response = await client.DeleteAsync($"{baseUrl}{separator}api-version={ApiVersion}");
 
                 var result = await response.Content.ReadAsAsync<T>();
 
@@ -256,7 +271,9 @@ public class ApiCall : IApiCall
         {
             using (client)
             {
-                var response = await client.DeleteAsync($"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}?api-version={ApiVersion}");
+                var baseUrl = $"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}";
+                var separator = baseUrl.Contains("?") ? "&" : "?";
+                var response = await client.DeleteAsync($"{baseUrl}{separator}api-version={ApiVersion}");
 
                 var result = await response.Content.ReadAsAsync<T>();
 
@@ -276,7 +293,9 @@ public class ApiCall : IApiCall
         {
             using (client)
             {
-                var response = await client.DeleteAsync($"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}?api-version={ApiVersion}");
+                var baseUrl = $"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}";
+                var separator = baseUrl.Contains("?") ? "&" : "?";
+                var response = await client.DeleteAsync($"{baseUrl}{separator}api-version={ApiVersion}");
 
                 var result = await response.Content.ReadAsAsync<T>();
 
@@ -296,7 +315,9 @@ public class ApiCall : IApiCall
         {
             using (client)
             {
-                var response = await client.DeleteAsync($"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}?api-version={ApiVersion}");
+                var baseUrl = $"{url}{(url.EndsWith("/") ? string.Empty : "/")}{id}";
+                var separator = baseUrl.Contains("?") ? "&" : "?";
+                var response = await client.DeleteAsync($"{baseUrl}{separator}api-version={ApiVersion}");
 
                 var result = await response.Content.ReadAsAsync<T>();
 
@@ -316,9 +337,10 @@ public class ApiCall : IApiCall
         {
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            
-            var response = await httpClient.PostAsync($"{endpoint}?api-version={ApiVersion}", content);
-            
+
+            var separator = endpoint.Contains("?") ? "&" : "?";
+            var response = await httpClient.PostAsync($"{endpoint}{separator}api-version={ApiVersion}", content);
+
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadAsByteArrayAsync();
@@ -340,10 +362,11 @@ public class ApiCall : IApiCall
     {
         var json = JsonSerializer.Serialize(request);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        
-        var response = await httpClient.PostAsync($"{endpoint}?api-version={ApiVersion}", content);
+
+        var separator = endpoint.Contains("?") ? "&" : "?";
+        var response = await httpClient.PostAsync($"{endpoint}{separator}api-version={ApiVersion}", content);
         response.EnsureSuccessStatusCode();
-        
+
         return response;
     }
 

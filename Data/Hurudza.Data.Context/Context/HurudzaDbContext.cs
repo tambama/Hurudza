@@ -71,6 +71,16 @@ public class HurudzaDbContext :
     // Equipment
     public DbSet<Equipment> Equipment { get; set; }
     public DbSet<EquipmentMaintenance> EquipmentMaintenance { get; set; }
+    
+    // Inventory
+    public DbSet<Inventory> Inventories { get; set; }
+    public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
+    
+    // Harvest Management
+    public DbSet<HarvestPlan> HarvestPlans { get; set; }
+    public DbSet<HarvestSchedule> HarvestSchedules { get; set; }
+    public DbSet<HarvestRecord> HarvestRecords { get; set; }
+    public DbSet<HarvestLoss> HarvestLosses { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
@@ -393,6 +403,116 @@ public class HurudzaDbContext :
             b.HasOne(em => em.Equipment)
                 .WithMany(e => e.MaintenanceRecords)
                 .HasForeignKey(em => em.EquipmentId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Inventory Configuration
+        builder.Entity<Inventory>(b =>
+        {
+            b.Property(i => i.Id).ValueGeneratedOnAdd();
+
+            b.HasOne(i => i.Farm)
+                .WithMany()
+                .HasForeignKey(i => i.FarmId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            b.HasMany(i => i.Transactions)
+                .WithOne(t => t.Inventory)
+                .HasForeignKey(t => t.InventoryId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<InventoryTransaction>(b =>
+        {
+            b.Property(it => it.Id).ValueGeneratedOnAdd();
+
+            b.HasOne(it => it.Inventory)
+                .WithMany(i => i.Transactions)
+                .HasForeignKey(it => it.InventoryId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne(it => it.Field)
+                .WithMany()
+                .HasForeignKey(it => it.FieldId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            b.HasOne(it => it.FieldCrop)
+                .WithMany()
+                .HasForeignKey(it => it.FieldCropId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Harvest Management Configuration
+        builder.Entity<HarvestPlan>(b =>
+        {
+            b.Property(hp => hp.Id).ValueGeneratedOnAdd();
+
+            b.HasOne(hp => hp.Farm)
+                .WithMany()
+                .HasForeignKey(hp => hp.FarmId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            b.HasMany(hp => hp.HarvestSchedules)
+                .WithOne(hs => hs.HarvestPlan)
+                .HasForeignKey(hs => hs.HarvestPlanId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<HarvestSchedule>(b =>
+        {
+            b.Property(hs => hs.Id).ValueGeneratedOnAdd();
+
+            b.HasOne(hs => hs.HarvestPlan)
+                .WithMany(hp => hp.HarvestSchedules)
+                .HasForeignKey(hs => hs.HarvestPlanId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne(hs => hs.FieldCrop)
+                .WithMany()
+                .HasForeignKey(hs => hs.FieldCropId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            b.HasMany(hs => hs.HarvestRecords)
+                .WithOne(hr => hr.HarvestSchedule)
+                .HasForeignKey(hr => hr.HarvestScheduleId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<HarvestRecord>(b =>
+        {
+            b.Property(hr => hr.Id).ValueGeneratedOnAdd();
+
+            b.HasOne(hr => hr.HarvestSchedule)
+                .WithMany(hs => hs.HarvestRecords)
+                .HasForeignKey(hr => hr.HarvestScheduleId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasMany(hr => hr.HarvestLosses)
+                .WithOne(hl => hl.HarvestRecord)
+                .HasForeignKey(hl => hl.HarvestRecordId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<HarvestLoss>(b =>
+        {
+            b.Property(hl => hl.Id).ValueGeneratedOnAdd();
+
+            b.HasOne(hl => hl.HarvestRecord)
+                .WithMany(hr => hr.HarvestLosses)
+                .HasForeignKey(hl => hl.HarvestRecordId)
                 .IsRequired(true)
                 .OnDelete(DeleteBehavior.Cascade);
         });

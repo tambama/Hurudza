@@ -58,7 +58,25 @@ public class FieldCropsController : Controller
     public async Task<IActionResult> GetFarmFieldCrops(string id)
     {
         var fieldCrops = await _context.FieldCrops
-            .Where(fc => fc.Field.FarmId == id && fc.IsActive)
+            .Where(fc => fc.Field.FarmId == id &&
+                   fc.IsActive &&
+                   fc.PlantedDate != null &&
+                   (fc.HarvestDate == null || fc.HarvestDate > DateTime.Now))
+            .ProjectTo<FieldCropViewModel>(_configuration)
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        return Ok(fieldCrops);
+    }
+
+    [HttpGet("{id}", Name = nameof(GetFieldCropsByFarm))]
+    public async Task<IActionResult> GetFieldCropsByFarm(string id)
+    {
+        var fieldCrops = await _context.FieldCrops
+            .Where(fc => fc.Field.FarmId == id &&
+                   fc.IsActive &&
+                   fc.PlantedDate != null &&
+                   (fc.HarvestDate == null || fc.HarvestDate > DateTime.Now))
             .ProjectTo<FieldCropViewModel>(_configuration)
             .ToListAsync()
             .ConfigureAwait(false);

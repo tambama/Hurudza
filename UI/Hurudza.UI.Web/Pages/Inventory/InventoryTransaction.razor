@@ -1,0 +1,555 @@
+@page "/inventory/{Id}/transaction"
+@attribute [Authorize]
+
+@using System.Net
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.Data.UI.Models.Models
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
+@inject IJSRuntime JSRuntime
+
+<Toast @ref="Alert" />
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-secondary me-3" @onclick="GoBack">
+                            <i class="fas fa-arrow-left me-1"></i>Back
+                        </button>
+                        <div>
+                            <h5 class="mb-0">Record Transaction</h5>
+                            <p class="text-sm mb-0">@(inventoryItem?.Name ?? "Loading...")</p>
+                            @if (inventoryItem != null)
+                            {
+                                <small class="text-muted">Current Stock: @inventoryItem.QuantityInStock.ToString("N2") @inventoryItem.UnitOfMeasure.ToString("G").Replace("_", " ")</small>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (isLoading)
+                    {
+                        <div class="d-flex justify-content-center p-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else if (inventoryItem == null)
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Inventory item not found or you don't have permission to record transactions.
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="alert alert-danger" />
+
+                            <div class="row">
+                                <!-- Transaction Type & Basic Info -->
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header pb-0">
+                                            <h6>Transaction Details</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <SfDropDownList TValue="TransactionType" TItem="TransactionTypeModel" 
+                                                               DataSource="@transactionTypeItems" @bind-Value="model.TransactionType" 
+                                                               FloatLabelType="FloatLabelType.Auto" Placeholder="Transaction Type">
+                                                    <DropDownListEvents TValue="TransactionType" TItem="TransactionTypeModel" ValueChange="OnTransactionTypeChanged"></DropDownListEvents>
+                                                    <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+                                                </SfDropDownList>
+                                                <ValidationMessage For="@(() => model.TransactionType)" />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfNumericTextBox TValue="decimal" @bind-Value="model.Quantity" FloatLabelType="FloatLabelType.Auto" 
+                                                                 Placeholder="Quantity" Format="N2" Min="0.01m" ShowSpinButton="false">
+                                                    <NumericTextBoxEvents ValueChange="@((Syncfusion.Blazor.Inputs.ChangeEventArgs<decimal> args) => OnQuantityChanged(args))"></NumericTextBoxEvents>
+                                                </SfNumericTextBox>
+                                                <ValidationMessage For="@(() => model.Quantity)" />
+                                                @if (showStockWarning)
+                                                {
+                                                    <small class="text-danger">⚠️ Insufficient stock available: @inventoryItem.QuantityInStock.ToString("N2")</small>
+                                                }
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfDateTimePicker @bind-Value="model.TransactionDate" FloatLabelType="FloatLabelType.Auto" 
+                                                                 Placeholder="Transaction Date" ShowClearButton="true"></SfDateTimePicker>
+                                                <ValidationMessage For="@(() => model.TransactionDate)" />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <SfTextBox @bind-Value="model.Reason" FloatLabelType="FloatLabelType.Auto" Placeholder="Reason/Description"></SfTextBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Cost & Reference Information -->
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header pb-0">
+                                            <h6>Cost & Reference</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            @if (showCostFields)
+                                            {
+                                                <div class="form-group">
+                                                    <SfNumericTextBox TValue="decimal?" @bind-Value="model.UnitCost" FloatLabelType="FloatLabelType.Auto" 
+                                                                     Placeholder="Unit Cost (Optional)" Format="C2" Min="0" ShowSpinButton="false">
+                                                        <NumericTextBoxEvents ValueChange="@((Syncfusion.Blazor.Inputs.ChangeEventArgs<decimal?> args) => CalculateTotalCost(args))"></NumericTextBoxEvents>
+                                                    </SfNumericTextBox>
+                                                </div>
+                                            }
+
+                                            @if (showTotalCost && totalCost > 0)
+                                            {
+                                                <div class="form-group">
+                                                    <label class="form-label text-success">Total Cost: @totalCost.ToString("C2")</label>
+                                                </div>
+                                            }
+
+                                            <div class="form-group">
+                                                <SfTextBox @bind-Value="model.ReferenceNumber" FloatLabelType="FloatLabelType.Auto" Placeholder="Reference Number (Optional)"></SfTextBox>
+                                            </div>
+
+                                            @if (showSupplierFields)
+                                            {
+                                                <div class="form-group">
+                                                    <SfTextBox @bind-Value="model.SupplierInvoiceNumber" FloatLabelType="FloatLabelType.Auto" Placeholder="Supplier Invoice Number"></SfTextBox>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <SfTextBox @bind-Value="model.ReceivedBy" FloatLabelType="FloatLabelType.Auto" Placeholder="Received By"></SfTextBox>
+                                                </div>
+                                            }
+
+                                            @if (showApprovalFields)
+                                            {
+                                                <div class="form-group">
+                                                    <SfTextBox @bind-Value="model.ApprovedBy" FloatLabelType="FloatLabelType.Auto" Placeholder="Approved By"></SfTextBox>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Field & Crop Selection (for Usage) -->
+                            @if (showFieldSelection)
+                            {
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-header pb-0">
+                                                <h6>Field & Crop Information</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="form-group">
+                                                    <SfDropDownList TValue="string" TItem="FieldViewModel" 
+                                                                   DataSource="@availableFields" @bind-Value="model.FieldId" 
+                                                                   FloatLabelType="FloatLabelType.Auto" Placeholder="Select Field (Optional)">
+                                                        <DropDownListEvents TValue="string" TItem="FieldViewModel" ValueChange="OnFieldChanged"></DropDownListEvents>
+                                                        <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                                                    </SfDropDownList>
+                                                </div>
+
+                                                @if (!string.IsNullOrEmpty(model.FieldId) && availableFieldCrops.Any())
+                                                {
+                                                    <div class="form-group">
+                                                        <SfDropDownList TValue="string" TItem="FieldCropViewModel" 
+                                                                       DataSource="@availableFieldCrops" @bind-Value="model.FieldCropId" 
+                                                                       FloatLabelType="FloatLabelType.Auto" Placeholder="Select Crop (Optional)">
+                                                            <DropDownListFieldSettings Value="Id" Text="Crop"></DropDownListFieldSettings>
+                                                        </SfDropDownList>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-header pb-0">
+                                                <h6>Additional Information</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="form-group">
+                                                    <SfTextBox @bind-Value="model.Notes" FloatLabelType="FloatLabelType.Auto" 
+                                                              Placeholder="Additional Notes (Optional)" Multiline="true"></SfTextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Batch & Expiry (for Purchases) -->
+                            @if (showBatchFields)
+                            {
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-header pb-0">
+                                                <h6>Batch & Expiry Information</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="form-group">
+                                                    <SfTextBox @bind-Value="model.BatchNumber" FloatLabelType="FloatLabelType.Auto" Placeholder="Batch Number (Optional)"></SfTextBox>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <SfDatePicker @bind-Value="model.ExpiryDate" FloatLabelType="FloatLabelType.Auto" 
+                                                                 Placeholder="Expiry Date (Optional)" ShowClearButton="true"></SfDatePicker>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-header pb-0">
+                                                <h6>Notes</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="form-group">
+                                                    <SfTextBox @bind-Value="model.Notes" FloatLabelType="FloatLabelType.Auto" 
+                                                              Placeholder="Transaction Notes (Optional)" Multiline="true"></SfTextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Summary -->
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6>Transaction Summary</h6>
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <strong>Current Stock:</strong> @inventoryItem.QuantityInStock.ToString("N2")
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <strong>Transaction:</strong> 
+                                                    <span class="@(IsDebitTransaction(model.TransactionType) ? "text-danger" : "text-success")">
+                                                        @(IsDebitTransaction(model.TransactionType) ? "-" : "+")@model.Quantity.ToString("N2")
+                                                    </span>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <strong>New Stock:</strong> 
+                                                    <span class="@(newStockLevel < 0 ? "text-danger" : "text-success")">
+                                                        @newStockLevel.ToString("N2")
+                                                    </span>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    @if (totalCost > 0)
+                                                    {
+                                                        <strong>Total Cost:</strong> @totalCost.ToString("C2")
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-end">
+                                        <button type="button" class="btn btn-outline-secondary me-2" @onclick="GoBack">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" disabled="@(isSaving || showStockWarning)">
+                                            @if (isSaving)
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                                <span>Recording...</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-save me-1"></i>
+                                                <span>Record Transaction</span>
+                                            }
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Id { get; set; }
+    
+    private Toast Alert;
+    private CreateInventoryTransactionViewModel model = new();
+    private InventoryViewModel inventoryItem;
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private ClaimsPrincipal _user;
+
+    // UI state
+    private bool showCostFields = false;
+    private bool showTotalCost = false;
+    private bool showSupplierFields = false;
+    private bool showApprovalFields = false;
+    private bool showFieldSelection = false;
+    private bool showBatchFields = false;
+    private bool showStockWarning = false;
+    private decimal totalCost = 0;
+    private decimal newStockLevel = 0;
+
+    // Dropdowns
+    private List<TransactionTypeModel> transactionTypeItems = new();
+    private List<FieldViewModel> availableFields = new();
+    private List<FieldCropViewModel> availableFieldCrops = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+        
+        // Initialize transaction types
+        var allowedTypes = new[] 
+        {
+            TransactionType.Purchase,
+            TransactionType.Usage,
+            TransactionType.Sale,
+            TransactionType.Return,
+            TransactionType.Adjustment,
+            TransactionType.Damage,
+            TransactionType.Expiry
+        };
+        
+        transactionTypeItems = allowedTypes.Select(x => new TransactionTypeModel(x)).ToList();
+        
+        // Set defaults
+        model.TransactionDate = DateTime.Now;
+        model.TransactionType = TransactionType.Purchase;
+        
+        await LoadInventoryItem();
+        await LoadFields();
+        
+        UpdateUIState();
+    }
+
+    private async Task LoadInventoryItem()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(Id))
+            {
+                Alert.Show("Invalid inventory item ID", showTitle: true, toastType: ToastType.Danger);
+                return;
+            }
+
+            model.InventoryId = Id;
+
+            var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<InventoryViewModel>>(
+                await ApiCall.GetHttpClient(), "Inventory/GetInventoryDetails", Id);
+                
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                inventoryItem = response.Result;
+                CalculateNewStockLevel();
+            }
+            else
+            {
+                Alert.Show("Inventory item not found", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading inventory item: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadFields()
+    {
+        try
+        {
+            // Get all available fields - using the actual Fields endpoint
+            var response = await ApiCall.Get<List<FieldViewModel>>(
+                await ApiCall.GetHttpClient(), "Fields/GetFields");
+                    
+            if (response != null)
+            {
+                availableFields = response;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading fields: {ex.Message}");
+        }
+    }
+
+    private async Task OnFieldChanged(ChangeEventArgs<string, FieldViewModel> args)
+    {
+        availableFieldCrops.Clear();
+        model.FieldCropId = null;
+        
+        if (!string.IsNullOrEmpty(args.Value))
+        {
+            try
+            {
+                var response = await ApiCall.Get<List<FieldCropViewModel>>(
+                    await ApiCall.GetHttpClient(), $"FieldCrops/GetFieldFieldCrops/{args.Value}");
+                    
+                if (response != null)
+                {
+                    availableFieldCrops = response;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading field crops: {ex.Message}");
+            }
+        }
+        
+        StateHasChanged();
+    }
+
+    private void OnTransactionTypeChanged(ChangeEventArgs<TransactionType, TransactionTypeModel> args)
+    {
+        UpdateUIState();
+        CalculateNewStockLevel();
+    }
+
+    private void OnQuantityChanged(Syncfusion.Blazor.Inputs.ChangeEventArgs<decimal> args)
+    {
+        CalculateNewStockLevel();
+        CalculateTotalCost();
+    }
+
+    private void CalculateTotalCost(Syncfusion.Blazor.Inputs.ChangeEventArgs<decimal?> args = null)
+    {
+        if (model.UnitCost.HasValue && model.Quantity > 0)
+        {
+            totalCost = model.Quantity * model.UnitCost.Value;
+        }
+        else
+        {
+            totalCost = 0;
+        }
+        StateHasChanged();
+    }
+
+    private void UpdateUIState()
+    {
+        var type = model.TransactionType;
+        
+        showCostFields = type == TransactionType.Purchase || type == TransactionType.Sale;
+        showTotalCost = showCostFields;
+        showSupplierFields = type == TransactionType.Purchase;
+        showApprovalFields = type == TransactionType.Adjustment || type == TransactionType.Return;
+        showFieldSelection = type == TransactionType.Usage;
+        showBatchFields = type == TransactionType.Purchase;
+        
+        // Set default reason based on transaction type
+        if (string.IsNullOrEmpty(model.Reason))
+        {
+            model.Reason = type switch
+            {
+                TransactionType.Purchase => "Stock purchase",
+                TransactionType.Usage => "Stock usage",
+                TransactionType.Sale => "Stock sale",
+                TransactionType.Return => "Stock return",
+                TransactionType.Adjustment => "Stock adjustment",
+                TransactionType.Damage => "Damaged stock",
+                TransactionType.Expiry => "Expired stock removal",
+                _ => ""
+            };
+        }
+        
+        StateHasChanged();
+    }
+
+    private void CalculateNewStockLevel()
+    {
+        if (inventoryItem == null) return;
+        
+        var currentStock = inventoryItem.QuantityInStock;
+        
+        if (IsDebitTransaction(model.TransactionType))
+        {
+            newStockLevel = currentStock - model.Quantity;
+            showStockWarning = newStockLevel < 0;
+        }
+        else
+        {
+            newStockLevel = currentStock + model.Quantity;
+            showStockWarning = false;
+        }
+    }
+
+    private bool IsDebitTransaction(TransactionType type)
+    {
+        return type == TransactionType.Usage || 
+               type == TransactionType.Sale || 
+               type == TransactionType.Damage || 
+               type == TransactionType.Expiry;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (showStockWarning)
+        {
+            Alert.Show("Cannot process transaction: Insufficient stock available", showTitle: true, toastType: ToastType.Danger);
+            return;
+        }
+        
+        isSaving = true;
+        
+        try
+        {
+            var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<InventoryTransactionViewModel>, CreateInventoryTransactionViewModel>(
+                await ApiCall.GetHttpClient(), "Inventory/CreateTransaction", model);
+                
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show("Transaction recorded successfully!", showTitle: true, toastType: ToastType.Success);
+                await Task.Delay(1500); // Show success message briefly
+                NavigationManager.NavigateTo($"/inventory/{Id}");
+            }
+            else
+            {
+                Alert.Show(response.Title ?? "Error recording transaction", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo($"/inventory/{Id}");
+    }
+}

@@ -1,0 +1,219 @@
+@page "/harvest/planning/add"
+@attribute [Authorize]
+
+@using System.Net
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.Data.UI.Models.Models
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
+
+<Toast @ref="Alert" />
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-secondary me-3" @onclick="GoBack">
+                            <i class="fas fa-arrow-left me-1"></i>Back
+                        </button>
+                        <div>
+                            <h5 class="mb-0">Create Harvest Plan</h5>
+                            <p class="text-sm mb-0">Plan your seasonal harvest activities</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    @if (isLoading)
+                    {
+                        <div class="d-flex justify-content-center p-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+                            <DataAnnotationsValidator />
+
+                            @* Display the current farm context *@
+                            @if (!string.IsNullOrEmpty(currentFarmName))
+                            {
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Creating harvest plan for: <strong>@currentFarmName</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Season <span class="text-danger">*</span></label>
+                                        <SfTextBox @bind-Value="model.Season" FloatLabelType="FloatLabelType.Auto"
+                                                  Placeholder="e.g., Spring 2025, Main Season 2025"></SfTextBox>
+                                        <ValidationMessage For="@(() => model.Season)" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Start Date <span class="text-danger">*</span></label>
+                                        <SfDatePicker TValue="DateTime" @bind-Value="model.StartDate"
+                                                     FloatLabelType="FloatLabelType.Auto"></SfDatePicker>
+                                        <ValidationMessage For="@(() => model.StartDate)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">End Date <span class="text-danger">*</span></label>
+                                        <SfDatePicker TValue="DateTime" @bind-Value="model.EndDate"
+                                                     FloatLabelType="FloatLabelType.Auto"></SfDatePicker>
+                                        <ValidationMessage For="@(() => model.EndDate)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Notes</label>
+                                        <SfTextBox @bind-Value="model.Notes" FloatLabelType="FloatLabelType.Auto"
+                                                  Placeholder="Optional notes about the harvest plan" Multiline="true"></SfTextBox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-outline-secondary me-2" @onclick="Cancel">Cancel</button>
+                                <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                                    @if (isSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        <span>Saving...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-save me-2"></i>
+                                        <span>Create Plan</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Toast Alert;
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private ClaimsPrincipal _user;
+
+    private CreateHarvestPlanViewModel model = new();
+    private string currentFarmId = string.Empty;
+    private string currentFarmName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+
+        // Get current farm context
+        currentFarmId = await FarmAccessService.GetCurrentFarmId();
+        currentFarmName = await FarmAccessService.GetCurrentFarmName();
+
+        if (string.IsNullOrEmpty(currentFarmId))
+        {
+            Alert.Show("No farm context found. Please select a farm profile.", showTitle: true, toastType: ToastType.Danger);
+            NavigationManager.NavigateTo("/farms");
+            return;
+        }
+
+        // If farm name is empty, try to fetch it from the API
+        if (string.IsNullOrEmpty(currentFarmName))
+        {
+            try
+            {
+                var farm = await ApiCall.Get<FarmViewModel>(
+                    await ApiCall.GetHttpClient(), $"Farms/GetFarm/{currentFarmId}");
+                if (farm != null)
+                {
+                    currentFarmName = farm.Name ?? "Farm";
+                }
+            }
+            catch
+            {
+                currentFarmName = "Current Farm";
+            }
+        }
+
+        // Initialize model with defaults
+        model = new CreateHarvestPlanViewModel
+        {
+            FarmId = currentFarmId,
+            StartDate = DateTime.Today,
+            EndDate = DateTime.Today.AddMonths(3)
+        };
+
+        isLoading = false;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (isSaving) return;
+
+        isSaving = true;
+
+        try
+        {
+            var response = await ApiCall.Add<UI.Shared.Models.ApiResponse<HarvestPlanViewModel>, CreateHarvestPlanViewModel>(
+                await ApiCall.GetHttpClient(), "Harvest/CreateHarvestPlan", model);
+
+            if (response.Status == (int)HttpStatusCode.OK && response.Result != null)
+            {
+                Alert.Show("Harvest plan created successfully!", showTitle: true, toastType: ToastType.Success);
+                // Navigate to the schedule page for the new plan
+                NavigationManager.NavigateTo($"/harvest/schedule?planId={response.Result.Id}");
+            }
+            else
+            {
+                Alert.Show(response.Title ?? "Failed to create harvest plan", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error saving harvest plan: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/harvest/planning");
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/harvest/planning");
+    }
+}

@@ -1,0 +1,518 @@
+@page "/inventory/{Id}"
+@attribute [Authorize]
+
+@using System.Net
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
+@inject IJSRuntime JSRuntime
+
+<Toast @ref="Alert" />
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            @if (isLoading)
+            {
+                <div class="d-flex justify-content-center p-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            }
+            else if (model == null)
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Inventory item not found or you don't have permission to view it.
+                </div>
+            }
+            else
+            {
+                <!-- Header -->
+                <div class="card mb-4">
+                    <div class="card-header pb-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <button class="btn btn-outline-secondary me-3" @onclick="GoBack">
+                                    <i class="fas fa-arrow-left me-1"></i>Back
+                                </button>
+                                <div>
+                                    <h5 class="mb-0">@model.Name</h5>
+                                    <p class="text-sm mb-0">@model.Type.ToString("G").Replace("_", " ") • @model.FarmName</p>
+                                    <div class="mt-2">
+                                        @{
+                                            var statusBadgeClass = GetStatusBadgeClass();
+                                            var statusText = GetStatusText();
+                                        }
+                                        <span class="badge @statusBadgeClass me-2">@statusText</span>
+                                        @if (!string.IsNullOrEmpty(model.SKU))
+                                        {
+                                            <span class="badge bg-secondary">SKU: @model.SKU</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex">
+                                @if (_hasInventoryManagePermission)
+                                {
+                                    <button type="button" class="btn btn-info btn-sm me-2" @onclick="RecordTransaction">
+                                        <i class="fas fa-exchange-alt me-1"></i>Record Transaction
+                                    </button>
+                                    <button type="button" class="btn btn-warning btn-sm me-2" @onclick="EditInventory">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Stock Information -->
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-header pb-0">
+                                <h6><i class="fas fa-box me-2"></i>Stock Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="info-item mb-3">
+                                            <strong>Current Stock:</strong>
+                                            <div class="text-primary h5 mb-0">@model.QuantityInStock.ToString("N2") @model.UnitOfMeasure.ToString("G").Replace("_", " ")</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                @if (model.MinimumStockLevel.HasValue)
+                                {
+                                    <div class="info-item mb-2">
+                                        <strong>Minimum Level:</strong> @model.MinimumStockLevel.Value.ToString("N2")
+                                    </div>
+                                }
+                                
+                                @if (model.ReorderLevel.HasValue)
+                                {
+                                    <div class="info-item mb-2">
+                                        <strong>Reorder Level:</strong> @model.ReorderLevel.Value.ToString("N2")
+                                    </div>
+                                }
+                                
+                                @if (model.ReorderQuantity.HasValue)
+                                {
+                                    <div class="info-item mb-2">
+                                        <strong>Reorder Quantity:</strong> @model.ReorderQuantity.Value.ToString("N2")
+                                    </div>
+                                }
+
+                                <div class="info-item">
+                                    <strong>Total Value:</strong> <span class="text-success">@model.TotalValue.ToString("C2")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing Information -->
+                        @if (model.UnitCost.HasValue || model.SellingPrice.HasValue)
+                        {
+                            <div class="card mb-4">
+                                <div class="card-header pb-0">
+                                    <h6><i class="fas fa-dollar-sign me-2"></i>Pricing</h6>
+                                </div>
+                                <div class="card-body">
+                                    @if (model.UnitCost.HasValue)
+                                    {
+                                        <div class="info-item mb-2">
+                                            <strong>Unit Cost:</strong> @model.UnitCost.Value.ToString("C2")
+                                        </div>
+                                    }
+                                    @if (model.SellingPrice.HasValue)
+                                    {
+                                        <div class="info-item">
+                                            <strong>Selling Price:</strong> @model.SellingPrice.Value.ToString("C2")
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Product Details -->
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-header pb-0">
+                                <h6><i class="fas fa-info-circle me-2"></i>Product Details</h6>
+                            </div>
+                            <div class="card-body">
+                                @if (!string.IsNullOrEmpty(model.Description))
+                                {
+                                    <div class="info-item mb-3">
+                                        <strong>Description:</strong>
+                                        <p class="mb-0 mt-1">@model.Description</p>
+                                    </div>
+                                }
+                                
+                                @if (!string.IsNullOrEmpty(model.Brand))
+                                {
+                                    <div class="info-item mb-2">
+                                        <strong>Brand:</strong> @model.Brand
+                                    </div>
+                                }
+                                
+                                @if (!string.IsNullOrEmpty(model.Supplier))
+                                {
+                                    <div class="info-item mb-2">
+                                        <strong>Supplier:</strong> @model.Supplier
+                                    </div>
+                                }
+                                
+                                @if (!string.IsNullOrEmpty(model.Barcode))
+                                {
+                                    <div class="info-item mb-2">
+                                        <strong>Barcode:</strong> @model.Barcode
+                                    </div>
+                                }
+                                
+                                @if (!string.IsNullOrEmpty(model.BatchNumber))
+                                {
+                                    <div class="info-item">
+                                        <strong>Batch Number:</strong> @model.BatchNumber
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Storage Information -->
+                        <div class="card mb-4">
+                            <div class="card-header pb-0">
+                                <h6><i class="fas fa-warehouse me-2"></i>Storage</h6>
+                            </div>
+                            <div class="card-body">
+                                @if (!string.IsNullOrEmpty(model.StorageLocation))
+                                {
+                                    <div class="info-item mb-2">
+                                        <strong>Location:</strong> @model.StorageLocation
+                                    </div>
+                                }
+                                
+                                @if (!string.IsNullOrEmpty(model.StorageConditions))
+                                {
+                                    <div class="info-item mb-3">
+                                        <strong>Conditions:</strong>
+                                        <p class="mb-0 mt-1">@model.StorageConditions</p>
+                                    </div>
+                                }
+                                
+                                <div class="info-item mb-2">
+                                    <strong>Perishable:</strong> 
+                                    <span class="badge @(model.IsPerishable ? "bg-warning text-dark" : "bg-success")">
+                                        @(model.IsPerishable ? "Yes" : "No")
+                                    </span>
+                                </div>
+                                
+                                <div class="info-item">
+                                    <strong>Special Handling:</strong> 
+                                    <span class="badge @(model.RequiresSpecialHandling ? "bg-warning text-dark" : "bg-success")">
+                                        @(model.RequiresSpecialHandling ? "Required" : "Not Required")
+                                    </span>
+                                </div>
+                                
+                                @if (model.RequiresSpecialHandling && !string.IsNullOrEmpty(model.SpecialHandlingInstructions))
+                                {
+                                    <div class="info-item mt-3">
+                                        <strong>Instructions:</strong>
+                                        <p class="mb-0 mt-1 text-warning">@model.SpecialHandlingInstructions</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dates & Activity -->
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-header pb-0">
+                                <h6><i class="fas fa-calendar-alt me-2"></i>Important Dates</h6>
+                            </div>
+                            <div class="card-body">
+                                @if (model.ExpiryDate.HasValue)
+                                {
+                                    <div class="info-item mb-3">
+                                        <strong>Expiry Date:</strong>
+                                        <div class="@(model.IsExpired ? "text-danger" : model.IsNearExpiry ? "text-warning" : "text-success")">
+                                            @model.ExpiryDate.Value.ToString("yyyy-MM-dd")
+                                            @if (model.IsExpired)
+                                            {
+                                                <small class="d-block">⚠️ EXPIRED</small>
+                                            }
+                                            else if (model.IsNearExpiry)
+                                            {
+                                                <small class="d-block">⚠️ Expires in @((model.ExpiryDate.Value - DateTime.Now).Days) days</small>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                
+                                @if (model.ManufactureDate.HasValue)
+                                {
+                                    <div class="info-item mb-2">
+                                        <strong>Manufacture Date:</strong> @model.ManufactureDate.Value.ToString("yyyy-MM-dd")
+                                    </div>
+                                }
+                                
+                                @if (model.LastRestockDate.HasValue)
+                                {
+                                    <div class="info-item mb-2">
+                                        <strong>Last Restocked:</strong> @model.LastRestockDate.Value.ToString("yyyy-MM-dd")
+                                    </div>
+                                }
+                                
+                                @if (model.LastUsedDate.HasValue)
+                                {
+                                    <div class="info-item">
+                                        <strong>Last Used:</strong> @model.LastUsedDate.Value.ToString("yyyy-MM-dd")
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        @if (!string.IsNullOrEmpty(model.Notes))
+                        {
+                            <div class="card mb-4">
+                                <div class="card-header pb-0">
+                                    <h6><i class="fas fa-sticky-note me-2"></i>Notes</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-0">@model.Notes</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Transaction History -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header pb-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6><i class="fas fa-history me-2"></i>Transaction History</h6>
+                                    @if (_hasInventoryManagePermission)
+                                    {
+                                        <button type="button" class="btn btn-primary btn-sm" @onclick="RecordTransaction">
+                                            <i class="fas fa-plus me-1"></i>New Transaction
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                @if (isLoadingTransactions)
+                                {
+                                    <div class="d-flex justify-content-center p-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading transactions...</span>
+                                        </div>
+                                    </div>
+                                }
+                                else if (transactions == null || !transactions.Any())
+                                {
+                                    <div class="text-center p-4">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            No transactions recorded yet.
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Type</th>
+                                                    <th>Quantity</th>
+                                                    <th>Before</th>
+                                                    <th>After</th>
+                                                    <th>Cost</th>
+                                                    <th>Reference</th>
+                                                    <th>Field</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var transaction in transactions)
+                                                {
+                                                    <tr>
+                                                        <td>@transaction.TransactionDate.ToString("yyyy-MM-dd")</td>
+                                                        <td>
+                                                            <span class="badge @GetTransactionBadgeClass(transaction.TransactionType)">
+                                                                @transaction.TransactionType.ToString("G").Replace("_", " ")
+                                                            </span>
+                                                        </td>
+                                                        <td class="@(IsDebitTransaction(transaction.TransactionType) ? "text-danger" : "text-success")">
+                                                            @(IsDebitTransaction(transaction.TransactionType) ? "-" : "+")@transaction.Quantity.ToString("N2")
+                                                        </td>
+                                                        <td>@transaction.QuantityBefore.ToString("N2")</td>
+                                                        <td>@transaction.QuantityAfter.ToString("N2")</td>
+                                                        <td>@(transaction.TotalCost?.ToString("C2") ?? "-")</td>
+                                                        <td>@(transaction.ReferenceNumber ?? "-")</td>
+                                                        <td>@(transaction.FieldName ?? transaction.CropName ?? "-")</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Id { get; set; }
+    
+    private Toast Alert;
+    private InventoryViewModel model;
+    private List<InventoryTransactionListViewModel> transactions = new();
+    private bool isLoading = true;
+    private bool isLoadingTransactions = true;
+    private bool _hasInventoryManagePermission = false;
+    private ClaimsPrincipal _user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+        
+        // Check permissions
+        _hasInventoryManagePermission = _user.IsInRole("FarmManager") || _user.IsInRole("Administrator") || _user.IsInRole("SystemAdministrator");
+        
+        await LoadInventoryItem();
+        await LoadTransactions();
+    }
+
+    private async Task LoadInventoryItem()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(Id))
+            {
+                Alert.Show("Invalid inventory item ID", showTitle: true, toastType: ToastType.Danger);
+                return;
+            }
+
+            var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<InventoryViewModel>>(
+                await ApiCall.GetHttpClient(), "Inventory/GetInventoryDetails", Id);
+                
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                model = response.Result;
+            }
+            else
+            {
+                Alert.Show("Inventory item not found", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading inventory item: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadTransactions()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(Id)) return;
+
+            var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<InventoryTransactionListViewModel>>>(
+                await ApiCall.GetHttpClient(), $"Inventory/{Id}/transactions");
+                
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                transactions = response.Result;
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading transactions: {ex.Message}", showTitle: true, toastType: ToastType.Warning);
+        }
+        finally
+        {
+            isLoadingTransactions = false;
+        }
+    }
+
+    private string GetStatusBadgeClass()
+    {
+        if (model.IsExpired) return "bg-danger";
+        if (model.IsNearExpiry) return "bg-warning text-dark";
+        if (model.NeedsReorder) return "bg-info";
+        if (model.IsLowStock) return "bg-warning text-dark";
+        return "bg-success";
+    }
+
+    private string GetStatusText()
+    {
+        if (model.IsExpired) return "Expired";
+        if (model.IsNearExpiry) return "Expiring Soon";
+        if (model.NeedsReorder) return "Needs Reorder";
+        if (model.IsLowStock) return "Low Stock";
+        return "OK";
+    }
+
+    private string GetTransactionBadgeClass(TransactionType type)
+    {
+        return type switch
+        {
+            TransactionType.Purchase => "bg-success",
+            TransactionType.Usage => "bg-primary",
+            TransactionType.Sale => "bg-info",
+            TransactionType.Return => "bg-warning text-dark",
+            TransactionType.Adjustment => "bg-secondary",
+            TransactionType.Transfer => "bg-dark",
+            TransactionType.Damage => "bg-danger",
+            TransactionType.Expiry => "bg-danger",
+            TransactionType.Initial_Stock => "bg-success",
+            TransactionType.Stock_Take => "bg-info",
+            _ => "bg-secondary"
+        };
+    }
+
+    private bool IsDebitTransaction(TransactionType type)
+    {
+        return type == TransactionType.Usage || 
+               type == TransactionType.Sale || 
+               type == TransactionType.Damage || 
+               type == TransactionType.Expiry;
+    }
+
+    private void EditInventory()
+    {
+        NavigationManager.NavigateTo($"/inventory/{Id}/edit");
+    }
+
+    private void RecordTransaction()
+    {
+        NavigationManager.NavigateTo($"/inventory/{Id}/transaction");
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/inventory");
+    }
+}

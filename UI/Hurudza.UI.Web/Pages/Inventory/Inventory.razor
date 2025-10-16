@@ -1,0 +1,557 @@
+@page "/inventory"
+@attribute [Authorize]
+
+@using System.Net
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.Data.UI.Models.Models
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
+@inject IJSRuntime JSRuntime
+
+<Toast @ref="Alert" />
+
+<div class="row">
+    <div class="col-12">
+        <!-- Summary Cards -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Items</p>
+                                <h5 class="font-weight-bolder mb-0">@totalItems</h5>
+                            </div>
+                            <div class="text-end">
+                                <i class="fas fa-box fa-2x text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Low Stock</p>
+                                <h5 class="font-weight-bolder mb-0 text-warning">@lowStockCount</h5>
+                            </div>
+                            <div class="text-end">
+                                <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Expiring Soon</p>
+                                <h5 class="font-weight-bolder mb-0 text-danger">@nearExpiryCount</h5>
+                            </div>
+                            <div class="text-end">
+                                <i class="fas fa-clock fa-2x text-danger"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Value</p>
+                                <h5 class="font-weight-bolder mb-0">$@totalValue.ToString("N2")</h5>
+                            </div>
+                            <div class="text-end">
+                                <i class="fas fa-dollar-sign fa-2x text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <div class="d-flex justify-content-between flex-wrap align-items-center">
+                    <div>
+                        <h6 class="mb-0">Inventory Management</h6>
+                        <p class="text-sm mb-0">Track seeds, fertilizers, chemicals, fuel, parts and more</p>
+                        @if (!string.IsNullOrEmpty(currentFarmName))
+                        {
+                            <span class="badge bg-info mt-2">Farm: @currentFarmName</span>
+                        }
+                    </div>
+                    <div class="d-flex">
+                        @if (_hasInventoryManagePermission)
+                        {
+                            <button type="button" class="btn btn-primary btn-sm ms-auto" @onclick="NavigateToNewInventory">
+                                <i class="fas fa-plus me-2"></i>Add New Item
+                            </button>
+                            <button type="button" class="btn btn-warning btn-sm ms-2" @onclick="ShowAlerts">
+                                <i class="fas fa-bell me-2"></i>Alerts
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+                <!-- Filters -->
+                <div class="px-3 py-3">
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <div class="input-group input-group-outline">
+                                <SfTextBox @bind-Value="searchText" Placeholder="Search inventory..." @oninput="ApplyFilters"></SfTextBox>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <SfDropDownList TValue="InventoryType?" TItem="InventoryTypeModel" DataSource="@inventoryTypeItems" @bind-Value="selectedType" 
+                                            Placeholder="All Types" AllowFiltering="true">
+                                <DropDownListEvents TValue="InventoryType?" TItem="InventoryTypeModel" ValueChange="ApplyFilters"></DropDownListEvents>
+                                <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                        </div>
+                        <div class="col-md-2">
+                            <SfCheckBox @bind-Checked="showLowStockOnly" Label="Low Stock Only" @onchange="ApplyFilters"></SfCheckBox>
+                        </div>
+                        <div class="col-md-2">
+                            <SfCheckBox @bind-Checked="showExpiringOnly" Label="Expiring Soon" @onchange="ApplyFilters"></SfCheckBox>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
+                                <i class="fas fa-sync-alt me-1"></i>Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading indicator -->
+                @if (isLoading)
+                {
+                    <div class="d-flex justify-content-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                }
+                else if (filteredInventory == null || !filteredInventory.Any())
+                {
+                    <div class="text-center p-4">
+                        <div class="alert alert-info">
+                            <p class="mb-0">No inventory items found.</p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Inventory Grid -->
+                    <div style="height: calc(100vh - 450px); width: 100%;">
+                        <SfGrid DataSource="@filteredInventory"
+                                @ref="Grid"
+                                AllowPaging="true"
+                                AllowExcelExport="true"
+                                AllowSorting="true"
+                                AllowMultiSorting="true"
+                                EnableStickyHeader="true"
+                                AllowResizing="true"
+                                AllowSelection="true"
+                                EnableVirtualization="true"
+                                EnableHover="true"
+                                Height="100%"
+                                Width="100%"
+                                Toolbar="@(new List<string>() { "ExcelExport", "Print", "Search" })"
+                                ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Copy", "ExcelExport", "Print", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                            <GridPageSettings PageSize="15"></GridPageSettings>
+                            <GridFilterSettings Type="FilterType.Menu" Mode="FilterBarMode.Immediate"></GridFilterSettings>
+                            <GridEvents RowSelected="RowSelectHandler" TValue="InventoryListViewModel"></GridEvents>
+                            
+                            <GridColumns>
+                                <GridColumn Field=@nameof(InventoryListViewModel.Id) HeaderText="ID" IsPrimaryKey="true" Visible="false"></GridColumn>
+                                <GridColumn Field=@nameof(InventoryListViewModel.Name) HeaderText="Item Name" TextAlign="TextAlign.Left" Width="180" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                                <GridColumn Field=@nameof(InventoryListViewModel.SKU) HeaderText="SKU" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                <GridColumn Field=@nameof(InventoryListViewModel.Type) HeaderText="Type" TextAlign="TextAlign.Left" Width="120">
+                                    <Template>
+                                        @{
+                                            var item = (context as InventoryListViewModel);
+                                            <span>@item.Type.ToString("G").Replace("_", " ")</span>
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field=@nameof(InventoryListViewModel.Brand) HeaderText="Brand" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                <GridColumn Field=@nameof(InventoryListViewModel.QuantityInStock) HeaderText="Quantity" TextAlign="TextAlign.Right" Width="100">
+                                    <Template>
+                                        @{
+                                            var item = (context as InventoryListViewModel);
+                                            var badgeClass = item.IsLowStock ? "text-warning" : "text-success";
+                                            <span class='@badgeClass'>
+                                                <strong>@item.QuantityInStock.ToString("N2")</strong> @item.UnitOfMeasure.ToString("G").Replace("_", " ")
+                                            </span>
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field=@nameof(InventoryListViewModel.MinimumStockLevel) HeaderText="Min Stock" TextAlign="TextAlign.Right" Width="90" Format="N2"></GridColumn>
+                                <GridColumn Field=@nameof(InventoryListViewModel.ExpiryDate) HeaderText="Expiry" TextAlign="TextAlign.Center" Width="110" Type="ColumnType.Date" Format="MM/dd/yyyy">
+                                    <Template>
+                                        @{
+                                            var item = (context as InventoryListViewModel);
+                                            if (item.ExpiryDate.HasValue)
+                                            {
+                                                var badgeClass = item.IsExpired ? "bg-danger" : item.IsNearExpiry ? "bg-warning text-dark" : "bg-success";
+                                                <span class='badge @badgeClass'>
+                                                    @item.ExpiryDate.Value.ToString("MM/dd/yyyy")
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class='badge bg-secondary'>N/A</span>
+                                            }
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field=@nameof(InventoryListViewModel.StorageLocation) HeaderText="Location" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                                <GridColumn Field=@nameof(InventoryListViewModel.TotalValue) HeaderText="Total Value" TextAlign="TextAlign.Right" Width="110" Format="C2"></GridColumn>
+                                <GridColumn HeaderText="Status" Width="100" TextAlign="TextAlign.Center">
+                                    <Template>
+                                        @{
+                                            var item = (context as InventoryListViewModel);
+                                            <div>
+                                                @if (item.IsExpired)
+                                                {
+                                                    <span class="badge bg-danger">Expired</span>
+                                                }
+                                                else if (item.IsNearExpiry)
+                                                {
+                                                    <span class="badge bg-warning text-dark">Expiring</span>
+                                                }
+                                                else if (item.NeedsReorder)
+                                                {
+                                                    <span class="badge bg-info">Reorder</span>
+                                                }
+                                                else if (item.IsLowStock)
+                                                {
+                                                    <span class="badge bg-warning text-dark">Low Stock</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">OK</span>
+                                                }
+                                            </div>
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn HeaderText="Actions" Width="140" TextAlign="TextAlign.Center">
+                                    <Template>
+                                        @{
+                                            var item = (context as InventoryListViewModel);
+                                            <div class="btn-group">
+                                                <a href="/inventory/@item.Id" class="btn btn-link text-primary p-1" @onclick:stopPropagation="true" data-bs-toggle="tooltip" data-bs-title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                @if (_hasInventoryManagePermission)
+                                                {
+                                                    <a href="/inventory/@item.Id/edit" class="btn btn-link text-info p-1" @onclick:stopPropagation="true" data-bs-toggle="tooltip" data-bs-title="Edit Item">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button class="btn btn-link text-success p-1" @onclick="() => OpenTransactionDialog(item)" @onclick:stopPropagation="true" data-bs-toggle="tooltip" data-bs-title="Record Transaction">
+                                                        <i class="fas fa-exchange-alt"></i>
+                                                    </button>
+                                                    <button class="btn btn-link text-danger p-1" @onclick="() => OpenDeleteConfirmation(item)" @onclick:stopPropagation="true" data-bs-toggle="tooltip" data-bs-title="Delete Item">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                }
+                                            </div>
+                                        }
+                                    </Template>
+                                </GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Dialog -->
+<SfDialog @bind-Visible="isDeleteDialogVisible" Width="400px" IsModal="true" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>Confirm Deletion</Header>
+        <Content>
+            @if (selectedInventory != null)
+            {
+                <div>
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <p class="mb-0">Are you sure you want to delete <strong>@selectedInventory.Name</strong>?</p>
+                    </div>
+                    <p>This action cannot be undone and will remove all inventory data including transaction history.</p>
+                    
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="button" class="btn btn-secondary me-2" @onclick="() => isDeleteDialogVisible = false">Cancel</button>
+                        <button type="button" class="btn btn-danger" @onclick="DeleteSelectedInventory" disabled="@isDeleting">
+                            @if (isDeleting)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                <span>Deleting...</span>
+                            }
+                            else
+                            {
+                                <span>Delete Item</span>
+                            }
+                        </button>
+                    </div>
+                </div>
+            }
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+    // References
+    private SfGrid<InventoryListViewModel> Grid;
+    private Toast Alert;
+    
+    // Data
+    private List<InventoryListViewModel> inventory = new();
+    private List<InventoryListViewModel> filteredInventory = new();
+    private InventoryListViewModel selectedInventory;
+    
+    // Filters
+    private string searchText = "";
+    private InventoryType? selectedType = null;
+    private bool showLowStockOnly = false;
+    private bool showExpiringOnly = false;
+    private List<InventoryTypeModel> inventoryTypeItems = new();
+    
+    // State
+    private bool isLoading = true;
+    private bool isDeleteDialogVisible = false;
+    private bool isDeleting = false;
+    private bool _hasInventoryManagePermission = false;
+    private ClaimsPrincipal _user;
+    private string currentFarmId = string.Empty;
+    private string currentFarmName = string.Empty;
+    
+    // Summary
+    private int totalItems = 0;
+    private int lowStockCount = 0;
+    private int nearExpiryCount = 0;
+    private decimal totalValue = 0;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+        
+        // Check if user is administrator or system administrator (can view all inventory)
+        bool isAdministrator = _user.IsInRole("Administrator") || _user.IsInRole("SystemAdministrator");
+        
+        if (!isAdministrator)
+        {
+            // Get current user's farm context for non-administrators
+            currentFarmId = await FarmAccessService.GetCurrentFarmId();
+            currentFarmName = await FarmAccessService.GetCurrentFarmName();
+            
+            if (string.IsNullOrEmpty(currentFarmId))
+            {
+                Alert.Show("No farm context found. Please select a farm profile.", showTitle: true, toastType: ToastType.Danger);
+                return;
+            }
+        }
+        else
+        {
+            currentFarmName = "All Farms";
+        }
+        
+        // Check permissions
+        _hasInventoryManagePermission = _user.IsInRole("FarmManager") || _user.IsInRole("Administrator") || _user.IsInRole("SystemAdministrator");
+        
+        // Initialize filter dropdowns
+        inventoryTypeItems = Enum.GetValues<InventoryType>().Select(x => new InventoryTypeModel(x)).ToList();
+        
+        await LoadInventory();
+    }
+    
+    private async Task LoadInventory()
+    {
+        try
+        {
+            isLoading = true;
+            
+            // Check if user is administrator to determine which endpoint to call
+            bool isAdministrator = _user.IsInRole("Administrator") || _user.IsInRole("SystemAdministrator");
+            
+            UI.Shared.Models.ApiResponse<List<InventoryListViewModel>> response;
+            
+            if (isAdministrator)
+            {
+                // Get all inventory across all farms for administrators
+                response = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<InventoryListViewModel>>>(
+                    await ApiCall.GetHttpClient(), "Inventory/GetInventory");
+            }
+            else
+            {
+                // Get inventory for the current farm only
+                response = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<InventoryListViewModel>>>(
+                    await ApiCall.GetHttpClient(), "Inventory/GetInventoryByFarm", currentFarmId);
+            }
+                
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                inventory = response.Result;
+                CalculateSummary();
+                ApplyFilters();
+            }
+            else
+            {
+                inventory = new List<InventoryListViewModel>();
+                filteredInventory = new List<InventoryListViewModel>();
+                Alert.Show("Error loading inventory data. Please try again later.", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            inventory = new List<InventoryListViewModel>();
+            filteredInventory = new List<InventoryListViewModel>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    
+    private void CalculateSummary()
+    {
+        totalItems = inventory.Count;
+        lowStockCount = inventory.Count(i => i.IsLowStock);
+        nearExpiryCount = inventory.Count(i => i.IsNearExpiry && !i.IsExpired);
+        totalValue = inventory.Sum(i => i.TotalValue);
+    }
+    
+    private void ApplyFilters()
+    {
+        filteredInventory = inventory;
+        
+        // Apply type filter
+        if (selectedType.HasValue)
+        {
+            filteredInventory = filteredInventory
+                .Where(i => i.Type == selectedType.Value)
+                .ToList();
+        }
+        
+        // Apply low stock filter
+        if (showLowStockOnly)
+        {
+            filteredInventory = filteredInventory
+                .Where(i => i.IsLowStock)
+                .ToList();
+        }
+        
+        // Apply expiring filter
+        if (showExpiringOnly)
+        {
+            filteredInventory = filteredInventory
+                .Where(i => i.IsNearExpiry || i.IsExpired)
+                .ToList();
+        }
+        
+        // Apply search filter
+        if (!string.IsNullOrEmpty(searchText))
+        {
+            var search = searchText.ToLower();
+            filteredInventory = filteredInventory
+                .Where(i => 
+                    (i.Name?.ToLower().Contains(search) ?? false) ||
+                    (i.SKU?.ToLower().Contains(search) ?? false) ||
+                    (i.Brand?.ToLower().Contains(search) ?? false) ||
+                    (i.StorageLocation?.ToLower().Contains(search) ?? false)
+                )
+                .ToList();
+        }
+    }
+    
+    private void ClearFilters()
+    {
+        searchText = "";
+        selectedType = null;
+        showLowStockOnly = false;
+        showExpiringOnly = false;
+        ApplyFilters();
+    }
+    
+    private void RowSelectHandler(RowSelectEventArgs<InventoryListViewModel> args)
+    {
+        selectedInventory = args.Data;
+        NavigationManager.NavigateTo($"/inventory/{selectedInventory.Id}");
+    }
+    
+    private void OpenDeleteConfirmation(InventoryListViewModel inventoryItem)
+    {
+        selectedInventory = inventoryItem;
+        isDeleteDialogVisible = true;
+    }
+    
+    private void OpenTransactionDialog(InventoryListViewModel inventoryItem)
+    {
+        NavigationManager.NavigateTo($"/inventory/{inventoryItem.Id}/transaction");
+    }
+    
+    private async Task DeleteSelectedInventory()
+    {
+        if (selectedInventory == null) return;
+        
+        try
+        {
+            isDeleting = true;
+            
+            // Call API to delete inventory
+            var response = await ApiCall.Remove<UI.Shared.Models.ApiResponse<object>>(
+                await ApiCall.GetHttpClient(), "Inventory/DeleteInventory", selectedInventory.Id);
+                
+            if (response?.Status == (int)HttpStatusCode.OK)
+            {
+                Alert.Show($"Inventory item '{selectedInventory.Name}' deleted successfully", showTitle: true, toastType: ToastType.Success);
+                
+                // Refresh inventory list
+                await LoadInventory();
+                
+                // Close dialog
+                isDeleteDialogVisible = false;
+            }
+            else
+            {
+                Alert.Show(response?.Title ?? "Error deleting inventory item", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+    
+    private void NavigateToNewInventory()
+    {
+        NavigationManager.NavigateTo("/inventory/new");
+    }
+    
+    private void ShowAlerts()
+    {
+        NavigationManager.NavigateTo("/inventory/alerts");
+    }
+}

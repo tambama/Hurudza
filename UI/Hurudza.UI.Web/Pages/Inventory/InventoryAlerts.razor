@@ -1,0 +1,505 @@
+@page "/inventory/alerts"
+@attribute [Authorize]
+
+@using System.Net
+@using Hurudza.Data.Enums.Enums
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.UI.Web.Services
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
+@inject IJSRuntime JSRuntime
+
+<Toast @ref="Alert" />
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Alerts</p>
+                                    <h5 class="font-weight-bolder mb-0">@totalAlerts</h5>
+                                </div>
+                                <div class="text-end">
+                                    <i class="fas fa-bell fa-2x text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <p class="text-sm mb-0 text-uppercase font-weight-bold">High Priority</p>
+                                    <h5 class="font-weight-bolder mb-0 text-danger">@highPriorityAlerts</h5>
+                                </div>
+                                <div class="text-end">
+                                    <i class="fas fa-exclamation-circle fa-2x text-danger"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Expired Items</p>
+                                    <h5 class="font-weight-bolder mb-0 text-danger">@expiredCount</h5>
+                                </div>
+                                <div class="text-end">
+                                    <i class="fas fa-calendar-times fa-2x text-danger"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Low Stock</p>
+                                    <h5 class="font-weight-bolder mb-0 text-warning">@lowStockCount</h5>
+                                </div>
+                                <div class="text-end">
+                                    <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <div class="d-flex justify-content-between flex-wrap align-items-center">
+                        <div>
+                            <h6 class="mb-0">Inventory Alerts</h6>
+                            <p class="text-sm mb-0">Monitor critical inventory conditions and required actions</p>
+                            @if (!string.IsNullOrEmpty(currentFarmName))
+                            {
+                                <span class="badge bg-info mt-2">Farm: @currentFarmName</span>
+                            }
+                        </div>
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-outline-primary btn-sm me-2" @onclick="RefreshAlerts">
+                                <i class="fas fa-sync-alt me-1"></i>Refresh
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm" @onclick="GoToInventory">
+                                <i class="fas fa-boxes me-1"></i>View Inventory
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <!-- Filters -->
+                    <div class="px-3 py-3">
+                        <div class="row g-2">
+                            <div class="col-md-3">
+                                <SfDropDownList TValue="string" TItem="AlertTypeOption" DataSource="@alertTypeOptions" @bind-Value="selectedAlertType" 
+                                                Placeholder="All Alert Types" AllowFiltering="true">
+                                    <DropDownListEvents TValue="string" TItem="AlertTypeOption" ValueChange="ApplyFilters"></DropDownListEvents>
+                                    <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+                                </SfDropDownList>
+                            </div>
+                            <div class="col-md-3">
+                                <SfDropDownList TValue="int?" TItem="PriorityOption" DataSource="@priorityOptions" @bind-Value="selectedPriority" 
+                                                Placeholder="All Priorities" AllowFiltering="true">
+                                    <DropDownListEvents TValue="int?" TItem="PriorityOption" ValueChange="ApplyFilters"></DropDownListEvents>
+                                    <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+                                </SfDropDownList>
+                            </div>
+                            <div class="col-md-3">
+                                <SfTextBox @bind-Value="searchText" Placeholder="Search items..." @oninput="ApplyFilters"></SfTextBox>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
+                                    <i class="fas fa-sync-alt me-1"></i>Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading indicator -->
+                    @if (isLoading)
+                    {
+                        <div class="d-flex justify-content-center p-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else if (filteredAlerts == null || !filteredAlerts.Any())
+                    {
+                        <div class="text-center p-4">
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Great news!</strong> No inventory alerts at this time.
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Alerts List -->
+                        <div class="px-3">
+                            @foreach (var alert in filteredAlerts.OrderBy(a => a.Priority).ThenBy(a => a.Name))
+                            {
+                                <div class="card mb-3 @GetAlertCardClass(alert)">
+                                    <div class="card-body p-3">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-1">
+                                                <div class="text-center">
+                                                    <i class="@GetAlertIcon(alert.AlertType) fa-2x @GetAlertIconColor(alert)"></i>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <h6 class="mb-1">@alert.Name</h6>
+                                                <p class="text-sm mb-0 text-muted">@alert.FarmName</p>
+                                                <span class="badge @GetTypeBadgeClass(alert.Type)">@alert.Type.ToString("G").Replace("_", " ")</span>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <span class="badge @GetAlertTypeBadgeClass(alert.AlertType)">@alert.AlertType</span>
+                                                <div class="text-sm text-muted mt-1">
+                                                    Priority: @GetPriorityText(alert.Priority)
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <p class="mb-0">@alert.AlertMessage</p>
+                                                @if (alert.ExpiryDate.HasValue)
+                                                {
+                                                    <small class="text-muted">Expires: @alert.ExpiryDate.Value.ToString("yyyy-MM-dd")</small>
+                                                }
+                                            </div>
+                                            <div class="col-md-2 text-end">
+                                                <div class="d-flex flex-column">
+                                                    <div class="mb-2">
+                                                        <strong>Stock:</strong> @alert.QuantityInStock.ToString("N2")
+                                                    </div>
+                                                    <div class="btn-group">
+                                                        <button class="btn btn-primary btn-sm" @onclick="() => ViewItem(alert.Id)" title="View Details">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        @if (_hasInventoryManagePermission)
+                                                        {
+                                                            @if (alert.AlertType == "Low Stock" || alert.AlertType == "Reorder")
+                                                            {
+                                                                <button class="btn btn-success btn-sm" @onclick="() => RecordPurchase(alert.Id)" title="Record Purchase">
+                                                                    <i class="fas fa-plus"></i>
+                                                                </button>
+                                                            }
+                                                            else if (alert.AlertType == "Expired")
+                                                            {
+                                                                <button class="btn btn-danger btn-sm" @onclick="() => RemoveExpired(alert.Id)" title="Remove Expired">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            }
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Pagination if needed -->
+                        @if (filteredAlerts.Count > 20)
+                        {
+                            <div class="px-3">
+                                <nav aria-label="Alerts pagination">
+                                    <small class="text-muted">Showing @Math.Min(20, filteredAlerts.Count) of @filteredAlerts.Count alerts</small>
+                                </nav>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Toast Alert;
+    
+    // Data
+    private List<InventoryAlertViewModel> alerts = new();
+    private List<InventoryAlertViewModel> filteredAlerts = new();
+    
+    // Filters
+    private string searchText = "";
+    private string selectedAlertType = "";
+    private int? selectedPriority = null;
+    private List<AlertTypeOption> alertTypeOptions = new();
+    private List<PriorityOption> priorityOptions = new();
+    
+    // State
+    private bool isLoading = true;
+    private bool _hasInventoryManagePermission = false;
+    private ClaimsPrincipal _user;
+    private string currentFarmId = string.Empty;
+    private string currentFarmName = string.Empty;
+    
+    // Summary
+    private int totalAlerts = 0;
+    private int highPriorityAlerts = 0;
+    private int expiredCount = 0;
+    private int lowStockCount = 0;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+        
+        // Check if user is administrator or system administrator (can view all inventory alerts)
+        bool isAdministrator = _user.IsInRole("Administrator") || _user.IsInRole("SystemAdministrator");
+        
+        if (!isAdministrator)
+        {
+            // Get current user's farm context for non-administrators
+            currentFarmId = await FarmAccessService.GetCurrentFarmId();
+            currentFarmName = await FarmAccessService.GetCurrentFarmName();
+            
+            if (string.IsNullOrEmpty(currentFarmId))
+            {
+                Alert.Show("No farm context found. Please select a farm profile.", showTitle: true, toastType: ToastType.Danger);
+                return;
+            }
+        }
+        else
+        {
+            currentFarmName = "All Farms";
+        }
+        
+        // Check permissions
+        _hasInventoryManagePermission = _user.IsInRole("FarmManager") || _user.IsInRole("Administrator") || _user.IsInRole("SystemAdministrator");
+        
+        // Initialize filter options
+        alertTypeOptions = new List<AlertTypeOption>
+        {
+            new AlertTypeOption { Value = "", Text = "All Types" },
+            new AlertTypeOption { Value = "Low Stock", Text = "Low Stock" },
+            new AlertTypeOption { Value = "Reorder", Text = "Reorder" },
+            new AlertTypeOption { Value = "Expired", Text = "Expired" },
+            new AlertTypeOption { Value = "Near Expiry", Text = "Near Expiry" }
+        };
+        
+        priorityOptions = new List<PriorityOption>
+        {
+            new PriorityOption { Value = null, Text = "All Priorities" },
+            new PriorityOption { Value = 1, Text = "High Priority" },
+            new PriorityOption { Value = 2, Text = "Medium Priority" },
+            new PriorityOption { Value = 3, Text = "Low Priority" }
+        };
+        
+        await LoadAlerts();
+    }
+    
+    private async Task LoadAlerts()
+    {
+        try
+        {
+            isLoading = true;
+            
+            // Check if user is administrator to determine which endpoint to call
+            bool isAdministrator = _user.IsInRole("Administrator") || _user.IsInRole("SystemAdministrator");
+            
+            var farmIdParam = isAdministrator ? null : currentFarmId;
+            var endpoint = "Inventory/GetInventoryAlerts" + (farmIdParam != null ? $"?farmId={farmIdParam}" : "");
+            
+            var response = await ApiCall.Get<UI.Shared.Models.ApiResponse<List<InventoryAlertViewModel>>>(
+                await ApiCall.GetHttpClient(), endpoint);
+                
+            if (response.Status == (int)HttpStatusCode.OK)
+            {
+                alerts = response.Result;
+                CalculateSummary();
+                ApplyFilters();
+            }
+            else
+            {
+                alerts = new List<InventoryAlertViewModel>();
+                filteredAlerts = new List<InventoryAlertViewModel>();
+                Alert.Show("Error loading inventory alerts. Please try again later.", showTitle: true, toastType: ToastType.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+            alerts = new List<InventoryAlertViewModel>();
+            filteredAlerts = new List<InventoryAlertViewModel>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    
+    private void CalculateSummary()
+    {
+        totalAlerts = alerts.Count;
+        highPriorityAlerts = alerts.Count(a => a.Priority == 1);
+        expiredCount = alerts.Count(a => a.AlertType == "Expired");
+        lowStockCount = alerts.Count(a => a.AlertType == "Low Stock");
+    }
+    
+    private void ApplyFilters()
+    {
+        filteredAlerts = alerts;
+        
+        // Apply alert type filter
+        if (!string.IsNullOrEmpty(selectedAlertType))
+        {
+            filteredAlerts = filteredAlerts
+                .Where(a => a.AlertType == selectedAlertType)
+                .ToList();
+        }
+        
+        // Apply priority filter
+        if (selectedPriority.HasValue)
+        {
+            filteredAlerts = filteredAlerts
+                .Where(a => a.Priority == selectedPriority.Value)
+                .ToList();
+        }
+        
+        // Apply search filter
+        if (!string.IsNullOrEmpty(searchText))
+        {
+            var search = searchText.ToLower();
+            filteredAlerts = filteredAlerts
+                .Where(a => 
+                    (a.Name?.ToLower().Contains(search) ?? false) ||
+                    (a.FarmName?.ToLower().Contains(search) ?? false) ||
+                    (a.AlertMessage?.ToLower().Contains(search) ?? false)
+                )
+                .ToList();
+        }
+    }
+    
+    private void ClearFilters()
+    {
+        searchText = "";
+        selectedAlertType = "";
+        selectedPriority = null;
+        ApplyFilters();
+    }
+    
+    private async Task RefreshAlerts()
+    {
+        await LoadAlerts();
+        Alert.Show("Alerts refreshed", showTitle: true, toastType: ToastType.Info);
+    }
+    
+    // UI Helper Methods
+    private string GetAlertCardClass(InventoryAlertViewModel alert)
+    {
+        return alert.Priority switch
+        {
+            1 => "border-left border-danger border-4",
+            2 => "border-left border-warning border-4",
+            _ => "border-left border-info border-4"
+        };
+    }
+    
+    private string GetAlertIcon(string alertType)
+    {
+        return alertType switch
+        {
+            "Low Stock" => "fas fa-exclamation-triangle",
+            "Reorder" => "fas fa-shopping-cart",
+            "Expired" => "fas fa-calendar-times",
+            "Near Expiry" => "fas fa-clock",
+            _ => "fas fa-bell"
+        };
+    }
+    
+    private string GetAlertIconColor(InventoryAlertViewModel alert)
+    {
+        return alert.Priority switch
+        {
+            1 => "text-danger",
+            2 => "text-warning",
+            _ => "text-info"
+        };
+    }
+    
+    private string GetAlertTypeBadgeClass(string alertType)
+    {
+        return alertType switch
+        {
+            "Low Stock" => "bg-warning text-dark",
+            "Reorder" => "bg-info",
+            "Expired" => "bg-danger",
+            "Near Expiry" => "bg-warning text-dark",
+            _ => "bg-secondary"
+        };
+    }
+    
+    private string GetTypeBadgeClass(InventoryType type)
+    {
+        return type switch
+        {
+            InventoryType.Seeds => "bg-success",
+            InventoryType.Fertilizers => "bg-primary",
+            InventoryType.Pesticides => "bg-warning text-dark",
+            InventoryType.Fuel => "bg-dark",
+            _ => "bg-secondary"
+        };
+    }
+    
+    private string GetPriorityText(int priority)
+    {
+        return priority switch
+        {
+            1 => "High",
+            2 => "Medium",
+            _ => "Low"
+        };
+    }
+    
+    // Navigation Methods
+    private void ViewItem(string itemId)
+    {
+        NavigationManager.NavigateTo($"/inventory/{itemId}");
+    }
+    
+    private void RecordPurchase(string itemId)
+    {
+        NavigationManager.NavigateTo($"/inventory/{itemId}/transaction?type=purchase");
+    }
+    
+    private void RemoveExpired(string itemId)
+    {
+        NavigationManager.NavigateTo($"/inventory/{itemId}/transaction?type=expiry");
+    }
+    
+    private void GoToInventory()
+    {
+        NavigationManager.NavigateTo("/inventory");
+    }
+    
+    // Helper Classes
+    public class AlertTypeOption
+    {
+        public string Value { get; set; }
+        public string Text { get; set; }
+    }
+    
+    public class PriorityOption
+    {
+        public int? Value { get; set; }
+        public string Text { get; set; }
+    }
+}

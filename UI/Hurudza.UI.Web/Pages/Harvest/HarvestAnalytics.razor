@@ -1,0 +1,483 @@
+@page "/harvest/analytics"
+@page "/harvest/analytics/{FarmId}"
+@attribute [Authorize]
+
+@using System.Net
+@using Hurudza.Data.UI.Models.ViewModels.Core
+@using Hurudza.UI.Web.Services
+@using Syncfusion.Blazor.Calendars
+@using IApiCall = Hurudza.UI.Web.Api.Interfaces.IApiCall
+@inject IApiCall ApiCall
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject FarmAccessService FarmAccessService
+
+<Toast @ref="Alert" />
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-outline-secondary me-3" @onclick="GoBack">
+                                <i class="fas fa-arrow-left me-1"></i>Back
+                            </button>
+                            <div>
+                                <h5 class="mb-0">Harvest Analytics</h5>
+                                <p class="text-sm mb-0">Comprehensive harvest performance analysis</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            @if (!string.IsNullOrEmpty(currentFarmName))
+                            {
+                                <div class="me-3">
+                                    <span class="badge bg-gradient-info">Farm: @currentFarmName</span>
+                                </div>
+                            }
+                            <div class="d-flex align-items-center">
+                                <SfDateRangePicker TValue="DateTime?" StartDate="@dateRange[0]" EndDate="@dateRange[1]"
+                                                  Format="MMM dd, yyyy" Width="250px">
+                                    <DateRangePickerEvents TValue="DateTime?" ValueChange="OnDateRangeChanged"></DateRangePickerEvents>
+                                </SfDateRangePicker>
+                                <button class="btn btn-outline-primary btn-sm ms-2" @onclick="RefreshData">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (isLoading)
+                    {
+                        <div class="d-flex justify-content-center p-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Summary Cards -->
+                        <div class="row mb-4">
+                            <div class="col-xl-3 col-sm-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="numbers">
+                                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Harvests</p>
+                                                    <h5 class="font-weight-bolder mb-0">@analytics.TotalHarvests</h5>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 text-end">
+                                                <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                                                    <i class="fas fa-seedling text-lg opacity-10" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-sm-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="numbers">
+                                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Yield</p>
+                                                    <h5 class="font-weight-bolder mb-0">@analytics.TotalYield.ToString("N1")</h5>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 text-end">
+                                                <div class="icon icon-shape bg-gradient-success shadow text-center border-radius-md">
+                                                    <i class="fas fa-weight text-lg opacity-10" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-sm-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="numbers">
+                                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Average Yield</p>
+                                                    <h5 class="font-weight-bolder mb-0">@analytics.AverageYield.ToString("N1")</h5>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 text-end">
+                                                <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                                                    <i class="fas fa-chart-bar text-lg opacity-10" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-sm-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="numbers">
+                                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Losses</p>
+                                                    <h5 class="font-weight-bolder mb-0 @(analytics.TotalLosses > 0 ? "text-danger" : "")">
+                                                        @analytics.TotalLosses.ToString("N1")
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 text-end">
+                                                <div class="icon icon-shape bg-gradient-@(analytics.TotalLosses > 0 ? "danger" : "secondary") shadow text-center border-radius-md">
+                                                    <i class="fas fa-exclamation-triangle text-lg opacity-10" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Yield by Crop Chart -->
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header pb-0">
+                                        <h6>Yield by Crop</h6>
+                                        <p class="text-sm">Distribution of yield across different crops</p>
+                                    </div>
+                                    <div class="card-body">
+                                        @if (analytics.YieldByCrop.Any())
+                                        {
+                                            <div class="table-responsive">
+                                                <table class="table align-items-center mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Crop</th>
+                                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Total Yield</th>
+                                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Percentage</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in analytics.YieldByCrop.OrderByDescending(x => x.TotalYield))
+                                                        {
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="d-flex px-2 py-1">
+                                                                        <div class="d-flex flex-column justify-content-center">
+                                                                            <h6 class="mb-0 text-sm">@item.Crop</h6>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <p class="text-xs font-weight-bold mb-0">@item.TotalYield.ToString("N1")</p>
+                                                                </td>
+                                                                <td class="align-middle text-center text-sm">
+                                                                    <div class="d-flex align-items-center justify-content-center">
+                                                                        <span class="me-2 text-xs font-weight-bold">@(GetPercentage(item.TotalYield, analytics.TotalYield).ToString("F1"))%</span>
+                                                                        <div class="progress" style="width: 60px; height: 8px;">
+                                                                            <div class="progress-bar bg-gradient-success" role="progressbar"
+                                                                                 style="width: @(GetPercentage(item.TotalYield, analytics.TotalYield))%"
+                                                                                 aria-valuenow="@GetPercentage(item.TotalYield, analytics.TotalYield)"
+                                                                                 aria-valuemin="0" aria-valuemax="100"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center p-4">
+                                                <i class="fas fa-chart-pie fa-2x text-secondary mb-3"></i>
+                                                <p class="text-secondary mb-0">No yield data available</p>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Loss by Type Chart -->
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header pb-0">
+                                        <h6>Loss by Type</h6>
+                                        <p class="text-sm">Breakdown of harvest losses by category</p>
+                                    </div>
+                                    <div class="card-body">
+                                        @if (analytics.LossByType.Any())
+                                        {
+                                            <div class="table-responsive">
+                                                <table class="table align-items-center mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Loss Type</th>
+                                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Total Loss</th>
+                                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Percentage</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in analytics.LossByType.OrderByDescending(x => x.TotalLoss))
+                                                        {
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="d-flex px-2 py-1">
+                                                                        <div class="d-flex flex-column justify-content-center">
+                                                                            <h6 class="mb-0 text-sm">@item.LossType.Replace("_", " ")</h6>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <p class="text-xs font-weight-bold mb-0 text-danger">@item.TotalLoss.ToString("N1")</p>
+                                                                </td>
+                                                                <td class="align-middle text-center text-sm">
+                                                                    <div class="d-flex align-items-center justify-content-center">
+                                                                        <span class="me-2 text-xs font-weight-bold">@(GetPercentage(item.TotalLoss, analytics.TotalLosses).ToString("F1"))%</span>
+                                                                        <div class="progress" style="width: 60px; height: 8px;">
+                                                                            <div class="progress-bar bg-gradient-danger" role="progressbar"
+                                                                                 style="width: @(GetPercentage(item.TotalLoss, analytics.TotalLosses))%"
+                                                                                 aria-valuenow="@GetPercentage(item.TotalLoss, analytics.TotalLosses)"
+                                                                                 aria-valuemin="0" aria-valuemax="100"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center p-4">
+                                                <i class="fas fa-check-circle fa-2x text-success mb-3"></i>
+                                                <p class="text-success mb-0">No losses recorded</p>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Harvest Records -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header pb-0">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <h6>Harvest History</h6>
+                                                <p class="text-sm">Recent harvest records and performance</p>
+                                            </div>
+                                            <button class="btn btn-outline-primary btn-sm" @onclick="ExportData">
+                                                <i class="fas fa-download me-1"></i>Export
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body px-0 pb-2">
+                                        @if (harvestHistory.Any())
+                                        {
+                                            <div class="table-responsive">
+                                                <table class="table align-items-center mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Field/Crop</th>
+                                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Harvest Date</th>
+                                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actual Yield</th>
+                                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quality</th>
+                                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Variance</th>
+                                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Loss</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var record in harvestHistory.Take(10))
+                                                        {
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="d-flex px-2 py-1">
+                                                                        <div class="d-flex flex-column justify-content-center">
+                                                                            <h6 class="mb-0 text-sm">@record.Field</h6>
+                                                                            <p class="text-xs text-secondary mb-0">@record.Crop</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <p class="text-xs font-weight-bold mb-0">@record.HarvestDate.ToString("MMM dd, yyyy")</p>
+                                                                    @if (!string.IsNullOrEmpty(record.StorageLocation))
+                                                                    {
+                                                                        <p class="text-xs text-secondary mb-0">@record.StorageLocation</p>
+                                                                    }
+                                                                </td>
+                                                                <td class="align-middle text-center">
+                                                                    <span class="text-secondary text-xs font-weight-bold">
+                                                                        @record.ActualYield.ToString("N1") @record.YieldUnit.ToString("G").Replace("_", " ")
+                                                                    </span>
+                                                                </td>
+                                                                <td class="align-middle text-center text-sm">
+                                                                    <span class="badge badge-sm bg-gradient-@(GetQualityColor(record.Quality))">
+                                                                        @record.Quality.ToString("G").Replace("_", " ")
+                                                                    </span>
+                                                                </td>
+                                                                <td class="align-middle text-center">
+                                                                    <span class="text-xs font-weight-bold @(record.YieldVariance >= 0 ? "text-success" : "text-warning")">
+                                                                        @(record.YieldVariance >= 0 ? "+" : "")@record.YieldVariancePercentage.ToString("N1")%
+                                                                    </span>
+                                                                </td>
+                                                                <td class="align-middle text-center">
+                                                                    <span class="text-xs font-weight-bold @(record.TotalLoss > 0 ? "text-danger" : "text-success")">
+                                                                        @record.TotalLoss.ToString("N1")
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            
+                                            @if (harvestHistory.Count > 10)
+                                            {
+                                                <div class="text-center mt-3">
+                                                    <small class="text-muted">Showing 10 of @harvestHistory.Count records</small>
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center p-4">
+                                                <i class="fas fa-history fa-2x text-secondary mb-3"></i>
+                                                <h5 class="text-secondary">No harvest history</h5>
+                                                <p class="text-muted mb-0">No harvest records found for the selected period.</p>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? FarmId { get; set; }
+
+    private Toast Alert;
+    private bool isLoading = true;
+    private ClaimsPrincipal _user;
+    private string currentFarmId = string.Empty;
+    private string currentFarmName = string.Empty;
+
+    private DateTime[] dateRange = new[] { DateTime.Today.AddMonths(-12), DateTime.Today };
+
+    // Analytics data
+    private HarvestAnalyticsViewModel analytics = new();
+    private List<HarvestRecordViewModel> harvestHistory = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+
+        // Get current farm context
+        currentFarmId = await FarmAccessService.GetCurrentFarmId();
+        currentFarmName = await FarmAccessService.GetCurrentFarmName();
+
+        if (string.IsNullOrEmpty(currentFarmId))
+        {
+            Alert.Show("No farm context found. Please select a farm profile.", showTitle: true, toastType: ToastType.Danger);
+            NavigationManager.NavigateTo("/farms");
+            return;
+        }
+
+        await LoadAnalyticsData();
+        isLoading = false;
+    }
+
+    private async Task LoadAnalyticsData()
+    {
+        if (string.IsNullOrEmpty(currentFarmId)) return;
+
+        try
+        {
+            isLoading = true;
+
+            // Load analytics
+            var analyticsResponse = await ApiCall.Get<UI.Shared.Models.ApiResponse<HarvestAnalyticsViewModel>>(
+                await ApiCall.GetHttpClient(),
+                $"Harvest/GetHarvestAnalytics/{currentFarmId}?startDate={dateRange[0]:yyyy-MM-dd}&endDate={dateRange[1]:yyyy-MM-dd}");
+
+            if (analyticsResponse?.Status == (int)HttpStatusCode.OK && analyticsResponse.Result != null)
+            {
+                analytics = analyticsResponse.Result;
+            }
+
+            // Load harvest history
+            var historyResponse = await ApiCall.Get<List<HarvestRecordViewModel>>(
+                await ApiCall.GetHttpClient(), 
+                $"Harvest/GetHarvestHistory/{currentFarmId}?startDate={dateRange[0]:yyyy-MM-dd}&endDate={dateRange[1]:yyyy-MM-dd}");
+
+            harvestHistory = historyResponse ?? new List<HarvestRecordViewModel>();
+        }
+        catch (Exception ex)
+        {
+            Alert.Show($"Error loading analytics data: {ex.Message}", showTitle: true, toastType: ToastType.Danger);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+    private async Task OnDateRangeChanged(RangePickerEventArgs<DateTime?> args)
+    {
+        if (args?.StartDate != null && args?.EndDate != null)
+        {
+            dateRange = new[] { args.StartDate.Value, args.EndDate.Value };
+            await LoadAnalyticsData();
+        }
+    }
+
+    private async Task RefreshData()
+    {
+        await LoadAnalyticsData();
+        Alert.Show("Data refreshed successfully!", showTitle: true, toastType: ToastType.Success);
+    }
+
+    private void ExportData()
+    {
+        // In a real implementation, you would generate and download an Excel/CSV file
+        Alert.Show("Export functionality coming soon!", showTitle: true, toastType: ToastType.Info);
+    }
+
+    private decimal GetPercentage(decimal value, decimal total)
+    {
+        return total > 0 ? (value / total) * 100 : 0;
+    }
+
+    private string GetQualityColor(QualityGrade quality)
+    {
+        return quality switch
+        {
+            QualityGrade.Premium => "success",
+            QualityGrade.Grade1 => "primary",
+            QualityGrade.Grade2 => "info",
+            QualityGrade.Grade3 => "warning",
+            QualityGrade.Reject => "danger",
+            _ => "secondary"
+        };
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/harvest");
+    }
+}

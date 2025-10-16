@@ -1,0 +1,24 @@
+{
+  "solution": {
+    "path": "Hurudza.sln",
+    "projects": [
+      "Apis/Hurudza.Apis.Base/Hurudza.Apis.Base.csproj",
+      "Apis/Hurudza.Apis.Core/Hurudza.Apis.Core.csproj",
+      "Common/Hurudza.Common.Emails/Hurudza.Common.Emails.csproj",
+      "Common/Hurudza.Common.Services/Hurudza.Common.Services.csproj",
+      "Common/Hurudza.Common.Sms/Hurudza.Common.Sms.csproj",
+      "Common/Hurudza.Common.Utils/Hurudza.Common.Utils.csproj",
+      "Data/Hurudza.Data.Context/Hurudza.Data.Context.csproj",
+      "Data/Hurudza.Data.Data/Hurudza.Data.Data.csproj",
+      "Data/Hurudza.Data.Migrator/Hurudza.Data.Migrator.csproj",
+      "Data/Hurudza.Data.Models/Hurudza.Data.Models.csproj",
+      "Data/Hurudza.Data.Repository/Hurudza.Data.Repository.csproj",
+      "Data/Hurudza.Data.Services/Hurudza.Data.Services.csproj",
+      "Hurudza.Apis.Sync/Hurudza.Apis.Sync.csproj",
+      "Hurudza.Data.Enums/Hurudza.Data.Enums.csproj",
+      "Hurudza.Data.ViewModels/Hurudza.Data.UI.Models.csproj",
+      "UI/Hurudza.UI.Shared/Hurudza.UI.Shared.csproj",
+      "UI/Hurudza.UI.Web/Hurudza.UI.Web.csproj"
+    ]
+  }
+}
